@@ -69,12 +69,12 @@ export function EstabCard(props: EstabCardComponentProps) {
 
         {vm.recursosAtivos.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {vm.recursosAtivos.slice(0, 3).map((k) => (
+            {vm.recursosAtivos.slice(0, maxRecursos).map((k) => (
               <Pill key={k} {...RECURSO_BADGES[k]} />
             ))}
-            {vm.recursosAtivos.length > 3 && (
+            {vm.recursosAtivos.length > maxRecursos && (
               <span className="text-[11px] text-muted-foreground self-center font-medium">
-                +{vm.recursosAtivos.length - 3}
+                +{vm.recursosAtivos.length - maxRecursos}
               </span>
             )}
           </div>
