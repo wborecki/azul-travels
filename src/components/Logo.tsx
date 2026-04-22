@@ -5,15 +5,14 @@ type LogoVariant = "light" | "dark";
 /**
  * Logo do Turismo Azul.
  *
- * Regras de cor (fixas):
- *   - Símbolo (ondas): SEMPRE teal (#2CA8A0)
- *   - Palavra "Azul":  SEMPRE teal (#2CA8A0)
- *   - Palavra "Turismo":
- *       variant="light" (fundo claro)  → navy  (#1B2E4B)
- *       variant="dark"  (fundo escuro) → branco (#FFFFFF)
+ * Comportamento padrão (sem props): cores fixas para fundo claro
+ *   - Símbolo (ondas): teal #2CA8A0
+ *   - "Turismo": navy #1B2E4B
+ *   - "Azul": teal #2CA8A0
  *
- * Compatibilidade: a prop legada `light` (boolean) ainda é aceita e equivale
- * a `variant="dark"` (logo sobre fundo escuro). Prefira `variant`.
+ * A prop `variant="dark"` (ou `light` boolean legada) ainda é aceita para
+ * uso em fundos escuros — ex.: Footer. Nesse caso "Turismo" vira branco.
+ * O Header NÃO usa variant — usa o padrão estático.
  */
 export function Logo({
   variant = "light",
@@ -21,7 +20,7 @@ export function Logo({
 }: {
   variant?: LogoVariant;
   light?: boolean;
-}) {
+} = {}) {
   const resolvedVariant: LogoVariant = light ? "dark" : variant;
   const turismoColor = resolvedVariant === "dark" ? "text-white" : "text-[#1B2E4B]";
 
@@ -51,7 +50,7 @@ export function Logo({
         />
       </svg>
 
-      <span className="font-display font-extrabold text-lg tracking-tight transition-colors duration-200">
+      <span className="font-display font-extrabold text-lg tracking-tight">
         <span className={turismoColor}>Turismo </span>
         <span className="text-[#2CA8A0]">Azul</span>
       </span>
