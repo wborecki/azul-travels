@@ -99,29 +99,29 @@ function AvaliacoesSkeleton() {
   );
 }
 
-function AvaliacoesErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
+function AvaliacoesErrorBlock({ title, message, onRetry }: ErrorBannerProps) {
   return (
     <div
       role="alert"
       className="bg-destructive/5 border border-destructive/20 rounded-xl p-6 text-center space-y-3"
     >
       <div>
-        <p className="text-sm font-medium text-destructive">
-          Não foi possível carregar as avaliações
-        </p>
+        <p className="text-sm font-medium text-destructive">{title}</p>
         <p className="text-xs text-muted-foreground mt-1">{message}</p>
       </div>
-      <Button size="sm" variant="outline" onClick={onRetry}>
-        Tentar de novo
-      </Button>
+      {onRetry && (
+        <Button size="sm" variant="outline" onClick={onRetry}>
+          Tentar de novo
+        </Button>
+      )}
     </div>
   );
 }
 
-function AvaliacoesEmpty() {
+function AvaliacoesEmpty({ message }: EmptyBannerProps) {
   return (
     <div className="bg-muted/40 rounded-xl p-6 text-center text-sm text-muted-foreground">
-      Ainda não há avaliações para este estabelecimento.
+      {message}
     </div>
   );
 }
@@ -136,7 +136,7 @@ function AvaliacoesLista({ avaliacoes }: { avaliacoes: AvaliacaoVM[] }) {
   );
 }
 
-function AvaliacaoCard({ avaliacao }: { avaliacao: AvaliacaoVM }) {
+function AvaliacaoCard({ avaliacao }: AvaliacaoCardProps) {
   return (
     <article className="bg-card border rounded-xl p-4">
       <div className="flex items-center justify-between">
