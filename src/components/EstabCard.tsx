@@ -1,14 +1,28 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Star } from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
-import { mapEstabCard, type EstabelecimentoView } from "@/lib/queries";
+import {
+  mapEstabCard,
+  type EstabelecimentoView,
+  type EstabCardProps,
+} from "@/lib/queries";
 
 /** @deprecated use `EstabelecimentoView` de `@/lib/queries`. Mantido como alias. */
 export type Estab = EstabelecimentoView;
 
-export function EstabCard({ e }: { e: EstabelecimentoView }) {
-  // View model único — derivações (recursos, mídia, localidade) já resolvidas.
-  const vm = mapEstabCard(e);
+/**
+ * Props do EstabCard. Aceita:
+ *  - `vm: EstabCardVM` (preferido — tipagem forte via `EstabCardProps`)
+ *  - `e: EstabelecimentoView` (legado — mapeia internamente)
+ *
+ * Em ambos os casos as props são derivadas do payload central — você
+ * não consegue passar um campo que não existe.
+ */
+type EstabCardComponentProps = EstabCardProps | { e: EstabelecimentoView; maxRecursos?: number };
+
+export function EstabCard(props: EstabCardComponentProps) {
+  const vm = "vm" in props ? props.vm : mapEstabCard(props.e);
+  const maxRecursos = props.maxRecursos ?? 3;
 
   return (
     <Link
