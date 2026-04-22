@@ -273,6 +273,7 @@ function Landing() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => void }) {
+  const navigate = useNavigate();
   return (
     <section id="hero" className="relative overflow-hidden">
       <img
