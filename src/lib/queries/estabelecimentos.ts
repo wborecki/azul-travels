@@ -252,10 +252,16 @@ export async function fetchEstabelecimentosView(
   return data ?? [];
 }
 
-/** Busca um estabelecimento ativo por slug (payload completo). */
+/**
+ * Busca um estabelecimento ativo por slug.
+ *
+ * Retorna o payload **normalizado** (`EstabelecimentoNormalized`) — campos
+ * opcionais como `fotos` e URLs já chegam saneados, dispensando guards e
+ * casts (`as string[]`) na UI consumidora.
+ */
 export async function fetchEstabelecimentoPorSlug(
   slug: string,
-): Promise<EstabelecimentoFull | null> {
+): Promise<EstabelecimentoNormalized | null> {
   const { data, error } = await supabase
     .from("estabelecimentos")
     .select("*")
@@ -264,7 +270,7 @@ export async function fetchEstabelecimentoPorSlug(
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ? normalizeEstabelecimento(data) : null;
 }
 
 // ──────────────────────────────────────────────────────────────
