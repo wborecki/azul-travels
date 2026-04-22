@@ -97,7 +97,7 @@ export function Header() {
                 <Link to="/login">Entrar</Link>
               </Button>
               <Button size="sm" asChild className="bg-primary hover:bg-primary/90">
-                <Link to="/cadastro">Cadastrar</Link>
+                <Link to="/cadastro">Cadastrar grátis</Link>
               </Button>
             </>
           )}
