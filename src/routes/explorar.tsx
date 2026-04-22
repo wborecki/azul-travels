@@ -574,6 +574,30 @@ function Explorar() {
     });
   };
 
+  /**
+   * "Restaurar padrão" — reseta TODOS os filtros (incluindo busca textual,
+   * estado, ordem, toggles e paginação) de volta aos valores iniciais
+   * de `SEARCH_DEFAULTS`. A URL volta a ser `/explorar` puro e o
+   * `useEffect` que observa `search.*` reage e refaz o fetch da lista
+   * a partir da página 1.
+   *
+   * Diferenças vs. atalho lateral "Limpar filtros":
+   *  - Sempre visível (não depende de `filtrosAtivos > 0`).
+   *  - Também limpa `tamanhoPagina` para o default — é um "reset total".
+   *  - Marca `autoAplicadoRef` para evitar que o efeito de auto-aplicação
+   *    do filtro padrão salvo do usuário sobreponha imediatamente o reset.
+   *  - Mostra toast de confirmação.
+   */
+  const restaurarPadrao = () => {
+    setBusca("");
+    autoAplicadoRef.current = true;
+    void navigate({
+      search: { ...SEARCH_DEFAULTS },
+      replace: true,
+    });
+    toast.success("Filtros restaurados aos valores iniciais.");
+  };
+
   const filtrosAtivos = useMemo(
     () =>
       search.tipos.length +
