@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateBR } from "@/lib/brazil";
 import { MarkdownView } from "@/components/MarkdownView";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 
 export const Route = createFileRoute("/conteudo/$slug")({
   component: Artigo,

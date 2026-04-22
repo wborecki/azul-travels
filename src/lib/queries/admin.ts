@@ -35,6 +35,7 @@ import {
   type EstabelecimentoDetalhe,
 } from "./estabelecimentos";
 import { fetchAvaliacoesPublicasPorEstab } from "./avaliacoes";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Estabelecimentos — listagem admin

@@ -14,6 +14,7 @@ import {
   type EstabelecimentoView,
   type PerfilSensorial,
 } from "@/lib/queries";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
   Search,
   ShieldCheck,

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Search, X } from "lucide-react";
 import { formatDateBR } from "@/lib/brazil";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
   CONTEUDO_CATEGORIAS,
   CONTEUDO_CATEGORIA_LABEL,
