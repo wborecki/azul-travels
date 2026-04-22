@@ -216,4 +216,127 @@ export async function fetchAdminCounts(): Promise<AdminCounts> {
     conteudos: conteudos.count ?? 0,
     familias: familias.count ?? 0,
   };
+// ─────────────────────────────────────────────────────────────────────────────
+// Conteúdo TEA — leituras públicas (consumidas em /conteudo, /conteudo/$slug
+// e na home). Mesma fonte da listagem admin, payload simplificado.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ConteudoPublico = Tables<"conteudo_tea">;
+
+export type ConteudoCard = Pick<
+  Tables<"conteudo_tea">,
+  "slug" | "titulo" | "resumo" | "foto_capa" | "categoria" | "criado_em" | "autor"
+>;
+
+const CONTEUDO_CARD_SELECT =
+  "slug, titulo, resumo, foto_capa, categoria, criado_em, autor" as const;
+
+import type { Database } from "@/integrations/supabase/types";
+type ConteudoCategoria = Database["public"]["Enums"]["conteudo_categoria"];
+
+/** Lista artigos publicados, opcionalmente filtrando por categoria. */
+export async function fetchConteudosPublicados(
+  filters: { categoria?: ConteudoCategoria; limite?: number } = {},
+): Promise<ConteudoCard[]> {
+  let q = supabase
+    .from("conteudo_tea")
+    .select(CONTEUDO_CARD_SELECT)
+    .eq("publicado", true)
+    .order("criado_em", { ascending: false });
+  if (filters.categoria) q = q.eq("categoria", filters.categoria);
+  if (filters.limite) q = q.limit(filters.limite);
+  const { data, error } = await q.returns<ConteudoCard[]>();
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Busca um artigo publicado por slug (ou null se não publicado). */
+export async function fetchConteudoPorSlug(slug: string): Promise<ConteudoPublico | null> {
+  const { data, error } = await supabase
+    .from("conteudo_tea")
+    .select("*")
+    .eq("slug", slug)
+    .eq("publicado", true)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** Artigos relacionados (mesma categoria, excluindo o slug atual). */
+export async function fetchConteudosRelacionados(
+  categoria: ConteudoCategoria,
+  excluirSlug: string,
+  limite = 3,
+): Promise<ConteudoPublico[]> {
+  const { data, error } = await supabase
+    .from("conteudo_tea")
+    .select("*")
+    .eq("publicado", true)
+    .eq("categoria", categoria)
+    .neq("slug", excluirSlug)
+    .limit(limite);
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth/role + dashboards leves consumidos por hooks/rotas públicas
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Verifica se um usuário tem role admin. */
+export async function fetchIsAdmin(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return !!data;
+}
+
+/** Primeiro perfil sensorial completo da família — usado em /explorar. */
+export async function fetchPrimeiroPerfilSensorial(
+  familiaId: string,
+): Promise<Tables<"perfil_sensorial"> | null> {
+  const { data, error } = await supabase
+    .from("perfil_sensorial")
+    .select("*")
+    .eq("familia_id", familiaId)
+    .order("criado_em", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** Estatísticas resumidas do dashboard /minha-conta. */
+export interface FamiliaStats {
+  perfis: number;
+  reservas: number;
+  primeiroNome: string;
+}
+
+export async function fetchFamiliaStats(familiaId: string): Promise<FamiliaStats> {
+  const [{ count: pc }, { count: rc }, { data: prof }] = await Promise.all([
+    supabase
+      .from("perfil_sensorial")
+      .select("id", { count: "exact", head: true })
+      .eq("familia_id", familiaId),
+    supabase
+      .from("reservas")
+      .select("id", { count: "exact", head: true })
+      .eq("familia_id", familiaId),
+    supabase
+      .from("perfil_sensorial")
+      .select("nome_autista")
+      .eq("familia_id", familiaId)
+      .order("criado_em")
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  return {
+    perfis: pc ?? 0,
+    reservas: rc ?? 0,
+    primeiroNome: prof?.nome_autista ?? "",
+  };
 }
