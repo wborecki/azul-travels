@@ -209,7 +209,7 @@ function AdminConteudo() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-foreground/80">
-                      {r.categoria ? CATEGORIA_LABEL[r.categoria] : "—"}
+                      {r.categoria ? CONTEUDO_CATEGORIA_LABEL[r.categoria] : "—"}
                     </td>
                     <td className="px-4 py-3 text-foreground/80">{r.autor ?? "—"}</td>
                     <td className="px-4 py-3">
