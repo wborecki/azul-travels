@@ -324,7 +324,10 @@ function Cadastro() {
           {step > 1 && step < 4 ? (
             <button
               type="button"
-              onClick={() => setStep((s) => Math.max(1, (s - 1) as 1 | 2 | 3))}
+              onClick={() => {
+                if (step === 2) setStep(1);
+                else if (step === 3) setStep(2);
+              }}
               className="inline-flex items-center gap-1 hover:text-primary transition"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Voltar
