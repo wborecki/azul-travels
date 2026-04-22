@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +20,17 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 
 interface PerfilOpt { id: string; nome_autista: string }
 
+type Estab = Tables<"estabelecimentos">;
+type Avaliacao = Tables<"avaliacoes"> & {
+  familia_profiles: { nome_responsavel: string | null } | null;
+};
+
 function EstabPage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [estab, setEstab] = useState<Record<string, unknown> | null>(null);
+  const [estab, setEstab] = useState<Estab | null>(null);
   const [loading, setLoading] = useState(true);
   const [perfis, setPerfis] = useState<PerfilOpt[]>([]);
   const [perfilSel, setPerfilSel] = useState<string>("");
@@ -35,7 +41,7 @@ function EstabPage() {
   const [mensagem, setMensagem] = useState("");
   const [autoriza, setAutoriza] = useState(true);
   const [enviando, setEnviando] = useState(false);
-  const [avals, setAvals] = useState<Record<string, unknown>[]>([]);
+  const [avals, setAvals] = useState<Avaliacao[]>([]);
 
   useEffect(() => {
     void (async () => {
