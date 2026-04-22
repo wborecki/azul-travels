@@ -266,6 +266,16 @@ function AdminEstabelecimentos() {
             </tbody>
           </table>
         </div>
+        <AdminPagination
+          pagina={pagina}
+          tamanhoPagina={tamanhoPagina}
+          totalPaginas={totalPaginas}
+          total={total}
+          onPaginaChange={setPagina}
+          onTamanhoChange={setTamanhoPagina}
+          loading={loading}
+          itemLabel="estabelecimento(s)"
+        />
       </div>
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
