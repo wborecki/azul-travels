@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDateBR } from "@/lib/brazil";
 import { MarkdownView } from "@/components/MarkdownView";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
-import { registrarView, registrarClick } from "@/lib/analyticsConteudo";
+import { registrarViewConteudo, registrarClickConteudo } from "@/lib/queries/conteudo-tracking";
 
 export const Route = createFileRoute("/conteudo/$slug")({
   component: Artigo,
