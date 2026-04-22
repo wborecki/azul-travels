@@ -26,6 +26,8 @@ import type { Tables } from "@/integrations/supabase/types";
 import {
   ESTAB_VIEW_SELECT,
   applyEstabelecimentosViewFilters,
+  resolvePagination,
+  ESTAB_PAGE_SIZE_DEFAULT,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
 } from "./estabelecimentos";
