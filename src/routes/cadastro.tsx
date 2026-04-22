@@ -112,13 +112,20 @@ function Cadastro() {
   });
   const [loading, setLoading] = useState(false);
 
+  const [emailJaCadastrado, setEmailJaCadastrado] = useState(false);
+
   const next1 = () => {
-    if (!s1.nome || !s1.email || !s1.senha || !s1.estado) {
+    setEmailJaCadastrado(false);
+    if (!s1.nome.trim() || !s1.email.trim() || !s1.senha || !s1.estado) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
-    if (s1.senha.length < 6) {
-      toast.error("Senha deve ter ao menos 6 caracteres.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s1.email.trim())) {
+      toast.error("E-mail inválido.");
+      return;
+    }
+    if (s1.senha.length < 8) {
+      toast.error("Senha deve ter ao menos 8 caracteres.");
       return;
     }
     if (s1.senha !== s1.senha2) {
@@ -137,9 +144,10 @@ function Cadastro() {
 
   const finalizar = async () => {
     setLoading(true);
+    setEmailJaCadastrado(false);
     const redirectUrl = `${window.location.origin}/minha-conta`;
     const { data, error } = await supabase.auth.signUp({
-      email: s1.email,
+      email: s1.email.trim(),
       password: s1.senha,
       options: {
         emailRedirectTo: redirectUrl,
@@ -153,9 +161,14 @@ function Cadastro() {
     });
     if (error) {
       setLoading(false);
-      toast.error(
-        error.message.includes("already") ? "Email já cadastrado." : "Erro: " + error.message,
-      );
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        setEmailJaCadastrado(true);
+        setStep(1);
+        toast.error("Este e-mail já está cadastrado.");
+      } else {
+        toast.error("Erro: " + error.message);
+      }
       return;
     }
     if (data.user) {
