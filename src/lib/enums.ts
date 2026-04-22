@@ -66,7 +66,67 @@ export const ESTAB_TIPO_LABEL: Record<EstabTipo, string> = {
   atracoes: "Atração",
   agencia: "Agência",
   transporte: "Transporte",
+  excursao: "Excursão guiada",
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Categorias (agrupadores de tipos para a UI da home + filtro de /explorar)
+//
+// Não é um enum do banco — é uma camada puramente de produto. Cada tipo
+// pertence a exatamente uma categoria. A categoria é derivada do tipo
+// via `categoriaDoTipo()`. Mantemos `Record<EstabCategoria, ...>` para
+// que o build trave caso uma categoria nova entre sem label/mapa.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ESTAB_CATEGORIAS = [
+  "hospedagem",
+  "passeios",
+  "gastronomia",
+  "transporte",
+  "planejamento",
+] as const;
+
+export type EstabCategoria = (typeof ESTAB_CATEGORIAS)[number];
+
+export const ESTAB_CATEGORIA_LABEL: Record<EstabCategoria, string> = {
+  hospedagem: "Hospedagem",
+  passeios: "Passeios e experiências",
+  gastronomia: "Onde comer",
+  transporte: "Transporte",
+  planejamento: "Planejamento",
+};
+
+/** Mapa exaustivo: tipo do banco → categoria de produto. */
+export const TIPO_PARA_CATEGORIA: Record<EstabTipo, EstabCategoria> = {
+  hotel: "hospedagem",
+  pousada: "hospedagem",
+  resort: "hospedagem",
+  parque: "passeios",
+  atracoes: "passeios",
+  excursao: "passeios",
+  restaurante: "gastronomia",
+  transporte: "transporte",
+  agencia: "planejamento",
+};
+
+/** Inverso: categoria → todos os tipos que a compõem (ordem do enum). */
+export const CATEGORIA_PARA_TIPOS: Record<EstabCategoria, ReadonlyArray<EstabTipo>> = (() => {
+  const acc: Record<EstabCategoria, EstabTipo[]> = {
+    hospedagem: [],
+    passeios: [],
+    gastronomia: [],
+    transporte: [],
+    planejamento: [],
+  };
+  for (const t of ESTAB_TIPOS) {
+    acc[TIPO_PARA_CATEGORIA[t]].push(t);
+  }
+  return acc;
+})();
+
+export function categoriaDoTipo(tipo: EstabTipo): EstabCategoria {
+  return TIPO_PARA_CATEGORIA[tipo];
+}
 
 export const ESTAB_STATUS_LABEL: Record<EstabStatus, string> = {
   ativo: "Ativo",
