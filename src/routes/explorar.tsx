@@ -368,6 +368,48 @@ function Explorar() {
     }
   }
 
+  /**
+   * Atalho "Necessidades mais comuns".
+   *
+   * Liga em um clique os recursos sensoriais mais demandados (sala
+   * sensorial, fila prioritária, CAA). Quando há perfil sensorial da
+   * família carregado, **intersecta** com o que esse perfil de fato
+   * marca como necessário — assim o atalho não impõe filtros que a
+   * família não usa. Sem perfil/login, aplica os três como heurística.
+   *
+   * Também liga `priorizarPerfil` para que a ordenação leve em conta a
+   * compatibilidade — coerente com o intent do botão.
+   */
+  function aplicarNecessidadesComuns() {
+    const temPerfil = user && Object.values(perfilNecessidades).some(Boolean);
+    const recursosParaAplicar = temPerfil
+      ? RECURSOS_COMUNS.filter((r) => perfilNecessidades[r])
+      : [...RECURSOS_COMUNS];
+
+    if (recursosParaAplicar.length === 0) {
+      toast.info(
+        "Seu perfil sensorial não marca nenhuma das necessidades mais comuns. Atualize-o em Minha conta › Perfil sensorial.",
+      );
+      return;
+    }
+
+    // Mescla com o que já está marcado — não desativa filtros que o
+    // usuário tenha ligado manualmente (ex.: cardápio visual).
+    const merged = Array.from(
+      new Set<(typeof RECURSOS_VALORES)[number]>([
+        ...search.recursos,
+        ...recursosParaAplicar,
+      ]),
+    );
+
+    patchSearchResetPage({ recursos: merged, priorizarPerfil: true });
+    toast.success(
+      temPerfil
+        ? `Atalho aplicado com base no perfil sensorial (${recursosParaAplicar.length} recurso${recursosParaAplicar.length > 1 ? "s" : ""}).`
+        : `Atalho aplicado: sala sensorial, fila prioritária e CAA.`,
+    );
+  }
+
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
     let cancelled = false;
