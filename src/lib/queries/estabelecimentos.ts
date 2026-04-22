@@ -19,6 +19,97 @@ import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
 
 /**
+ * Versão normalizada de `EstabelecimentoFull` para consumo seguro no UI.
+ *
+ * Garantias adicionais sobre o payload bruto do Supabase:
+ *  - `fotos`: sempre `string[]` (nunca `Json`/`null`/objeto). Entradas
+ *    inválidas (não-string ou string vazia) são descartadas.
+ *  - `tour_360_url`, `foto_capa`, `website`: `string | null` — strings
+ *    vazias/whitespace viram `null` para simplificar os checks no UI
+ *    (`{x && ...}` passa a refletir intenção real).
+ *  - `latitude`/`longitude`: `number | null` — qualquer valor inválido
+ *    (NaN, infinito, fora de faixa) vira `null` para evitar pin no
+ *    meio do oceano.
+ *
+ * Demais campos são repassados sem alteração.
+ */
+export type EstabelecimentoNormalized = Omit<
+  EstabelecimentoFull,
+  "fotos" | "tour_360_url" | "foto_capa" | "website" | "latitude" | "longitude"
+> & {
+  fotos: string[];
+  tour_360_url: string | null;
+  foto_capa: string | null;
+  website: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+/** Trim + transforma string vazia em null. */
+function cleanString(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t.length > 0 ? t : null;
+}
+
+/** Aceita number já válido ou string parseável; rejeita NaN/Infinity. */
+function cleanNumber(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+/**
+ * Normaliza o JSONB `fotos` em `string[]`.
+ *
+ * Aceita:
+ *  - `null` / `undefined`               → `[]`
+ *  - array de strings                   → strings não vazias
+ *  - array de objetos `{ url: string }` → extrai `url` (compat futura)
+ *  - qualquer outra coisa               → `[]` (defensive)
+ */
+function cleanFotos(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  const out: string[] = [];
+  for (const item of v) {
+    if (typeof item === "string") {
+      const s = item.trim();
+      if (s) out.push(s);
+    } else if (
+      item &&
+      typeof item === "object" &&
+      "url" in item &&
+      typeof (item as { url: unknown }).url === "string"
+    ) {
+      const s = (item as { url: string }).url.trim();
+      if (s) out.push(s);
+    }
+  }
+  return out;
+}
+
+/**
+ * Converte uma row crua do Supabase no shape seguro de UI.
+ * Idempotente — passar um `EstabelecimentoNormalized` retorna o mesmo shape.
+ */
+export function normalizeEstabelecimento(
+  row: EstabelecimentoFull,
+): EstabelecimentoNormalized {
+  return {
+    ...row,
+    fotos: cleanFotos(row.fotos),
+    tour_360_url: cleanString(row.tour_360_url),
+    foto_capa: cleanString(row.foto_capa),
+    website: cleanString(row.website),
+    latitude: cleanNumber(row.latitude),
+    longitude: cleanNumber(row.longitude),
+  };
+}
+
+/**
  * Shape unificado para listagem/card/detalhe-resumo.
  * Inclui: identificação, localização, capa, todos os selos,
  * Tour 360°, todos os recursos sensoriais, benefício TEA, destaque.
@@ -161,10 +252,16 @@ export async function fetchEstabelecimentosView(
   return data ?? [];
 }
 
-/** Busca um estabelecimento ativo por slug (payload completo). */
+/**
+ * Busca um estabelecimento ativo por slug.
+ *
+ * Retorna o payload **normalizado** (`EstabelecimentoNormalized`) — campos
+ * opcionais como `fotos` e URLs já chegam saneados, dispensando guards e
+ * casts (`as string[]`) na UI consumidora.
+ */
 export async function fetchEstabelecimentoPorSlug(
   slug: string,
-): Promise<EstabelecimentoFull | null> {
+): Promise<EstabelecimentoNormalized | null> {
   const { data, error } = await supabase
     .from("estabelecimentos")
     .select("*")
@@ -173,7 +270,7 @@ export async function fetchEstabelecimentoPorSlug(
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ? normalizeEstabelecimento(data) : null;
 }
 
 // ──────────────────────────────────────────────────────────────

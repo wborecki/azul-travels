@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import {
+  fetchEstabelecimentoPorSlug,
+  type EstabelecimentoNormalized,
+} from "@/lib/queries";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 
 interface PerfilOpt { id: string; nome_autista: string }
 
-type Estab = Tables<"estabelecimentos">;
+type Estab = EstabelecimentoNormalized;
 type Avaliacao = AvaliacaoComFamilia;
 
 function EstabPage() {
@@ -45,13 +48,21 @@ function EstabPage() {
   useEffect(() => {
     void (async () => {
       setLoading(true);
-      const { data } = await supabase.from("estabelecimentos").select("*").eq("slug", slug).maybeSingle();
-      setEstab(data ?? null);
-      if (data) {
-        const a = await fetchAvaliacoesPublicasPorEstab(data.id);
-        setAvals(a);
+      try {
+        const data = await fetchEstabelecimentoPorSlug(slug);
+        setEstab(data);
+        if (data) {
+          const a = await fetchAvaliacoesPublicasPorEstab(data.id);
+          setAvals(a);
+        }
+      } catch (err) {
+        toast.error("Erro ao carregar estabelecimento", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+        setEstab(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, [slug]);
 
@@ -114,8 +125,8 @@ function EstabPage() {
     navigate({ to: "/minha-conta/reservas" });
   };
 
-  const fotos: string[] = Array.isArray(e.fotos) ? (e.fotos as string[]) : [];
-  const fotoCapa = e.foto_capa ?? "";
+  // `e.fotos` e `e.foto_capa` já chegam normalizados (string[] / string|null).
+  const { fotos, foto_capa: fotoCapa } = e;
 
   return (
     <div className="container mx-auto px-4 py-8">
