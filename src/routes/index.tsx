@@ -630,15 +630,12 @@ function DestinosDestaque({
   onCriarPerfil: () => void;
 }) {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <Reveal>
           <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-                Recomendados
-              </p>
-              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary max-w-xl">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary max-w-xl">
                 Estabelecimentos mais escolhidos pelas famílias
               </h2>
             </div>
@@ -666,7 +663,7 @@ function DestinosDestaque({
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {destaques.map((e, i) => (
-              <Reveal key={e.id} delay={i * 80}>
+              <Reveal key={e.id} delay={i * 60}>
                 <DestaqueCard
                   estab={e}
                   perfil={perfil}
@@ -679,7 +676,7 @@ function DestinosDestaque({
         )}
 
         <Reveal className="mt-14 text-center max-w-2xl mx-auto">
-          <p className="text-lg text-foreground">
+          <p className="text-[15px] text-foreground">
             Quer ver estabelecimentos compatíveis com o perfil do seu filho?
           </p>
           <Button
@@ -688,7 +685,7 @@ function DestinosDestaque({
             className="mt-4 bg-primary hover:bg-primary/90 min-h-[44px]"
             onClick={onCriarPerfil}
           >
-            Criar perfil sensorial — é gratuito <ArrowRight className="ml-1 h-4 w-4" />
+            Criar perfil sensorial, é gratuito
           </Button>
         </Reveal>
       </div>
