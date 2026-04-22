@@ -26,6 +26,8 @@ import type { Tables } from "@/integrations/supabase/types";
 import {
   ESTAB_VIEW_SELECT,
   applyEstabelecimentosViewFilters,
+  resolvePagination,
+  ESTAB_PAGE_SIZE_DEFAULT,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
 } from "./estabelecimentos";
@@ -125,7 +127,54 @@ export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdmi
   }));
 }
 
-/** Busca uma row completa para o form de edição. */
+/**
+ * Página tipada do payload admin — items + metadados de paginação.
+ * Análoga a `EstabelecimentosViewPage` mas para o payload com `status`/`criado_em`.
+ */
+export interface EstabelecimentosAdminPage {
+  items: EstabelecimentoAdminView[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada de `fetchEstabelecimentosAdminView` — uma única ida
+ * ao banco com `count: "exact"`. **Não** força `status='ativo'`, então
+ * traz pendentes/inativos para o painel.
+ */
+export async function fetchEstabelecimentosAdminViewPaginated(
+  filters: EstabelecimentosViewFilters = {},
+): Promise<EstabelecimentosAdminPage> {
+  const pag = resolvePagination({
+    pagina: filters.pagina ?? 1,
+    tamanhoPagina: filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT,
+  })!;
+
+  const base = supabase
+    .from("estabelecimentos")
+    .select(ESTAB_ADMIN_VIEW_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false });
+
+  const q = applyEstabelecimentosViewFilters(base, {
+    ...filters,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    limite: undefined,
+  });
+
+  const { data, error, count } = await q.returns<EstabelecimentoAdminView[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
 export async function fetchEstabelecimentoAdminPorId(
   id: string,
 ): Promise<Tables<"estabelecimentos"> | null> {
@@ -159,6 +208,70 @@ export async function fetchConteudosAdmin(limit = 300): Promise<ConteudoAdminRow
     .returns<ConteudoAdminRow[]>();
   if (error) throw error;
   return data ?? [];
+}
+
+/** Filtros aceitos pela listagem paginada de conteúdo admin. */
+export interface ConteudosAdminFilters {
+  /** Texto livre — busca em titulo, slug e autor (ilike). */
+  busca?: string;
+  /** Filtra por categoria do enum (omita para todas). */
+  categoria?: Database["public"]["Enums"]["conteudo_categoria"];
+  /** Filtra por status de publicação (omita para todos). */
+  publicado?: boolean;
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface ConteudosAdminPage {
+  items: ConteudoAdminRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/** Default de página para listagens admin (sem perfil específico de tela). */
+const ADMIN_PAGE_SIZE_DEFAULT = 20;
+const ADMIN_PAGE_SIZE_MAX = 100;
+
+function clampPagina(pagina = 1, tamanhoPagina = ADMIN_PAGE_SIZE_DEFAULT) {
+  const tp = Math.min(ADMIN_PAGE_SIZE_MAX, Math.max(1, Math.floor(tamanhoPagina)));
+  const p = Math.max(1, Math.floor(pagina));
+  return { pagina: p, tamanhoPagina: tp, from: (p - 1) * tp, to: p * tp - 1 };
+}
+
+/**
+ * Versão paginada e com busca server-side da listagem admin de conteúdo.
+ * Faz uma única ida ao banco com `count: "exact"`.
+ */
+export async function fetchConteudosAdminPaginated(
+  filters: ConteudosAdminFilters = {},
+): Promise<ConteudosAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("conteudo_tea")
+    .select(CONTEUDO_ADMIN_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.or(`titulo.ilike.%${term}%,slug.ilike.%${term}%,autor.ilike.%${term}%`);
+  }
+  if (filters.categoria) q = q.eq("categoria", filters.categoria);
+  if (filters.publicado !== undefined) q = q.eq("publicado", filters.publicado);
+
+  const { data, error, count } = await q.returns<ConteudoAdminRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
 }
 
 export async function fetchConteudoAdminPorId(
@@ -208,8 +321,60 @@ export async function fetchReservasAdmin(limit = 300): Promise<ReservaAdminRow[]
   return data ?? [];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Auditoria de reservas
+/** Filtros aceitos pela listagem paginada de reservas admin. */
+export interface ReservasAdminFilters {
+  /** Texto livre — busca em mensagem (ilike). Para campos de tabelas
+   * embutidas (estabelecimentos.nome, familia_profiles.email) o filtro
+   * **complementar** acontece no cliente sobre a página atual. */
+  busca?: string;
+  /** Filtra por status (omita para todos). */
+  status?: Database["public"]["Enums"]["reserva_status"];
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface ReservasAdminPage {
+  items: ReservaAdminRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada da listagem admin de reservas. Faz busca server-side
+ * por `mensagem` (ilike) e por `status` (eq); filtros adicionais por
+ * dados embutidos (`estabelecimentos.nome`, `familia_profiles.*`)
+ * permanecem opcionais no caller, sobre a página retornada.
+ */
+export async function fetchReservasAdminPaginated(
+  filters: ReservasAdminFilters = {},
+): Promise<ReservasAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("reservas")
+    .select(RESERVA_ADMIN_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.status) q = q.eq("status", filters.status);
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.ilike("mensagem", `%${term}%`);
+  }
+
+  const { data, error, count } = await q.returns<ReservaAdminRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type AuditoriaRow = Tables<"reservas_auditoria">;

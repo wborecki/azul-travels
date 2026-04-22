@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchEstabelecimentosAdmin, type EstabAdminRow } from "@/lib/queries";
+import {
+  fetchEstabelecimentosAdminViewPaginated,
+  type EstabelecimentoAdminView,
+} from "@/lib/queries";
 import { ESTAB_STATUS, ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,46 +31,63 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
   component: AdminEstabelecimentos,
 });
 
-type Row = EstabAdminRow;
+type Row = EstabelecimentoAdminView;
 
 function AdminEstabelecimentos() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [pagina, setPagina] = useState(1);
+  const [tamanhoPagina, setTamanhoPagina] = useState(20);
+  const debouncedQ = useDebouncedValue(q, 350);
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
   /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchEstabelecimentosAdmin();
-      setRows(data);
-    } catch (err) {
-      toast.error("Erro ao carregar", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    }
-    setLoading(false);
-  };
+  // Reset pra página 1 sempre que busca/tamanho mudarem.
+  useEffect(() => {
+    setPagina(1);
+  }, [debouncedQ, tamanhoPagina]);
 
   useEffect(() => {
-    void load();
-  }, []);
+    let cancelled = false;
+    setLoading(true);
+    void (async () => {
+      try {
+        const page = await fetchEstabelecimentosAdminViewPaginated({
+          busca: debouncedQ.trim() || undefined,
+          pagina,
+          tamanhoPagina,
+        });
+        if (cancelled) return;
+        setRows(page.items);
+        setTotal(page.total);
+        setTotalPaginas(page.totalPaginas);
+      } catch (err) {
+        if (cancelled) return;
+        toast.error("Erro ao carregar", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQ, pagina, tamanhoPagina]);
 
-  const filtered = q.trim()
-    ? rows.filter((r) =>
-        [r.nome, r.cidade, r.estado, r.tipo]
-          .filter(Boolean)
-          .some((v) => v!.toLowerCase().includes(q.toLowerCase())),
-      )
-    : rows;
+  const filtered = useMemo(() => rows, [rows]);
+
 
   const markSaving = (id: string, on: boolean) =>
     setSavingIds((prev) => {
@@ -133,7 +154,10 @@ function AdminEstabelecimentos() {
     }
     toast.success(`"${toDelete.nome}" excluído`);
     setToDelete(null);
-    void load();
+    // Remove localmente e ajusta paginação se a página atual ficou vazia.
+    setRows((rs) => rs.filter((r) => r.id !== toDelete.id));
+    setTotal((t) => Math.max(0, t - 1));
+    if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
   return (
@@ -142,7 +166,7 @@ function AdminEstabelecimentos() {
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">Estabelecimentos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {loading ? "Carregando..." : `${filtered.length} de ${rows.length} registros`}
+            {loading ? "Carregando..." : `${total} registro(s)`}
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -242,6 +266,16 @@ function AdminEstabelecimentos() {
             </tbody>
           </table>
         </div>
+        <AdminPagination
+          pagina={pagina}
+          tamanhoPagina={tamanhoPagina}
+          totalPaginas={totalPaginas}
+          total={total}
+          onPaginaChange={setPagina}
+          onTamanhoChange={setTamanhoPagina}
+          loading={loading}
+          itemLabel="estabelecimento(s)"
+        />
       </div>
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
