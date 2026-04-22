@@ -2,11 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchEstabelecimentosAdmin, type EstabAdminRow } from "@/lib/queries";
-import { ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
+import { ESTAB_STATUS, ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, Pencil, Trash2, ChevronDown, Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -31,6 +40,8 @@ function AdminEstabelecimentos() {
   const [q, setQ] = useState("");
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
+  /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
@@ -56,6 +67,60 @@ function AdminEstabelecimentos() {
           .some((v) => v!.toLowerCase().includes(q.toLowerCase())),
       )
     : rows;
+
+  const markSaving = (id: string, on: boolean) =>
+    setSavingIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+
+  /**
+   * Atualiza status com **rollback otimista** — aplica na UI primeiro;
+   * se o Supabase falhar, restaura o valor anterior e mostra erro.
+   */
+  const handleStatusChange = async (row: Row, next: EstabStatus) => {
+    if (row.status === next) return;
+    const previous = row.status;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, status: next } : r)));
+
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ status: next })
+      .eq("id", row.id);
+
+    markSaving(row.id, false);
+
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, status: previous } : r)));
+      toast.error("Não foi possível alterar o status", { description: error.message });
+      return;
+    }
+    toast.success(`"${row.nome}" agora está ${ESTAB_STATUS_LABEL[next].toLowerCase()}`);
+  };
+
+  /** Toggle de destaque com mesma estratégia otimista. */
+  const handleDestaqueToggle = async (row: Row, next: boolean) => {
+    const previous = row.destaque;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, destaque: next } : r)));
+
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ destaque: next })
+      .eq("id", row.id);
+
+    markSaving(row.id, false);
+
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, destaque: previous } : r)));
+      toast.error("Não foi possível alterar o destaque", { description: error.message });
+      return;
+    }
+    toast.success(next ? `"${row.nome}" marcado como destaque` : `"${row.nome}" sem destaque`);
+  };
 
   const handleDelete = async () => {
     if (!toDelete) return;
@@ -136,16 +201,18 @@ function AdminEstabelecimentos() {
                       {[r.cidade, r.estado].filter(Boolean).join(" / ") || "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={r.status} />
+                      <StatusControl
+                        row={r}
+                        saving={savingIds.has(r.id)}
+                        onChange={(next) => void handleStatusChange(r, next)}
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      {r.destaque ? (
-                        <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-                          Destaque
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
+                      <DestaqueControl
+                        row={r}
+                        saving={savingIds.has(r.id)}
+                        onChange={(next) => void handleDestaqueToggle(r, next)}
+                      />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
@@ -215,4 +282,91 @@ const STATUS_BADGE: Record<EstabStatus, string> = {
 function StatusBadge({ status }: { status: Row["status"] }) {
   if (!status) return <Badge variant="secondary">—</Badge>;
   return <Badge className={STATUS_BADGE[status]}>{ESTAB_STATUS_LABEL[status]}</Badge>;
+}
+
+/**
+ * Dropdown que troca o status do estabelecimento direto na lista.
+ * O badge serve como trigger; ao abrir, lista os status disponíveis e
+ * marca o atual como desabilitado.
+ */
+function StatusControl({
+  row,
+  saving,
+  onChange,
+}: {
+  row: Row;
+  saving: boolean;
+  onChange: (next: EstabStatus) => void;
+}) {
+  const status = row.status;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          disabled={saving}
+          aria-label={`Alterar status de ${row.nome}`}
+          className="inline-flex items-center gap-1.5 rounded-full disabled:opacity-60"
+        >
+          {saving ? (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground px-2 py-1">
+              <Loader2 className="h-3 w-3 animate-spin" /> salvando...
+            </span>
+          ) : (
+            <>
+              <StatusBadge status={status} />
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-44">
+        <DropdownMenuLabel>Mudar status</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {ESTAB_STATUS.map((s) => (
+          <DropdownMenuItem
+            key={s}
+            disabled={s === status}
+            onSelect={() => onChange(s)}
+            className="flex items-center justify-between gap-2"
+          >
+            <span>{ESTAB_STATUS_LABEL[s]}</span>
+            {s === status && <span className="text-xs text-muted-foreground">atual</span>}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Toggle inline do flag `destaque`, com ícone e estado de loading. */
+function DestaqueControl({
+  row,
+  saving,
+  onChange,
+}: {
+  row: Row;
+  saving: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const checked = !!row.destaque;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <Switch
+        checked={checked}
+        disabled={saving}
+        onCheckedChange={(v) => onChange(v === true)}
+        aria-label={`${checked ? "Remover" : "Marcar como"} destaque para ${row.nome}`}
+      />
+      {saving ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+      ) : checked ? (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+          <Star className="h-3.5 w-3.5 fill-primary" /> Destaque
+        </span>
+      ) : (
+        <span className="text-xs text-muted-foreground">—</span>
+      )}
+    </div>
+  );
 }
