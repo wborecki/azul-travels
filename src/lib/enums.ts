@@ -174,3 +174,65 @@ export const CONTEUDO_CATEGORIA_OPTIONS = makeOptions(
   CONTEUDO_CATEGORIAS,
   CONTEUDO_CATEGORIA_LABEL,
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Máquina de estados — reservas
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Transições válidas para o status de uma reserva. Espelha exatamente a
+ * trigger `validar_transicao_reserva_status` no banco — qualquer mudança
+ * aqui exige migration correspondente.
+ *
+ *   pendente   → confirmada | cancelada
+ *   confirmada → concluida  | cancelada
+ *   cancelada  → (terminal)
+ *   concluida  → (terminal)
+ */
+export const RESERVA_TRANSICOES_VALIDAS: Record<ReservaStatus, ReadonlyArray<ReservaStatus>> = {
+  pendente: ["confirmada", "cancelada"],
+  confirmada: ["concluida", "cancelada"],
+  cancelada: [],
+  concluida: [],
+};
+
+/** Verifica no cliente se uma transição é permitida (mesma regra do banco). */
+export function podeTransicionarReserva(de: ReservaStatus, para: ReservaStatus): boolean {
+  if (de === para) return true;
+  return RESERVA_TRANSICOES_VALIDAS[de].includes(para);
+}
+
+/**
+ * Traduz erro do Supabase em mensagem amigável quando vier da trigger
+ * de validação de transição. Reconhece o `HINT = 'INVALID_STATUS_TRANSITION'`
+ * (presente em `error.message`/`error.details`/`error.hint` dependendo do
+ * driver) e também faz fallback heurístico para "Transição inválida".
+ *
+ * Retorna `null` quando o erro NÃO é de transição inválida — o caller
+ * deve então mostrar a mensagem genérica original.
+ */
+export function mensagemTransicaoInvalida(
+  err: { message?: string | null; hint?: string | null; details?: string | null } | null,
+  de: ReservaStatus | null,
+  para: ReservaStatus,
+): string | null {
+  if (!err) return null;
+  const blob = `${err.message ?? ""} ${err.hint ?? ""} ${err.details ?? ""}`;
+  const isTransicao =
+    blob.includes("INVALID_STATUS_TRANSITION") ||
+    /transi[cç][aã]o inv[aá]lida/i.test(blob) ||
+    /estado final/i.test(blob);
+  if (!isTransicao) return null;
+
+  const labelPara = RESERVA_STATUS_LABEL[para].toLowerCase();
+  if (de && (de === "cancelada" || de === "concluida")) {
+    return `Esta reserva está ${RESERVA_STATUS_LABEL[de].toLowerCase()} e não pode mais ser alterada.`;
+  }
+  if (de) {
+    const permitidas = RESERVA_TRANSICOES_VALIDAS[de]
+      .map((s) => RESERVA_STATUS_LABEL[s].toLowerCase())
+      .join(" ou ");
+    return `Não é possível ${labelPara} uma reserva ${RESERVA_STATUS_LABEL[de].toLowerCase()}. Transições permitidas: ${permitidas || "nenhuma"}.`;
+  }
+  return `Transição de status inválida (alvo: ${labelPara}).`;
+}

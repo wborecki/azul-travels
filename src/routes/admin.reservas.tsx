@@ -15,6 +15,8 @@ import {
   RESERVA_STATUS,
   RESERVA_STATUS_LABEL,
   toReservaStatus,
+  podeTransicionarReserva,
+  mensagemTransicaoInvalida,
   type ReservaStatus,
 } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
@@ -187,6 +189,18 @@ function AdminReservas() {
     const { reserva, next } = confirmAction;
     const previous = toReservaStatus(reserva.status, "pendente");
 
+    // Guarda no cliente — espelha a regra do banco e evita ida desnecessária.
+    if (!podeTransicionarReserva(previous, next)) {
+      const msg =
+        mensagemTransicaoInvalida(
+          { message: "INVALID_STATUS_TRANSITION" },
+          previous,
+          next,
+        ) ?? "Transição de status inválida.";
+      toast.error("Transição não permitida", { description: msg });
+      return;
+    }
+
     setSavingAction(true);
     const { error: updErr } = await supabase
       .from("reservas")
@@ -195,7 +209,12 @@ function AdminReservas() {
 
     if (updErr) {
       setSavingAction(false);
-      toast.error("Não foi possível atualizar", { description: updErr.message });
+      const friendly = mensagemTransicaoInvalida(updErr, previous, next);
+      if (friendly) {
+        toast.error("Transição não permitida", { description: friendly });
+      } else {
+        toast.error("Não foi possível atualizar", { description: updErr.message });
+      }
       return;
     }
 
@@ -266,16 +285,15 @@ function AdminReservas() {
 
   const limparSelecao = () => setSelecionadas(new Set());
 
-  /** Reservas selecionadas elegíveis para a transição alvo. */
+  /** Reservas selecionadas elegíveis para a transição alvo (mesma regra do banco). */
   const elegiveisParaBulk = (next: ReservaStatus): ReservaAdmin[] => {
     const ids = new Set(selecionadas);
     return rows.filter((r) => {
       if (!ids.has(r.id)) return false;
-      const cur = r.status ?? "pendente";
-      if (next === "confirmada") return cur === "pendente";
-      if (next === "concluida") return cur === "confirmada";
-      if (next === "cancelada") return cur === "pendente" || cur === "confirmada";
-      return false;
+      const cur = toReservaStatus(r.status, "pendente");
+      // Não conta "no-op" (cur === next) como elegível em lote.
+      if (cur === next) return false;
+      return podeTransicionarReserva(cur, next);
     });
   };
 
@@ -310,7 +328,18 @@ function AdminReservas() {
 
     if (updErr) {
       setSavingBulk(false);
-      toast.error("Falha na atualização em lote", { description: updErr.message });
+      // O banco aborta o batch inteiro no primeiro erro de trigger;
+      // reconhecemos a assinatura para mostrar mensagem amigável.
+      const friendly = mensagemTransicaoInvalida(updErr, null, next);
+      if (friendly) {
+        toast.error("Transição não permitida em uma ou mais reservas", {
+          description:
+            friendly +
+            " Nenhuma reserva foi alterada. Revise a seleção e tente novamente.",
+        });
+      } else {
+        toast.error("Falha na atualização em lote", { description: updErr.message });
+      }
       return;
     }
 
