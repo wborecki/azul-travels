@@ -37,7 +37,7 @@ import {
   DoorOpen,
   Hotel,
   UtensilsCrossed,
-  Trees,
+  Compass,
   Briefcase,
   Camera,
   type LucideIcon,
