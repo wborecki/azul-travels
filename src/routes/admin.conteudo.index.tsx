@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { Constants } from "@/integrations/supabase/types";
+import {
+  CONTEUDO_CATEGORIAS,
+  CONTEUDO_CATEGORIA_LABEL,
+} from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { CATEGORIA_LABEL } from "@/lib/conteudo";
+// CATEGORIA_LABEL e CONTEUDO_CATEGORIAS importados de `@/lib/enums` no topo.
 
 export const Route = createFileRoute("/admin/conteudo/")({
   component: AdminConteudo,
@@ -35,8 +38,6 @@ type Row = Pick<
   Tables<"conteudo_tea">,
   "id" | "titulo" | "slug" | "categoria" | "publicado" | "autor" | "criado_em" | "foto_capa"
 >;
-
-const CATEGORIAS = Constants.public.Enums.conteudo_categoria;
 
 function AdminConteudo() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -138,9 +139,9 @@ function AdminConteudo() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todas">Todas as categorias</SelectItem>
-            {CATEGORIAS.map((c) => (
+            {CONTEUDO_CATEGORIAS.map((c) => (
               <SelectItem key={c} value={c}>
-                {CATEGORIA_LABEL[c]}
+                {CONTEUDO_CATEGORIA_LABEL[c]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -208,7 +209,7 @@ function AdminConteudo() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-foreground/80">
-                      {r.categoria ? CATEGORIA_LABEL[r.categoria] : "—"}
+                      {r.categoria ? CONTEUDO_CATEGORIA_LABEL[r.categoria] : "—"}
                     </td>
                     <td className="px-4 py-3 text-foreground/80">{r.autor ?? "—"}</td>
                     <td className="px-4 py-3">

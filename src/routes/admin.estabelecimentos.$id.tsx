@@ -3,8 +3,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Constants } from "@/integrations/supabase/types";
-import { ESTADOS_BR, TIPO_LABEL } from "@/lib/brazil";
+import { ESTADOS_BR } from "@/lib/brazil";
+import {
+  ESTAB_TIPOS,
+  ESTAB_STATUS,
+  ESTAB_TIPO_LABEL,
+  ESTAB_STATUS_LABEL,
+  toEstabStatus,
+  type EstabTipo,
+  type EstabStatus,
+} from "@/lib/enums";
 import { SELO_BADGES, RECURSO_BADGES, Pill } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,11 +44,9 @@ export const Route = createFileRoute("/admin/estabelecimentos/$id")({
 
 type EstabRow = Tables<"estabelecimentos">;
 type EstabInsert = TablesInsert<"estabelecimentos">;
-type Tipo = EstabRow["tipo"];
-type Status = NonNullable<EstabRow["status"]>;
-
-const TIPOS = Constants.public.Enums.estab_tipo;
-const STATUS_OPTS: Status[] = ["ativo", "pendente", "inativo"];
+// Aliases locais — apontam para os enums centralizados em `@/lib/enums`.
+type Tipo = EstabTipo;
+type Status = EstabStatus;
 
 const SELO_KEYS = ["selo_azul", "selo_governamental", "selo_privado"] as const;
 const RECURSO_KEYS = [
@@ -60,8 +66,8 @@ const formSchema = z.object({
     .min(2, "Slug obrigatório")
     .max(120)
     .regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífen"),
-  tipo: z.enum(TIPOS),
-  status: z.enum(["ativo", "pendente", "inativo"]),
+  tipo: z.enum(ESTAB_TIPOS),
+  status: z.enum(ESTAB_STATUS),
   descricao: z.string().max(2000).optional().nullable(),
   descricao_tea: z.string().max(2000).optional().nullable(),
   cidade: z.string().max(120).optional().nullable(),
@@ -167,7 +173,7 @@ function rowToForm(r: EstabRow): FormState {
     nome: r.nome ?? "",
     slug: r.slug ?? "",
     tipo: r.tipo,
-    status: (r.status ?? "ativo") as Status,
+    status: toEstabStatus(r.status, "ativo"),
     descricao: r.descricao ?? "",
     descricao_tea: r.descricao_tea ?? "",
     cidade: r.cidade ?? "",
@@ -391,28 +397,34 @@ function AdminEstabelecimentoForm() {
             />
           </Field>
           <Field label="Tipo" required>
-            <Select value={form.tipo} onValueChange={(v) => set("tipo", v as Tipo)}>
+            <Select
+              value={form.tipo}
+              onValueChange={(v) => set("tipo", v as Tipo)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TIPOS.map((t) => (
+                {ESTAB_TIPOS.map((t) => (
                   <SelectItem key={t} value={t}>
-                    {TIPO_LABEL[t] ?? t}
+                    {ESTAB_TIPO_LABEL[t]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Status" required>
-            <Select value={form.status} onValueChange={(v) => set("status", v as Status)}>
+            <Select
+              value={form.status}
+              onValueChange={(v) => set("status", toEstabStatus(v, "ativo"))}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTS.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
+                {ESTAB_STATUS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {ESTAB_STATUS_LABEL[s]}
                   </SelectItem>
                 ))}
               </SelectContent>

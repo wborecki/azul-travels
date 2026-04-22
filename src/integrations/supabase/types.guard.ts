@@ -15,6 +15,23 @@
 
 import { supabase } from "./client";
 import type { Tables, TablesInsert } from "./types";
+import {
+  ESTAB_TIPO_LABEL,
+  ESTAB_STATUS_LABEL,
+  RESERVA_STATUS_LABEL,
+  TEA_NIVEL_LABEL,
+  APP_ROLE_LABEL,
+  CONTEUDO_CATEGORIA_LABEL,
+  type EstabTipo,
+  type EstabStatus,
+  type ReservaStatus,
+  type TeaNivel,
+  type AppRole,
+  type ConteudoCategoria,
+} from "@/lib/enums";
+
+// (Os checks de exhaustividade de labels estão no fim do arquivo, junto
+// aos demais — precisam dos helpers `AssertEqual` declarados abaixo.)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers de asserção em tempo de compilação

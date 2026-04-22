@@ -28,16 +28,16 @@ export const ESTADOS_BR = [
   { sigla: "TO", nome: "Tocantins" },
 ] as const;
 
-export const TIPO_LABEL: Record<string, string> = {
-  hotel: "Hotel",
-  pousada: "Pousada",
-  resort: "Resort",
-  restaurante: "Restaurante",
-  parque: "Parque",
-  atracoes: "Atração",
-  agencia: "Agência",
-  transporte: "Transporte",
-};
+/**
+ * @deprecated Re-exporta `ESTAB_TIPO_LABEL` de `@/lib/enums` para
+ * compatibilidade. Em código novo, importe direto de `@/lib/enums`:
+ *
+ *   import { ESTAB_TIPO_LABEL } from "@/lib/enums";
+ *
+ * O tipo agora é `Record<EstabTipo, string>` (exhaustive), não
+ * `Record<string, string>`.
+ */
+export { ESTAB_TIPO_LABEL as TIPO_LABEL } from "./enums";
 
 export function formatDateBR(date: string | Date | null | undefined) {
   if (!date) return "";

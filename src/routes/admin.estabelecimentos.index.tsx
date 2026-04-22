@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -205,10 +206,17 @@ function AdminEstabelecimentos() {
   );
 }
 
+/**
+ * Cores semânticas por status. Exhaustive `Record<EstabStatus, ...>` —
+ * adicionar valor novo ao enum quebra o build até ser tratado aqui.
+ */
+const STATUS_BADGE: Record<EstabStatus, string> = {
+  ativo: "bg-success/15 text-success hover:bg-success/15",
+  pendente: "bg-warning/15 text-warning hover:bg-warning/15",
+  inativo: "bg-muted text-muted-foreground hover:bg-muted",
+};
+
 function StatusBadge({ status }: { status: Row["status"] }) {
-  if (status === "ativo")
-    return <Badge className="bg-success/15 text-success hover:bg-success/15">Ativo</Badge>;
-  if (status === "pendente")
-    return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Pendente</Badge>;
-  return <Badge variant="secondary">Inativo</Badge>;
+  if (!status) return <Badge variant="secondary">—</Badge>;
+  return <Badge className={STATUS_BADGE[status]}>{ESTAB_STATUS_LABEL[status]}</Badge>;
 }
