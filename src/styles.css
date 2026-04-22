@@ -54,6 +54,9 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-roxo-suave: var(--roxo-suave);
   --color-roxo-suave-foreground: var(--roxo-suave-foreground);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
 
   --shadow-soft: 0 4px 16px -4px oklch(0.2 0.06 250 / 0.08);
   --shadow-elegant: 0 10px 30px -10px oklch(0.2 0.06 250 / 0.18);
