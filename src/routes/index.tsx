@@ -642,8 +642,7 @@ function DestinosDestaque({
             Em breve novos destinos certificados.
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destaques.map((e, i) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               <Reveal key={e.id} delay={i * 80}>
                 <DestaqueCard
                   estab={e}
