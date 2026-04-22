@@ -2,7 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { EstabCard } from "@/components/EstabCard";
-import { ESTAB_VIEW_SELECT, type EstabelecimentoView } from "@/lib/queries";
+import {
+  fetchEstabelecimentosView,
+  type EstabelecimentoView,
+  type EstabelecimentosViewFilters,
+  type RecursoFlag,
+  type SeloFlag,
+} from "@/lib/queries";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
