@@ -1,5 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,52 +13,21 @@ import { LogOut, Settings, User as UserIcon } from "lucide-react";
 
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();
-  const { pathname } = useLocation();
-  const [scrolled, setScrolled] = useState(false);
 
-  // Páginas com hero escuro no topo (header transparente sobre fundo escuro
-  // até rolar). Hoje, apenas a home.
-  const overDarkHero = pathname === "/";
+  const navLinkClass =
+    "px-3 py-2 text-sm font-medium text-[#1B2E4B] hover:text-[#2CA8A0] transition-colors duration-150 rounded-md";
+  const navActiveClass = "text-[#2CA8A0] font-semibold";
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const entrarBtnClass =
+    "text-[#1B2E4B] border border-[#1B2E4B] hover:bg-[#EBF4F8] hover:text-[#1B2E4B] transition-colors duration-150";
 
-  // Em páginas com hero escuro: enquanto não rolou, header transparente sobre
-  // fundo escuro → variant "dark". Após rolar, header branco → variant "light".
-  // Em páginas sem hero escuro: sempre header branco → variant "light".
-  const onDark = overDarkHero && !scrolled;
-  const logoVariant = onDark ? "dark" : "light";
-
-  const headerBg = onDark
-    ? "bg-transparent"
-    : `bg-background/90 backdrop-blur ${scrolled ? "shadow-soft" : ""}`;
-
-  const navLinkClass = onDark
-    ? "px-3 py-2 text-sm font-medium text-white hover:text-[#2CA8A0] transition-colors duration-200 rounded-md"
-    : "px-3 py-2 text-sm font-medium text-[#1B2E4B] hover:text-[#2CA8A0] transition-colors duration-200 rounded-md";
-
-  const navActiveClass = onDark
-    ? "text-[#2CA8A0] font-semibold"
-    : "text-[#2CA8A0] font-semibold";
-
-  const entrarBtnClass = onDark
-    ? "text-white border border-white hover:bg-white/10 hover:text-white transition-colors duration-200"
-    : "text-[#1B2E4B] border border-[#1B2E4B] hover:bg-[#1B2E4B]/5 transition-colors duration-200";
-
-  const cadastrarBtnClass = onDark
-    ? "bg-[#2CA8A0] text-white hover:bg-[#2CA8A0]/90 transition-colors duration-200"
-    : "bg-[#1B2E4B] text-white hover:bg-[#1B2E4B]/90 transition-colors duration-200";
+  const cadastrarBtnClass =
+    "bg-[#1B2E4B] text-white hover:bg-[#2CA8A0] hover:text-white transition-colors duration-150";
 
   return (
-    <header
-      className={`sticky top-0 z-40 w-full transition-colors duration-200 ${headerBg}`}
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white shadow-sm h-16">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Logo variant={logoVariant} />
+        <Logo />
 
         <nav className="hidden md:flex items-center gap-1">
           <Link
