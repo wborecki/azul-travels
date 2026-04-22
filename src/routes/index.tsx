@@ -167,12 +167,28 @@ function Landing() {
   // Carrega dados públicos
   useEffect(() => {
     void (async () => {
-      const [d, b] = await Promise.all([
+      const [dDestaque, b] = await Promise.all([
         fetchEstabelecimentosView({ apenasDestaque: true, pagina: 1, tamanhoPagina: 6 }),
         fetchEstabelecimentosView({ apenasComBeneficio: true, pagina: 1, tamanhoPagina: 3 }),
       ]);
+
+      // Garante 6 cards no grid (3x2 desktop / 2x3 tablet) — sem card sozinho
+      // na última linha. Se houver menos de 6 com destaque=true, completa
+      // com os demais ativos mais recentes.
+      let d = dDestaque;
+      if (d.length < 6) {
+        const faltam = 6 - d.length;
+        const idsExcluir = d.map((x) => x.id);
+        const extras = await fetchEstabelecimentosView({
+          pagina: 1,
+          tamanhoPagina: faltam + idsExcluir.length,
+        });
+        const complemento = extras.filter((x) => !idsExcluir.includes(x.id)).slice(0, faltam);
+        d = [...d, ...complemento];
+      }
       setDestaques(d);
       setBeneficios(b);
+
 
       const { data: a } = await supabase
         .from("conteudo_tea")
@@ -613,7 +629,7 @@ function DestinosDestaque({
 
         {destaques === null ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
                 className="aspect-[4/3] bg-muted animate-pulse rounded-2xl"
