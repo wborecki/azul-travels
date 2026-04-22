@@ -5,6 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  TEA_NIVEIS,
+  TEA_NIVEL_LABEL,
+  type TeaNivel,
+} from "@/lib/enums";
 
 export const Route = createFileRoute("/minha-conta/perfil-sensorial")({
   component: PerfisPage,
@@ -14,7 +19,7 @@ interface Perfil {
   id: string;
   nome_autista: string;
   idade: number | null;
-  nivel_tea: string | null;
+  nivel_tea: TeaNivel | null;
   precisa_sala_sensorial: boolean | null;
   precisa_checkin_antecipado: boolean | null;
   precisa_fila_prioritaria: boolean | null;
@@ -29,12 +34,12 @@ function PerfisPage() {
   const [list, setList] = useState<Perfil[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [novoNome, setNovoNome] = useState("");
-  const [novoNivel, setNovoNivel] = useState<"leve" | "moderado" | "severo">("leve");
+  const [novoNivel, setNovoNivel] = useState<TeaNivel>("leve");
 
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("perfil_sensorial").select("*").eq("familia_id", user.id).order("criado_em");
-    setList((data as Perfil[]) ?? []);
+    setList((data ?? []) as Perfil[]);
   };
 
   useEffect(() => { void load(); }, [user]);
@@ -67,10 +72,14 @@ function PerfisPage() {
         <div className="bg-card border rounded-2xl p-5 space-y-3">
           <h3 className="font-display font-semibold">Novo perfil</h3>
           <input value={novoNome} onChange={(e) => setNovoNome(e.target.value)} placeholder="Nome" className="w-full px-3 py-2 border rounded-md" />
-          <select value={novoNivel} onChange={(e) => setNovoNivel(e.target.value as "leve" | "moderado" | "severo")} className="w-full px-3 py-2 border rounded-md">
-            <option value="leve">Leve</option>
-            <option value="moderado">Moderado</option>
-            <option value="severo">Severo</option>
+          <select
+            value={novoNivel}
+            onChange={(e) => setNovoNivel(e.target.value as TeaNivel)}
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            {TEA_NIVEIS.map((n) => (
+              <option key={n} value={n}>{TEA_NIVEL_LABEL[n]}</option>
+            ))}
           </select>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
