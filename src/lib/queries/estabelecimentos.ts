@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
+import { normalizeFotos, normalizeUrl, pickEstabMedia, type EstabMedia } from "@/lib/media";
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
@@ -46,13 +47,6 @@ export type EstabelecimentoNormalized = Omit<
   longitude: number | null;
 };
 
-/** Trim + transforma string vazia em null. */
-function cleanString(v: unknown): string | null {
-  if (typeof v !== "string") return null;
-  const t = v.trim();
-  return t.length > 0 ? t : null;
-}
-
 /** Aceita number já válido ou string parseável; rejeita NaN/Infinity. */
 function cleanNumber(v: unknown): number | null {
   if (typeof v === "number") return Number.isFinite(v) ? v : null;
@@ -64,49 +58,41 @@ function cleanNumber(v: unknown): number | null {
 }
 
 /**
- * Normaliza o JSONB `fotos` em `string[]`.
- *
- * Aceita:
- *  - `null` / `undefined`               → `[]`
- *  - array de strings                   → strings não vazias
- *  - array de objetos `{ url: string }` → extrai `url` (compat futura)
- *  - qualquer outra coisa               → `[]` (defensive)
- */
-function cleanFotos(v: unknown): string[] {
-  if (!Array.isArray(v)) return [];
-  const out: string[] = [];
-  for (const item of v) {
-    if (typeof item === "string") {
-      const s = item.trim();
-      if (s) out.push(s);
-    } else if (
-      item &&
-      typeof item === "object" &&
-      "url" in item &&
-      typeof (item as { url: unknown }).url === "string"
-    ) {
-      const s = (item as { url: string }).url.trim();
-      if (s) out.push(s);
-    }
-  }
-  return out;
-}
-
-/**
  * Converte uma row crua do Supabase no shape seguro de UI.
  * Idempotente — passar um `EstabelecimentoNormalized` retorna o mesmo shape.
+ *
+ * Usa o helper único de mídia (`@/lib/media`) para `fotos`, `foto_capa`
+ * e `tour_360_url` — mesmo contrato consumido no card, no admin e na
+ * página de detalhe.
  */
 export function normalizeEstabelecimento(row: EstabelecimentoFull): EstabelecimentoNormalized {
+  const media = pickEstabMedia(row);
   return {
     ...row,
-    fotos: cleanFotos(row.fotos),
-    tour_360_url: cleanString(row.tour_360_url),
-    foto_capa: cleanString(row.foto_capa),
-    website: cleanString(row.website),
+    fotos: media.fotos,
+    foto_capa: media.fotoCapa,
+    tour_360_url: media.tour360Url,
+    website: normalizeUrl(row.website),
     latitude: cleanNumber(row.latitude),
     longitude: cleanNumber(row.longitude),
   };
 }
+
+/**
+ * Extrai o payload de mídia (`EstabMedia`) de uma row de view/embed.
+ * Use em cards de listagem ou em embeds de reservas onde `EstabelecimentoView`
+ * é suficiente — mesmo shape que `normalizeEstabelecimento(...)` retorna
+ * para a página de detalhe.
+ */
+export function pickMediaFromView(
+  row: Pick<EstabelecimentoFull, "foto_capa" | "tour_360_url"> & { fotos?: unknown },
+): EstabMedia {
+  return pickEstabMedia(row);
+}
+
+// Re-export do helper bruto de fotos para forms admin (que precisam
+// trabalhar com `string[]` antes de serializar de volta no `Insert`).
+export { normalizeFotos };
 
 /**
  * Shape unificado para listagem/card/detalhe-resumo.
