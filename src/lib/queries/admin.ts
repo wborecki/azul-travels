@@ -216,6 +216,8 @@ export async function fetchAdminCounts(): Promise<AdminCounts> {
     conteudos: conteudos.count ?? 0,
     familias: familias.count ?? 0,
   };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Conteúdo TEA — leituras públicas (consumidas em /conteudo, /conteudo/$slug
 // e na home). Mesma fonte da listagem admin, payload simplificado.
