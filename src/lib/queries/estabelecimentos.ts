@@ -16,17 +16,6 @@ import type { Tables } from "@/integrations/supabase/types";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 import { normalizeFotos, normalizeUrl, pickEstabMedia, type EstabMedia } from "@/lib/media";
 
-// O subpath `@supabase/postgrest-js` não está exposto na resolução do
-// projeto (vem como dep transitiva de `supabase-js`). Em vez de
-// importá-lo direto, derivamos o tipo do builder a partir de uma
-// invocação real (apenas como expressão de tipo via `typeof`). Mesmo
-// shape, sem acoplar a um package potencialmente ausente.
-//
-// `_estabBuilderShape` nunca é executado — existe só para o `typeof`.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _estabBuilderShape = () => supabase.from("estabelecimentos").select("*");
-export type EstabPostgrestBuilder = ReturnType<typeof _estabBuilderShape>;
-
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
 
