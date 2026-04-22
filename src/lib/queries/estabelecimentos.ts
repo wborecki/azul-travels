@@ -154,7 +154,17 @@ export type RecursoFlag =
   | "tem_cardapio_visual"
   | "tem_caa";
 
-/** Filtros opcionais aplicáveis a qualquer listagem do payload View. */
+/**
+ * Filtros opcionais aplicáveis a qualquer listagem do payload View.
+ *
+ * **Paginação:**
+ * - `pagina` (1-indexada) e `tamanhoPagina` são opcionais. Se ambos
+ *   omitidos, retorna sem paginação (limitado por `limite` se fornecido).
+ * - Se apenas `tamanhoPagina` for passado, assume `pagina = 1`.
+ * - `pagina` e `tamanhoPagina` são clampados (mín. 1; tamanho ≤ 100)
+ *   por `resolvePagination` para nunca explodir o servidor.
+ * - Quando paginação está ativa, `limite` é ignorado.
+ */
 export interface EstabelecimentosViewFilters {
   /** Texto livre — busca em nome, cidade e tipo (ilike). */
   busca?: string;
@@ -171,7 +181,48 @@ export interface EstabelecimentosViewFilters {
   apenasDestaque?: boolean;
   apenasComBeneficio?: boolean;
   apenasComTour360?: boolean;
+  /** Limita o número total de itens. Ignorado quando há paginação. */
   limite?: number;
+  /** Página 1-indexada. Use junto com `tamanhoPagina`. */
+  pagina?: number;
+  /** Itens por página (clampado entre 1 e 100). */
+  tamanhoPagina?: number;
+}
+
+/** Limites de paginação aplicados em `resolvePagination`. */
+export const ESTAB_PAGE_SIZE_MAX = 100;
+export const ESTAB_PAGE_SIZE_DEFAULT = 24;
+
+/** Resultado de paginação resolvida (sempre números válidos). */
+export interface ResolvedPagination {
+  /** Página 1-indexada. */
+  pagina: number;
+  /** Tamanho da página, clampado em [1, ESTAB_PAGE_SIZE_MAX]. */
+  tamanhoPagina: number;
+  /** Offset inclusivo (passado para `.range`). */
+  from: number;
+  /** Offset inclusivo final (passado para `.range`). */
+  to: number;
+}
+
+/**
+ * Normaliza `pagina`/`tamanhoPagina` para offsets seguros do Postgrest.
+ * Retorna `null` se nenhum dos dois for fornecido (sem paginação).
+ */
+export function resolvePagination(
+  filters: Pick<EstabelecimentosViewFilters, "pagina" | "tamanhoPagina">,
+): ResolvedPagination | null {
+  if (filters.pagina === undefined && filters.tamanhoPagina === undefined) return null;
+
+  const tamanhoBruto = filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT;
+  const tamanhoPagina = Math.min(
+    ESTAB_PAGE_SIZE_MAX,
+    Math.max(1, Math.floor(tamanhoBruto)),
+  );
+  const pagina = Math.max(1, Math.floor(filters.pagina ?? 1));
+  const from = (pagina - 1) * tamanhoPagina;
+  const to = from + tamanhoPagina - 1;
+  return { pagina, tamanhoPagina, from, to };
 }
 
 /**
@@ -216,7 +267,13 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
   for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
   for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;
 
-  if (filters.limite) q = q.limit(filters.limite) as Q;
+  // Paginação tem prioridade sobre `limite` (mais específica).
+  const pag = resolvePagination(filters);
+  if (pag) {
+    q = q.range(pag.from, pag.to) as Q;
+  } else if (filters.limite) {
+    q = q.limit(filters.limite) as Q;
+  }
 
   return q;
 }
@@ -232,6 +289,64 @@ export async function fetchEstabelecimentosView(
   const { data, error } = await q.returns<EstabelecimentoView[]>();
   if (error) throw error;
   return data ?? [];
+}
+
+/**
+ * Página tipada de estabelecimentos — items + metadados de paginação.
+ * Use `fetchEstabelecimentosViewPaginated` quando precisar do total /
+ * número de páginas para renderizar uma paginação visual.
+ */
+export interface EstabelecimentosViewPage {
+  items: EstabelecimentoView[];
+  /** Total de linhas que casam com os filtros (independente da página). */
+  total: number;
+  /** Página 1-indexada efetivamente retornada (após clamp). */
+  pagina: number;
+  /** Tamanho da página efetivamente usado (após clamp). */
+  tamanhoPagina: number;
+  /** `Math.max(1, ceil(total / tamanhoPagina))`. */
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada de `fetchEstabelecimentosView`. Faz uma única ida
+ * ao banco com `count: "exact"` — o total é devolvido junto, evitando
+ * uma segunda query.
+ *
+ * Sempre paginado: se `pagina`/`tamanhoPagina` não vierem, usa
+ * `pagina=1` e `tamanhoPagina=ESTAB_PAGE_SIZE_DEFAULT`.
+ */
+export async function fetchEstabelecimentosViewPaginated(
+  filters: EstabelecimentosViewFilters = {},
+): Promise<EstabelecimentosViewPage> {
+  const pag = resolvePagination({
+    pagina: filters.pagina ?? 1,
+    tamanhoPagina: filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT,
+  })!;
+
+  const base = supabase
+    .from("estabelecimentos")
+    .select(ESTAB_VIEW_SELECT, { count: "exact" })
+    .eq("status", "ativo");
+
+  // Reusa o helper, mas garante a mesma paginação resolvida.
+  const q = applyEstabelecimentosViewFilters(base, {
+    ...filters,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    limite: undefined,
+  });
+
+  const { data, error, count } = await q.returns<EstabelecimentoView[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
 }
 
 /**
