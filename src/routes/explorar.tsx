@@ -274,6 +274,80 @@ function Explorar() {
     })();
   }, [user]);
 
+  // ───────────────────────────────────────────────────────────────
+  // Filtro padrão do usuário — carrega ao logar; auto-aplica quando
+  // o usuário entra em /explorar "limpo" (sem filtros relevantes na
+  // URL). Links compartilhados continuam vencendo: se há `tipos`,
+  // `selos` ou `recursos` na query, o padrão é ignorado.
+  // ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) {
+      setFiltroPadrao(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const f = await fetchFiltrosPadrao(user.id);
+        setFiltroPadrao(f);
+
+        const urlVazia =
+          search.tipos.length === 0 &&
+          search.selos.length === 0 &&
+          search.recursos.length === 0;
+
+        if (!autoAplicadoRef.current && urlVazia && temFiltrosSalvos(f)) {
+          autoAplicadoRef.current = true;
+          patchSearchResetPage({
+            tipos: [...f.tipos] as EstabTipo[],
+            selos: [...f.selos] as (typeof SELOS_VALORES)[number][],
+            recursos: [...f.recursos] as (typeof RECURSOS_VALORES)[number][],
+          });
+        }
+      } catch (e) {
+        console.error("Falha ao carregar filtros padrão", e);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function salvarComoPadrao() {
+    if (!user) {
+      toast.info("Faça login para salvar seus filtros favoritos.");
+      return;
+    }
+    setSalvandoPadrao(true);
+    try {
+      const novo: FiltrosPadraoUI = {
+        tipos: search.tipos,
+        selos: search.selos,
+        recursos: search.recursos,
+      };
+      await salvarFiltrosPadrao(user.id, novo);
+      setFiltroPadrao(novo);
+      toast.success("Filtros salvos como seu padrão.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível salvar os filtros.");
+    } finally {
+      setSalvandoPadrao(false);
+    }
+  }
+
+  async function removerPadrao() {
+    if (!user) return;
+    setSalvandoPadrao(true);
+    try {
+      await limparFiltrosPadrao(user.id);
+      setFiltroPadrao(null);
+      toast.success("Filtros padrão removidos.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível remover os filtros padrão.");
+    } finally {
+      setSalvandoPadrao(false);
+    }
+  }
+
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
     let cancelled = false;
