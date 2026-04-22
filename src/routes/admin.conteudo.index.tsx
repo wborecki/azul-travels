@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import { fetchConteudosAdmin, type ConteudoAdminRow } from "@/lib/queries";
 import { CONTEUDO_CATEGORIAS, CONTEUDO_CATEGORIA_LABEL } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,16 +25,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-// CATEGORIA_LABEL e CONTEUDO_CATEGORIAS importados de `@/lib/enums` no topo.
 
 export const Route = createFileRoute("/admin/conteudo/")({
   component: AdminConteudo,
 });
 
-type Row = Pick<
-  Tables<"conteudo_tea">,
-  "id" | "titulo" | "slug" | "categoria" | "publicado" | "autor" | "criado_em" | "foto_capa"
->;
+type Row = ConteudoAdminRow;
 
 function AdminConteudo() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -47,13 +43,14 @@ function AdminConteudo() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("conteudo_tea")
-      .select("id, titulo, slug, categoria, publicado, autor, criado_em, foto_capa")
-      .order("criado_em", { ascending: false })
-      .limit(300);
-    if (error) toast.error("Erro ao carregar", { description: error.message });
-    setRows(data ?? []);
+    try {
+      const data = await fetchConteudosAdmin();
+      setRows(data);
+    } catch (err) {
+      toast.error("Erro ao carregar", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
     setLoading(false);
   };
 

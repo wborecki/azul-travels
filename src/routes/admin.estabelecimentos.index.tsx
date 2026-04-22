@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import { fetchEstabelecimentosAdmin, type EstabAdminRow } from "@/lib/queries";
 import { ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,7 @@ export const Route = createFileRoute("/admin/estabelecimentos/")({
   component: AdminEstabelecimentos,
 });
 
-type Row = Pick<
-  Tables<"estabelecimentos">,
-  "id" | "nome" | "slug" | "tipo" | "cidade" | "estado" | "status" | "destaque" | "criado_em"
->;
+type Row = EstabAdminRow;
 
 function AdminEstabelecimentos() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -37,12 +34,14 @@ function AdminEstabelecimentos() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("estabelecimentos")
-      .select("id, nome, slug, tipo, cidade, estado, status, destaque, criado_em")
-      .order("criado_em", { ascending: false })
-      .limit(200);
-    setRows(data ?? []);
+    try {
+      const data = await fetchEstabelecimentosAdmin();
+      setRows(data);
+    } catch (err) {
+      toast.error("Erro ao carregar", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
     setLoading(false);
   };
 
