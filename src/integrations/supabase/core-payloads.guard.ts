@@ -469,6 +469,138 @@ type _Vm_ResPeriodo = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
+// PARTE 4 — FETCHERS ADMIN: payloads vêm da camada `/lib/queries/admin`
+// ═════════════════════════════════════════════════════════════════════════════
+//
+// Cada fetcher público admin precisa expor um shape **nomeado** (não
+// inferido inline numa rota). Se alguém remover o `.returns<...>()` ou
+// trocar o select por algo divergente, o tipo de retorno do fetcher
+// muda e este guard quebra com mensagem clara.
+//
+// Cobertura — exatamente os fetchers exportados em `/lib/queries/admin`:
+//   fetchEstabelecimentosAdmin       → EstabAdminRow[]
+//   fetchEstabelecimentoAdminPorId   → Tables<"estabelecimentos"> | null
+//   fetchConteudosAdmin              → ConteudoAdminRow[]
+//   fetchConteudoAdminPorId          → Tables<"conteudo_tea"> | null
+//   fetchReservasAdmin               → ReservaAdminRow[]
+//   fetchAuditoriaPorReserva         → AuditoriaRow[]
+//   fetchPerfisSensoriaisDaFamilia   → PerfilSensorialRow[]
+//   fetchAdminCounts                 → AdminCounts
+
+import {
+  fetchEstabelecimentosAdmin,
+  fetchEstabelecimentoAdminPorId,
+  fetchConteudosAdmin,
+  fetchConteudoAdminPorId,
+  fetchReservasAdmin,
+  fetchAuditoriaPorReserva,
+  fetchPerfisSensoriaisDaFamilia,
+  fetchAdminCounts,
+  type EstabAdminRow,
+  type ConteudoAdminRow,
+  type ReservaAdminRow,
+  type AuditoriaRow,
+  type PerfilSensorialRow,
+  type AdminCounts,
+} from "@/lib/queries/admin";
+
+type EstabAdminReturn = Awaited<ReturnType<typeof fetchEstabelecimentosAdmin>>;
+type EstabAdminByIdReturn = Awaited<ReturnType<typeof fetchEstabelecimentoAdminPorId>>;
+type ConteudosAdminReturn = Awaited<ReturnType<typeof fetchConteudosAdmin>>;
+type ConteudoAdminByIdReturn = Awaited<ReturnType<typeof fetchConteudoAdminPorId>>;
+type ReservasAdminReturn = Awaited<ReturnType<typeof fetchReservasAdmin>>;
+type AuditoriaReturn = Awaited<ReturnType<typeof fetchAuditoriaPorReserva>>;
+type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisSensoriaisDaFamilia>>;
+type CountsReturn = Awaited<ReturnType<typeof fetchAdminCounts>>;
+
+// ─── 4.1 Listagens — array de rows com shape nomeado ─────────────────────────
+type _Ad_EstabNotAny = AssertNotAny<
+  EstabAdminReturn[number],
+  "REGRESSION: fetchEstabelecimentosAdmin retorna `any[]`"
+>;
+type _Ad_EstabShape = AssertEqual<
+  EstabAdminReturn[number],
+  EstabAdminRow,
+  "REGRESSION: fetchEstabelecimentosAdmin divergiu de EstabAdminRow"
+>;
+type _Ad_ConteudoNotAny = AssertNotAny<
+  ConteudosAdminReturn[number],
+  "REGRESSION: fetchConteudosAdmin retorna `any[]`"
+>;
+type _Ad_ConteudoShape = AssertEqual<
+  ConteudosAdminReturn[number],
+  ConteudoAdminRow,
+  "REGRESSION: fetchConteudosAdmin divergiu de ConteudoAdminRow"
+>;
+type _Ad_ReservasNotAny = AssertNotAny<
+  ReservasAdminReturn[number],
+  "REGRESSION: fetchReservasAdmin retorna `any[]`"
+>;
+type _Ad_ReservasShape = AssertEqual<
+  ReservasAdminReturn[number],
+  ReservaAdminRow,
+  "REGRESSION: fetchReservasAdmin divergiu de ReservaAdminRow"
+>;
+// Joins de ReservaAdminRow precisam expor as colunas que o painel mostra.
+type _Ad_ReservasFamiliaEmail = AssertEqual<
+  NonNullable<ReservasAdminReturn[number]["familia_profiles"]>["email"],
+  string | null,
+  "REGRESSION: ReservaAdminRow.familia_profiles.email quebrou"
+>;
+type _Ad_ReservasEstabSlug = AssertEqual<
+  NonNullable<ReservasAdminReturn[number]["estabelecimentos"]>["slug"],
+  string,
+  "REGRESSION: ReservaAdminRow.estabelecimentos.slug quebrou"
+>;
+type _Ad_AuditoriaNotAny = AssertNotAny<
+  AuditoriaReturn[number],
+  "REGRESSION: fetchAuditoriaPorReserva retorna `any[]`"
+>;
+type _Ad_AuditoriaShape = AssertEqual<
+  AuditoriaReturn[number],
+  AuditoriaRow,
+  "REGRESSION: fetchAuditoriaPorReserva divergiu de AuditoriaRow"
+>;
+type _Ad_PerfisNotAny = AssertNotAny<
+  PerfisReturn[number],
+  "REGRESSION: fetchPerfisSensoriaisDaFamilia retorna `any[]`"
+>;
+type _Ad_PerfisShape = AssertEqual<
+  PerfisReturn[number],
+  PerfilSensorialRow,
+  "REGRESSION: fetchPerfisSensoriaisDaFamilia divergiu de PerfilSensorialRow"
+>;
+
+// ─── 4.2 Detalhes — single + nullable ────────────────────────────────────────
+type _Ad_EstabByIdNotAny = AssertNotAny<
+  EstabAdminByIdReturn,
+  "REGRESSION: fetchEstabelecimentoAdminPorId retorna `any`"
+>;
+type _Ad_EstabByIdShape = AssertEqual<
+  EstabAdminByIdReturn,
+  Tables<"estabelecimentos"> | null,
+  "REGRESSION: fetchEstabelecimentoAdminPorId não devolve mais Tables<estabelecimentos> | null"
+>;
+type _Ad_ConteudoByIdShape = AssertEqual<
+  ConteudoAdminByIdReturn,
+  Tables<"conteudo_tea"> | null,
+  "REGRESSION: fetchConteudoAdminPorId não devolve mais Tables<conteudo_tea> | null"
+>;
+
+// ─── 4.3 Counts — shape numérico exato ───────────────────────────────────────
+type _Ad_CountsNotAny = AssertNotAny<CountsReturn, "REGRESSION: fetchAdminCounts retorna `any`">;
+type _Ad_CountsShape = AssertEqual<
+  CountsReturn,
+  AdminCounts,
+  "REGRESSION: fetchAdminCounts divergiu de AdminCounts"
+>;
+type _Ad_CountsAllNumber = AssertEqual<
+  CountsReturn[keyof CountsReturn],
+  number,
+  "REGRESSION: AdminCounts deveria ter todos os campos `number` (sem null/undefined)"
+>;
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Registry — agrega todos os checks num tipo "usado", impedindo que
 // um `noUnusedLocals` futuro silencie acidentalmente as asserções.
 // Se algum dos checks acima virar uma string de erro, este array
@@ -553,4 +685,23 @@ export type __CorePayloadGuards = readonly [
   _Vm_ResShape,
   _Vm_ResStatusNotNull,
   _Vm_ResPeriodo,
+  // Fetchers admin — payloads vêm da camada `/lib/queries/admin`
+  _Ad_EstabNotAny,
+  _Ad_EstabShape,
+  _Ad_ConteudoNotAny,
+  _Ad_ConteudoShape,
+  _Ad_ReservasNotAny,
+  _Ad_ReservasShape,
+  _Ad_ReservasFamiliaEmail,
+  _Ad_ReservasEstabSlug,
+  _Ad_AuditoriaNotAny,
+  _Ad_AuditoriaShape,
+  _Ad_PerfisNotAny,
+  _Ad_PerfisShape,
+  _Ad_EstabByIdNotAny,
+  _Ad_EstabByIdShape,
+  _Ad_ConteudoByIdShape,
+  _Ad_CountsNotAny,
+  _Ad_CountsShape,
+  _Ad_CountsAllNumber,
 ];

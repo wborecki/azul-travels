@@ -80,3 +80,22 @@ export {
   type ReservaVM,
   type RecursoKey,
 } from "./mappers";
+
+// Camada admin — listagens/joins do painel + dashboard counts.
+// Toda leitura admin importa daqui (writes ficam inline nas rotas).
+export {
+  fetchEstabelecimentosAdmin,
+  fetchEstabelecimentoAdminPorId,
+  fetchConteudosAdmin,
+  fetchConteudoAdminPorId,
+  fetchReservasAdmin,
+  fetchAuditoriaPorReserva,
+  fetchPerfisSensoriaisDaFamilia,
+  fetchAdminCounts,
+  type EstabAdminRow,
+  type ConteudoAdminRow,
+  type ReservaAdminRow,
+  type AuditoriaRow,
+  type PerfilSensorialRow,
+  type AdminCounts,
+} from "./admin";

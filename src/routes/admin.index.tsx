@@ -1,18 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchAdminCounts, type AdminCounts } from "@/lib/queries";
 import { Building2, CalendarCheck, FileText, Users } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
 
-interface Stats {
-  estabelecimentos: number;
-  reservasPendentes: number;
-  conteudos: number;
-  familias: number;
-}
+type Stats = AdminCounts;
 
 function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -20,21 +16,13 @@ function AdminDashboard() {
 
   useEffect(() => {
     void (async () => {
-      const [estabs, reservas, conteudos, familias] = await Promise.all([
-        supabase.from("estabelecimentos").select("id", { count: "exact", head: true }),
-        supabase
-          .from("reservas")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "pendente"),
-        supabase.from("conteudo_tea").select("id", { count: "exact", head: true }),
-        supabase.from("familia_profiles").select("id", { count: "exact", head: true }),
-      ]);
-      setStats({
-        estabelecimentos: estabs.count ?? 0,
-        reservasPendentes: reservas.count ?? 0,
-        conteudos: conteudos.count ?? 0,
-        familias: familias.count ?? 0,
-      });
+      try {
+        setStats(await fetchAdminCounts());
+      } catch (err) {
+        toast.error("Erro ao carregar dashboard", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
       setLoading(false);
     })();
   }, []);

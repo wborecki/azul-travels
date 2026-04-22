@@ -2,6 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchPerfisSensoriaisDaFamilia,
+  type PerfilSensorialRow,
+} from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,19 +15,8 @@ export const Route = createFileRoute("/minha-conta/perfil-sensorial")({
   component: PerfisPage,
 });
 
-interface Perfil {
-  id: string;
-  nome_autista: string;
-  idade: number | null;
-  nivel_tea: TeaNivel | null;
-  precisa_sala_sensorial: boolean | null;
-  precisa_checkin_antecipado: boolean | null;
-  precisa_fila_prioritaria: boolean | null;
-  precisa_cardapio_visual: boolean | null;
-  precisa_concierge_tea: boolean | null;
-  sensivel_sons: boolean | null;
-  sensivel_luz: boolean | null;
-}
+// Payload vem da camada `/lib/queries` — alias local só para legibilidade.
+type Perfil = PerfilSensorialRow;
 
 function PerfisPage() {
   const { user } = useAuth();
@@ -34,12 +27,14 @@ function PerfisPage() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("perfil_sensorial")
-      .select("*")
-      .eq("familia_id", user.id)
-      .order("criado_em");
-    setList((data ?? []) as Perfil[]);
+    try {
+      const data = await fetchPerfisSensoriaisDaFamilia(user.id);
+      setList(data);
+    } catch (err) {
+      toast.error("Erro ao carregar perfis", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
   };
 
   useEffect(() => {
