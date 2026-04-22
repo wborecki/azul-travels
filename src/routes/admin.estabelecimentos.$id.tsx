@@ -843,91 +843,27 @@ async function uploadToBucket(file: File): Promise<string> {
   return data.publicUrl;
 }
 
-function FotosCapa({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-
-  const onFile = async (file: File) => {
-    setUploading(true);
-    try {
-      const url = await uploadToBucket(file);
-      onChange(url);
-      toast.success("Capa enviada");
-    } catch (e) {
-      toast.error("Falha no upload", {
-        description: e instanceof Error ? e.message : undefined,
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium text-foreground/80">Foto de capa</Label>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="w-full sm:w-56 aspect-[16/10] rounded-xl border bg-muted overflow-hidden flex items-center justify-center">
-          {value ? (
-            <img src={value} alt="Capa" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-xs text-muted-foreground">Sem capa</span>
-          )}
-        </div>
-        <div className="flex-1 space-y-2">
-          <Input
-            placeholder="https://... (cole uma URL)"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
-          <div className="flex items-center gap-2">
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void onFile(f);
-                e.target.value = "";
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => inputRef.current?.click()}
-              disabled={uploading}
-              className="gap-2"
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4" />
-              )}
-              Enviar imagem
-            </Button>
-            {value && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-destructive"
-                onClick={() => onChange("")}
-              >
-                Remover
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * Galeria de fotos com **drag-and-drop** nativo (HTML5 DnD).
+ *
+ * Modelo unificado: a primeira foto do array é a **capa** — não há
+ * mais campo `foto_capa` editável. Reordenar arrastando ou clicando em
+ * "Tornar capa" muda quem aparece nos cards e na hero do estabelecimento.
+ *
+ * Decisões:
+ *  - Sem dependências novas (`react-dnd`/`dnd-kit`): o bundle do Worker
+ *    fica menor e o caso de uso é simples (lista linear de strings).
+ *  - Estado de drag isolado em `dragIndex` (apenas o índice da fonte;
+ *    o destino é calculado no `onDrop`).
+ *  - Acessibilidade: além do mouse, cada tile tem botões "Tornar capa"
+ *    e "Remover" — usuários sem mouse continuam funcionais.
+ */
 function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [urlInput, setUrlInput] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   const addUrl = () => {
     const u = urlInput.trim();
@@ -957,10 +893,25 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
 
   const removeAt = (i: number) => onChange(value.filter((_, idx) => idx !== i));
 
-  const count = useMemo(() => value.length, [value]);
+  /** Move o item de `from` para `to` preservando o restante da ordem. */
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= value.length || to >= value.length) return;
+    const next = value.slice();
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
+
+  const promoteToCapa = (i: number) => {
+    if (i === 0) return;
+    reorder(i, 0);
+    toast.success("Capa atualizada");
+  };
+
+  const count = value.length;
 
   return (
-    <div className="space-y-3 mt-6">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Label className="text-sm font-medium text-foreground/80">
           Galeria{" "}
@@ -968,11 +919,16 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
             {count}
           </Badge>
         </Label>
+        {count > 1 && (
+          <span className="text-[11px] text-muted-foreground">
+            Arraste as fotos para reordenar — a primeira vira a capa.
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
-          placeholder="https://..."
+          placeholder="https://... (cole uma URL)"
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
           onKeyDown={(e) => {
@@ -1013,28 +969,96 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
         </Button>
       </div>
 
-      {value.length === 0 ? (
+      {count === 0 ? (
         <div className="rounded-xl border border-dashed bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-          Nenhuma foto na galeria.
+          Nenhuma foto na galeria. A primeira foto enviada será a capa.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {value.map((url, i) => (
-            <div
-              key={`${url}-${i}`}
-              className="relative group aspect-square rounded-xl overflow-hidden border bg-muted"
-            >
-              <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => removeAt(i)}
-                className="absolute top-1.5 right-1.5 rounded-full bg-background/90 text-destructive p-1 shadow-sm opacity-0 group-hover:opacity-100 transition"
-                aria-label="Remover foto"
+          {value.map((url, i) => {
+            const isCapa = i === 0;
+            const isDragging = dragIndex === i;
+            const isOver = overIndex === i && dragIndex !== null && dragIndex !== i;
+            return (
+              <div
+                key={`${url}-${i}`}
+                draggable
+                onDragStart={(e) => {
+                  setDragIndex(i);
+                  e.dataTransfer.effectAllowed = "move";
+                  // Necessário para Firefox aceitar o drag.
+                  e.dataTransfer.setData("text/plain", String(i));
+                }}
+                onDragEnter={() => setOverIndex(i)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                }}
+                onDragLeave={() => setOverIndex((curr) => (curr === i ? null : curr))}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragIndex !== null) reorder(dragIndex, i);
+                  setDragIndex(null);
+                  setOverIndex(null);
+                }}
+                onDragEnd={() => {
+                  setDragIndex(null);
+                  setOverIndex(null);
+                }}
+                className={`relative group aspect-square rounded-xl overflow-hidden border bg-muted transition ${
+                  isCapa ? "ring-2 ring-amarelo ring-offset-2 ring-offset-background" : ""
+                } ${isDragging ? "opacity-40" : ""} ${
+                  isOver ? "scale-[1.02] border-primary" : ""
+                }`}
               >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
+                <img
+                  src={url}
+                  alt={isCapa ? "Foto de capa" : `Foto ${i + 1}`}
+                  className="w-full h-full object-cover pointer-events-none"
+                />
+
+                {/* Handle de drag — visível, indica interatividade */}
+                <div
+                  className="absolute top-1.5 left-1.5 rounded-md bg-background/90 px-1 py-1 shadow-sm cursor-grab active:cursor-grabbing"
+                  title="Arraste para reordenar"
+                  aria-hidden
+                >
+                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+
+                {/* Badge de capa */}
+                {isCapa && (
+                  <div className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-amarelo px-2 py-0.5 text-[10px] font-semibold text-amarelo-foreground shadow-sm">
+                    <StarIcon className="h-3 w-3" /> CAPA
+                  </div>
+                )}
+
+                {/* Ações no hover */}
+                <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                  {!isCapa && (
+                    <button
+                      type="button"
+                      onClick={() => promoteToCapa(i)}
+                      className="rounded-full bg-background/90 text-amarelo-foreground p-1 shadow-sm hover:bg-amarelo hover:text-amarelo-foreground"
+                      aria-label="Tornar esta a foto de capa"
+                      title="Tornar capa"
+                    >
+                      <StarIcon className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeAt(i)}
+                    className="rounded-full bg-background/90 text-destructive p-1 shadow-sm hover:bg-destructive hover:text-destructive-foreground"
+                    aria-label="Remover foto"
+                    title="Remover"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
