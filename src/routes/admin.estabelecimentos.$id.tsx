@@ -840,7 +840,95 @@ function MapPreview({ lat, lng }: { lat: string; lng: string }) {
   );
 }
 
-const BUCKET = "estabelecimentos-fotos";
+/**
+ * Botão de geocodificação que consulta a API pública do Nominatim
+ * (OpenStreetMap) para converter endereço em latitude/longitude.
+ *
+ * - Não requer chave / configuração
+ * - Monta uma query estruturada (rua, cidade, estado, país, CEP)
+ * - Mostra mensagens via toast e desabilita o botão durante a busca
+ */
+function GeocodeButton({
+  endereco,
+  cidade,
+  estado,
+  cep,
+  onResult,
+}: {
+  endereco: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  onResult: (lat: number, lng: number) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const canSearch = (endereco?.trim() || cidade?.trim() || cep?.trim()) ? true : false;
+
+  const handleSearch = async () => {
+    if (!canSearch) {
+      toast.error("Preencha pelo menos endereço, cidade ou CEP.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        format: "jsonv2",
+        addressdetails: "0",
+        limit: "1",
+        countrycodes: "br",
+      });
+      if (endereco?.trim()) params.set("street", endereco.trim());
+      if (cidade?.trim()) params.set("city", cidade.trim());
+      if (estado?.trim()) params.set("state", estado.trim());
+      if (cep?.trim()) params.set("postalcode", cep.trim());
+
+      const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+      const res = await fetch(url, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>;
+      if (!data.length) {
+        toast.error("Endereço não encontrado. Tente refinar os campos.");
+        return;
+      }
+      const lat = Number(data[0].lat);
+      const lng = Number(data[0].lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        toast.error("Coordenadas inválidas retornadas pelo serviço.");
+        return;
+      }
+      onResult(lat, lng);
+      toast.success("Coordenadas encontradas! Confira o pino no mapa abaixo.");
+    } catch (err) {
+      console.error("[geocode] erro:", err);
+      toast.error("Não foi possível buscar as coordenadas. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-2.5">
+      <div className="text-xs text-muted-foreground">
+        Use os campos de endereço acima para buscar automaticamente a latitude e longitude.
+        Depois confira o pino no mapa.
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleSearch}
+        disabled={loading || !canSearch}
+        className="gap-2 shrink-0"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+        Buscar coordenadas
+      </Button>
+    </div>
+  );
+}
 
 async function uploadToBucket(file: File): Promise<string> {
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
