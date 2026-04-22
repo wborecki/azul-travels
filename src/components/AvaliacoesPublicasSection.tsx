@@ -62,9 +62,13 @@ export function AvaliacoesPublicasSection({
       {loading ? (
         <AvaliacoesSkeleton />
       ) : error ? (
-        <AvaliacoesErrorBlock message={error.message} onRetry={refetch} />
+        <AvaliacoesErrorBlock
+          title="Não foi possível carregar as avaliações"
+          message={error.message}
+          onRetry={refetch}
+        />
       ) : avaliacoes.length === 0 ? (
-        <AvaliacoesEmpty />
+        <AvaliacoesEmpty message="Ainda não há avaliações para este estabelecimento." />
       ) : (
         <AvaliacoesLista avaliacoes={avaliacoes} />
       )}
