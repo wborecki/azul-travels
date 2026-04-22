@@ -210,6 +210,18 @@ function Cadastro() {
               <p className="text-sm text-muted-foreground">Suas informações de contato.</p>
             </div>
 
+            {emailJaCadastrado && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm">
+                <p className="font-semibold text-destructive">Este e-mail já está cadastrado.</p>
+                <p className="text-muted-foreground mt-1">
+                  Quer entrar em vez disso?{" "}
+                  <Link to="/login" className="text-secondary font-semibold hover:underline">
+                    Ir para o login →
+                  </Link>
+                </p>
+              </div>
+            )}
+
             <Button
               type="button"
               variant="outline"
