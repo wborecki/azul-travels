@@ -73,6 +73,25 @@ const RECURSOS_VALORES = [
   "tem_cardapio_visual",
   "tem_caa",
 ] as const;
+
+/**
+ * Recursos considerados "necessidades mais comuns" do público TEA — base
+ * do atalho rápido na toolbar. Escolhidos pelo PO como o trio que cobre
+ * a maior fatia das demandas de famílias autistas:
+ *
+ *  - sala sensorial (ambiente de regulação),
+ *  - fila prioritária (reduz tempo de espera, gatilho clássico),
+ *  - CAA — Comunicação Aumentativa e Alternativa.
+ *
+ * Quando há perfil sensorial logado, o atalho **filtra esse trio** pelos
+ * recursos de fato necessários à família (`perfilNecessidades`). Sem
+ * perfil/login, aplica os três brutos como heurística geral.
+ */
+const RECURSOS_COMUNS = [
+  "tem_sala_sensorial",
+  "tem_fila_prioritaria",
+  "tem_caa",
+] as const satisfies ReadonlyArray<(typeof RECURSOS_VALORES)[number]>;
 /**
  * Critério principal de ordenação.
  *
