@@ -57,8 +57,18 @@ function Landing() {
   useEffect(() => {
     void (async () => {
       const [d, b] = await Promise.all([
-        fetchEstabelecimentosView({ apenasDestaque: true, limite: 6 }),
-        fetchEstabelecimentosView({ apenasComBeneficio: true, limite: 3 }),
+        // Mesmas opções tipadas de paginação que /explorar usa
+        // (`tamanhoPagina` no lugar do antigo `limite`).
+        fetchEstabelecimentosView({
+          apenasDestaque: true,
+          pagina: 1,
+          tamanhoPagina: 6,
+        }),
+        fetchEstabelecimentosView({
+          apenasComBeneficio: true,
+          pagina: 1,
+          tamanhoPagina: 3,
+        }),
       ]);
       setDestaques(d);
       setBeneficios(b);

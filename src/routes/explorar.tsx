@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { EstabCard } from "@/components/EstabCard";
 import {
-  fetchEstabelecimentosView,
+  fetchEstabelecimentosViewPaginated,
+  ESTAB_PAGE_SIZE_DEFAULT,
+  ESTAB_PAGE_SIZE_MAX,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type RecursoFlag,
@@ -74,6 +76,12 @@ const searchSchema = z.object({
   beneficio: fallback(z.boolean(), false).default(false),
   tour360: fallback(z.boolean(), false).default(false),
   ordem: fallback(z.enum(ORDEM_VALORES), "relevante").default("relevante"),
+  // Paginação tipada — clampada na fetcher (resolvePagination).
+  pagina: fallback(z.number().int().min(1), 1).default(1),
+  tamanhoPagina: fallback(
+    z.number().int().min(1).max(ESTAB_PAGE_SIZE_MAX),
+    ESTAB_PAGE_SIZE_DEFAULT,
+  ).default(ESTAB_PAGE_SIZE_DEFAULT),
 });
 
 const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
@@ -112,11 +120,12 @@ function Explorar() {
   const [busca, setBusca] = useState(search.q);
   const buscaDebounced = useDebouncedValue(busca, 350);
 
-  // Sincroniza input → URL quando o termo "assenta".
+  // Sincroniza input → URL quando o termo "assenta". Reseta a página
+  // (mudou o termo, faz sentido voltar para a primeira).
   useEffect(() => {
     if (buscaDebounced !== search.q) {
       void navigate({
-        search: (prev: ExplorarSearch) => ({ ...prev, q: buscaDebounced }),
+        search: (prev: ExplorarSearch) => ({ ...prev, q: buscaDebounced, pagina: 1 }),
         replace: true,
       });
     }
@@ -132,14 +141,28 @@ function Explorar() {
   }, [search.q]);
 
   const [list, setList] = useState<EstabelecimentoView[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
 
-  // Helper único para atualizar a query string preservando outros params.
-  function patchSearch(patch: Partial<ExplorarSearch>) {
+  /**
+   * Atualiza a query string preservando outros params e **reseta a
+   * paginação para 1** — todos os controles de filtro/ordem chamam
+   * isso para que o usuário não fique numa página vazia ao filtrar.
+   */
+  function patchSearchResetPage(patch: Partial<ExplorarSearch>) {
     void navigate({
-      search: (prev: ExplorarSearch) => ({ ...prev, ...patch }),
+      search: (prev: ExplorarSearch) => ({ ...prev, ...patch, pagina: 1 }),
+      replace: true,
+    });
+  }
+
+  /** Navega para uma página específica (usado pelo paginador). */
+  function goToPage(pagina: number) {
+    void navigate({
+      search: (prev: ExplorarSearch) => ({ ...prev, pagina }),
       replace: true,
     });
   }
@@ -172,7 +195,7 @@ function Explorar() {
     })();
   }, [user]);
 
-  // Refetch a cada mudança de filtro (URL é a fonte da verdade)
+  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
     void (async () => {
       setLoading(true);
@@ -185,23 +208,31 @@ function Explorar() {
         estado: search.estado !== "todos" ? search.estado : undefined,
         apenasComBeneficio: search.beneficio,
         apenasComTour360: search.tour360,
+        pagina: search.pagina,
+        tamanhoPagina: search.tamanhoPagina,
       };
 
-      let res = await fetchEstabelecimentosView(filters);
+      const page = await fetchEstabelecimentosViewPaginated(filters);
+      let items = page.items;
 
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
           ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
+      // Ordenação local — só rearranja a página atual (paginação é
+      // server-side; a re-ordenação fina por perfil/certificados fica
+      // no cliente para não complicar os índices do Postgres).
       if (search.ordem === "relevante") {
-        res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
+        items = [...items].sort((a, b) => compatScore(b) - compatScore(a));
       } else if (search.ordem === "certificados") {
         const score = (e: EstabelecimentoView) =>
           (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
-        res = [...res].sort((a, b) => score(b) - score(a));
+        items = [...items].sort((a, b) => score(b) - score(a));
       }
-      setList(res);
+      setList(items);
+      setTotal(page.total);
+      setTotalPaginas(page.totalPaginas);
       setLoading(false);
     })();
   }, [
@@ -213,6 +244,8 @@ function Explorar() {
     search.beneficio,
     search.tour360,
     search.ordem,
+    search.pagina,
+    search.tamanhoPagina,
     perfilNecessidades,
   ]);
 
@@ -228,6 +261,8 @@ function Explorar() {
         beneficio: false,
         tour360: false,
         ordem: "relevante",
+        pagina: 1,
+        tamanhoPagina: search.tamanhoPagina,
       },
       replace: true,
     });
@@ -316,7 +351,7 @@ function Explorar() {
                   <Chip
                     key={t.v}
                     active={search.tipos.includes(t.v)}
-                    onClick={() => patchSearch({ tipos: toggleInArray(search.tipos, t.v) })}
+                    onClick={() => patchSearchResetPage({ tipos: toggleInArray(search.tipos, t.v) })}
                     label={t.l}
                   />
                 ))}
@@ -332,7 +367,7 @@ function Explorar() {
                     <ChipBadge
                       key={s}
                       active={search.selos.includes(s)}
-                      onClick={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
+                      onClick={() => patchSearchResetPage({ selos: toggleInArray(search.selos, s) })}
                       icon={b.icon}
                       label={b.label}
                       activeClassName={b.className}
@@ -352,7 +387,7 @@ function Explorar() {
                       key={r}
                       active={search.recursos.includes(r)}
                       onClick={() =>
-                        patchSearch({
+                        patchSearchResetPage({
                           recursos: toggleInArray(search.recursos, r),
                         })
                       }
@@ -372,14 +407,14 @@ function Explorar() {
                 icon={<Camera className="h-4 w-4" />}
                 label="Tour 360° disponível"
                 checked={search.tour360}
-                onCheckedChange={(v) => patchSearch({ tour360: v })}
+                onCheckedChange={(v) => patchSearchResetPage({ tour360: v })}
               />
               <ToggleRow
                 id="ben"
                 icon={<Gift className="h-4 w-4" />}
                 label="Possui Benefício TEA"
                 checked={search.beneficio}
-                onCheckedChange={(v) => patchSearch({ beneficio: v })}
+                onCheckedChange={(v) => patchSearchResetPage({ beneficio: v })}
               />
             </FilterGroup>
 
@@ -387,7 +422,7 @@ function Explorar() {
               <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
                 Estado
               </Label>
-              <Select value={search.estado} onValueChange={(v) => patchSearch({ estado: v })}>
+              <Select value={search.estado} onValueChange={(v) => patchSearchResetPage({ estado: v })}>
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Todos os estados" />
                 </SelectTrigger>
@@ -445,7 +480,7 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) => patchSearch({ ordem: v as (typeof ORDEM_VALORES)[number] })}
+                onValueChange={(v) => patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })}
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue />
@@ -471,7 +506,7 @@ function Explorar() {
                   <ActiveChip
                     key={`a-t-${t}`}
                     label={def?.l ?? t}
-                    onRemove={() => patchSearch({ tipos: toggleInArray(search.tipos, t) })}
+                    onRemove={() => patchSearchResetPage({ tipos: toggleInArray(search.tipos, t) })}
                   />
                 );
               })}
@@ -479,7 +514,7 @@ function Explorar() {
                 <ActiveChip
                   key={`a-s-${s}`}
                   label={SELO_BADGES[s].label}
-                  onRemove={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
+                  onRemove={() => patchSearchResetPage({ selos: toggleInArray(search.selos, s) })}
                 />
               ))}
               {search.recursos.map((r: (typeof RECURSOS_VALORES)[number]) => (
@@ -487,7 +522,7 @@ function Explorar() {
                   key={`a-r-${r}`}
                   label={RECURSO_BADGES[r].label}
                   onRemove={() =>
-                    patchSearch({
+                    patchSearchResetPage({
                       recursos: toggleInArray(search.recursos, r),
                     })
                   }
@@ -496,17 +531,17 @@ function Explorar() {
               {search.estado !== "todos" && (
                 <ActiveChip
                   label={ESTADOS_BR.find((e) => e.sigla === search.estado)?.nome ?? search.estado}
-                  onRemove={() => patchSearch({ estado: "todos" })}
+                  onRemove={() => patchSearchResetPage({ estado: "todos" })}
                 />
               )}
               {search.beneficio && (
                 <ActiveChip
                   label="Benefício TEA"
-                  onRemove={() => patchSearch({ beneficio: false })}
+                  onRemove={() => patchSearchResetPage({ beneficio: false })}
                 />
               )}
               {search.tour360 && (
-                <ActiveChip label="Tour 360°" onRemove={() => patchSearch({ tour360: false })} />
+                <ActiveChip label="Tour 360°" onRemove={() => patchSearchResetPage({ tour360: false })} />
               )}
             </div>
           )}
@@ -529,11 +564,49 @@ function Explorar() {
               </Button>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {list.map((e) => (
-                <EstabCard key={e.id} e={e} />
-              ))}
-            </div>
+            <>
+              <div className="mb-3 text-xs text-muted-foreground">
+                Mostrando{" "}
+                <strong className="text-foreground">
+                  {(search.pagina - 1) * search.tamanhoPagina + 1}–
+                  {Math.min(search.pagina * search.tamanhoPagina, total)}
+                </strong>{" "}
+                de <strong className="text-foreground">{total}</strong> resultado
+                {total === 1 ? "" : "s"}
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {list.map((e) => (
+                  <EstabCard key={e.id} e={e} />
+                ))}
+              </div>
+              {totalPaginas > 1 && (
+                <nav
+                  aria-label="Paginação dos resultados"
+                  className="mt-8 flex items-center justify-center gap-2"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={search.pagina <= 1}
+                    onClick={() => goToPage(search.pagina - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    Página <strong className="text-foreground">{search.pagina}</strong> de{" "}
+                    <strong className="text-foreground">{totalPaginas}</strong>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={search.pagina >= totalPaginas}
+                    onClick={() => goToPage(search.pagina + 1)}
+                  >
+                    Próxima
+                  </Button>
+                </nav>
+              )}
+            </>
           )}
 
           {!user && (
