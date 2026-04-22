@@ -28,9 +28,13 @@ import {
   applyEstabelecimentosViewFilters,
   resolvePagination,
   ESTAB_PAGE_SIZE_DEFAULT,
+  normalizeEstabelecimento,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
+  type EstabelecimentoFull,
+  type EstabelecimentoDetalhe,
 } from "./estabelecimentos";
+import { fetchAvaliacoesPublicasPorEstab } from "./avaliacoes";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Estabelecimentos — listagem admin
