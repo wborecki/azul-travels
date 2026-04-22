@@ -67,19 +67,28 @@ const RECURSOS_VALORES = [
   "tem_caa",
 ] as const;
 /**
- * Critério principal de ordenação. **Não** inclui "perfil sensorial" —
- * isso virou um toggle independente (`priorizarPerfil`) que **se combina**
- * com qualquer um destes critérios em camadas:
+ * Critério principal de ordenação.
  *
- *   1. (opcional) score de compatibilidade com o perfil sensorial — DESC
- *   2. critério principal selecionado abaixo                       — DESC
- *   3. tiebreaker estável: `id`                                     — ASC
+ * - `compatibilidade`: ordena pelo score de compatibilidade com o perfil
+ *   sensorial da família (DESC) como critério **principal**. Fallback
+ *   automático para selos quando não há perfil ou em empate. Escolher
+ *   essa opção também liga `priorizarPerfil` por coerência.
  *
- * Sem o toggle, a ordenação respeita só (2) + (3). Com o toggle ligado
- * mas sem perfil cadastrado, o score é 0 para todos e a ordem cai
- * naturalmente para (2) + (3).
+ * - Os demais critérios (`recomendado`, `certificados`, `recente`,
+ *   `alfabetica`) podem ser **combinados** com o toggle independente
+ *   `priorizarPerfil`, que adiciona o score como pré-camada:
+ *
+ *     1. (opcional) score de compatibilidade — DESC
+ *     2. critério principal selecionado abaixo — DESC/ASC
+ *     3. tiebreaker estável: `id` — ASC
  */
-const ORDEM_VALORES = ["recomendado", "certificados", "recente", "alfabetica"] as const;
+const ORDEM_VALORES = [
+  "compatibilidade",
+  "recomendado",
+  "certificados",
+  "recente",
+  "alfabetica",
+] as const;
 
 /**
  * Defaults dos filtros — fonte única usada por:
@@ -297,6 +306,15 @@ function Explorar() {
 
       const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
         switch (search.ordem) {
+          case "compatibilidade": {
+            // Critério principal = score de compatibilidade. Em empate
+            // (ou quando o usuário ainda não tem perfil → score 0 para
+            // todos), cai para o ranking por selos para não devolver
+            // ordem aleatória.
+            const diff = compatScore(b) - compatScore(a);
+            if (diff !== 0) return diff;
+            return seloScore(b) - seloScore(a);
+          }
           case "certificados":
             return seloScore(b) - seloScore(a);
           case "alfabetica":
@@ -311,7 +329,10 @@ function Explorar() {
 
       const sortItems = (arr: EstabelecimentoView[]) =>
         [...arr].sort((a, b) => {
-          if (search.priorizarPerfil) {
+          // O toggle `priorizarPerfil` adiciona o score como pré-camada
+          // — exceto quando o critério principal já É a compatibilidade
+          // (evita aplicar a mesma comparação duas vezes).
+          if (search.priorizarPerfil && search.ordem !== "compatibilidade") {
             const diff = compatScore(b) - compatScore(a);
             if (diff !== 0) return diff;
           }
@@ -430,12 +451,23 @@ function Explorar() {
         <p className="text-muted-foreground mt-1">
           Encontre estabelecimentos preparados para sua família.
         </p>
-        {user &&
-          search.priorizarPerfil &&
+        {(search.ordem === "compatibilidade" || search.priorizarPerfil) &&
+          user &&
           Object.values(perfilNecessidades).some(Boolean) && (
             <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-teal-claro text-secondary font-medium">
-              <Sparkles className="h-3.5 w-3.5" /> Resultados priorizados pelo perfil sensorial da
-              sua família
+              <Sparkles className="h-3.5 w-3.5" />
+              {search.ordem === "compatibilidade"
+                ? "Ordenado pelos destinos mais compatíveis com sua família"
+                : "Resultados priorizados pelo perfil sensorial da sua família"}
+            </div>
+          )}
+        {search.ordem === "compatibilidade" &&
+          (!user || !Object.values(perfilNecessidades).some(Boolean)) && (
+            <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-muted text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5" />
+              {!user
+                ? "Faça login e cadastre um perfil sensorial para ver as recomendações personalizadas."
+                : "Cadastre necessidades no perfil sensorial para ativar as recomendações personalizadas."}
             </div>
           )}
       </div>
@@ -636,14 +668,29 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) =>
-                  patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })
-                }
+                onValueChange={(v) => {
+                  const ordem = v as (typeof ORDEM_VALORES)[number];
+                  // Coerência: ao escolher "compatibilidade" como critério
+                  // principal, ligamos `priorizarPerfil` automaticamente
+                  // (caso o usuário tenha desligado antes). O toggle no
+                  // painel continua disponível como override.
+                  patchSearchResetPage(
+                    ordem === "compatibilidade"
+                      ? { ordem, priorizarPerfil: true }
+                      : { ordem },
+                  );
+                }}
               >
-                <SelectTrigger className="w-[200px] h-9" aria-label="Ordenar resultados">
+                <SelectTrigger className="w-[260px] h-9" aria-label="Ordenar resultados">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="compatibilidade">
+                    <span className="inline-flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                      Mais compatíveis com minha família
+                    </span>
+                  </SelectItem>
                   <SelectItem value="recomendado">Recomendado</SelectItem>
                   <SelectItem value="certificados">Mais certificados</SelectItem>
                   <SelectItem value="recente">Mais recentes</SelectItem>
