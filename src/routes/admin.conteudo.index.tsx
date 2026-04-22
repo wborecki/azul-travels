@@ -140,6 +140,62 @@ function AdminConteudo() {
     if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
+  const handleDuplicate = async (r: Row) => {
+    setDuplicatingId(r.id);
+    try {
+      // Busca artigo completo (resumo, conteúdo, etc.)
+      const { data: original, error: fetchErr } = await supabase
+        .from("conteudo_tea")
+        .select("titulo, resumo, conteudo, categoria, autor, foto_capa")
+        .eq("id", r.id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+      if (!original) throw new Error("Artigo original não encontrado.");
+
+      // Gera slug único a partir do slug atual
+      const baseSlug = `${r.slug}-copia`.slice(0, 100);
+      let slug = baseSlug;
+      let suffix = 1;
+      // Tenta até encontrar um slug livre (limite de tentativas defensivo)
+      while (suffix < 50) {
+        const { data: existing, error: slugErr } = await supabase
+          .from("conteudo_tea")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (slugErr) throw slugErr;
+        if (!existing) break;
+        suffix += 1;
+        slug = `${baseSlug}-${suffix}`;
+      }
+
+      const { data: created, error: insertErr } = await supabase
+        .from("conteudo_tea")
+        .insert({
+          titulo: `${original.titulo} (cópia)`,
+          slug,
+          resumo: original.resumo,
+          conteudo: original.conteudo,
+          categoria: original.categoria,
+          autor: original.autor,
+          foto_capa: original.foto_capa,
+          publicado: false,
+        })
+        .select("id")
+        .single();
+      if (insertErr) throw insertErr;
+
+      toast.success("Artigo duplicado como rascunho");
+      void navigate({ to: "/admin/conteudo/$id", params: { id: created.id } });
+    } catch (err) {
+      toast.error("Não foi possível duplicar", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex items-end justify-between gap-4 flex-wrap">
