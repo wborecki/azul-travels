@@ -100,7 +100,7 @@ function PerfisPage() {
                 <div>
                   <h3 className="font-display font-bold text-lg text-primary">{p.nome_autista}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {p.idade && `${p.idade} anos · `}TEA {p.nivel_tea}
+                    {p.idade && `${p.idade} anos · `}TEA {p.nivel_tea ? TEA_NIVEL_LABEL[p.nivel_tea] : "—"}
                   </p>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => remover(p.id)} className="text-destructive">
