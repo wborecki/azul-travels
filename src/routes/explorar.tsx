@@ -41,6 +41,7 @@ import {
   Sparkles,
   Bookmark,
   BookmarkX,
+  Wand2,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
