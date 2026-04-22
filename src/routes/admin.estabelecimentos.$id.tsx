@@ -190,7 +190,7 @@ function rowToForm(r: EstabRow): FormState {
     latitude: r.latitude != null ? String(r.latitude) : "",
     longitude: r.longitude != null ? String(r.longitude) : "",
     foto_capa: normalizeUrl(r.foto_capa) ?? "",
-    fotos: normalizeFotos(r.fotos),
+    fotos: mergeCapaIntoFotos(normalizeUrl(r.foto_capa), normalizeFotos(r.fotos)),
     destaque: !!r.destaque,
     tem_beneficio_tea: !!r.tem_beneficio_tea,
     selo_azul: !!r.selo_azul,
