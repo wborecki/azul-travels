@@ -40,6 +40,8 @@ function AdminEstabelecimentos() {
   const [q, setQ] = useState("");
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
+  /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +67,60 @@ function AdminEstabelecimentos() {
           .some((v) => v!.toLowerCase().includes(q.toLowerCase())),
       )
     : rows;
+
+  const markSaving = (id: string, on: boolean) =>
+    setSavingIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+
+  /**
+   * Atualiza status com **rollback otimista** — aplica na UI primeiro;
+   * se o Supabase falhar, restaura o valor anterior e mostra erro.
+   */
+  const handleStatusChange = async (row: Row, next: EstabStatus) => {
+    if (row.status === next) return;
+    const previous = row.status;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, status: next } : r)));
+
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ status: next })
+      .eq("id", row.id);
+
+    markSaving(row.id, false);
+
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, status: previous } : r)));
+      toast.error("Não foi possível alterar o status", { description: error.message });
+      return;
+    }
+    toast.success(`"${row.nome}" agora está ${ESTAB_STATUS_LABEL[next].toLowerCase()}`);
+  };
+
+  /** Toggle de destaque com mesma estratégia otimista. */
+  const handleDestaqueToggle = async (row: Row, next: boolean) => {
+    const previous = row.destaque;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, destaque: next } : r)));
+
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ destaque: next })
+      .eq("id", row.id);
+
+    markSaving(row.id, false);
+
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, destaque: previous } : r)));
+      toast.error("Não foi possível alterar o destaque", { description: error.message });
+      return;
+    }
+    toast.success(next ? `"${row.nome}" marcado como destaque` : `"${row.nome}" sem destaque`);
+  };
 
   const handleDelete = async () => {
     if (!toDelete) return;
