@@ -44,6 +44,7 @@ import {
   Bookmark,
   BookmarkX,
   Wand2,
+  RotateCcw,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
@@ -573,6 +574,30 @@ function Explorar() {
     });
   };
 
+  /**
+   * "Restaurar padrão" — reseta TODOS os filtros (incluindo busca textual,
+   * estado, ordem, toggles e paginação) de volta aos valores iniciais
+   * de `SEARCH_DEFAULTS`. A URL volta a ser `/explorar` puro e o
+   * `useEffect` que observa `search.*` reage e refaz o fetch da lista
+   * a partir da página 1.
+   *
+   * Diferenças vs. atalho lateral "Limpar filtros":
+   *  - Sempre visível (não depende de `filtrosAtivos > 0`).
+   *  - Também limpa `tamanhoPagina` para o default — é um "reset total".
+   *  - Marca `autoAplicadoRef` para evitar que o efeito de auto-aplicação
+   *    do filtro padrão salvo do usuário sobreponha imediatamente o reset.
+   *  - Mostra toast de confirmação.
+   */
+  const restaurarPadrao = () => {
+    setBusca("");
+    autoAplicadoRef.current = true;
+    void navigate({
+      search: { ...SEARCH_DEFAULTS },
+      replace: true,
+    });
+    toast.success("Filtros restaurados aos valores iniciais.");
+  };
+
   const filtrosAtivos = useMemo(
     () =>
       search.tipos.length +
@@ -851,6 +876,14 @@ function Explorar() {
                 }
               >
                 <Wand2 className="h-4 w-4 mr-1" /> Necessidades mais comuns
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={restaurarPadrao}
+                title="Restaurar todos os filtros aos valores iniciais"
+              >
+                <RotateCcw className="h-4 w-4 mr-1" /> Restaurar padrão
               </Button>
               <Button
                 variant="outline"
