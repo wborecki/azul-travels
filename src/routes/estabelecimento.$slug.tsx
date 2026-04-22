@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { TIPO_LABEL, formatDateBR } from "@/lib/brazil";
-import { Camera, MapPin, Phone, Star, Gift, Globe } from "lucide-react";
+import { Camera, MapPin, Phone, Gift, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/estabelecimento/$slug")({
