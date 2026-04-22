@@ -328,7 +328,18 @@ function AdminReservas() {
 
     if (updErr) {
       setSavingBulk(false);
-      toast.error("Falha na atualização em lote", { description: updErr.message });
+      // O banco aborta o batch inteiro no primeiro erro de trigger;
+      // reconhecemos a assinatura para mostrar mensagem amigável.
+      const friendly = mensagemTransicaoInvalida(updErr, null, next);
+      if (friendly) {
+        toast.error("Transição não permitida em uma ou mais reservas", {
+          description:
+            friendly +
+            " Nenhuma reserva foi alterada. Revise a seleção e tente novamente.",
+        });
+      } else {
+        toast.error("Falha na atualização em lote", { description: updErr.message });
+      }
       return;
     }
 
