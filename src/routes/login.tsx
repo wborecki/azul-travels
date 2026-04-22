@@ -169,9 +169,7 @@ function LoginPage() {
           }}
         />
         <div className="relative z-10">
-          <Link to="/" className="inline-block">
-            <Logo variant="light" />
-          </Link>
+          <Logo variant="dark" />
         </div>
 
         <div className="relative z-10 max-w-md">
