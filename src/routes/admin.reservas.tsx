@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -85,6 +86,15 @@ function AdminReservas() {
   } | null>(null);
   const [observacao, setObservacao] = useState("");
   const [savingAction, setSavingAction] = useState(false);
+
+  // Seleção em lote
+  const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<{
+    next: ReservaStatus;
+    ids: string[];
+  } | null>(null);
+  const [bulkObservacao, setBulkObservacao] = useState("");
+  const [savingBulk, setSavingBulk] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -186,6 +196,130 @@ function AdminReservas() {
     setConfirmAction(null);
   };
 
+  // ─── Seleção em lote ───────────────────────────────────────────────
+  const filteredIds = useMemo(() => filtered.map((r) => r.id), [filtered]);
+  const selecionadasNaView = useMemo(
+    () => filteredIds.filter((id) => selecionadas.has(id)),
+    [filteredIds, selecionadas],
+  );
+  const todasNaViewMarcadas =
+    filteredIds.length > 0 && selecionadasNaView.length === filteredIds.length;
+  const algumaNaViewMarcada =
+    selecionadasNaView.length > 0 && selecionadasNaView.length < filteredIds.length;
+
+  const toggleLinha = (id: string, checked: boolean) => {
+    setSelecionadas((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleTodasNaView = (checked: boolean) => {
+    setSelecionadas((prev) => {
+      const next = new Set(prev);
+      if (checked) for (const id of filteredIds) next.add(id);
+      else for (const id of filteredIds) next.delete(id);
+      return next;
+    });
+  };
+
+  const limparSelecao = () => setSelecionadas(new Set());
+
+  /** Reservas selecionadas elegíveis para a transição alvo. */
+  const elegiveisParaBulk = (next: ReservaStatus): ReservaAdmin[] => {
+    const ids = new Set(selecionadas);
+    return rows.filter((r) => {
+      if (!ids.has(r.id)) return false;
+      const cur = r.status ?? "pendente";
+      if (next === "confirmada") return cur === "pendente";
+      if (next === "concluida") return cur === "confirmada";
+      if (next === "cancelada") return cur === "pendente" || cur === "confirmada";
+      return false;
+    });
+  };
+
+  const askBulk = (next: ReservaStatus) => {
+    const elig = elegiveisParaBulk(next);
+    if (elig.length === 0) {
+      toast.info("Nenhuma reserva elegível", {
+        description: `As reservas selecionadas não podem ser ${RESERVA_STATUS_LABEL[next].toLowerCase()}s nesta transição.`,
+      });
+      return;
+    }
+    setBulkObservacao("");
+    setBulkAction({ next, ids: elig.map((r) => r.id) });
+  };
+
+  const applyBulk = async () => {
+    if (!bulkAction || !user) return;
+    const { next, ids } = bulkAction;
+    setSavingBulk(true);
+
+    // Snapshot dos status anteriores antes do update, para o log de auditoria.
+    const previousById = new Map<string, ReservaStatus>(
+      rows
+        .filter((r) => ids.includes(r.id))
+        .map((r) => [r.id, toReservaStatus(r.status, "pendente")]),
+    );
+
+    const { error: updErr } = await supabase
+      .from("reservas")
+      .update({ status: next })
+      .in("id", ids);
+
+    if (updErr) {
+      setSavingBulk(false);
+      toast.error("Falha na atualização em lote", { description: updErr.message });
+      return;
+    }
+
+    const acaoLabel =
+      next === "confirmada"
+        ? "confirmar"
+        : next === "cancelada"
+          ? "cancelar"
+          : next === "concluida"
+            ? "concluir"
+            : "atualizar";
+
+    const obs = bulkObservacao.trim() || null;
+    const auditoriaPayload = ids.map((id) => ({
+      reserva_id: id,
+      ator_id: user.id,
+      ator_email: user.email ?? null,
+      acao: acaoLabel,
+      status_anterior: previousById.get(id) ?? null,
+      status_novo: next,
+      observacao: obs,
+    }));
+
+    const { error: logErr } = await supabase.from("reservas_auditoria").insert(auditoriaPayload);
+
+    setSavingBulk(false);
+
+    if (logErr) {
+      toast.warning(`${ids.length} reserva(s) atualizadas, mas o log falhou`, {
+        description: logErr.message,
+      });
+    } else {
+      toast.success(
+        `${ids.length} reserva(s) ${RESERVA_STATUS_LABEL[next].toLowerCase()}${
+          ids.length > 1 ? "s" : ""
+        }`,
+      );
+    }
+
+    const idSet = new Set(ids);
+    setRows((rs) => rs.map((r) => (idSet.has(r.id) ? { ...r, status: next } : r)));
+    if (selected && idSet.has(selected.id)) {
+      setSelected({ ...selected, status: next });
+    }
+    setSelecionadas(new Set());
+    setBulkAction(null);
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -233,11 +367,57 @@ function AdminReservas() {
         })}
       </div>
 
+      {selecionadas.size > 0 && (
+        <div
+          className="sticky top-16 z-10 bg-card border rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm"
+          role="region"
+          aria-label="Ações em lote"
+        >
+          <div className="text-sm text-foreground/80">
+            <strong className="text-foreground">{selecionadas.size}</strong> reserva(s)
+            selecionada(s)
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              className="bg-success text-success-foreground hover:bg-success/90"
+              onClick={() => askBulk("confirmada")}
+            >
+              <Check className="h-4 w-4 mr-1" /> Confirmar
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => askBulk("concluida")}>
+              <CheckCheck className="h-4 w-4 mr-1" /> Concluir
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/40 hover:bg-destructive/10"
+              onClick={() => askBulk("cancelada")}
+            >
+              <X className="h-4 w-4 mr-1" /> Cancelar
+            </Button>
+            <Button size="sm" variant="ghost" onClick={limparSelecao}>
+              Limpar seleção
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-card border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
+                <th className="px-4 py-3 w-10">
+                  <Checkbox
+                    aria-label="Selecionar todas as reservas visíveis"
+                    checked={
+                      todasNaViewMarcadas ? true : algumaNaViewMarcada ? "indeterminate" : false
+                    }
+                    onCheckedChange={(v) => toggleTodasNaView(v === true)}
+                    disabled={loading || filteredIds.length === 0}
+                  />
+                </th>
                 <th className="px-4 py-3">Estabelecimento</th>
                 <th className="px-4 py-3">Família</th>
                 <th className="px-4 py-3">Check-in</th>
@@ -249,55 +429,70 @@ function AdminReservas() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin inline mr-2" /> Carregando reservas...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhuma reserva encontrada para este filtro.
                   </td>
                 </tr>
               ) : (
-                filtered.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="hover:bg-muted/30 cursor-pointer"
-                    onClick={() => setSelected(r)}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">
-                        {r.estabelecimentos?.nome ?? "—"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
-                          .filter(Boolean)
-                          .join(" / ") || "—"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">
-                        {r.familia_profiles?.nome_responsavel ?? "—"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {r.familia_profiles?.email ?? ""}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-foreground/80">
-                      {r.data_checkin ? new Date(r.data_checkin).toLocaleDateString("pt-BR") : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
-                      {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
-                    </td>
-                    <td className="px-4 py-3">
-                      <ReservaStatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <RowActions reserva={r} onAction={askAction} />
-                    </td>
-                  </tr>
-                ))
+                filtered.map((r) => {
+                  const checked = selecionadas.has(r.id);
+                  return (
+                    <tr
+                      key={r.id}
+                      data-state={checked ? "selected" : undefined}
+                      className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
+                      onClick={() => setSelected(r)}
+                    >
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          aria-label={`Selecionar reserva de ${
+                            r.familia_profiles?.nome_responsavel ?? "família"
+                          }`}
+                          checked={checked}
+                          onCheckedChange={(v) => toggleLinha(r.id, v === true)}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground">
+                          {r.estabelecimentos?.nome ?? "—"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
+                            .filter(Boolean)
+                            .join(" / ") || "—"}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground">
+                          {r.familia_profiles?.nome_responsavel ?? "—"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {r.familia_profiles?.email ?? ""}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-foreground/80">
+                        {r.data_checkin
+                          ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
+                        {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
+                      </td>
+                      <td className="px-4 py-3">
+                        <ReservaStatusBadge status={r.status} />
+                      </td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <RowActions reserva={r} onAction={askAction} />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -365,6 +560,75 @@ function AdminReservas() {
                 </>
               ) : (
                 confirmAction && verboLabel(confirmAction.next)
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação de ação em lote */}
+      <AlertDialog
+        open={!!bulkAction}
+        onOpenChange={(o) => !o && !savingBulk && setBulkAction(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction
+                ? `${verboLabel(bulkAction.next)} ${bulkAction.ids.length} reserva(s)?`
+                : "Confirmar ação em lote"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction && (
+                <>
+                  Esta ação atualizará <strong>{bulkAction.ids.length}</strong> reserva(s) para o
+                  status <strong>{RESERVA_STATUS_LABEL[bulkAction.next]}</strong>. Cada alteração
+                  ficará registrada individualmente no log de auditoria.
+                  {selecionadas.size !== bulkAction.ids.length && (
+                    <>
+                      {" "}
+                      <span className="text-warning">
+                        ({selecionadas.size - bulkAction.ids.length} reserva(s) selecionada(s) serão
+                        ignoradas por não estarem em um status compatível.)
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="bulk-obs" className="text-sm">
+              Observação (opcional, aplicada a todas)
+            </Label>
+            <Textarea
+              id="bulk-obs"
+              rows={3}
+              placeholder="Ex: lote confirmado após reunião com parceiro..."
+              value={bulkObservacao}
+              onChange={(e) => setBulkObservacao(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={savingBulk}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void applyBulk();
+              }}
+              disabled={savingBulk}
+              className={
+                bulkAction?.next === "cancelada"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+            >
+              {savingBulk ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Aplicando em lote...
+                </>
+              ) : (
+                bulkAction && `${verboLabel(bulkAction.next)} ${bulkAction.ids.length}`
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
