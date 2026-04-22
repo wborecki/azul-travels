@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateBR } from "@/lib/brazil";
+import { MarkdownView } from "@/components/MarkdownView";
 
 export const Route = createFileRoute("/conteudo/$slug")({
   component: Artigo,
@@ -93,8 +94,12 @@ function Artigo() {
               {a.resumo}
             </p>
           )}
-          <div className="mt-8 prose prose-lg max-w-none text-foreground leading-relaxed whitespace-pre-line">
-            {a.conteudo}
+          <div className="mt-8">
+            {a.conteudo ? (
+              <MarkdownView source={a.conteudo} />
+            ) : (
+              <p className="text-muted-foreground italic">Sem conteúdo.</p>
+            )}
           </div>
         </div>
 
