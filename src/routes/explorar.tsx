@@ -65,6 +65,7 @@ const TIPOS_VALORES = [
   "atracoes",
   "agencia",
   "transporte",
+  "excursao",
 ] as const;
 type EstabTipo = (typeof TIPOS_VALORES)[number];
 
@@ -172,8 +173,29 @@ const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
   { v: "restaurante", l: "Restaurante" },
   { v: "parque", l: "Parque" },
   { v: "atracoes", l: "Atrações" },
+  { v: "excursao", l: "Excursão guiada" },
   { v: "agencia", l: "Agência" },
   { v: "transporte", l: "Transporte" },
+];
+
+/**
+ * Categorias de produto — agrupadores que aparecem como chips acima dos
+ * tipos. Cada chip ativa/desativa em bloco todos os tipos da categoria.
+ *
+ * Espelha `TIPO_PARA_CATEGORIA` em `@/lib/enums`, mas mantemos uma cópia
+ * local tipada com o `EstabTipo` da rota (que já inclui `excursao`)
+ * para evitar import circular com o schema da search.
+ */
+const CATEGORIAS: ReadonlyArray<{
+  v: "hospedagem" | "passeios" | "gastronomia" | "transporte" | "planejamento";
+  l: string;
+  tipos: ReadonlyArray<EstabTipo>;
+}> = [
+  { v: "hospedagem", l: "Hospedagem", tipos: ["hotel", "pousada", "resort"] },
+  { v: "passeios", l: "Passeios e experiências", tipos: ["parque", "atracoes", "excursao"] },
+  { v: "gastronomia", l: "Onde comer", tipos: ["restaurante"] },
+  { v: "transporte", l: "Transporte", tipos: ["transporte"] },
+  { v: "planejamento", l: "Planejamento", tipos: ["agencia"] },
 ];
 
 export const Route = createFileRoute("/explorar")({
