@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Star } from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
-import {
-  mapEstabCard,
-  type EstabelecimentoView,
-  type EstabCardProps,
-} from "@/lib/queries";
+import { mapEstabCard, type EstabelecimentoView, type EstabCardProps } from "@/lib/queries";
 
 /** @deprecated use `EstabelecimentoView` de `@/lib/queries`. Mantido como alias. */
 export type Estab = EstabelecimentoView;
