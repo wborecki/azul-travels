@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchEstabelecimentosAdmin, type EstabAdminRow } from "@/lib/queries";
+import {
+  fetchEstabelecimentosAdminViewPaginated,
+  type EstabelecimentoAdminView,
+} from "@/lib/queries";
 import { ESTAB_STATUS, ESTAB_STATUS_LABEL, type EstabStatus } from "@/lib/enums";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,46 +31,63 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
   component: AdminEstabelecimentos,
 });
 
-type Row = EstabAdminRow;
+type Row = EstabelecimentoAdminView;
 
 function AdminEstabelecimentos() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [pagina, setPagina] = useState(1);
+  const [tamanhoPagina, setTamanhoPagina] = useState(20);
+  const debouncedQ = useDebouncedValue(q, 350);
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
   /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchEstabelecimentosAdmin();
-      setRows(data);
-    } catch (err) {
-      toast.error("Erro ao carregar", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    }
-    setLoading(false);
-  };
+  // Reset pra página 1 sempre que busca/tamanho mudarem.
+  useEffect(() => {
+    setPagina(1);
+  }, [debouncedQ, tamanhoPagina]);
 
   useEffect(() => {
-    void load();
-  }, []);
+    let cancelled = false;
+    setLoading(true);
+    void (async () => {
+      try {
+        const page = await fetchEstabelecimentosAdminViewPaginated({
+          busca: debouncedQ.trim() || undefined,
+          pagina,
+          tamanhoPagina,
+        });
+        if (cancelled) return;
+        setRows(page.items);
+        setTotal(page.total);
+        setTotalPaginas(page.totalPaginas);
+      } catch (err) {
+        if (cancelled) return;
+        toast.error("Erro ao carregar", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQ, pagina, tamanhoPagina]);
 
-  const filtered = q.trim()
-    ? rows.filter((r) =>
-        [r.nome, r.cidade, r.estado, r.tipo]
-          .filter(Boolean)
-          .some((v) => v!.toLowerCase().includes(q.toLowerCase())),
-      )
-    : rows;
+  const filtered = useMemo(() => rows, [rows]);
+
 
   const markSaving = (id: string, on: boolean) =>
     setSavingIds((prev) => {
