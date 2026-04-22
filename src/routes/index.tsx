@@ -167,6 +167,33 @@ function Landing() {
   const [artigos, setArtigos] = useState<ArtigoCard[] | null>(null);
   const [perfilPrincipal, setPerfilPrincipal] = useState<PerfilSensorial | null>(null);
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>(DEPOIMENTOS_SEED);
+  const [stats, setStats] = useState<{ destinos: number; estados: number; media: number }>({
+    destinos: 0,
+    estados: 0,
+    media: 4.8,
+  });
+
+  // Stats reais para o Hero (contadores animados)
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("estabelecimentos")
+        .select("estado")
+        .eq("status", "ativo");
+      const { data: avs } = await supabase
+        .from("avaliacoes")
+        .select("nota_geral")
+        .eq("publica", true)
+        .not("nota_geral", "is", null);
+      const destinos = data?.length ?? 0;
+      const estados = new Set((data ?? []).map((e) => e.estado).filter(Boolean)).size;
+      const notas = (avs ?? []).map((a) => a.nota_geral as number);
+      const media = notas.length
+        ? Number((notas.reduce((s, n) => s + n, 0) / notas.length).toFixed(1))
+        : 4.8;
+      setStats({ destinos, estados, media });
+    })();
+  }, []);
 
   // Carrega dados públicos
   useEffect(() => {
