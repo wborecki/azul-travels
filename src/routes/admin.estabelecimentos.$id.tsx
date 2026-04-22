@@ -275,9 +275,24 @@ function AdminEstabelecimentoForm() {
     e.preventDefault();
     setErrors({});
 
+    // Slug é sempre derivado do nome no submit — protege contra estados
+    // intermediários (ex.: form recém-carregado de um registro antigo cujo
+    // slug não bate exatamente com `slugify(nome)`).
+    const baseSlug = slugify(form.nome);
+    let finalSlug = baseSlug;
+    try {
+      finalSlug = await ensureUniqueSlug(baseSlug);
+    } catch (err) {
+      toast.error("Não foi possível validar o slug", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+      return;
+    }
+    if (finalSlug !== form.slug) setForm((f) => ({ ...f, slug: finalSlug }));
+
     const parsed = formSchema.safeParse({
       nome: form.nome,
-      slug: form.slug,
+      slug: finalSlug,
       tipo: form.tipo,
       status: form.status,
       descricao: form.descricao || null,
