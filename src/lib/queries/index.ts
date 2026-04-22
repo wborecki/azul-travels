@@ -81,6 +81,22 @@ export {
   type RecursoKey,
 } from "./mappers";
 
+// Props tipadas de componentes (Card/Banner/Modal) derivadas dos VMs.
+// Importe daqui ao tipar componentes que consomem dados do banco.
+export type {
+  EstabCardProps,
+  AvaliacaoCardProps,
+  ReservaCardProps,
+  EstabBannerProps,
+  ErrorBannerProps,
+  EmptyBannerProps,
+  CancelarReservaModalProps,
+  AvaliacaoDetalheModalProps,
+  EstabPreviewModalProps,
+  WithRetry,
+  WithOpenChange,
+} from "./component-props";
+
 // Camada admin — listagens/joins do painel + dashboard counts.
 // Toda leitura admin importa daqui (writes ficam inline nas rotas).
 export {
