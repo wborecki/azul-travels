@@ -123,15 +123,18 @@ function ConteudoLista() {
   // Se a página atual ficou fora do range após filtro, volta pra 1
   useEffect(() => {
     if (!loading && page > totalPaginas) {
-      void navigate({ search: (prev) => ({ ...prev, page: 1 }), replace: true });
+      void navigate({
+        search: (prev: ConteudoSearch) => ({ ...prev, page: 1 }),
+        replace: true,
+      });
     }
   }, [loading, page, totalPaginas, navigate]);
 
   function setCategoria(novo: "todas" | ConteudoCategoria) {
-    void navigate({ search: (prev) => ({ ...prev, cat: novo, page: 1 }) });
+    void navigate({ search: (prev: ConteudoSearch) => ({ ...prev, cat: novo, page: 1 }) });
   }
   function irParaPagina(p: number) {
-    void navigate({ search: (prev) => ({ ...prev, page: p }) });
+    void navigate({ search: (prev: ConteudoSearch) => ({ ...prev, page: p }) });
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
