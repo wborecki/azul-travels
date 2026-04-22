@@ -13,10 +13,10 @@ export function Logo({ light = false }: { light?: boolean }) {
         />
         <path
           d="M2 13c3-2 5-2 8 0s5 2 8 0 5-2 8 0"
-          stroke="oklch(0.66 0.10 195)"
+          stroke={light ? "#fff" : "hsl(var(--secondary))"}
           strokeWidth="2.5"
           strokeLinecap="round"
-          opacity="0.85"
+          opacity={light ? 0.85 : 1}
         />
       </svg>
       <span
