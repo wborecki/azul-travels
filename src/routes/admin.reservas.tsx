@@ -144,13 +144,11 @@ function ReservaStatusBadge({ status }: { status: Tables<"reservas">["status"] }
   switch (status) {
     case "confirmada":
       return (
-        <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15">
-          Confirmada
-        </Badge>
+        <Badge className="bg-success/15 text-success hover:bg-success/15">Confirmada</Badge>
       );
     case "pendente":
       return (
-        <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">Pendente</Badge>
+        <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Pendente</Badge>
       );
     case "cancelada":
       return (

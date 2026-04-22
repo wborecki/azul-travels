@@ -122,8 +122,8 @@ function AdminEstabelecimentos() {
 
 function StatusBadge({ status }: { status: Row["status"] }) {
   if (status === "ativo")
-    return <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15">Ativo</Badge>;
+    return <Badge className="bg-success/15 text-success hover:bg-success/15">Ativo</Badge>;
   if (status === "pendente")
-    return <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">Pendente</Badge>;
+    return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Pendente</Badge>;
   return <Badge variant="secondary">Inativo</Badge>;
 }

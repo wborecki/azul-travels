@@ -87,7 +87,7 @@ function AdminConteudo() {
                     <td className="px-4 py-3 text-foreground/80">{c.autor ?? "—"}</td>
                     <td className="px-4 py-3">
                       {c.publicado ? (
-                        <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15">
+                        <Badge className="bg-success/15 text-success hover:bg-success/15">
                           Publicado
                         </Badge>
                       ) : (
