@@ -91,7 +91,7 @@ function EstabPage() {
       </div>
     );
 
-  if (!estab)
+  if (!detalhe)
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-display font-bold text-primary">
@@ -103,7 +103,8 @@ function EstabPage() {
       </div>
     );
 
-  const e = estab;
+  const e: Estab = detalhe.estabelecimento;
+  const avals: Avaliacao[] = detalhe.avaliacoes;
   const recursoKeys = [
     "tem_sala_sensorial",
     "tem_concierge_tea",
