@@ -40,11 +40,15 @@ import type { Tables } from "@/integrations/supabase/types";
 type EstabRow = Tables<"estabelecimentos">;
 
 // Builder mínimo apenas para satisfazer a assinatura genérica do
-// helper — nunca executado em runtime. O cast é controlado e
-// localizado neste arquivo de teste.
+// helper — nunca executado em runtime real. Stub fluente: cada método
+// devolve o próprio objeto para permitir o encadeamento que o helper faz.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyBuilder = PostgrestFilterBuilder<any, any, any, any, any>;
-const fakeBuilder = {} as AnyBuilder;
+const fluentStub: Record<string, (...args: unknown[]) => unknown> = {};
+for (const m of ["eq", "in", "or", "not", "limit", "range"] as const) {
+  fluentStub[m] = () => fluentStub;
+}
+const fakeBuilder = fluentStub as unknown as AnyBuilder;
 
 describe("EstabelecimentosViewFilters — contratos de tipo (regressão)", () => {
   it("SeloFlag corresponde exatamente às colunas boolean de selo do schema", () => {
