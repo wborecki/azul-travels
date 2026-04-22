@@ -116,6 +116,7 @@ export {
   fetchReservasAdmin,
   fetchReservasAdminPaginated,
   fetchAuditoriaPorReserva,
+  fetchAuditoriaAdminPaginated,
   fetchPerfisSensoriaisDaFamilia,
   fetchAdminCounts,
   ESTAB_ADMIN_VIEW_SELECT,
