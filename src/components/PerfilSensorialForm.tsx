@@ -116,11 +116,23 @@ const NIVEIS = [
   { v: "severo" as const, t: "Severo (Nível 3)", d: "Precisa de suporte constante." },
 ];
 
-type BoolKey = {
-  [K in keyof PerfilSensorialDraft]: PerfilSensorialDraft[K] extends boolean | null | undefined
-    ? K
-    : never;
-}[keyof PerfilSensorialDraft];
+type BoolKey =
+  | "sensivel_sons"
+  | "sensivel_luz"
+  | "sensivel_texturas"
+  | "sensivel_cheiros"
+  | "sensivel_multidao"
+  | "comunicacao_verbal"
+  | "usa_caa"
+  | "usa_libras"
+  | "precisa_checkin_antecipado"
+  | "precisa_fila_prioritaria"
+  | "precisa_cardapio_visual"
+  | "precisa_sala_sensorial"
+  | "precisa_concierge_tea"
+  | "gosta_atividades_agua"
+  | "gosta_natureza"
+  | "gosta_animais";
 
 interface OpcaoCard {
   key: BoolKey;
