@@ -120,11 +120,12 @@ function Explorar() {
   const [busca, setBusca] = useState(search.q);
   const buscaDebounced = useDebouncedValue(busca, 350);
 
-  // Sincroniza input → URL quando o termo "assenta".
+  // Sincroniza input → URL quando o termo "assenta". Reseta a página
+  // (mudou o termo, faz sentido voltar para a primeira).
   useEffect(() => {
     if (buscaDebounced !== search.q) {
       void navigate({
-        search: (prev: ExplorarSearch) => ({ ...prev, q: buscaDebounced }),
+        search: (prev: ExplorarSearch) => ({ ...prev, q: buscaDebounced, pagina: 1 }),
         replace: true,
       });
     }
