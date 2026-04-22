@@ -242,6 +242,105 @@ function Explorar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.q]);
 
+  // ───────────────────────────────────────────────────────────────
+  // Tratamento de URL com filtros inválidos.
+  //
+  // O `zodValidator` + `fallback()` no schema já substitui valores
+  // inválidos pelo default silenciosamente — o problema é justamente
+  // esse silêncio: o usuário compartilha um link com `ordem=foo` ou
+  // `pagina=-1` e vê resultados sem entender que algo foi corrigido.
+  //
+  // Aqui re-validamos manualmente a query string crua com `safeParse`,
+  // detectamos quais chaves o adapter "consertou" e:
+  //   1. Avisamos via toast (lista os nomes amigáveis).
+  //   2. Reescrevemos a URL com os valores efetivos (search) — assim o
+  //      `stripSearchParams` limpa também os params já idênticos ao
+  //      default e a URL fica honesta sobre o que está aplicado.
+  //   3. Os efeitos de fetch existentes reagem à mudança de URL e
+  //      recarregam a busca naturalmente.
+  //
+  // Roda uma única vez por sessão da rota (ref guard) para não disparar
+  // toast a cada navegação interna que altere filtros.
+  // ───────────────────────────────────────────────────────────────
+  const validouUrlInicialRef = useRef(false);
+  useEffect(() => {
+    if (validouUrlInicialRef.current) return;
+    validouUrlInicialRef.current = true;
+    if (typeof window === "undefined") return;
+    const raw = window.location.search;
+    if (!raw || raw.length <= 1) return;
+
+    // Decodifica params crus para um objeto. TanStack Router serializa
+    // arrays/booleans/numbers como JSON na URL — tentamos JSON.parse e
+    // caímos em string literal quando falhar (q, estado etc.).
+    const params = new URLSearchParams(raw);
+    const cru: Record<string, unknown> = {};
+    for (const [k, v] of params.entries()) {
+      try {
+        cru[k] = JSON.parse(v);
+      } catch {
+        cru[k] = v;
+      }
+    }
+
+    const parsed = searchSchema.safeParse(cru);
+
+    // Quais chaves enviadas NÃO casam com o valor efetivo aplicado?
+    // Comparação por JSON.stringify cobre arrays/objetos.
+    const efetivo = search as unknown as Record<string, unknown>;
+    const corrigidas: string[] = [];
+    const shape = searchSchema.shape as Record<string, unknown>;
+    for (const k of Object.keys(cru)) {
+      if (k in shape) {
+        if (JSON.stringify(cru[k]) !== JSON.stringify(efetivo[k])) {
+          corrigidas.push(k);
+        }
+      } else {
+        corrigidas.push(k);
+      }
+    }
+
+    if (corrigidas.length === 0) return;
+
+    const NOMES_AMIGAVEIS: Record<string, string> = {
+      q: "busca",
+      tipos: "tipos",
+      selos: "selos",
+      recursos: "recursos",
+      estado: "estado",
+      beneficio: "benefício TEA",
+      tour360: "tour 360°",
+      ordem: "ordenação",
+      priorizarPerfil: "priorizar perfil",
+      pagina: "página",
+      tamanhoPagina: "tamanho da página",
+    };
+    const conhecidas = corrigidas
+      .filter((k) => k in NOMES_AMIGAVEIS)
+      .map((k) => NOMES_AMIGAVEIS[k]);
+    const desconhecidas = corrigidas.filter((k) => !(k in NOMES_AMIGAVEIS));
+    const partes: string[] = [];
+    if (conhecidas.length > 0) partes.push(conhecidas.join(", "));
+    if (desconhecidas.length > 0)
+      partes.push(
+        `${desconhecidas.length} parâmetro${desconhecidas.length > 1 ? "s" : ""} desconhecido${desconhecidas.length > 1 ? "s" : ""}`,
+      );
+
+    toast.warning("Filtros inválidos no link", {
+      description: `Substituídos pelo padrão: ${partes.join(" + ")}.${
+        parsed.success ? "" : " Alguns valores não puderam ser interpretados."
+      }`,
+    });
+
+    // Reescreve a URL com os valores efetivos — `stripSearchParams`
+    // limpa o que já é default e o efeito de fetch reage à mudança.
+    void navigate({
+      search: () => ({ ...(efetivo as ExplorarSearch) }),
+      replace: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
