@@ -207,11 +207,18 @@ function AdminConteudo() {
             {loading ? "Carregando..." : `${total} artigo(s)`}
           </p>
         </div>
-        <Button asChild className="gap-2">
-          <Link to="/admin/conteudo/$id" params={{ id: "novo" }}>
-            <Plus className="h-4 w-4" /> Novo artigo
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/admin/conteudo/analytics">
+              <BarChart3 className="h-4 w-4" /> Analytics
+            </Link>
+          </Button>
+          <Button asChild className="gap-2">
+            <Link to="/admin/conteudo/$id" params={{ id: "novo" }}>
+              <Plus className="h-4 w-4" /> Novo artigo
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2">
