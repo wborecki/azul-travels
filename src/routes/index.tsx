@@ -294,17 +294,18 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
     <section id="hero" className="relative overflow-hidden">
       <img
         src={heroImg}
-        alt="Família sorrindo durante uma viagem em um hotel tropical"
+        alt="Família brasileira diversa caminhando feliz em uma praia tropical ao entardecer"
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ objectPosition: "center 30%" }}
         width={1920}
         height={1280}
       />
-      {/* Overlay azul-navy a 55% */}
+      {/* Overlay azul-navy para garantir contraste com texto branco */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(135deg, oklch(0.27 0.06 255 / 0.78) 0%, oklch(0.27 0.06 255 / 0.55) 50%, oklch(0.35 0.08 230 / 0.7) 100%)",
+            "linear-gradient(to bottom, rgba(27, 46, 75, 0.60) 0%, rgba(27, 46, 75, 0.45) 50%, rgba(27, 46, 75, 0.65) 100%)",
         }}
       />
 
