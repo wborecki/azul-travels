@@ -227,6 +227,45 @@ export type Database = {
         }
         Relationships: []
       }
+      estabelecimentos_auditoria: {
+        Row: {
+          acao: string
+          ator_email: string | null
+          ator_id: string | null
+          campo: string | null
+          criado_em: string
+          estabelecimento_id: string
+          estabelecimento_nome: string | null
+          id: string
+          valor_anterior: Json | null
+          valor_novo: Json | null
+        }
+        Insert: {
+          acao: string
+          ator_email?: string | null
+          ator_id?: string | null
+          campo?: string | null
+          criado_em?: string
+          estabelecimento_id: string
+          estabelecimento_nome?: string | null
+          id?: string
+          valor_anterior?: Json | null
+          valor_novo?: Json | null
+        }
+        Update: {
+          acao?: string
+          ator_email?: string | null
+          ator_id?: string | null
+          campo?: string | null
+          criado_em?: string
+          estabelecimento_id?: string
+          estabelecimento_nome?: string | null
+          id?: string
+          valor_anterior?: Json | null
+          valor_novo?: Json | null
+        }
+        Relationships: []
+      }
       explorar_filtros_padrao: {
         Row: {
           atualizado_em: string
