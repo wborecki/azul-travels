@@ -38,7 +38,7 @@ export function Header() {
             className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-md"
             activeProps={{ className: "text-primary font-semibold" }}
           >
-            Explorar
+            Explorar destinos
           </Link>
           <Link
             to="/beneficios-tea"
@@ -97,7 +97,7 @@ export function Header() {
                 <Link to="/login">Entrar</Link>
               </Button>
               <Button size="sm" asChild className="bg-primary hover:bg-primary/90">
-                <Link to="/cadastro">Cadastrar</Link>
+                <Link to="/cadastro">Cadastrar grátis</Link>
               </Button>
             </>
           )}

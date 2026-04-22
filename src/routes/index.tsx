@@ -270,16 +270,16 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
         <div className="max-w-3xl mx-auto text-center text-white animate-fade-up">
           <span className="badge-shimmer inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur text-xs font-semibold border border-white/25">
             <Sparkles className="h-3.5 w-3.5 text-amarelo" />
-            Marketplace pioneiro de turismo inclusivo TEA
+            ✦ O 1º marketplace de turismo TEA do Brasil
           </span>
           <h1 className="mt-6 text-4xl md:text-6xl font-display font-extrabold leading-[1.05] text-shadow-soft">
-            Viajar com autismo.
+            Sua família também
             <br />
-            <span className="text-secondary">Com confiança, com conforto, com alegria.</span>
+            <span className="text-secondary">merece viajar.</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            O primeiro marketplace brasileiro que conecta famílias TEA a destinos realmente
-            preparados.
+            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho — antes
+            mesmo de vocês chegarem.
           </p>
 
           {/* Busca */}
@@ -295,7 +295,7 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
               <Input
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Destino, cidade ou tipo de estabelecimento..."
+                placeholder="Para onde sua família quer ir?"
                 className="border-0 shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
                 aria-label="Buscar destinos"
               />
@@ -305,7 +305,7 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
               size="lg"
               className="rounded-xl bg-primary hover:bg-primary/90 px-6"
             >
-              Buscar
+              Buscar destinos
             </Button>
           </form>
 
@@ -331,9 +331,9 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
 
           {/* Indicadores com contador animado */}
           <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
-            <Counter target={247} suffix="" label="Estabelecimentos certificados" />
-            <Counter target={12} suffix="" label="Estados cobertos" />
-            <Counter target={4.8} decimals={1} suffix="★" label="Satisfação das famílias" />
+            <Counter target={247} suffix="" label="Destinos verificados" />
+            <Counter target={12} suffix="" label="Estados do Brasil" />
+            <Counter target={4.8} decimals={1} suffix="★" label="Avaliação média das famílias" />
           </div>
 
           {/* Scroll indicator */}
@@ -384,23 +384,23 @@ function ComoFunciona() {
     {
       n: "01",
       Icon: UserPlus,
-      titulo: "Crie o perfil sensorial",
+      titulo: "Conte sobre o seu filho",
       texto:
-        "Conte-nos sobre as sensibilidades, necessidades e preferências do seu filho. Leva menos de 3 minutos.",
+        "Sensibilidades, preferências, o que funciona e o que não funciona. Leva 3 minutos — e muda completamente como você planeja viagens.",
     },
     {
       n: "02",
       Icon: MapPinned,
-      titulo: "Encontre destinos compatíveis",
+      titulo: "Veja destinos feitos para ele",
       texto:
-        "Nossa plataforma sugere automaticamente hotéis, restaurantes e parques alinhados com o perfil do seu autista.",
+        "Nada de ligar para dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares que estão prontos para receber o seu filho.",
     },
     {
       n: "03",
       Icon: HeartHandshake,
-      titulo: "Reserve com segurança",
+      titulo: "Chegue. Eles já sabem.",
       texto:
-        "O estabelecimento recebe o perfil sensorial antes da sua chegada e se compromete a cuidar da sua família.",
+        "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe. Você chega, eles já estão preparados.",
     },
   ];
 
@@ -409,13 +409,13 @@ function ComoFunciona() {
       <div className="container mx-auto px-4">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Simples e seguro
+            Como funciona
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Como o Turismo Azul funciona?
+            Simples assim. Prometemos.
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Três passos simples para a viagem que sua família merecia.
+            Três passos para a viagem que vocês tanto adiaram.
           </p>
         </Reveal>
 
@@ -466,28 +466,28 @@ function SelosImportantes() {
       cor: "bg-primary text-primary-foreground",
       nome: "Selo Azul",
       descricao:
-        "Absoluto Educacional — equipe treinada em TEA/ABA, mínimo 70% dos colaboradores certificados.",
+        "Emitido pela Absoluto Educacional. Exige que no mínimo 70% da equipe seja treinada em TEA/ABA com metodologia validada. O mais rigoroso do mercado.",
     },
     {
       Icon: Award,
       cor: "bg-success text-success-foreground",
       nome: "Certificação Governamental",
       descricao:
-        "Certificação pública (pós-aprovação PL 4108/2024). Estabelecimentos auditados por órgão federal.",
+        "Certificação pública federal. Passa a valer após a aprovação do PL 4108/2024, com auditoria por órgão governamental independente.",
     },
     {
       Icon: HomeIcon,
       cor: "bg-roxo-suave text-roxo-suave-foreground",
       nome: "Sala Sensorial",
       descricao:
-        "Ambiente físico adaptado, com controle de luz, som e texturas. Projeto validado por especialista TEA.",
+        "Espaço físico dedicado com controle de luz, volume e estímulos. Projeto validado por especialista em TEA. Seu filho tem para onde ir quando precisar.",
     },
     {
       Icon: Heart,
       cor: "bg-secondary text-secondary-foreground",
       nome: "Concierge TEA",
       descricao:
-        "Profissional dedicado ao acolhimento. Presente durante toda a experiência da família no estabelecimento.",
+        "Profissional especializado em autismo presente durante toda a sua estadia. Não é um funcionário treinado — é alguém que entende de verdade.",
     },
   ];
 
@@ -496,13 +496,13 @@ function SelosImportantes() {
       <div className="container mx-auto px-4">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Confiança real
+            Transparência total
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Aqui, cada certificação tem significado real
+            Cada selo que você vê foi ganho de verdade
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Não aceitamos simples declarações. Cada selo é auditado.
+            Qualquer hotel pode dizer que é inclusivo. Aqui, precisa provar.
           </p>
         </Reveal>
 
