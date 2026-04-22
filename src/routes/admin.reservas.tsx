@@ -3,6 +3,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  RESERVA_STATUS,
+  RESERVA_STATUS_LABEL,
+  toReservaStatus,
+  type ReservaStatus,
+} from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +50,6 @@ export const Route = createFileRoute("/admin/reservas")({
   component: AdminReservas,
 });
 
-type ReservaStatus = NonNullable<Tables<"reservas">["status"]>;
-
 type ReservaAdmin = Tables<"reservas"> & {
   estabelecimentos: Pick<
     Tables<"estabelecimentos">,
@@ -59,22 +63,19 @@ type ReservaAdmin = Tables<"reservas"> & {
 
 type Auditoria = Tables<"reservas_auditoria">;
 
+/**
+ * Filtros derivados do enum `reserva_status` — labels vêm de
+ * `RESERVA_STATUS_LABEL` (exhaustive). Adicionar valor novo no banco
+ * inclui o filtro automaticamente.
+ */
 const FILTERS = [
-  { key: "todas", label: "Todas" },
-  { key: "pendente", label: "Pendentes" },
-  { key: "confirmada", label: "Confirmadas" },
-  { key: "cancelada", label: "Canceladas" },
-  { key: "concluida", label: "Concluídas" },
-] as const;
+  { key: "todas", label: "Todas" } as const,
+  ...RESERVA_STATUS.map(
+    (s) => ({ key: s, label: `${RESERVA_STATUS_LABEL[s]}s` }) as const,
+  ),
+] as ReadonlyArray<{ readonly key: "todas" | ReservaStatus; readonly label: string }>;
 
 type FilterKey = (typeof FILTERS)[number]["key"];
-
-const STATUS_LABEL: Record<ReservaStatus, string> = {
-  pendente: "Pendente",
-  confirmada: "Confirmada",
-  cancelada: "Cancelada",
-  concluida: "Concluída",
-};
 
 function AdminReservas() {
   const { user } = useAuth();
@@ -147,7 +148,7 @@ function AdminReservas() {
   const applyAction = async () => {
     if (!confirmAction || !user) return;
     const { reserva, next } = confirmAction;
-    const previous = (reserva.status ?? "pendente") as ReservaStatus;
+    const previous = toReservaStatus(reserva.status, "pendente");
 
     setSavingAction(true);
     const { error: updErr } = await supabase
@@ -185,7 +186,7 @@ function AdminReservas() {
     if (logErr) {
       toast.warning("Status atualizado, mas o log falhou", { description: logErr.message });
     } else {
-      toast.success(`Reserva ${STATUS_LABEL[next].toLowerCase()}`);
+      toast.success(`Reserva ${RESERVA_STATUS_LABEL[next].toLowerCase()}`);
     }
 
     // Atualiza estado local sem refetch completo
