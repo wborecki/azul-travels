@@ -296,20 +296,21 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
   const navigate = useNavigate();
   return (
     <section id="hero" className="relative overflow-hidden">
-      <img
-        src={heroImg}
-        alt="Família brasileira diversa caminhando feliz em uma praia tropical ao entardecer"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ objectPosition: "center 30%" }}
-        width={1920}
-        height={1280}
-      />
-      {/* Overlay azul-navy para garantir contraste com texto branco */}
+      {/* Fundo de marca: gradiente navy → teal + textura SVG sutil */}
       <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232CA8A0' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 50%, #2CA8A0 100%)`,
+        }}
+      />
+      {/* Overlay sutil para profundidade extra na parte inferior (stats) */}
+      <div
+        aria-hidden="true"
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(27, 46, 75, 0.60) 0%, rgba(27, 46, 75, 0.45) 50%, rgba(27, 46, 75, 0.65) 100%)",
+            "linear-gradient(to bottom, rgba(27, 46, 75, 0.15) 0%, rgba(27, 46, 75, 0.05) 40%, rgba(27, 46, 75, 0.45) 100%)",
         }}
       />
 
