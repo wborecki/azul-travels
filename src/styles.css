@@ -54,6 +54,9 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-roxo-suave: var(--roxo-suave);
   --color-roxo-suave-foreground: var(--roxo-suave-foreground);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
 
   --shadow-soft: 0 4px 16px -4px oklch(0.2 0.06 250 / 0.08);
   --shadow-elegant: 0 10px 30px -10px oklch(0.2 0.06 250 / 0.18);
@@ -107,6 +110,11 @@
 
   --roxo-suave: oklch(0.85 0.06 295);
   --roxo-suave-foreground: oklch(0.35 0.1 295);
+
+  /* Footer escuro — gray-900 (#111827) */
+  --footer: oklch(0.21 0.03 260);
+  --footer-foreground: oklch(0.85 0.01 250); /* gray-300 */
+  --footer-muted: oklch(0.62 0.015 250); /* gray-500 */
 
   --chart-1: oklch(0.27 0.06 255);
   --chart-2: oklch(0.66 0.1 195);
@@ -186,6 +194,14 @@
   .gradient-teal {
     background: linear-gradient(135deg, oklch(0.66 0.1 195) 0%, oklch(0.58 0.1 210) 100%);
   }
+  .gradient-cta-final {
+    background: linear-gradient(
+      135deg,
+      oklch(0.27 0.06 255) 0%,
+      oklch(0.45 0.08 220) 50%,
+      oklch(0.66 0.1 195) 100%
+    );
+  }
   .text-shadow-soft {
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
@@ -201,5 +217,62 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Shimmer suave para badges premium (passa luz da esquerda à direita) */
+  .badge-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .badge-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: shimmerSlide 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmerSlide {
+    0% {
+      transform: translateX(-100%);
+    }
+    60%,
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Bounce vertical leve para o scroll indicator do hero */
+  .animate-scroll-hint {
+    animation: scrollHint 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollHint {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translateY(8px);
+      opacity: 1;
+    }
+  }
+
+  /* Linha conectora horizontal do "Como funciona" (apenas md+) */
+  .step-connector {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-secondary) 25%,
+      var(--color-secondary) 75%,
+      transparent 100%
+    );
+    opacity: 0.35;
   }
 }
