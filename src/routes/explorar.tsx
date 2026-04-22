@@ -803,6 +803,18 @@ function Explorar() {
                 {filtrosAtivos > 0 && ` (${filtrosAtivos})`}
               </Button>
               <Button
+                variant="secondary"
+                size="sm"
+                onClick={aplicarNecessidadesComuns}
+                title={
+                  user && Object.values(perfilNecessidades).some(Boolean)
+                    ? "Ativa rapidamente sala sensorial, fila prioritária e CAA — filtrados pelo seu perfil sensorial."
+                    : "Ativa rapidamente sala sensorial, fila prioritária e CAA."
+                }
+              >
+                <Wand2 className="h-4 w-4 mr-1" /> Necessidades mais comuns
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={copiarLink}
