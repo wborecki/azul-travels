@@ -389,6 +389,67 @@ export async function fetchAuditoriaPorReserva(reservaId: string): Promise<Audit
   return data ?? [];
 }
 
+/** Filtros aceitos pela listagem paginada da auditoria de reservas. */
+export interface AuditoriaAdminFilters {
+  /** Busca livre — case-insensitive em `ator_email`, `acao`, `observacao`. */
+  busca?: string;
+  /** ISO inicial (`>=`) de `criado_em`. */
+  desde?: string;
+  /** ISO final (`<=`) de `criado_em`. */
+  ate?: string;
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface AuditoriaAdminPage {
+  items: AuditoriaRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada da auditoria de reservas — uma única ida ao banco
+ * com `count: "exact"`. Filtros de data e busca são server-side.
+ */
+export async function fetchAuditoriaAdminPaginated(
+  filters: AuditoriaAdminFilters = {},
+): Promise<AuditoriaAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("reservas_auditoria")
+    .select("*", { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.desde) q = q.gte("criado_em", filters.desde);
+  if (filters.ate) q = q.lte("criado_em", filters.ate);
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.or(
+      `ator_email.ilike.%${term}%,acao.ilike.%${term}%,observacao.ilike.%${term}%,reserva_id.eq.${isUuid(term) ? term : "00000000-0000-0000-0000-000000000000"}`,
+    );
+  }
+
+  const { data, error, count } = await q.returns<AuditoriaRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
+
+/** Heurística simples — evita injetar termos não-UUID no `eq.` de `reserva_id`. */
+function isUuid(s: string) {
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Perfis sensoriais — listagem rica para `/minha-conta/perfil-sensorial`
 // ─────────────────────────────────────────────────────────────────────────────
