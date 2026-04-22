@@ -33,6 +33,7 @@ import {
   Gift,
   Link as LinkIcon,
   Check as CheckIcon,
+  Sparkles,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
