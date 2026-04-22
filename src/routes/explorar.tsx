@@ -610,7 +610,7 @@ function Explorar() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setPaginaAtual((p) => p + 1);
+          setPaginaAtual((p: number) => p + 1);
         }
       },
       { rootMargin: "200px 0px" },
