@@ -456,4 +456,11 @@ export type __SupabaseTypeGuards = [
   _CheckMediaCapa,
   _CheckMediaTour,
   _CheckNormalizedFeedsMedia,
+  _CheckBuildArgShape,
+  _CheckBuildReturnShape,
+  _CheckFormFamiliaId,
+  _CheckFormEstabId,
+  _CheckFormPerfilId,
+  _CheckFormAdultos,
+  _CheckFormAutistas,
 ];
