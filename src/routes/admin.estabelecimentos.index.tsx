@@ -154,7 +154,10 @@ function AdminEstabelecimentos() {
     }
     toast.success(`"${toDelete.nome}" excluído`);
     setToDelete(null);
-    void load();
+    // Remove localmente e ajusta paginação se a página atual ficou vazia.
+    setRows((rs) => rs.filter((r) => r.id !== toDelete.id));
+    setTotal((t) => Math.max(0, t - 1));
+    if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
   return (
