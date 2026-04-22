@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { EstabCard } from "@/components/EstabCard";
@@ -21,21 +23,72 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, X, Camera, Gift } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  Camera,
+  Gift,
+  Link as LinkIcon,
+  Check as CheckIcon,
+} from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { toast } from "sonner";
 
-interface Search {
-  q?: string;
-  tipo?: string;
-}
+// ──────────────────────────────────────────────────────────────
+// Search schema — fonte da verdade dos filtros persistidos na URL.
+// Cada chip / toggle do painel é refletido aqui.
+// ──────────────────────────────────────────────────────────────
+
+const TIPOS_VALORES = [
+  "hotel",
+  "pousada",
+  "resort",
+  "restaurante",
+  "parque",
+  "atracoes",
+  "agencia",
+  "transporte",
+] as const;
+type EstabTipo = (typeof TIPOS_VALORES)[number];
+
+const SELOS_VALORES = ["selo_azul", "selo_governamental", "selo_privado"] as const;
+const RECURSOS_VALORES = [
+  "tem_sala_sensorial",
+  "tem_concierge_tea",
+  "tem_checkin_antecipado",
+  "tem_fila_prioritaria",
+  "tem_cardapio_visual",
+  "tem_caa",
+] as const;
+const ORDEM_VALORES = ["relevante", "recente", "certificados"] as const;
+
+const searchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  tipos: fallback(z.array(z.enum(TIPOS_VALORES)), []).default([]),
+  selos: fallback(z.array(z.enum(SELOS_VALORES)), []).default([]),
+  recursos: fallback(z.array(z.enum(RECURSOS_VALORES)), []).default([]),
+  estado: fallback(z.string(), "todos").default("todos"),
+  beneficio: fallback(z.boolean(), false).default(false),
+  tour360: fallback(z.boolean(), false).default(false),
+  ordem: fallback(z.enum(ORDEM_VALORES), "relevante").default("relevante"),
+});
+
+const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
+  { v: "hotel", l: "Hotel" },
+  { v: "pousada", l: "Pousada" },
+  { v: "resort", l: "Resort" },
+  { v: "restaurante", l: "Restaurante" },
+  { v: "parque", l: "Parque" },
+  { v: "atracoes", l: "Atrações" },
+  { v: "agencia", l: "Agência" },
+  { v: "transporte", l: "Transporte" },
+];
 
 export const Route = createFileRoute("/explorar")({
-  validateSearch: (s: Record<string, unknown>): Search => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-    tipo: typeof s.tipo === "string" ? s.tipo : undefined,
-  }),
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Explorar destinos — Turismo Azul" },
@@ -49,66 +102,52 @@ export const Route = createFileRoute("/explorar")({
   component: Explorar,
 });
 
-type EstabTipo =
-  | "hotel"
-  | "pousada"
-  | "resort"
-  | "restaurante"
-  | "parque"
-  | "atracoes"
-  | "agencia"
-  | "transporte";
-
-const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
-  { v: "hotel", l: "Hotel" },
-  { v: "pousada", l: "Pousada" },
-  { v: "resort", l: "Resort" },
-  { v: "restaurante", l: "Restaurante" },
-  { v: "parque", l: "Parque" },
-  { v: "atracoes", l: "Atrações" },
-  { v: "agencia", l: "Agência" },
-  { v: "transporte", l: "Transporte" },
-];
-
-const SELOS_LIST: ReadonlyArray<SeloFlag> = [
-  "selo_azul",
-  "selo_governamental",
-  "selo_privado",
-];
-
-const RECURSOS_LIST: ReadonlyArray<RecursoFlag> = [
-  "tem_sala_sensorial",
-  "tem_concierge_tea",
-  "tem_checkin_antecipado",
-  "tem_fila_prioritaria",
-  "tem_cardapio_visual",
-  "tem_caa",
-];
-
 function Explorar() {
-  const { q, tipo } = Route.useSearch();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/explorar" });
   const { user } = useAuth();
 
-  const [busca, setBusca] = useState(q ?? "");
+  // Estado local do input de busca (debouncado antes de virar URL).
+  const [busca, setBusca] = useState(search.q);
   const buscaDebounced = useDebouncedValue(busca, 350);
 
-  const [tipos, setTipos] = useState<EstabTipo[]>(
-    tipo ? [tipo as EstabTipo] : [],
-  );
-  const [selos, setSelos] = useState<SeloFlag[]>([]);
-  const [recursos, setRecursos] = useState<RecursoFlag[]>([]);
-  const [estado, setEstado] = useState<string>("todos");
-  const [beneficio, setBeneficio] = useState(false);
-  const [tour360, setTour360] = useState(false);
-  const [ordem, setOrdem] = useState<"relevante" | "recente" | "certificados">(
-    "relevante",
-  );
+  // Sincroniza input → URL quando o termo "assenta".
+  useEffect(() => {
+    if (buscaDebounced !== search.q) {
+      void navigate({
+        search: (prev) => ({ ...prev, q: buscaDebounced }),
+        replace: true,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscaDebounced]);
+
+  // Se a URL mudar por fora (ex.: link compartilhado), realinha o input.
+  useEffect(() => {
+    if (search.q !== busca && search.q !== buscaDebounced) {
+      setBusca(search.q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.q]);
+
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<
     Record<string, boolean>
   >({});
+
+  // Helper único para atualizar a query string preservando outros params.
+  function patchSearch(patch: Partial<z.infer<typeof searchSchema>>) {
+    void navigate({
+      search: (prev) => ({ ...prev, ...patch }),
+      replace: true,
+    });
+  }
+
+  function toggleInArray<T extends string>(arr: readonly T[], v: T): T[] {
+    return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+  }
 
   // Carrega necessidades do primeiro perfil sensorial da família
   useEffect(() => {
@@ -134,19 +173,19 @@ function Explorar() {
     })();
   }, [user]);
 
-  // Refetch a cada mudança de filtro (busca debouncada)
+  // Refetch a cada mudança de filtro (URL é a fonte da verdade)
   useEffect(() => {
     void (async () => {
       setLoading(true);
 
       const filters: EstabelecimentosViewFilters = {
-        busca: buscaDebounced || undefined,
-        tipos: tipos.length > 0 ? tipos : undefined,
-        selos: selos.length > 0 ? selos : undefined,
-        recursos: recursos.length > 0 ? recursos : undefined,
-        estado: estado !== "todos" ? estado : undefined,
-        apenasComBeneficio: beneficio,
-        apenasComTour360: tour360,
+        busca: search.q || undefined,
+        tipos: search.tipos.length > 0 ? search.tipos : undefined,
+        selos: search.selos.length > 0 ? search.selos : undefined,
+        recursos: search.recursos.length > 0 ? search.recursos : undefined,
+        estado: search.estado !== "todos" ? search.estado : undefined,
+        apenasComBeneficio: search.beneficio,
+        apenasComTour360: search.tour360,
       };
 
       let res = await fetchEstabelecimentosView(filters);
@@ -157,9 +196,9 @@ function Explorar() {
             v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
-      if (ordem === "relevante") {
+      if (search.ordem === "relevante") {
         res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
-      } else if (ordem === "certificados") {
+      } else if (search.ordem === "certificados") {
         const score = (e: EstabelecimentoView) =>
           (e.selo_azul ? 3 : 0) +
           (e.selo_governamental ? 2 : 0) +
@@ -170,55 +209,58 @@ function Explorar() {
       setLoading(false);
     })();
   }, [
-    buscaDebounced,
-    tipos,
-    selos,
-    recursos,
-    estado,
-    beneficio,
-    tour360,
-    ordem,
+    search.q,
+    search.tipos,
+    search.selos,
+    search.recursos,
+    search.estado,
+    search.beneficio,
+    search.tour360,
+    search.ordem,
     perfilNecessidades,
   ]);
 
-  function toggleTipo(v: EstabTipo) {
-    setTipos((arr) =>
-      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
-    );
-  }
-  function toggleSelo(v: SeloFlag) {
-    setSelos((arr) =>
-      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
-    );
-  }
-  function toggleRecurso(v: RecursoFlag) {
-    setRecursos((arr) =>
-      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
-    );
-  }
-
   const limpar = () => {
     setBusca("");
-    setTipos([]);
-    setSelos([]);
-    setRecursos([]);
-    setEstado("todos");
-    setBeneficio(false);
-    setTour360(false);
+    void navigate({
+      search: {
+        q: "",
+        tipos: [],
+        selos: [],
+        recursos: [],
+        estado: "todos",
+        beneficio: false,
+        tour360: false,
+        ordem: "relevante",
+      },
+      replace: true,
+    });
   };
 
   const filtrosAtivos = useMemo(
     () =>
-      tipos.length +
-      selos.length +
-      recursos.length +
-      (estado !== "todos" ? 1 : 0) +
-      (beneficio ? 1 : 0) +
-      (tour360 ? 1 : 0),
-    [tipos, selos, recursos, estado, beneficio, tour360],
+      search.tipos.length +
+      search.selos.length +
+      search.recursos.length +
+      (search.estado !== "todos" ? 1 : 0) +
+      (search.beneficio ? 1 : 0) +
+      (search.tour360 ? 1 : 0),
+    [search.tipos, search.selos, search.recursos, search.estado, search.beneficio, search.tour360],
   );
 
   const buscando = busca !== buscaDebounced;
+  const [copiado, setCopiado] = useState(false);
+
+  async function copiarLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopiado(true);
+      toast.success("Link copiado! Compartilhe os filtros com sua família.");
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar o link.");
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -285,24 +327,28 @@ function Explorar() {
                 {TIPOS.map((t) => (
                   <Chip
                     key={t.v}
-                    active={tipos.includes(t.v)}
-                    onClick={() => toggleTipo(t.v)}
+                    active={search.tipos.includes(t.v)}
+                    onClick={() =>
+                      patchSearch({ tipos: toggleInArray(search.tipos, t.v) })
+                    }
                     label={t.l}
                   />
                 ))}
               </div>
             </FilterGroup>
 
-            {/* Selos como chips com ícone/cor da badge */}
+            {/* Selos */}
             <FilterGroup label="Selos & certificações">
               <div className="flex flex-wrap gap-2">
-                {SELOS_LIST.map((s) => {
+                {SELOS_VALORES.map((s) => {
                   const b = SELO_BADGES[s];
                   return (
                     <ChipBadge
                       key={s}
-                      active={selos.includes(s)}
-                      onClick={() => toggleSelo(s)}
+                      active={search.selos.includes(s)}
+                      onClick={() =>
+                        patchSearch({ selos: toggleInArray(search.selos, s) })
+                      }
                       icon={b.icon}
                       label={b.label}
                       activeClassName={b.className}
@@ -312,16 +358,20 @@ function Explorar() {
               </div>
             </FilterGroup>
 
-            {/* Recursos sensoriais como chips */}
+            {/* Recursos sensoriais */}
             <FilterGroup label="Recursos sensoriais">
               <div className="flex flex-wrap gap-2">
-                {RECURSOS_LIST.map((r) => {
+                {RECURSOS_VALORES.map((r) => {
                   const b = RECURSO_BADGES[r];
                   return (
                     <ChipBadge
                       key={r}
-                      active={recursos.includes(r)}
-                      onClick={() => toggleRecurso(r)}
+                      active={search.recursos.includes(r)}
+                      onClick={() =>
+                        patchSearch({
+                          recursos: toggleInArray(search.recursos, r),
+                        })
+                      }
                       icon={b.icon}
                       label={b.label}
                       activeClassName={b.className}
@@ -337,15 +387,15 @@ function Explorar() {
                 id="tour360"
                 icon={<Camera className="h-4 w-4" />}
                 label="Tour 360° disponível"
-                checked={tour360}
-                onCheckedChange={setTour360}
+                checked={search.tour360}
+                onCheckedChange={(v) => patchSearch({ tour360: v })}
               />
               <ToggleRow
                 id="ben"
                 icon={<Gift className="h-4 w-4" />}
                 label="Possui Benefício TEA"
-                checked={beneficio}
-                onCheckedChange={setBeneficio}
+                checked={search.beneficio}
+                onCheckedChange={(v) => patchSearch({ beneficio: v })}
               />
             </FilterGroup>
 
@@ -353,7 +403,10 @@ function Explorar() {
               <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
                 Estado
               </Label>
-              <Select value={estado} onValueChange={setEstado}>
+              <Select
+                value={search.estado}
+                onValueChange={(v) => patchSearch({ estado: v })}
+              >
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Todos os estados" />
                 </SelectTrigger>
@@ -369,11 +422,7 @@ function Explorar() {
             </div>
 
             {filtrosAtivos > 0 && (
-              <Button
-                variant="outline"
-                onClick={limpar}
-                className="w-full"
-              >
+              <Button variant="outline" onClick={limpar} className="w-full">
                 Limpar filtros ({filtrosAtivos})
               </Button>
             )}
@@ -382,11 +431,9 @@ function Explorar() {
 
         {/* Resultados */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">
-                {list.length}
-              </span>{" "}
+              <span className="font-semibold text-foreground">{list.length}</span>{" "}
               estabelecimentos encontrados
             </p>
             <div className="flex items-center gap-2">
@@ -399,9 +446,27 @@ function Explorar() {
                 <SlidersHorizontal className="h-4 w-4 mr-1" /> Filtros
                 {filtrosAtivos > 0 && ` (${filtrosAtivos})`}
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copiarLink}
+                title="Copiar link com filtros"
+              >
+                {copiado ? (
+                  <>
+                    <CheckIcon className="h-4 w-4 mr-1" /> Copiado
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="h-4 w-4 mr-1" /> Compartilhar
+                  </>
+                )}
+              </Button>
               <Select
-                value={ordem}
-                onValueChange={(v) => setOrdem(v as typeof ordem)}
+                value={search.ordem}
+                onValueChange={(v) =>
+                  patchSearch({ ordem: v as (typeof ORDEM_VALORES)[number] })
+                }
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue />
@@ -415,54 +480,63 @@ function Explorar() {
             </div>
           </div>
 
-          {/* Chips ativos (resumo dos filtros) */}
+          {/* Chips ativos */}
           {filtrosAtivos > 0 && (
             <div className="mb-4 flex flex-wrap gap-2 items-center">
               <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider mr-1">
                 Ativos:
               </span>
-              {tipos.map((t) => {
+              {search.tipos.map((t) => {
                 const def = TIPOS.find((x) => x.v === t);
                 return (
                   <ActiveChip
                     key={`a-t-${t}`}
                     label={def?.l ?? t}
-                    onRemove={() => toggleTipo(t)}
+                    onRemove={() =>
+                      patchSearch({ tipos: toggleInArray(search.tipos, t) })
+                    }
                   />
                 );
               })}
-              {selos.map((s) => (
+              {search.selos.map((s) => (
                 <ActiveChip
                   key={`a-s-${s}`}
                   label={SELO_BADGES[s].label}
-                  onRemove={() => toggleSelo(s)}
+                  onRemove={() =>
+                    patchSearch({ selos: toggleInArray(search.selos, s) })
+                  }
                 />
               ))}
-              {recursos.map((r) => (
+              {search.recursos.map((r) => (
                 <ActiveChip
                   key={`a-r-${r}`}
                   label={RECURSO_BADGES[r].label}
-                  onRemove={() => toggleRecurso(r)}
+                  onRemove={() =>
+                    patchSearch({
+                      recursos: toggleInArray(search.recursos, r),
+                    })
+                  }
                 />
               ))}
-              {estado !== "todos" && (
+              {search.estado !== "todos" && (
                 <ActiveChip
                   label={
-                    ESTADOS_BR.find((e) => e.sigla === estado)?.nome ?? estado
+                    ESTADOS_BR.find((e) => e.sigla === search.estado)?.nome ??
+                    search.estado
                   }
-                  onRemove={() => setEstado("todos")}
+                  onRemove={() => patchSearch({ estado: "todos" })}
                 />
               )}
-              {beneficio && (
+              {search.beneficio && (
                 <ActiveChip
                   label="Benefício TEA"
-                  onRemove={() => setBeneficio(false)}
+                  onRemove={() => patchSearch({ beneficio: false })}
                 />
               )}
-              {tour360 && (
+              {search.tour360 && (
                 <ActiveChip
                   label="Tour 360°"
-                  onRemove={() => setTour360(false)}
+                  onRemove={() => patchSearch({ tour360: false })}
                 />
               )}
             </div>
