@@ -11,8 +11,7 @@ import {
   type PerfilOption,
   type ReservaFormInput,
 } from "@/lib/queries";
-import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
-import { useAvaliacoesPublicasPorEstab } from "@/hooks/useAvaliacoesPublicasPorEstab";
+import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
