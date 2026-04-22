@@ -16,6 +16,7 @@ import {
   type EstabStatus,
 } from "@/lib/enums";
 import { SELO_BADGES, RECURSO_BADGES, Pill } from "@/components/Badges";
+import { EstabAuditoriaList } from "@/components/admin/EstabAuditoriaList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -702,6 +703,16 @@ function AdminEstabelecimentoForm() {
       >
         <FotosGaleria value={form.fotos} onChange={(v) => set("fotos", v)} />
       </Section>
+
+      {/* Histórico de alterações — só faz sentido para registros existentes */}
+      {!isNew && (
+        <Section
+          title="Histórico de alterações"
+          description="Quem editou, quando e o que mudou. Atualizado automaticamente a cada alteração salva."
+        >
+          <EstabAuditoriaList estabelecimentoId={id} />
+        </Section>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button asChild type="button" variant="ghost">
