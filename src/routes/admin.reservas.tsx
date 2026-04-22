@@ -196,6 +196,130 @@ function AdminReservas() {
     setConfirmAction(null);
   };
 
+  // ─── Seleção em lote ───────────────────────────────────────────────
+  const filteredIds = useMemo(() => filtered.map((r) => r.id), [filtered]);
+  const selecionadasNaView = useMemo(
+    () => filteredIds.filter((id) => selecionadas.has(id)),
+    [filteredIds, selecionadas],
+  );
+  const todasNaViewMarcadas =
+    filteredIds.length > 0 && selecionadasNaView.length === filteredIds.length;
+  const algumaNaViewMarcada =
+    selecionadasNaView.length > 0 && selecionadasNaView.length < filteredIds.length;
+
+  const toggleLinha = (id: string, checked: boolean) => {
+    setSelecionadas((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleTodasNaView = (checked: boolean) => {
+    setSelecionadas((prev) => {
+      const next = new Set(prev);
+      if (checked) for (const id of filteredIds) next.add(id);
+      else for (const id of filteredIds) next.delete(id);
+      return next;
+    });
+  };
+
+  const limparSelecao = () => setSelecionadas(new Set());
+
+  /** Reservas selecionadas elegíveis para a transição alvo. */
+  const elegiveisParaBulk = (next: ReservaStatus): ReservaAdmin[] => {
+    const ids = new Set(selecionadas);
+    return rows.filter((r) => {
+      if (!ids.has(r.id)) return false;
+      const cur = r.status ?? "pendente";
+      if (next === "confirmada") return cur === "pendente";
+      if (next === "concluida") return cur === "confirmada";
+      if (next === "cancelada") return cur === "pendente" || cur === "confirmada";
+      return false;
+    });
+  };
+
+  const askBulk = (next: ReservaStatus) => {
+    const elig = elegiveisParaBulk(next);
+    if (elig.length === 0) {
+      toast.info("Nenhuma reserva elegível", {
+        description: `As reservas selecionadas não podem ser ${RESERVA_STATUS_LABEL[next].toLowerCase()}s nesta transição.`,
+      });
+      return;
+    }
+    setBulkObservacao("");
+    setBulkAction({ next, ids: elig.map((r) => r.id) });
+  };
+
+  const applyBulk = async () => {
+    if (!bulkAction || !user) return;
+    const { next, ids } = bulkAction;
+    setSavingBulk(true);
+
+    // Snapshot dos status anteriores antes do update, para o log de auditoria.
+    const previousById = new Map<string, ReservaStatus>(
+      rows
+        .filter((r) => ids.includes(r.id))
+        .map((r) => [r.id, toReservaStatus(r.status, "pendente")]),
+    );
+
+    const { error: updErr } = await supabase
+      .from("reservas")
+      .update({ status: next })
+      .in("id", ids);
+
+    if (updErr) {
+      setSavingBulk(false);
+      toast.error("Falha na atualização em lote", { description: updErr.message });
+      return;
+    }
+
+    const acaoLabel =
+      next === "confirmada"
+        ? "confirmar"
+        : next === "cancelada"
+          ? "cancelar"
+          : next === "concluida"
+            ? "concluir"
+            : "atualizar";
+
+    const obs = bulkObservacao.trim() || null;
+    const auditoriaPayload = ids.map((id) => ({
+      reserva_id: id,
+      ator_id: user.id,
+      ator_email: user.email ?? null,
+      acao: acaoLabel,
+      status_anterior: previousById.get(id) ?? null,
+      status_novo: next,
+      observacao: obs,
+    }));
+
+    const { error: logErr } = await supabase.from("reservas_auditoria").insert(auditoriaPayload);
+
+    setSavingBulk(false);
+
+    if (logErr) {
+      toast.warning(`${ids.length} reserva(s) atualizadas, mas o log falhou`, {
+        description: logErr.message,
+      });
+    } else {
+      toast.success(
+        `${ids.length} reserva(s) ${RESERVA_STATUS_LABEL[next].toLowerCase()}${
+          ids.length > 1 ? "s" : ""
+        }`,
+      );
+    }
+
+    const idSet = new Set(ids);
+    setRows((rs) => rs.map((r) => (idSet.has(r.id) ? { ...r, status: next } : r)));
+    if (selected && idSet.has(selected.id)) {
+      setSelected({ ...selected, status: next });
+    }
+    setSelecionadas(new Set());
+    setBulkAction(null);
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
