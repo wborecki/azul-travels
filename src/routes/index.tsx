@@ -350,19 +350,15 @@ function Hero({
       />
 
       <div className="relative container mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32">
-        <div className="max-w-3xl mx-auto text-center text-white animate-fade-up">
-          <span className="badge-shimmer inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur text-xs font-semibold border border-white/25">
-            <Sparkles className="h-3.5 w-3.5 text-amarelo" />
-            ✦ O 1º marketplace de turismo TEA do Brasil
-          </span>
-          <h1 className="mt-6 text-4xl md:text-6xl font-display font-extrabold leading-[1.05] text-shadow-soft">
+        <div className="max-w-3xl mx-auto text-center text-white animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
             Sua família também
             <br />
             <span className="text-secondary">merece viajar.</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho — antes
-            mesmo de vocês chegarem.
+            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho antes de
+            vocês chegarem.
           </p>
 
           {/* Busca */}
