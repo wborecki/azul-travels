@@ -25,7 +25,6 @@ import { Route as MinhaContaDadosRouteImport } from './routes/minha-conta.dados'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
-import { Route as AdminEstabelecimentosRouteImport } from './routes/admin.estabelecimentos'
 import { Route as AdminConteudoRouteImport } from './routes/admin.conteudo'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 
@@ -110,11 +109,6 @@ const AdminReservasRoute = AdminReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminEstabelecimentosRoute = AdminEstabelecimentosRouteImport.update({
-  id: '/estabelecimentos',
-  path: '/estabelecimentos',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminConteudoRoute = AdminConteudoRouteImport.update({
   id: '/conteudo',
   path: '/conteudo',
@@ -122,9 +116,9 @@ const AdminConteudoRoute = AdminConteudoRouteImport.update({
 } as any)
 const AdminEstabelecimentosIndexRoute =
   AdminEstabelecimentosIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AdminEstabelecimentosRoute,
+    id: '/estabelecimentos/',
+    path: '/estabelecimentos/',
+    getParentRoute: () => AdminRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -136,7 +130,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/admin/conteudo': typeof AdminConteudoRoute
-  '/admin/estabelecimentos': typeof AdminEstabelecimentosRouteWithChildren
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -176,7 +169,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/admin/conteudo': typeof AdminConteudoRoute
-  '/admin/estabelecimentos': typeof AdminEstabelecimentosRouteWithChildren
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -199,7 +191,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/minha-conta'
     | '/admin/conteudo'
-    | '/admin/estabelecimentos'
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
@@ -238,7 +229,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/minha-conta'
     | '/admin/conteudo'
-    | '/admin/estabelecimentos'
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
@@ -378,13 +368,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReservasRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/estabelecimentos': {
-      id: '/admin/estabelecimentos'
-      path: '/estabelecimentos'
-      fullPath: '/admin/estabelecimentos'
-      preLoaderRoute: typeof AdminEstabelecimentosRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/conteudo': {
       id: '/admin/conteudo'
       path: '/conteudo'
@@ -394,39 +377,26 @@ declare module '@tanstack/react-router' {
     }
     '/admin/estabelecimentos/': {
       id: '/admin/estabelecimentos/'
-      path: '/'
+      path: '/estabelecimentos'
       fullPath: '/admin/estabelecimentos/'
       preLoaderRoute: typeof AdminEstabelecimentosIndexRouteImport
-      parentRoute: typeof AdminEstabelecimentosRoute
+      parentRoute: typeof AdminRoute
     }
   }
 }
 
-interface AdminEstabelecimentosRouteChildren {
-  AdminEstabelecimentosIndexRoute: typeof AdminEstabelecimentosIndexRoute
-}
-
-const AdminEstabelecimentosRouteChildren: AdminEstabelecimentosRouteChildren = {
-  AdminEstabelecimentosIndexRoute: AdminEstabelecimentosIndexRoute,
-}
-
-const AdminEstabelecimentosRouteWithChildren =
-  AdminEstabelecimentosRoute._addFileChildren(
-    AdminEstabelecimentosRouteChildren,
-  )
-
 interface AdminRouteChildren {
   AdminConteudoRoute: typeof AdminConteudoRoute
-  AdminEstabelecimentosRoute: typeof AdminEstabelecimentosRouteWithChildren
   AdminReservasRoute: typeof AdminReservasRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminEstabelecimentosIndexRoute: typeof AdminEstabelecimentosIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminConteudoRoute: AdminConteudoRoute,
-  AdminEstabelecimentosRoute: AdminEstabelecimentosRouteWithChildren,
   AdminReservasRoute: AdminReservasRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminEstabelecimentosIndexRoute: AdminEstabelecimentosIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
