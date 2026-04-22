@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { Constants } from "@/integrations/supabase/types";
+import {
+  CONTEUDO_CATEGORIAS,
+  CONTEUDO_CATEGORIA_LABEL,
+} from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +30,8 @@ import { Plus, Search, Pencil, Trash2, ExternalLink, Eye, EyeOff } from "lucide-
 import { toast } from "sonner";
 import { CATEGORIA_LABEL } from "@/lib/conteudo";
 
+import { CATEGORIA_LABEL } from "@/lib/conteudo";
+
 export const Route = createFileRoute("/admin/conteudo/")({
   component: AdminConteudo,
 });
@@ -35,8 +40,6 @@ type Row = Pick<
   Tables<"conteudo_tea">,
   "id" | "titulo" | "slug" | "categoria" | "publicado" | "autor" | "criado_em" | "foto_capa"
 >;
-
-const CATEGORIAS = Constants.public.Enums.conteudo_categoria;
 
 function AdminConteudo() {
   const [rows, setRows] = useState<Row[]>([]);
