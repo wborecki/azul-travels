@@ -108,7 +108,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 7,
     papel: "Mãe",
     texto:
-      "Nunca achei que conseguiríamos viajar de verdade. No hotel que encontramos aqui, o pessoal já sabia do perfil do Enzo antes de chegar. Foi a primeira vez que ele dormiu tranquilo fora de casa.",
+      "A gente nunca achou que ia conseguir viajar. No hotel que encontramos aqui, o pessoal já sabia do perfil do Enzo antes da gente chegar. Foi a primeira vez que ele dormiu tranquilo fora de casa.",
   },
   {
     nome: "Carlos e Renata",
@@ -117,7 +117,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 9,
     papel: "Mãe e Pai",
     texto:
-      "A sala sensorial do resort salvou nossa viagem. Quando ficou muito barulhento na piscina, a Sofia teve um lugar seguro para se reequilibrar. Voltamos mês que vem.",
+      "A sala sensorial do resort salvou nossa viagem. Quando ficou muito barulhento na piscina, a Sofia teve um lugar seguro pra se reequilibrar. Voltamos mês que vem.",
   },
   {
     nome: "Patrícia",
@@ -126,7 +126,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 11,
     papel: "Mãe",
     texto:
-      "Não precisamos mais ligar para 40 hotéis explicando o autismo do João. A plataforma já filtra. Simplesmente funciona.",
+      "A gente não precisa mais ligar pra vários hotéis explicando sobre o João. A plataforma já filtra. Funciona.",
   },
 ];
 
