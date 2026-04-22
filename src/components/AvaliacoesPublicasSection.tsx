@@ -20,7 +20,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAvaliacoesPublicasPorEstab } from "@/hooks/useAvaliacoesPublicasPorEstab";
-import { mapAvaliacoes, type AvaliacaoVM } from "@/lib/queries";
+import {
+  mapAvaliacoes,
+  type AvaliacaoVM,
+  type AvaliacaoCardProps,
+  type ErrorBannerProps,
+  type EmptyBannerProps,
+} from "@/lib/queries";
 
 interface AvaliacoesPublicasSectionProps {
   /** ID do estabelecimento — `null`/`undefined` deixa o hook em "pause". */
