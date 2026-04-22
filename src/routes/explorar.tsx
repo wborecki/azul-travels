@@ -67,19 +67,28 @@ const RECURSOS_VALORES = [
   "tem_caa",
 ] as const;
 /**
- * Critério principal de ordenação. **Não** inclui "perfil sensorial" —
- * isso virou um toggle independente (`priorizarPerfil`) que **se combina**
- * com qualquer um destes critérios em camadas:
+ * Critério principal de ordenação.
  *
- *   1. (opcional) score de compatibilidade com o perfil sensorial — DESC
- *   2. critério principal selecionado abaixo                       — DESC
- *   3. tiebreaker estável: `id`                                     — ASC
+ * - `compatibilidade`: ordena pelo score de compatibilidade com o perfil
+ *   sensorial da família (DESC) como critério **principal**. Fallback
+ *   automático para selos quando não há perfil ou em empate. Escolher
+ *   essa opção também liga `priorizarPerfil` por coerência.
  *
- * Sem o toggle, a ordenação respeita só (2) + (3). Com o toggle ligado
- * mas sem perfil cadastrado, o score é 0 para todos e a ordem cai
- * naturalmente para (2) + (3).
+ * - Os demais critérios (`recomendado`, `certificados`, `recente`,
+ *   `alfabetica`) podem ser **combinados** com o toggle independente
+ *   `priorizarPerfil`, que adiciona o score como pré-camada:
+ *
+ *     1. (opcional) score de compatibilidade — DESC
+ *     2. critério principal selecionado abaixo — DESC/ASC
+ *     3. tiebreaker estável: `id` — ASC
  */
-const ORDEM_VALORES = ["recomendado", "certificados", "recente", "alfabetica"] as const;
+const ORDEM_VALORES = [
+  "compatibilidade",
+  "recomendado",
+  "certificados",
+  "recente",
+  "alfabetica",
+] as const;
 
 /**
  * Defaults dos filtros — fonte única usada por:
