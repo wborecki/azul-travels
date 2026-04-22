@@ -213,6 +213,15 @@ function Explorar() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
+  // Filtro padrão salvo do usuário (1:1) — `null` = ainda não carregou /
+  // não tem registro. Usado para (a) auto-aplicar ao entrar limpo e
+  // (b) decidir se o botão da toolbar diz "Salvar" ou "Limpar padrão".
+  const [filtroPadrao, setFiltroPadrao] = useState<FiltrosPadraoUI | null>(null);
+  const [salvandoPadrao, setSalvandoPadrao] = useState(false);
+  // Garante que a auto-aplicação roda no máximo uma vez por sessão da
+  // rota — sem isso, voltar para `/explorar` "limpo" via Link reaplicaria
+  // os defaults a cada render do efeito.
+  const autoAplicadoRef = useRef(false);
   // Sentinel observado pelo IntersectionObserver — quando entra na
   // viewport, dispara o carregamento da próxima página.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
