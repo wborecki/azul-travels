@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { useEffect, useMemo, useState } from "react";
@@ -67,21 +67,42 @@ const RECURSOS_VALORES = [
 ] as const;
 const ORDEM_VALORES = ["relevante", "recente", "certificados"] as const;
 
+/**
+ * Defaults dos filtros — fonte única usada por:
+ *  1. `searchSchema` (`.default(...)`) — valor inicial quando a URL omite.
+ *  2. `stripSearchParams` — remove da URL params que estão no default,
+ *     deixando links compartilháveis enxutos (ex.: `/explorar?estado=SP`
+ *     em vez de `/explorar?q=&tipos=%5B%5D&estado=SP&...`).
+ *  3. `limpar()` — restaura tudo para o default e a URL volta a ser `/explorar`.
+ */
+const SEARCH_DEFAULTS = {
+  q: "",
+  tipos: [] as EstabTipo[],
+  selos: [] as (typeof SELOS_VALORES)[number][],
+  recursos: [] as (typeof RECURSOS_VALORES)[number][],
+  estado: "todos",
+  beneficio: false,
+  tour360: false,
+  ordem: "relevante" as (typeof ORDEM_VALORES)[number],
+  pagina: 1,
+  tamanhoPagina: ESTAB_PAGE_SIZE_DEFAULT,
+} as const;
+
 const searchSchema = z.object({
-  q: fallback(z.string(), "").default(""),
+  q: fallback(z.string(), SEARCH_DEFAULTS.q).default(SEARCH_DEFAULTS.q),
   tipos: fallback(z.array(z.enum(TIPOS_VALORES)), []).default([]),
   selos: fallback(z.array(z.enum(SELOS_VALORES)), []).default([]),
   recursos: fallback(z.array(z.enum(RECURSOS_VALORES)), []).default([]),
-  estado: fallback(z.string(), "todos").default("todos"),
-  beneficio: fallback(z.boolean(), false).default(false),
-  tour360: fallback(z.boolean(), false).default(false),
-  ordem: fallback(z.enum(ORDEM_VALORES), "relevante").default("relevante"),
+  estado: fallback(z.string(), SEARCH_DEFAULTS.estado).default(SEARCH_DEFAULTS.estado),
+  beneficio: fallback(z.boolean(), SEARCH_DEFAULTS.beneficio).default(SEARCH_DEFAULTS.beneficio),
+  tour360: fallback(z.boolean(), SEARCH_DEFAULTS.tour360).default(SEARCH_DEFAULTS.tour360),
+  ordem: fallback(z.enum(ORDEM_VALORES), SEARCH_DEFAULTS.ordem).default(SEARCH_DEFAULTS.ordem),
   // Paginação tipada — clampada na fetcher (resolvePagination).
-  pagina: fallback(z.number().int().min(1), 1).default(1),
+  pagina: fallback(z.number().int().min(1), SEARCH_DEFAULTS.pagina).default(SEARCH_DEFAULTS.pagina),
   tamanhoPagina: fallback(
     z.number().int().min(1).max(ESTAB_PAGE_SIZE_MAX),
-    ESTAB_PAGE_SIZE_DEFAULT,
-  ).default(ESTAB_PAGE_SIZE_DEFAULT),
+    SEARCH_DEFAULTS.tamanhoPagina,
+  ).default(SEARCH_DEFAULTS.tamanhoPagina),
 });
 
 const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
@@ -97,6 +118,12 @@ const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
 
 export const Route = createFileRoute("/explorar")({
   validateSearch: zodValidator(searchSchema),
+  // Mantém a URL limpa: params iguais ao default não aparecem na barra
+  // de endereços. Compartilhar `/explorar?estado=SP` é equivalente a
+  // visitar `/explorar?q=&tipos=[]&estado=SP&pagina=1&...`.
+  search: {
+    middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+  },
   head: () => ({
     meta: [
       { title: "Explorar destinos — Turismo Azul" },
@@ -251,19 +278,11 @@ function Explorar() {
 
   const limpar = () => {
     setBusca("");
+    // Volta a URL para `/explorar` puro — `stripSearchParams` cuida de
+    // remover qualquer chave que case com SEARCH_DEFAULTS. Mantém o
+    // tamanhoPagina escolhido pelo usuário (preferência da sessão).
     void navigate({
-      search: {
-        q: "",
-        tipos: [],
-        selos: [],
-        recursos: [],
-        estado: "todos",
-        beneficio: false,
-        tour360: false,
-        ordem: "relevante",
-        pagina: 1,
-        tamanhoPagina: search.tamanhoPagina,
-      },
+      search: { ...SEARCH_DEFAULTS, tamanhoPagina: search.tamanhoPagina },
       replace: true,
     });
   };
