@@ -8,6 +8,7 @@ import {
   fetchReservasAdminPaginated,
   fetchReservasAdminStatusCounts,
   fetchAuditoriaPorReserva,
+  fetchUltimaObservacaoPorReservas,
   type ReservaAdminRow,
   type AuditoriaRow,
 } from "@/lib/queries";
@@ -56,6 +57,9 @@ import {
   Calendar,
   Users,
   Download,
+  ChevronDown,
+  ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
