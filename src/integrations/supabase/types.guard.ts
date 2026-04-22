@@ -117,6 +117,14 @@ type _CheckFotosNotAny = AssertNotAny<
   Estab["fotos"],
   "REGRESSION: estabelecimentos.fotos virou `any`"
 >;
+// `fotos` precisa permanecer JSONB nullable — qualquer mudança aqui
+// deve fluir conscientemente até `EstabelecimentoNormalized.fotos`
+// (que normaliza para `string[]`).
+type _CheckFotosShape = AssertEqual<
+  Estab["fotos"],
+  import("./types").Json | null,
+  "REGRESSION: estabelecimentos.fotos deveria continuar Json | null"
+>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. Reserva — payload de insert deve casar com o id do estabelecimento
@@ -407,6 +415,114 @@ type _CheckNormalizedFeedsMedia = AssertEqual<
   "REGRESSION: pickEstabMedia(Normalized) deveria devolver EstabMedia"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. End-to-end de mídia — DB → View → Normalize → pickEstabMedia → UI
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Cobre, em ordem do banco para a UI, a cadeia completa:
+//
+//   Tables<"estabelecimentos">       (banco — JSONB cru)
+//        ↓ ESTAB_VIEW_SELECT
+//   EstabelecimentoView              (listagem/cards)
+//        ↓ normalizeEstabelecimento
+//   EstabelecimentoNormalized        (detalhe — saneado)
+//        ↓ pickEstabMedia
+//   EstabMedia                       (consumo final na UI)
+//
+// Qualquer regressão num link da cadeia (coluna renomeada, View que
+// deixa de selecionar Tour 360°, normalize que não sanitiza mais a
+// capa, helper que muda o shape) trava o build aqui.
+
+import { ESTAB_VIEW_SELECT, normalizeEstabelecimento, pickMediaFromView } from "@/lib/queries";
+import { normalizeFotos, normalizeUrl, type EstabMediaRow } from "@/lib/media";
+
+// 9.1 — Cobertura de SELECT: a View precisa carregar todos os campos
+// de mídia exigidos pela UI (capa + Tour 360°). Galeria fica fora da
+// View por design (carregada só no detalhe), mas se um dia for
+// adicionada, este check vai garantir que o tipo bate.
+type ViewKeys = keyof EstabelecimentoView;
+type _CheckViewHasFotoCapa = AssertEqual<
+  Extract<ViewKeys, "foto_capa">,
+  "foto_capa",
+  "REGRESSION: EstabelecimentoView perdeu a coluna foto_capa"
+>;
+type _CheckViewHasTour360 = AssertEqual<
+  Extract<ViewKeys, "tour_360_url">,
+  "tour_360_url",
+  "REGRESSION: EstabelecimentoView perdeu a coluna tour_360_url"
+>;
+
+// O literal do SELECT em runtime tem que mencionar exatamente as
+// colunas de mídia — sem isso o Supabase devolveria `undefined` em
+// produção mesmo com tipos OK.
+type SelectLiteral = typeof ESTAB_VIEW_SELECT;
+type _CheckSelectMentionsCapa = SelectLiteral extends `${string}foto_capa${string}`
+  ? true
+  : "REGRESSION: ESTAB_VIEW_SELECT não inclui foto_capa";
+type _CheckSelectMentionsTour = SelectLiteral extends `${string}tour_360_url${string}`
+  ? true
+  : "REGRESSION: ESTAB_VIEW_SELECT não inclui tour_360_url";
+
+// 9.2 — Normalize: shape de saída precisa expor mídia já saneada.
+type NormalizeReturn = ReturnType<typeof normalizeEstabelecimento>;
+type _CheckNormalizeFotosShape = AssertEqual<
+  NormalizeReturn["fotos"],
+  string[],
+  "REGRESSION: normalizeEstabelecimento.fotos deveria ser string[]"
+>;
+type _CheckNormalizeCapaShape = AssertEqual<
+  NormalizeReturn["foto_capa"],
+  string | null,
+  "REGRESSION: normalizeEstabelecimento.foto_capa quebrou"
+>;
+type _CheckNormalizeTourShape = AssertEqual<
+  NormalizeReturn["tour_360_url"],
+  string | null,
+  "REGRESSION: normalizeEstabelecimento.tour_360_url quebrou"
+>;
+// Detalhe.estabelecimento DEVE ser exatamente o shape normalizado
+// (nada de versão "quase igual" escapando para a UI).
+type _CheckDetalheUsesNormalize = AssertEqual<
+  EstabelecimentoDetalhe["estabelecimento"],
+  NormalizeReturn,
+  "REGRESSION: EstabelecimentoDetalhe.estabelecimento divergiu do retorno de normalizeEstabelecimento"
+>;
+
+// 9.3 — Helpers brutos: contratos individuais usados pelo admin form.
+type _CheckNormalizeFotosFn = AssertEqual<
+  ReturnType<typeof normalizeFotos>,
+  string[],
+  "REGRESSION: normalizeFotos deveria devolver string[]"
+>;
+type _CheckNormalizeUrlFn = AssertEqual<
+  ReturnType<typeof normalizeUrl>,
+  string | null,
+  "REGRESSION: normalizeUrl deveria devolver string | null"
+>;
+
+// 9.4 — Compatibilidade dos consumidores com o helper único.
+// Tanto `EstabelecimentoView` (cards/embeds) quanto `EstabelecimentoNormalized`
+// (detalhe) precisam ser aceitos por `pickEstabMedia` — caso contrário a
+// UI volta a acessar `row.fotos`/`row.foto_capa` direto e perde a sanitização.
+type _CheckViewIsMediaRow = EstabelecimentoView extends EstabMediaRow
+  ? true
+  : "REGRESSION: EstabelecimentoView não satisfaz EstabMediaRow — pickEstabMedia rejeitaria cards";
+type _CheckNormalizedIsMediaRow = EstabelecimentoNormalized extends EstabMediaRow
+  ? true
+  : "REGRESSION: EstabelecimentoNormalized não satisfaz EstabMediaRow";
+type _CheckFullIsMediaRow = Tables<"estabelecimentos"> extends EstabMediaRow
+  ? true
+  : "REGRESSION: Tables<estabelecimentos> não satisfaz EstabMediaRow — admin form quebra";
+
+// 9.5 — `pickMediaFromView` (atalho exportado para cards/embeds) precisa
+// devolver o mesmo `EstabMedia` que `pickEstabMedia(detalhe)`.
+type _CheckPickFromViewShape = AssertEqual<
+  ReturnType<typeof pickMediaFromView>,
+  EstabMedia,
+  "REGRESSION: pickMediaFromView divergiu de EstabMedia — cards e detalhe sairiam de sincronia"
+>;
+
+
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
   _CheckRowNotAny,
@@ -463,4 +579,19 @@ export type __SupabaseTypeGuards = [
   _CheckFormPerfilId,
   _CheckFormAdultos,
   _CheckFormAutistas,
+  _CheckFotosShape,
+  _CheckViewHasFotoCapa,
+  _CheckViewHasTour360,
+  _CheckSelectMentionsCapa,
+  _CheckSelectMentionsTour,
+  _CheckNormalizeFotosShape,
+  _CheckNormalizeCapaShape,
+  _CheckNormalizeTourShape,
+  _CheckDetalheUsesNormalize,
+  _CheckNormalizeFotosFn,
+  _CheckNormalizeUrlFn,
+  _CheckViewIsMediaRow,
+  _CheckNormalizedIsMediaRow,
+  _CheckFullIsMediaRow,
+  _CheckPickFromViewShape,
 ];
