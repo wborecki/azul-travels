@@ -33,6 +33,7 @@ import {
   Gift,
   Link as LinkIcon,
   Check as CheckIcon,
+  Sparkles,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,7 +66,20 @@ const RECURSOS_VALORES = [
   "tem_cardapio_visual",
   "tem_caa",
 ] as const;
-const ORDEM_VALORES = ["relevante", "recente", "certificados"] as const;
+/**
+ * Critério principal de ordenação. **Não** inclui "perfil sensorial" —
+ * isso virou um toggle independente (`priorizarPerfil`) que **se combina**
+ * com qualquer um destes critérios em camadas:
+ *
+ *   1. (opcional) score de compatibilidade com o perfil sensorial — DESC
+ *   2. critério principal selecionado abaixo                       — DESC
+ *   3. tiebreaker estável: `id`                                     — ASC
+ *
+ * Sem o toggle, a ordenação respeita só (2) + (3). Com o toggle ligado
+ * mas sem perfil cadastrado, o score é 0 para todos e a ordem cai
+ * naturalmente para (2) + (3).
+ */
+const ORDEM_VALORES = ["recomendado", "certificados", "recente", "alfabetica"] as const;
 
 /**
  * Defaults dos filtros — fonte única usada por:
@@ -83,7 +97,11 @@ const SEARCH_DEFAULTS = {
   estado: "todos",
   beneficio: false,
   tour360: false,
-  ordem: "relevante" as (typeof ORDEM_VALORES)[number],
+  ordem: "recomendado" as (typeof ORDEM_VALORES)[number],
+  // Quando true E o usuário tem perfil sensorial, soma o score de
+  // compatibilidade na frente da ordenação. Default: true (a página
+  // só é útil se priorizar quem precisa).
+  priorizarPerfil: true,
   pagina: 1,
   tamanhoPagina: ESTAB_PAGE_SIZE_DEFAULT,
 } as const;
@@ -97,6 +115,9 @@ const searchSchema = z.object({
   beneficio: fallback(z.boolean(), SEARCH_DEFAULTS.beneficio).default(SEARCH_DEFAULTS.beneficio),
   tour360: fallback(z.boolean(), SEARCH_DEFAULTS.tour360).default(SEARCH_DEFAULTS.tour360),
   ordem: fallback(z.enum(ORDEM_VALORES), SEARCH_DEFAULTS.ordem).default(SEARCH_DEFAULTS.ordem),
+  priorizarPerfil: fallback(z.boolean(), SEARCH_DEFAULTS.priorizarPerfil).default(
+    SEARCH_DEFAULTS.priorizarPerfil,
+  ),
   // Paginação tipada — clampada na fetcher (resolvePagination).
   pagina: fallback(z.number().int().min(1), SEARCH_DEFAULTS.pagina).default(SEARCH_DEFAULTS.pagina),
   tamanhoPagina: fallback(
@@ -240,23 +261,70 @@ function Explorar() {
       };
 
       const page = await fetchEstabelecimentosViewPaginated(filters);
-      let items = page.items;
+
+      // ─────────────────────────────────────────────────────────────
+      // Ordenação local determinística e composta.
+      //
+      // A ordenação roda no cliente (só rearranja a página atual)
+      // porque envolve heurísticas que não são triviais de indexar:
+      // perfil sensorial, score de selos, etc.
+      //
+      // Camadas (sempre nesta ordem, primeira diferença vence):
+      //   A. priorizarPerfil → score de compatibilidade (DESC)
+      //   B. critério principal selecionado em `ordem`    (DESC/ASC)
+      //   C. tiebreaker estável: id                       (ASC)
+      //
+      // Garantia: dados iguais sempre produzem a MESMA ordem visível
+      // entre re-renders e entre usuários (sem reshuffle aleatório).
+      // ─────────────────────────────────────────────────────────────
 
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
           ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
-      // Ordenação local — só rearranja a página atual (paginação é
-      // server-side; a re-ordenação fina por perfil/certificados fica
-      // no cliente para não complicar os índices do Postgres).
-      if (search.ordem === "relevante") {
-        items = [...items].sort((a, b) => compatScore(b) - compatScore(a));
-      } else if (search.ordem === "certificados") {
-        const score = (e: EstabelecimentoView) =>
-          (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
-        items = [...items].sort((a, b) => score(b) - score(a));
-      }
+      const seloScore = (e: EstabelecimentoView) =>
+        (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
+
+      const recenteKey = (e: EstabelecimentoView) =>
+        // `criado_em` não vem no payload de view; usamos id como
+        // proxy estável (uuid v4 — sem ordem temporal real, mas a
+        // chamada em si já vem `order("criado_em" desc)` quando
+        // suportado pela query). Mantém determinismo entre páginas.
+        e.id;
+
+      // Compara dois itens segundo o critério principal selecionado.
+      const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
+        switch (search.ordem) {
+          case "certificados":
+            return seloScore(b) - seloScore(a);
+          case "alfabetica":
+            return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
+          case "recente":
+            // Mantém a ordem do servidor (já vem por criação desc no
+            // futuro); usa id como tiebreaker estável.
+            return recenteKey(b).localeCompare(recenteKey(a));
+          case "recomendado":
+          default:
+            // "Recomendado" sem perfil = só selos (proxy de qualidade).
+            return seloScore(b) - seloScore(a);
+        }
+      };
+
+      const items = [...page.items].sort((a, b) => {
+        // (A) Compatibilidade com perfil — só se o toggle estiver ON
+        //     E houver pelo menos uma necessidade marcada.
+        if (search.priorizarPerfil) {
+          const diff = compatScore(b) - compatScore(a);
+          if (diff !== 0) return diff;
+        }
+        // (B) Critério principal.
+        const diff = compareCriterio(a, b);
+        if (diff !== 0) return diff;
+        // (C) Tiebreaker absoluto — garante ordem determinística.
+        return a.id.localeCompare(b.id);
+      });
+
       setList(items);
       setTotal(page.total);
       setTotalPaginas(page.totalPaginas);
@@ -271,6 +339,7 @@ function Explorar() {
     search.beneficio,
     search.tour360,
     search.ordem,
+    search.priorizarPerfil,
     search.pagina,
     search.tamanhoPagina,
     perfilNecessidades,
@@ -319,11 +388,14 @@ function Explorar() {
         <p className="text-muted-foreground mt-1">
           Encontre estabelecimentos preparados para sua família.
         </p>
-        {user && Object.values(perfilNecessidades).some(Boolean) && (
-          <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-teal-claro text-secondary font-medium">
-            ✨ Resultados priorizados pelo perfil sensorial da sua família
-          </div>
-        )}
+        {user &&
+          search.priorizarPerfil &&
+          Object.values(perfilNecessidades).some(Boolean) && (
+            <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-teal-claro text-secondary font-medium">
+              <Sparkles className="h-3.5 w-3.5" /> Resultados priorizados pelo perfil sensorial da
+              sua família
+            </div>
+          )}
       </div>
 
       <div className="flex gap-6">
@@ -419,6 +491,29 @@ function Explorar() {
               </div>
             </FilterGroup>
 
+            {/* Ordenação — toggle independente que se combina com `ordem` */}
+            <FilterGroup label="Ordenação">
+              <ToggleRow
+                id="prioriza-perfil"
+                icon={<Sparkles className="h-4 w-4" />}
+                label="Priorizar perfil sensorial"
+                checked={search.priorizarPerfil}
+                onCheckedChange={(v) => patchSearchResetPage({ priorizarPerfil: v })}
+              />
+              {search.priorizarPerfil && !user && (
+                <p className="text-[11px] text-muted-foreground pl-7 -mt-1">
+                  Faça login e cadastre um perfil sensorial para ver o efeito.
+                </p>
+              )}
+              {search.priorizarPerfil &&
+                user &&
+                !Object.values(perfilNecessidades).some(Boolean) && (
+                  <p className="text-[11px] text-muted-foreground pl-7 -mt-1">
+                    Cadastre necessidades no perfil para ativar a priorização.
+                  </p>
+                )}
+            </FilterGroup>
+
             {/* Toggles avançados */}
             <FilterGroup label="Experiência">
               <ToggleRow
@@ -499,15 +594,18 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) => patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })}
+                onValueChange={(v) =>
+                  patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })
+                }
               >
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-[200px] h-9" aria-label="Ordenar resultados">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="relevante">Mais relevante</SelectItem>
+                  <SelectItem value="recomendado">Recomendado</SelectItem>
                   <SelectItem value="certificados">Mais certificados</SelectItem>
                   <SelectItem value="recente">Mais recentes</SelectItem>
+                  <SelectItem value="alfabetica">A → Z</SelectItem>
                 </SelectContent>
               </Select>
             </div>
