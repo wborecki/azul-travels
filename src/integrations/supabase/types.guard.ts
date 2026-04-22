@@ -123,6 +123,37 @@ type _CheckReservaFamiliaId = AssertEqual<
   "REGRESSION: reservas.familia_id e familia_profiles.id divergiram"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type {
+  AvaliacaoComFamilia,
+} from "@/lib/queries/avaliacoes";
+import { fetchAvaliacoesPublicasPorEstab } from "@/lib/queries/avaliacoes";
+
+type FetchReturn = Awaited<ReturnType<typeof fetchAvaliacoesPublicasPorEstab>>;
+type FetchRow = FetchReturn[number];
+
+type _CheckFetchNotAny = AssertNotAny<
+  FetchRow,
+  "REGRESSION: fetchAvaliacoesPublicasPorEstab retorna `any`"
+>;
+type _CheckFetchNotUnknown = AssertNotUnknown<
+  FetchRow,
+  "REGRESSION: fetchAvaliacoesPublicasPorEstab retorna `unknown`"
+>;
+type _CheckFetchShape = AssertEqual<
+  FetchRow,
+  AvaliacaoComFamilia,
+  "REGRESSION: fetchAvaliacoesPublicasPorEstab divergiu de AvaliacaoComFamilia"
+>;
+type _CheckFetchEmbed = AssertEqual<
+  NonNullable<FetchRow["familia_profiles"]>["nome_responsavel"],
+  string | null,
+  "REGRESSION: familia_profiles.nome_responsavel no payload da função quebrou"
+>;
+
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
   _CheckRowNotAny,
@@ -136,4 +167,9 @@ export type __SupabaseTypeGuards = [
   _CheckFotosNotAny,
   _CheckReservaEstabId,
   _CheckReservaFamiliaId,
+  _CheckFetchNotAny,
+  _CheckFetchNotUnknown,
+  _CheckFetchShape,
+  _CheckFetchEmbed,
 ];
+

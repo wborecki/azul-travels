@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,9 +22,7 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 interface PerfilOpt { id: string; nome_autista: string }
 
 type Estab = Tables<"estabelecimentos">;
-type Avaliacao = Tables<"avaliacoes"> & {
-  familia_profiles: { nome_responsavel: string | null } | null;
-};
+type Avaliacao = AvaliacaoComFamilia;
 
 function EstabPage() {
   const { slug } = Route.useParams();
@@ -49,13 +48,8 @@ function EstabPage() {
       const { data } = await supabase.from("estabelecimentos").select("*").eq("slug", slug).maybeSingle();
       setEstab(data ?? null);
       if (data) {
-        const { data: a } = await supabase
-          .from("avaliacoes")
-          .select("*, familia_profiles(nome_responsavel)")
-          .eq("estabelecimento_id", data.id)
-          .eq("publica", true)
-          .order("criado_em", { ascending: false });
-        setAvals(a ?? []);
+        const a = await fetchAvaliacoesPublicasPorEstab(data.id);
+        setAvals(a);
       }
       setLoading(false);
     })();
