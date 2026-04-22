@@ -393,6 +393,141 @@ function AdminReservas() {
     void refreshCounts();
   };
 
+  // ─── Exportação CSV ────────────────────────────────────────────────
+  /**
+   * Escapa um valor para CSV (RFC 4180): wrappa em aspas se contém
+   * vírgula, aspas, quebra de linha ou ponto-e-vírgula. Aspas duplas
+   * internas viram `""`.
+   */
+  const csvCell = (v: unknown): string => {
+    if (v === null || v === undefined) return "";
+    const s = typeof v === "string" ? v : String(v);
+    if (/[",;\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+
+  const fmtData = (iso: string | null | undefined): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("pt-BR");
+  };
+
+  const fmtDataHora = (iso: string | null | undefined): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString("pt-BR");
+  };
+
+  const exportarCSV = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      // Busca TODAS as páginas que casam com os filtros atuais.
+      const PAGE_SIZE = 100; // máx aceito por fetchReservasAdminPaginated
+      const HARD_CAP = 10_000; // proteção contra exportações absurdas
+      const all: ReservaAdmin[] = [];
+      let page = 1;
+      let totalDoServidor = 0;
+
+      while (all.length < HARD_CAP) {
+        const result = await fetchReservasAdminPaginated({
+          pagina: page,
+          tamanhoPagina: PAGE_SIZE,
+          status: filter === "todas" ? undefined : filter,
+          busca: qDebounced.trim() || undefined,
+          checkinDe: checkinDe || undefined,
+          checkinAte: checkinAte || undefined,
+          criadoDe: criadoDe || undefined,
+          criadoAte: criadoAte || undefined,
+        });
+        totalDoServidor = result.total;
+        all.push(...result.items);
+        if (page >= result.totalPaginas || result.items.length === 0) break;
+        page += 1;
+      }
+
+      if (all.length === 0) {
+        toast.info("Nenhuma reserva para exportar com os filtros atuais.");
+        return;
+      }
+
+      const headers = [
+        "ID",
+        "Status",
+        "Criada em",
+        "Check-in",
+        "Check-out",
+        "Nº adultos",
+        "Nº autistas",
+        "Mensagem",
+        "Estabelecimento",
+        "Tipo do estabelecimento",
+        "Cidade do estabelecimento",
+        "Estado do estabelecimento",
+        "Família — responsável",
+        "Família — e-mail",
+        "Família — telefone",
+        "Família — cidade",
+        "Família — estado",
+        "Perfil sensorial enviado",
+      ];
+
+      const lines = all.map((r) => {
+        const status = toReservaStatus(r.status, "pendente");
+        return [
+          r.id,
+          RESERVA_STATUS_LABEL[status],
+          fmtDataHora(r.criado_em),
+          fmtData(r.data_checkin),
+          fmtData(r.data_checkout),
+          r.num_adultos ?? "",
+          r.num_autistas ?? "",
+          r.mensagem ?? "",
+          r.estabelecimentos?.nome ?? "",
+          r.estabelecimentos?.tipo ?? "",
+          r.estabelecimentos?.cidade ?? "",
+          r.estabelecimentos?.estado ?? "",
+          r.familia_profiles?.nome_responsavel ?? "",
+          r.familia_profiles?.email ?? "",
+          r.familia_profiles?.telefone ?? "",
+          r.familia_profiles?.cidade ?? "",
+          r.familia_profiles?.estado ?? "",
+          r.perfil_enviado_ao_estabelecimento ? "Sim" : "Não",
+        ]
+          .map(csvCell)
+          .join(",");
+      });
+
+      // BOM \uFEFF garante que o Excel abra acentos corretamente.
+      const csv =
+        "\uFEFF" + headers.map(csvCell).join(",") + "\n" + lines.join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `reservas-${ts}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      const truncado = totalDoServidor > all.length;
+      toast.success(
+        `Exportadas ${all.length} reserva(s)${truncado ? ` de ${totalDoServidor} (limite atingido)` : ""}.`,
+      );
+    } catch (err) {
+      toast.error("Falha ao exportar CSV", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
