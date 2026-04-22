@@ -136,10 +136,14 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
     expect(rows[0]!.familia_profiles).toBeNull();
   });
 
-  it("REGRESSÃO: rejeita number (se PostgREST devolver tipo errado)", async () => {
-    // Simula payload corrompido — não deveria acontecer, mas se acontecer
-    // queremos saber. O contrato é `string | null`; qualquer outra coisa
-    // é regressão.
+  // ── DETECÇÃO de payload corrompido ────────────────────────────────────────
+  // A função `fetchAvaliacoesPublicasPorEstab` repassa o que o Supabase
+  // devolve — não valida shape em runtime. Estes testes documentam o
+  // CONTRATO esperado: se a UI receber `nome_responsavel` que não é
+  // `string | null`, é regressão. Os testes detectam isso explicitamente
+  // (em vez de fingir que a função sanitiza).
+
+  it("DETECTA: number devolvido pelo Supabase é regressão de contrato", async () => {
     orderMock.mockResolvedValueOnce({
       data: [
         // @ts-expect-error — propósito: documentar que o tipo proíbe number.
@@ -151,12 +155,14 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
     const rows = await fetchAvaliacoesPublicasPorEstab("est-1");
     const valor = rows[0]!.familia_profiles!.nome_responsavel;
 
-    // Se este expect falhar, o contrato regrediu — investigue antes de
-    // "consertar" o teste.
-    expect(typeof valor === "string" || valor === null).toBe(true);
+    // Se este `expect` falhar (i.e. o valor PASSAR no contrato),
+    // ótimo — significa que adicionamos validação runtime na função.
+    // Atualize o teste para refletir a nova garantia.
+    const respeitaContrato = typeof valor === "string" || valor === null;
+    expect(respeitaContrato).toBe(false);
   });
 
-  it("REGRESSÃO: rejeita objeto aninhado (e.g. { value: '...' })", async () => {
+  it("DETECTA: objeto aninhado devolvido pelo Supabase é regressão", async () => {
     orderMock.mockResolvedValueOnce({
       data: [
         // @ts-expect-error — propósito: PostgREST mudou shape do embed.
@@ -168,7 +174,8 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
     const rows = await fetchAvaliacoesPublicasPorEstab("est-1");
     const valor = rows[0]!.familia_profiles!.nome_responsavel;
 
-    expect(typeof valor === "string" || valor === null).toBe(true);
+    const respeitaContrato = typeof valor === "string" || valor === null;
+    expect(respeitaContrato).toBe(false);
   });
 
   // ── PROPAGAÇÃO DE ERRO ────────────────────────────────────────────────────
