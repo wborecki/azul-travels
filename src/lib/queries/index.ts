@@ -5,8 +5,10 @@
  *
  *   import {
  *     fetchEstabelecimentoPorSlug,
+ *     fetchEstabelecimentosView,
  *     fetchAvaliacoesPublicasPorEstab,
- *     type Estabelecimento,
+ *     type EstabelecimentoView,
+ *     type EstabelecimentoFull,
  *     type AvaliacaoComFamilia,
  *   } from "@/lib/queries";
  *
@@ -22,9 +24,14 @@ export {
 
 export {
   fetchEstabelecimentoPorSlug,
-  fetchEstabelecimentosCards,
-  type Estabelecimento,
-  type EstabelecimentoCard,
+  fetchEstabelecimentosView,
+  fetchEstabelecimentosCards, // deprecated alias
+  ESTAB_VIEW_SELECT,
+  type EstabelecimentoFull,
+  type EstabelecimentoView,
+  type EstabelecimentosViewFilters,
+  type Estabelecimento, // deprecated alias
+  type EstabelecimentoCard, // deprecated alias
 } from "./estabelecimentos";
 
 export {
