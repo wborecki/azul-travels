@@ -230,6 +230,14 @@ function AdminConteudo() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        <QuickEditPopover
+                          row={r}
+                          onSaved={(patch) =>
+                            setRows((rs) =>
+                              rs.map((x) => (x.id === r.id ? { ...x, ...patch } : x)),
+                            )
+                          }
+                        />
                         <Button
                           size="sm"
                           variant="ghost"
@@ -262,7 +270,8 @@ function AdminConteudo() {
                           size="sm"
                           variant="ghost"
                           className="h-8 px-2"
-                          aria-label="Editar"
+                          aria-label="Editar completo"
+                          title="Editar completo"
                         >
                           <Link to="/admin/conteudo/$id" params={{ id: r.id }}>
                             <Pencil className="h-4 w-4" />
