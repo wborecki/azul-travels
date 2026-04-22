@@ -143,7 +143,7 @@ function AdminConteudo() {
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">Conteúdo TEA</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {loading ? "Carregando..." : `${filtered.length} de ${rows.length} artigo(s)`}
+            {loading ? "Carregando..." : `${total} artigo(s)`}
           </p>
         </div>
         <Button asChild className="gap-2">
