@@ -107,6 +107,7 @@ export type {
 // Toda leitura admin importa daqui (writes ficam inline nas rotas).
 export {
   fetchEstabelecimentosAdmin,
+  fetchEstabelecimentosAdminView,
   fetchEstabelecimentoAdminPorId,
   fetchConteudosAdmin,
   fetchConteudoAdminPorId,
@@ -114,7 +115,9 @@ export {
   fetchAuditoriaPorReserva,
   fetchPerfisSensoriaisDaFamilia,
   fetchAdminCounts,
+  ESTAB_ADMIN_VIEW_SELECT,
   type EstabAdminRow,
+  type EstabelecimentoAdminView,
   type ConteudoAdminRow,
   type ReservaAdminRow,
   type AuditoriaRow,
