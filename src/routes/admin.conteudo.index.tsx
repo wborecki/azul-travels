@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchConteudosAdmin, type ConteudoAdminRow } from "@/lib/queries";
+import { fetchConteudosAdminPaginated, type ConteudoAdminRow } from "@/lib/queries";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 import {
   CONTEUDO_CATEGORIAS,
   CONTEUDO_CATEGORIA_LABEL,
