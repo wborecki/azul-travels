@@ -48,13 +48,21 @@ function EstabPage() {
   useEffect(() => {
     void (async () => {
       setLoading(true);
-      const { data } = await supabase.from("estabelecimentos").select("*").eq("slug", slug).maybeSingle();
-      setEstab(data ?? null);
-      if (data) {
-        const a = await fetchAvaliacoesPublicasPorEstab(data.id);
-        setAvals(a);
+      try {
+        const data = await fetchEstabelecimentoPorSlug(slug);
+        setEstab(data);
+        if (data) {
+          const a = await fetchAvaliacoesPublicasPorEstab(data.id);
+          setAvals(a);
+        }
+      } catch (err) {
+        toast.error("Erro ao carregar estabelecimento", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+        setEstab(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, [slug]);
 
