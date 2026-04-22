@@ -84,6 +84,11 @@ function AdminLayout() {
             icon={<FileText className="h-4 w-4" />}
             label="Conteúdo TEA"
           />
+          <NavItem
+            to="/admin/auditoria"
+            icon={<History className="h-4 w-4" />}
+            label="Auditoria"
+          />
         </div>
       </aside>
       <div className="min-w-0">
