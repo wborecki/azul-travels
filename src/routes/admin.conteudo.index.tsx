@@ -44,6 +44,7 @@ import {
   Loader2,
   Zap,
   Copy,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBrtDateTime } from "@/lib/agendamentoConteudo";

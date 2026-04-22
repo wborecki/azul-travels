@@ -30,6 +30,7 @@ import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 import { Route as AdminConteudoIndexRouteImport } from './routes/admin.conteudo.index'
 import { Route as AdminEstabelecimentosIdRouteImport } from './routes/admin.estabelecimentos.$id'
+import { Route as AdminConteudoAnalyticsRouteImport } from './routes/admin.conteudo.analytics'
 import { Route as AdminConteudoIdRouteImport } from './routes/admin.conteudo.$id'
 import { Route as AdminEstabelecimentosIdPreviewRouteImport } from './routes/admin.estabelecimentos.$id.preview'
 
@@ -140,6 +141,11 @@ const AdminEstabelecimentosIdRoute = AdminEstabelecimentosIdRouteImport.update({
   path: '/estabelecimentos/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminConteudoAnalyticsRoute = AdminConteudoAnalyticsRouteImport.update({
+  id: '/conteudo/analytics',
+  path: '/conteudo/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConteudoIdRoute = AdminConteudoIdRouteImport.update({
   id: '/conteudo/$id',
   path: '/conteudo/$id',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/conteudo/': typeof ConteudoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
+  '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/conteudo': typeof ConteudoIndexRoute
   '/minha-conta': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
+  '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/admin/conteudo': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos': typeof AdminEstabelecimentosIndexRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/conteudo/': typeof ConteudoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
+  '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/conteudo/'
     | '/minha-conta/'
     | '/admin/conteudo/$id'
+    | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/conteudo'
     | '/minha-conta'
     | '/admin/conteudo/$id'
+    | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/admin/conteudo'
     | '/admin/estabelecimentos'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/conteudo/'
     | '/minha-conta/'
     | '/admin/conteudo/$id'
+    | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
@@ -465,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEstabelecimentosIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/conteudo/analytics': {
+      id: '/admin/conteudo/analytics'
+      path: '/conteudo/analytics'
+      fullPath: '/admin/conteudo/analytics'
+      preLoaderRoute: typeof AdminConteudoAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/conteudo/$id': {
       id: '/admin/conteudo/$id'
       path: '/conteudo/$id'
@@ -501,6 +520,7 @@ interface AdminRouteChildren {
   AdminReservasRoute: typeof AdminReservasRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminConteudoIdRoute: typeof AdminConteudoIdRoute
+  AdminConteudoAnalyticsRoute: typeof AdminConteudoAnalyticsRoute
   AdminEstabelecimentosIdRoute: typeof AdminEstabelecimentosIdRouteWithChildren
   AdminConteudoIndexRoute: typeof AdminConteudoIndexRoute
   AdminEstabelecimentosIndexRoute: typeof AdminEstabelecimentosIndexRoute
@@ -511,6 +531,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReservasRoute: AdminReservasRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminConteudoIdRoute: AdminConteudoIdRoute,
+  AdminConteudoAnalyticsRoute: AdminConteudoAnalyticsRoute,
   AdminEstabelecimentosIdRoute: AdminEstabelecimentosIdRouteWithChildren,
   AdminConteudoIndexRoute: AdminConteudoIndexRoute,
   AdminEstabelecimentosIndexRoute: AdminEstabelecimentosIndexRoute,
