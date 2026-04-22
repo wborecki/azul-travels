@@ -12,9 +12,7 @@ export type PerfilSensorialInsert = TablesInsert<"perfil_sensorial">;
 export type PerfilOption = Pick<PerfilSensorial, "id" | "nome_autista">;
 
 /** Lista os perfis sensoriais de uma família (forma leve para selects). */
-export async function fetchPerfisDaFamilia(
-  familiaId: string,
-): Promise<PerfilOption[]> {
+export async function fetchPerfisDaFamilia(familiaId: string): Promise<PerfilOption[]> {
   const { data, error } = await supabase
     .from("perfil_sensorial")
     .select("id, nome_autista")
@@ -27,9 +25,7 @@ export async function fetchPerfisDaFamilia(
 }
 
 /** Lista completa de perfis (para edição em /minha-conta/perfil-sensorial). */
-export async function fetchPerfisCompletos(
-  familiaId: string,
-): Promise<PerfilSensorial[]> {
+export async function fetchPerfisCompletos(familiaId: string): Promise<PerfilSensorial[]> {
   const { data, error } = await supabase
     .from("perfil_sensorial")
     .select("*")

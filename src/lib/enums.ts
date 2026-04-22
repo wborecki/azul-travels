@@ -29,8 +29,7 @@ export type EstabStatus = Database["public"]["Enums"]["estab_status"];
 export type ReservaStatus = Database["public"]["Enums"]["reserva_status"];
 export type TeaNivel = Database["public"]["Enums"]["tea_nivel"];
 export type AppRole = Database["public"]["Enums"]["app_role"];
-export type ConteudoCategoria =
-  Database["public"]["Enums"]["conteudo_categoria"];
+export type ConteudoCategoria = Database["public"]["Enums"]["conteudo_categoria"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Listas (readonly tuples) — use em forms, filtros, validações Zod
@@ -147,10 +146,7 @@ export function toReservaStatus<F extends ReservaStatus | undefined>(
 ): ReservaStatus | F {
   return isReservaStatus(v) ? v : fallback;
 }
-export function toTeaNivel<F extends TeaNivel | undefined>(
-  v: unknown,
-  fallback: F,
-): TeaNivel | F {
+export function toTeaNivel<F extends TeaNivel | undefined>(v: unknown, fallback: F): TeaNivel | F {
   return isTeaNivel(v) ? v : fallback;
 }
 
@@ -172,10 +168,7 @@ function makeOptions<T extends string>(
 
 export const ESTAB_TIPO_OPTIONS = makeOptions(ESTAB_TIPOS, ESTAB_TIPO_LABEL);
 export const ESTAB_STATUS_OPTIONS = makeOptions(ESTAB_STATUS, ESTAB_STATUS_LABEL);
-export const RESERVA_STATUS_OPTIONS = makeOptions(
-  RESERVA_STATUS,
-  RESERVA_STATUS_LABEL,
-);
+export const RESERVA_STATUS_OPTIONS = makeOptions(RESERVA_STATUS, RESERVA_STATUS_LABEL);
 export const TEA_NIVEL_OPTIONS = makeOptions(TEA_NIVEIS, TEA_NIVEL_LABEL);
 export const CONTEUDO_CATEGORIA_OPTIONS = makeOptions(
   CONTEUDO_CATEGORIAS,

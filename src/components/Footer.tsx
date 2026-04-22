@@ -17,17 +17,41 @@ export function Footer() {
         <div>
           <h4 className="font-display font-semibold mb-3 text-white">Plataforma</h4>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><Link to="/explorar" className="hover:text-secondary">Explorar</Link></li>
-            <li><Link to="/beneficios-tea" className="hover:text-secondary">Benefícios TEA</Link></li>
-            <li><Link to="/conteudo" className="hover:text-secondary">Conteúdo TEA</Link></li>
+            <li>
+              <Link to="/explorar" className="hover:text-secondary">
+                Explorar
+              </Link>
+            </li>
+            <li>
+              <Link to="/beneficios-tea" className="hover:text-secondary">
+                Benefícios TEA
+              </Link>
+            </li>
+            <li>
+              <Link to="/conteudo" className="hover:text-secondary">
+                Conteúdo TEA
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
           <h4 className="font-display font-semibold mb-3 text-white">Famílias</h4>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><Link to="/cadastro" className="hover:text-secondary">Cadastre-se</Link></li>
-            <li><Link to="/login" className="hover:text-secondary">Entrar</Link></li>
-            <li><Link to="/minha-conta" className="hover:text-secondary">Minha conta</Link></li>
+            <li>
+              <Link to="/cadastro" className="hover:text-secondary">
+                Cadastre-se
+              </Link>
+            </li>
+            <li>
+              <Link to="/login" className="hover:text-secondary">
+                Entrar
+              </Link>
+            </li>
+            <li>
+              <Link to="/minha-conta" className="hover:text-secondary">
+                Minha conta
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

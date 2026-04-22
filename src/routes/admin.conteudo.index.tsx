@@ -2,10 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import {
-  CONTEUDO_CATEGORIAS,
-  CONTEUDO_CATEGORIA_LABEL,
-} from "@/lib/enums";
+import { CONTEUDO_CATEGORIAS, CONTEUDO_CATEGORIA_LABEL } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,20 +188,12 @@ function AdminConteudo() {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden shrink-0 border">
                           {r.foto_capa ? (
-                            <img
-                              src={r.foto_capa}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={r.foto_capa} alt="" className="w-full h-full object-cover" />
                           ) : null}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-medium text-foreground truncate">
-                            {r.titulo}
-                          </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            /{r.slug}
-                          </div>
+                          <div className="font-medium text-foreground truncate">{r.titulo}</div>
+                          <div className="text-xs text-muted-foreground truncate">/{r.slug}</div>
                         </div>
                       </div>
                     </td>
@@ -288,8 +277,8 @@ function AdminConteudo() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir artigo?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação removerá permanentemente <strong>{toDelete?.titulo}</strong>. Não
-              pode ser desfeita.
+              Esta ação removerá permanentemente <strong>{toDelete?.titulo}</strong>. Não pode ser
+              desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

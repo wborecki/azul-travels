@@ -220,10 +220,7 @@ function AdminConteudoForm() {
       toast.success("Artigo criado");
       navigate({ to: "/admin/conteudo/$id", params: { id: data.id } });
     } else {
-      const { error } = await supabase
-        .from("conteudo_tea")
-        .update(payload)
-        .eq("id", id);
+      const { error } = await supabase.from("conteudo_tea").update(payload).eq("id", id);
       setSaving(false);
       if (error) {
         toast.error("Erro ao salvar", { description: error.message });
@@ -268,11 +265,7 @@ function AdminConteudoForm() {
             </Button>
           )}
           <Button type="submit" disabled={saving} className="gap-2">
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isNew ? "Criar" : "Salvar"}
           </Button>
         </div>
@@ -283,10 +276,7 @@ function AdminConteudoForm() {
         <div className="lg:col-span-2 space-y-6">
           <Section title="Conteúdo">
             <Field label="Título" error={errors.titulo} required>
-              <Input
-                value={form.titulo}
-                onChange={(e) => onTituloChange(e.target.value)}
-              />
+              <Input value={form.titulo} onChange={(e) => onTituloChange(e.target.value)} />
             </Field>
             <Field
               label="Slug"
@@ -340,9 +330,7 @@ function AdminConteudoForm() {
                   Publicado
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  {form.publicado
-                    ? "Visível no site público"
-                    : "Apenas no painel admin"}
+                  {form.publicado ? "Visível no site público" : "Apenas no painel admin"}
                 </p>
               </div>
               <Switch
@@ -356,10 +344,7 @@ function AdminConteudoForm() {
               <Select
                 value={form.categoria || "none"}
                 onValueChange={(v) =>
-                  set(
-                    "categoria",
-                    v === "none" ? "" : isConteudoCategoria(v) ? v : "",
-                  )
+                  set("categoria", v === "none" ? "" : isConteudoCategoria(v) ? v : "")
                 }
               >
                 <SelectTrigger>
@@ -389,11 +374,7 @@ function AdminConteudoForm() {
             <div className="space-y-3">
               <div className="aspect-[16/10] rounded-xl border bg-muted overflow-hidden flex items-center justify-center">
                 {form.foto_capa ? (
-                  <img
-                    src={form.foto_capa}
-                    alt="Capa"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={form.foto_capa} alt="Capa" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-xs text-muted-foreground">Sem capa</span>
                 )}
@@ -403,9 +384,7 @@ function AdminConteudoForm() {
                 value={form.foto_capa}
                 onChange={(e) => set("foto_capa", e.target.value)}
               />
-              {errors.foto_capa && (
-                <p className="text-xs text-destructive">{errors.foto_capa}</p>
-              )}
+              {errors.foto_capa && <p className="text-xs text-destructive">{errors.foto_capa}</p>}
               <div className="flex items-center gap-2">
                 <input
                   ref={fileRef}
@@ -455,11 +434,7 @@ function AdminConteudoForm() {
           <Link to="/admin/conteudo">Cancelar</Link>
         </Button>
         <Button type="submit" disabled={saving} className="gap-2">
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isNew ? "Criar artigo" : "Salvar alterações"}
         </Button>
       </div>
@@ -469,13 +444,7 @@ function AdminConteudoForm() {
 
 /* ---------------- helpers ---------------- */
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="bg-card border rounded-2xl p-5 sm:p-6">
       <h2 className="text-lg font-display font-semibold text-foreground mb-4">{title}</h2>

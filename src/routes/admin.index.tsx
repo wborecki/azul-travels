@@ -42,9 +42,7 @@ function AdminDashboard() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-display font-bold text-foreground">
-          Visão geral
-        </h1>
+        <h1 className="text-3xl font-display font-bold text-foreground">Visão geral</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Resumo do marketplace e atalhos para gestão.
         </p>
@@ -78,9 +76,7 @@ function AdminDashboard() {
       </div>
 
       <section className="bg-card border rounded-2xl p-6">
-        <h2 className="text-lg font-display font-semibold text-foreground">
-          Atalhos rápidos
-        </h2>
+        <h2 className="text-lg font-display font-semibold text-foreground">Atalhos rápidos</h2>
         <div className="mt-4 grid sm:grid-cols-3 gap-3">
           <ShortcutLink to="/admin/estabelecimentos" label="Gerenciar estabelecimentos" />
           <ShortcutLink to="/admin/reservas" label="Revisar reservas" />

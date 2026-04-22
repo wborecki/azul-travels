@@ -51,9 +51,7 @@ type AssertNotUnknown<T, Msg extends string> = unknown extends T
 
 /** Falha o build se A e B não forem exatamente o mesmo tipo. */
 type AssertEqual<A, B, Msg extends string> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-    ? A
-    : Msg;
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? A : Msg;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. Join avaliacoes ↔ familia_profiles deve ser tipado
@@ -79,10 +77,7 @@ type _CheckRowNotUnknown = AssertNotUnknown<
 
 // O campo embutido `familia_profiles` precisa existir e expor `nome_responsavel: string | null`.
 type FamiliaEmbed = AvaliacaoRow["familia_profiles"];
-type _CheckEmbedNotAny = AssertNotAny<
-  FamiliaEmbed,
-  "REGRESSION: familia_profiles embed is `any`"
->;
+type _CheckEmbedNotAny = AssertNotAny<FamiliaEmbed, "REGRESSION: familia_profiles embed is `any`">;
 type _CheckEmbedShape = AssertEqual<
   NonNullable<FamiliaEmbed>["nome_responsavel"],
   string | null,
@@ -144,9 +139,7 @@ type _CheckReservaFamiliaId = AssertEqual<
 // 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type {
-  AvaliacaoComFamilia,
-} from "@/lib/queries/avaliacoes";
+import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { fetchAvaliacoesPublicasPorEstab } from "@/lib/queries/avaliacoes";
 
 type FetchReturn = Awaited<ReturnType<typeof fetchAvaliacoesPublicasPorEstab>>;
@@ -197,32 +190,90 @@ type CriarReservaReturn = Awaited<ReturnType<typeof criarReserva>>;
 type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisDaFamilia>>[number];
 
 // Cada função precisa retornar shape concreto, nunca any/unknown.
-type _CheckEstabNotAny = AssertNotAny<EstabReturn, "REGRESSION: fetchEstabelecimentoPorSlug -> any">;
+type _CheckEstabNotAny = AssertNotAny<
+  EstabReturn,
+  "REGRESSION: fetchEstabelecimentoPorSlug -> any"
+>;
 // Após a normalização, o retorno é EstabelecimentoNormalized (não Full).
-type _CheckEstabShape = AssertEqual<EstabReturn, EstabelecimentoNormalized, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoNormalized">;
+type _CheckEstabShape = AssertEqual<
+  EstabReturn,
+  EstabelecimentoNormalized,
+  "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoNormalized"
+>;
 // Garantias do shape normalizado — UI não precisa mais lidar com Json/cast.
-type _CheckEstabFotos = AssertEqual<EstabReturn["fotos"], string[], "REGRESSION: Normalized.fotos deveria ser string[]">;
-type _CheckEstabTour = AssertEqual<EstabReturn["tour_360_url"], string | null, "REGRESSION: Normalized.tour_360_url quebrou">;
-type _CheckEstabCapa = AssertEqual<EstabReturn["foto_capa"], string | null, "REGRESSION: Normalized.foto_capa quebrou">;
-type _CheckEstabLat = AssertEqual<EstabReturn["latitude"], number | null, "REGRESSION: Normalized.latitude quebrou">;
-type _CheckEstabLng = AssertEqual<EstabReturn["longitude"], number | null, "REGRESSION: Normalized.longitude quebrou">;
+type _CheckEstabFotos = AssertEqual<
+  EstabReturn["fotos"],
+  string[],
+  "REGRESSION: Normalized.fotos deveria ser string[]"
+>;
+type _CheckEstabTour = AssertEqual<
+  EstabReturn["tour_360_url"],
+  string | null,
+  "REGRESSION: Normalized.tour_360_url quebrou"
+>;
+type _CheckEstabCapa = AssertEqual<
+  EstabReturn["foto_capa"],
+  string | null,
+  "REGRESSION: Normalized.foto_capa quebrou"
+>;
+type _CheckEstabLat = AssertEqual<
+  EstabReturn["latitude"],
+  number | null,
+  "REGRESSION: Normalized.latitude quebrou"
+>;
+type _CheckEstabLng = AssertEqual<
+  EstabReturn["longitude"],
+  number | null,
+  "REGRESSION: Normalized.longitude quebrou"
+>;
 // Normalized continua compatível com Full em campos invariantes.
-type _CheckEstabIdMatchesFull = AssertEqual<EstabReturn["id"], EstabelecimentoFull["id"], "REGRESSION: Normalized.id divergiu de Full.id">;
+type _CheckEstabIdMatchesFull = AssertEqual<
+  EstabReturn["id"],
+  EstabelecimentoFull["id"],
+  "REGRESSION: Normalized.id divergiu de Full.id"
+>;
 
 // Payload View unificado — usado em listagem, cards, destaques, benefícios.
 type _CheckViewNotAny = AssertNotAny<ViewReturn, "REGRESSION: fetchEstabelecimentosView -> any">;
-type _CheckViewShape = AssertEqual<ViewReturn, EstabelecimentoView, "REGRESSION: fetchEstabelecimentosView divergiu de EstabelecimentoView">;
+type _CheckViewShape = AssertEqual<
+  ViewReturn,
+  EstabelecimentoView,
+  "REGRESSION: fetchEstabelecimentosView divergiu de EstabelecimentoView"
+>;
 
 // Garante que campos críticos da View existem com tipo certo.
-type _CheckViewTour360 = AssertEqual<ViewReturn["tour_360_url"], string | null, "REGRESSION: View.tour_360_url quebrou">;
-type _CheckViewSeloAzul = AssertEqual<ViewReturn["selo_azul"], boolean | null, "REGRESSION: View.selo_azul quebrou">;
-type _CheckViewBeneficio = AssertEqual<ViewReturn["beneficio_tea_descricao"], string | null, "REGRESSION: View.beneficio_tea_descricao quebrou">;
+type _CheckViewTour360 = AssertEqual<
+  ViewReturn["tour_360_url"],
+  string | null,
+  "REGRESSION: View.tour_360_url quebrou"
+>;
+type _CheckViewSeloAzul = AssertEqual<
+  ViewReturn["selo_azul"],
+  boolean | null,
+  "REGRESSION: View.selo_azul quebrou"
+>;
+type _CheckViewBeneficio = AssertEqual<
+  ViewReturn["beneficio_tea_descricao"],
+  string | null,
+  "REGRESSION: View.beneficio_tea_descricao quebrou"
+>;
 type _CheckViewSlug = AssertEqual<ViewReturn["slug"], string, "REGRESSION: View.slug quebrou">;
 // View deve ser estritamente subset de Full — IDs precisam casar.
-type _CheckViewIdMatchesFull = AssertEqual<ViewReturn["id"], EstabelecimentoFull["id"], "REGRESSION: View.id e Full.id divergiram">;
+type _CheckViewIdMatchesFull = AssertEqual<
+  ViewReturn["id"],
+  EstabelecimentoFull["id"],
+  "REGRESSION: View.id e Full.id divergiram"
+>;
 
-type _CheckReservasNotAny = AssertNotAny<ReservasReturn, "REGRESSION: fetchReservasDaFamilia -> any">;
-type _CheckReservasShape = AssertEqual<ReservasReturn, ReservaComContexto, "REGRESSION: fetchReservasDaFamilia divergiu de ReservaComContexto">;
+type _CheckReservasNotAny = AssertNotAny<
+  ReservasReturn,
+  "REGRESSION: fetchReservasDaFamilia -> any"
+>;
+type _CheckReservasShape = AssertEqual<
+  ReservasReturn,
+  ReservaComContexto,
+  "REGRESSION: fetchReservasDaFamilia divergiu de ReservaComContexto"
+>;
 type _CheckReservasEmbedEstab = AssertEqual<
   NonNullable<ReservasReturn["estabelecimentos"]>["slug"],
   string,
@@ -234,10 +285,18 @@ type _CheckReservasEmbedPerfil = AssertEqual<
   "REGRESSION: perfil_sensorial.nome_autista embutido em reserva quebrou"
 >;
 
-type _CheckCriarReservaShape = AssertEqual<CriarReservaReturn, Tables<"reservas">, "REGRESSION: criarReserva divergiu de Tables<reservas>">;
+type _CheckCriarReservaShape = AssertEqual<
+  CriarReservaReturn,
+  Tables<"reservas">,
+  "REGRESSION: criarReserva divergiu de Tables<reservas>"
+>;
 
 type _CheckPerfisNotAny = AssertNotAny<PerfisReturn, "REGRESSION: fetchPerfisDaFamilia -> any">;
-type _CheckPerfisShape = AssertEqual<PerfisReturn, PerfilOption, "REGRESSION: fetchPerfisDaFamilia divergiu de PerfilOption">;
+type _CheckPerfisShape = AssertEqual<
+  PerfisReturn,
+  PerfilOption,
+  "REGRESSION: fetchPerfisDaFamilia divergiu de PerfilOption"
+>;
 
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
@@ -279,4 +338,3 @@ export type __SupabaseTypeGuards = [
   _CheckPerfisNotAny,
   _CheckPerfisShape,
 ];
-

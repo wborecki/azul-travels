@@ -94,8 +94,7 @@ export const Route = createFileRoute("/explorar")({
       { title: "Explorar destinos — Turismo Azul" },
       {
         name: "description",
-        content:
-          "Encontre hotéis, restaurantes e parques realmente preparados para famílias TEA.",
+        content: "Encontre hotéis, restaurantes e parques realmente preparados para famílias TEA.",
       },
     ],
   }),
@@ -135,9 +134,7 @@ function Explorar() {
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [perfilNecessidades, setPerfilNecessidades] = useState<
-    Record<string, boolean>
-  >({});
+  const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
 
   // Helper único para atualizar a query string preservando outros params.
   function patchSearch(patch: Partial<ExplorarSearch>) {
@@ -150,7 +147,6 @@ function Explorar() {
   function toggleInArray<T extends string>(arr: readonly T[], v: T): T[] {
     return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
   }
-
 
   // Carrega necessidades do primeiro perfil sensorial da família
   useEffect(() => {
@@ -195,17 +191,14 @@ function Explorar() {
 
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
-          ([k, v]) =>
-            v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
+          ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
       if (search.ordem === "relevante") {
         res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
       } else if (search.ordem === "certificados") {
         const score = (e: EstabelecimentoView) =>
-          (e.selo_azul ? 3 : 0) +
-          (e.selo_governamental ? 2 : 0) +
-          (e.selo_privado ? 1 : 0);
+          (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
         res = [...res].sort((a, b) => score(b) - score(a));
       }
       setList(res);
@@ -268,9 +261,7 @@ function Explorar() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-display font-bold text-primary">
-          Explorar destinos
-        </h1>
+        <h1 className="text-3xl font-display font-bold text-primary">Explorar destinos</h1>
         <p className="text-muted-foreground mt-1">
           Encontre estabelecimentos preparados para sua família.
         </p>
@@ -285,19 +276,13 @@ function Explorar() {
         {/* Painel de filtros */}
         <aside
           className={`${
-            showFilters
-              ? "fixed inset-0 z-50 bg-background overflow-y-auto p-6"
-              : "hidden"
+            showFilters ? "fixed inset-0 z-50 bg-background overflow-y-auto p-6" : "hidden"
           } md:relative md:block md:w-80 md:p-0 md:bg-transparent shrink-0`}
         >
           <div className="md:sticky md:top-20 space-y-6">
             <div className="flex items-center justify-between md:hidden">
               <h2 className="font-display font-bold">Filtros avançados</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowFilters(false)}
-              >
+              <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -331,9 +316,7 @@ function Explorar() {
                   <Chip
                     key={t.v}
                     active={search.tipos.includes(t.v)}
-                    onClick={() =>
-                      patchSearch({ tipos: toggleInArray(search.tipos, t.v) })
-                    }
+                    onClick={() => patchSearch({ tipos: toggleInArray(search.tipos, t.v) })}
                     label={t.l}
                   />
                 ))}
@@ -349,9 +332,7 @@ function Explorar() {
                     <ChipBadge
                       key={s}
                       active={search.selos.includes(s)}
-                      onClick={() =>
-                        patchSearch({ selos: toggleInArray(search.selos, s) })
-                      }
+                      onClick={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
                       icon={b.icon}
                       label={b.label}
                       activeClassName={b.className}
@@ -406,10 +387,7 @@ function Explorar() {
               <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
                 Estado
               </Label>
-              <Select
-                value={search.estado}
-                onValueChange={(v) => patchSearch({ estado: v })}
-              >
+              <Select value={search.estado} onValueChange={(v) => patchSearch({ estado: v })}>
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Todos os estados" />
                 </SelectTrigger>
@@ -436,8 +414,8 @@ function Explorar() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{list.length}</span>{" "}
-              estabelecimentos encontrados
+              <span className="font-semibold text-foreground">{list.length}</span> estabelecimentos
+              encontrados
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -467,9 +445,7 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) =>
-                  patchSearch({ ordem: v as (typeof ORDEM_VALORES)[number] })
-                }
+                onValueChange={(v) => patchSearch({ ordem: v as (typeof ORDEM_VALORES)[number] })}
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue />
@@ -495,9 +471,7 @@ function Explorar() {
                   <ActiveChip
                     key={`a-t-${t}`}
                     label={def?.l ?? t}
-                    onRemove={() =>
-                      patchSearch({ tipos: toggleInArray(search.tipos, t) })
-                    }
+                    onRemove={() => patchSearch({ tipos: toggleInArray(search.tipos, t) })}
                   />
                 );
               })}
@@ -505,9 +479,7 @@ function Explorar() {
                 <ActiveChip
                   key={`a-s-${s}`}
                   label={SELO_BADGES[s].label}
-                  onRemove={() =>
-                    patchSearch({ selos: toggleInArray(search.selos, s) })
-                  }
+                  onRemove={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
                 />
               ))}
               {search.recursos.map((r: (typeof RECURSOS_VALORES)[number]) => (
@@ -523,10 +495,7 @@ function Explorar() {
               ))}
               {search.estado !== "todos" && (
                 <ActiveChip
-                  label={
-                    ESTADOS_BR.find((e) => e.sigla === search.estado)?.nome ??
-                    search.estado
-                  }
+                  label={ESTADOS_BR.find((e) => e.sigla === search.estado)?.nome ?? search.estado}
                   onRemove={() => patchSearch({ estado: "todos" })}
                 />
               )}
@@ -537,10 +506,7 @@ function Explorar() {
                 />
               )}
               {search.tour360 && (
-                <ActiveChip
-                  label="Tour 360°"
-                  onRemove={() => patchSearch({ tour360: false })}
-                />
+                <ActiveChip label="Tour 360°" onRemove={() => patchSearch({ tour360: false })} />
               )}
             </div>
           )}
@@ -548,10 +514,7 @@ function Explorar() {
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-[4/3] rounded-2xl bg-muted animate-pulse"
-                />
+                <div key={i} className="aspect-[4/3] rounded-2xl bg-muted animate-pulse" />
               ))}
             </div>
           ) : list.length === 0 ? (
@@ -560,9 +523,7 @@ function Explorar() {
               <p className="mt-4 font-display font-semibold text-lg text-primary">
                 Nenhum estabelecimento encontrado
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Tente ajustar os filtros.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros.</p>
               <Button variant="outline" onClick={limpar} className="mt-4">
                 Limpar filtros
               </Button>
@@ -581,8 +542,8 @@ function Explorar() {
                 Quer resultados personalizados?
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Crie um perfil sensorial gratuito e veja os destinos mais
-                compatíveis com sua família.
+                Crie um perfil sensorial gratuito e veja os destinos mais compatíveis com sua
+                família.
               </p>
               <Button asChild className="mt-4">
                 <Link to="/cadastro">Criar perfil</Link>
@@ -595,13 +556,7 @@ function Explorar() {
   );
 }
 
-function FilterGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
@@ -612,15 +567,7 @@ function FilterGroup({
   );
 }
 
-function Chip({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
+function Chip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       type="button"
@@ -682,10 +629,7 @@ function ToggleRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 py-1">
-      <Label
-        htmlFor={id}
-        className="flex items-center gap-2 text-sm font-normal cursor-pointer"
-      >
+      <Label htmlFor={id} className="flex items-center gap-2 text-sm font-normal cursor-pointer">
         <span className="text-muted-foreground">{icon}</span>
         {label}
       </Label>
@@ -694,13 +638,7 @@ function ToggleRow({
   );
 }
 
-function ActiveChip({
-  label,
-  onRemove,
-}: {
-  label: string;
-  onRemove: () => void;
-}) {
+function ActiveChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-muted text-foreground border border-border">
       {label}

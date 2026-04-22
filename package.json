@@ -9,6 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun run lint",
+    "check:estab": "tsc --noEmit && eslint src/routes/estabelecimento.\\$slug.tsx src/lib/queries/estabelecimentos.ts src/lib/queries/reservas.ts src/lib/queries/perfis.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

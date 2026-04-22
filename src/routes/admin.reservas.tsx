@@ -70,9 +70,7 @@ type Auditoria = Tables<"reservas_auditoria">;
  */
 const FILTERS = [
   { key: "todas", label: "Todas" } as const,
-  ...RESERVA_STATUS.map(
-    (s) => ({ key: s, label: `${RESERVA_STATUS_LABEL[s]}s` }) as const,
-  ),
+  ...RESERVA_STATUS.map((s) => ({ key: s, label: `${RESERVA_STATUS_LABEL[s]}s` }) as const),
 ] as ReadonlyArray<{ readonly key: "todas" | ReservaStatus; readonly label: string }>;
 
 type FilterKey = (typeof FILTERS)[number]["key"];
@@ -296,9 +294,7 @@ function AdminReservas() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-foreground/80">
-                      {r.data_checkin
-                        ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
-                        : "—"}
+                      {r.data_checkin ? new Date(r.data_checkin).toLocaleDateString("pt-BR") : "—"}
                     </td>
                     <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
                       {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
@@ -306,10 +302,7 @@ function AdminReservas() {
                     <td className="px-4 py-3">
                       <ReservaStatusBadge status={r.status} />
                     </td>
-                    <td
-                      className="px-4 py-3"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <RowActions reserva={r} onAction={askAction} />
                     </td>
                   </tr>
@@ -324,10 +317,7 @@ function AdminReservas() {
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           {selected && (
-            <DetalheReserva
-              reserva={selected}
-              onAction={(next) => askAction(selected, next)}
-            />
+            <DetalheReserva reserva={selected} onAction={(next) => askAction(selected, next)} />
           )}
         </SheetContent>
       </Sheet>
@@ -340,16 +330,14 @@ function AdminReservas() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmAction
-                ? `${verboLabel(confirmAction.next)} reserva?`
-                : "Confirmar ação"}
+              {confirmAction ? `${verboLabel(confirmAction.next)} reserva?` : "Confirmar ação"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmAction && (
                 <>
                   Esta ação atualizará o status para{" "}
-                  <strong>{RESERVA_STATUS_LABEL[confirmAction.next]}</strong> e ficará registrada
-                  no log de auditoria.
+                  <strong>{RESERVA_STATUS_LABEL[confirmAction.next]}</strong> e ficará registrada no
+                  log de auditoria.
                 </>
               )}
             </AlertDialogDescription>
@@ -490,9 +478,7 @@ function DetalheReserva({
     <>
       <SheetHeader className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <SheetTitle className="text-xl font-display">
-            {est?.nome ?? "Reserva"}
-          </SheetTitle>
+          <SheetTitle className="text-xl font-display">{est?.nome ?? "Reserva"}</SheetTitle>
           <ReservaStatusBadge status={reserva.status} />
         </div>
         <SheetDescription>
@@ -530,9 +516,7 @@ function DetalheReserva({
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Família
           </h3>
-          <div className="font-medium text-foreground">
-            {fam?.nome_responsavel ?? "—"}
-          </div>
+          <div className="font-medium text-foreground">{fam?.nome_responsavel ?? "—"}</div>
           {fam?.email && (
             <InfoLine icon={<Mail className="h-4 w-4" />} label="E-mail">
               <a href={`mailto:${fam.email}`} className="text-primary hover:underline">
@@ -622,20 +606,13 @@ function DetalheReserva({
               <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> Carregando...
             </p>
           ) : logs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma alteração registrada ainda.
-            </p>
+            <p className="text-sm text-muted-foreground">Nenhuma alteração registrada ainda.</p>
           ) : (
             <ol className="space-y-3">
               {logs.map((log) => (
-                <li
-                  key={log.id}
-                  className="rounded-lg border bg-card px-3 py-2.5 text-sm"
-                >
+                <li key={log.id} className="rounded-lg border bg-card px-3 py-2.5 text-sm">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-foreground capitalize">
-                      {log.acao}
-                    </span>
+                    <span className="font-medium text-foreground capitalize">{log.acao}</span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(log.criado_em).toLocaleString("pt-BR", {
                         dateStyle: "short",
@@ -647,9 +624,7 @@ function DetalheReserva({
                     {log.status_anterior ?? "—"} → {log.status_novo ?? "—"}
                   </div>
                   {log.ator_email && (
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      por {log.ator_email}
-                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">por {log.ator_email}</div>
                   )}
                   {log.observacao && (
                     <p className="text-sm text-foreground/80 mt-2 rounded bg-muted/40 px-2 py-1.5">
@@ -687,13 +662,9 @@ function InfoLine({
 function ReservaStatusBadge({ status }: { status: Tables<"reservas">["status"] }) {
   switch (status) {
     case "confirmada":
-      return (
-        <Badge className="bg-success/15 text-success hover:bg-success/15">Confirmada</Badge>
-      );
+      return <Badge className="bg-success/15 text-success hover:bg-success/15">Confirmada</Badge>;
     case "pendente":
-      return (
-        <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Pendente</Badge>
-      );
+      return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Pendente</Badge>;
     case "cancelada":
       return (
         <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/15">

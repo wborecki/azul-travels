@@ -5,7 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EstabCard } from "@/components/EstabCard";
 import { fetchEstabelecimentosView, type EstabelecimentoView } from "@/lib/queries";
-import { Search, MapPin, ShieldCheck, Award, Camera, Heart, Gift, Star, ArrowRight, Sparkles, Calendar } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  ShieldCheck,
+  Award,
+  Camera,
+  Heart,
+  Gift,
+  Star,
+  ArrowRight,
+  Sparkles,
+  Calendar,
+} from "lucide-react";
 import heroImg from "@/assets/hero-familia.jpg";
 
 export const Route = createFileRoute("/")({
@@ -18,7 +30,10 @@ export const Route = createFileRoute("/")({
           "Marketplace que conecta famílias TEA a hotéis, restaurantes e parques realmente preparados. Selo Azul, Tour 360°, benefícios exclusivos.",
       },
       { property: "og:title", content: "Turismo Azul" },
-      { property: "og:description", content: "Viajar com autismo. Com confiança, com conforto, com alegria." },
+      {
+        property: "og:description",
+        content: "Viajar com autismo. Com confiança, com conforto, com alegria.",
+      },
     ],
   }),
   component: Landing,
@@ -27,7 +42,16 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const [destaques, setDestaques] = useState<EstabelecimentoView[]>([]);
   const [beneficios, setBeneficios] = useState<EstabelecimentoView[]>([]);
-  const [artigos, setArtigos] = useState<{ slug: string; titulo: string; resumo: string | null; foto_capa: string | null; categoria: string | null; criado_em: string }[]>([]);
+  const [artigos, setArtigos] = useState<
+    {
+      slug: string;
+      titulo: string;
+      resumo: string | null;
+      foto_capa: string | null;
+      categoria: string | null;
+      criado_em: string;
+    }[]
+  >([]);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
@@ -73,8 +97,8 @@ function Landing() {
               <span className="text-secondary">Com confiança, com conforto, com alegria.</span>
             </h1>
             <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-              O primeiro marketplace brasileiro que conecta famílias TEA a destinos
-              realmente preparados.
+              O primeiro marketplace brasileiro que conecta famílias TEA a destinos realmente
+              preparados.
             </p>
 
             {/* Busca */}
@@ -94,7 +118,11 @@ function Landing() {
                   className="border-0 shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
                 />
               </div>
-              <Button type="submit" size="lg" className="rounded-xl bg-primary hover:bg-primary/90 px-6">
+              <Button
+                type="submit"
+                size="lg"
+                className="rounded-xl bg-primary hover:bg-primary/90 px-6"
+              >
                 Buscar
               </Button>
             </form>
@@ -122,7 +150,9 @@ function Landing() {
             {/* Indicadores */}
             <div className="mt-10 grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
               <div>
-                <div className="text-2xl md:text-3xl font-display font-bold text-secondary">247</div>
+                <div className="text-2xl md:text-3xl font-display font-bold text-secondary">
+                  247
+                </div>
                 <div className="text-xs text-white/70">Estabelecimentos certificados</div>
               </div>
               <div>
@@ -130,7 +160,9 @@ function Landing() {
                 <div className="text-xs text-white/70">Estados cobertos</div>
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-display font-bold text-secondary">4.8★</div>
+                <div className="text-2xl md:text-3xl font-display font-bold text-secondary">
+                  4.8★
+                </div>
                 <div className="text-xs text-white/70">Satisfação das famílias</div>
               </div>
             </div>
@@ -142,17 +174,38 @@ function Landing() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-secondary font-semibold uppercase tracking-wide text-sm">Simples e seguro</p>
-            <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">Como funciona</h2>
-            <p className="mt-3 text-muted-foreground">Em 3 passos você encontra o destino certo para sua família.</p>
+            <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
+              Simples e seguro
+            </p>
+            <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
+              Como funciona
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Em 3 passos você encontra o destino certo para sua família.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { n: "1", t: "Crie o perfil sensorial", d: "Cadastre as necessidades específicas do seu filho — sensibilidades, comunicação e preferências." },
-              { n: "2", t: "Explore destinos compatíveis", d: "Veja estabelecimentos certificados e priorizados pelas necessidades do perfil." },
-              { n: "3", t: "Reserve com confiança", d: "Solicite a reserva com o perfil sensorial enviado automaticamente ao estabelecimento." },
+              {
+                n: "1",
+                t: "Crie o perfil sensorial",
+                d: "Cadastre as necessidades específicas do seu filho — sensibilidades, comunicação e preferências.",
+              },
+              {
+                n: "2",
+                t: "Explore destinos compatíveis",
+                d: "Veja estabelecimentos certificados e priorizados pelas necessidades do perfil.",
+              },
+              {
+                n: "3",
+                t: "Reserve com confiança",
+                d: "Solicite a reserva com o perfil sensorial enviado automaticamente ao estabelecimento.",
+              },
             ].map((s) => (
-              <div key={s.n} className="relative bg-azul-claro rounded-2xl p-7 text-center shadow-soft">
+              <div
+                key={s.n}
+                className="relative bg-azul-claro rounded-2xl p-7 text-center shadow-soft"
+              >
                 <div className="w-12 h-12 mx-auto rounded-full bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg mb-4">
                   {s.n}
                 </div>
@@ -168,17 +221,44 @@ function Landing() {
       <section className="py-20 bg-azul-claro">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-secondary font-semibold uppercase tracking-wide text-sm">Confiança</p>
-            <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">Selos que importam</h2>
+            <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
+              Confiança
+            </p>
+            <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
+              Selos que importam
+            </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { i: ShieldCheck, c: "bg-primary text-primary-foreground", t: "Selo Azul", d: "Certificação Absoluto Educacional. O padrão-ouro de turismo inclusivo TEA no Brasil." },
-              { i: Award, c: "bg-success text-success-foreground", t: "Certificado Governamental", d: "Estabelecimentos reconhecidos por órgãos públicos como acessíveis a pessoas com TEA." },
-              { i: Star, c: "bg-amarelo text-amarelo-foreground", t: "Selos Privados", d: "Certificações independentes de organizações especializadas em inclusão." },
-              { i: Camera, c: "bg-amarelo text-amarelo-foreground", t: "Tour 360°", d: "Visite o ambiente virtualmente antes de chegar — preparação visual essencial." },
+              {
+                i: ShieldCheck,
+                c: "bg-primary text-primary-foreground",
+                t: "Selo Azul",
+                d: "Certificação Absoluto Educacional. O padrão-ouro de turismo inclusivo TEA no Brasil.",
+              },
+              {
+                i: Award,
+                c: "bg-success text-success-foreground",
+                t: "Certificado Governamental",
+                d: "Estabelecimentos reconhecidos por órgãos públicos como acessíveis a pessoas com TEA.",
+              },
+              {
+                i: Star,
+                c: "bg-amarelo text-amarelo-foreground",
+                t: "Selos Privados",
+                d: "Certificações independentes de organizações especializadas em inclusão.",
+              },
+              {
+                i: Camera,
+                c: "bg-amarelo text-amarelo-foreground",
+                t: "Tour 360°",
+                d: "Visite o ambiente virtualmente antes de chegar — preparação visual essencial.",
+              },
             ].map((b) => (
-              <div key={b.t} className="bg-card rounded-2xl p-6 shadow-soft hover:shadow-elegant transition">
+              <div
+                key={b.t}
+                className="bg-card rounded-2xl p-6 shadow-soft hover:shadow-elegant transition"
+              >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${b.c}`}>
                   <b.i className="h-6 w-6" />
                 </div>
@@ -195,13 +275,17 @@ function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">Recomendados</p>
+              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
+                Recomendados
+              </p>
               <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
                 Estabelecimentos em destaque
               </h2>
             </div>
             <Button asChild variant="outline" className="hidden md:inline-flex">
-              <Link to="/explorar">Ver todos <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              <Link to="/explorar">
+                Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
           </div>
           {destaques.length === 0 ? (
@@ -233,11 +317,13 @@ function Landing() {
                 Entrada grátis e descontos para famílias TEA
               </h2>
               <p className="mt-4 text-white/85 text-lg">
-                Estabelecimentos parceiros oferecem benefícios exclusivos para pessoas autistas
-                e seus acompanhantes — basta apresentar a CIPTEA.
+                Estabelecimentos parceiros oferecem benefícios exclusivos para pessoas autistas e
+                seus acompanhantes — basta apresentar a CIPTEA.
               </p>
               <Button asChild size="lg" className="mt-6 bg-white text-secondary hover:bg-white/90">
-                <Link to="/beneficios-tea">Ver todos os benefícios <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                <Link to="/beneficios-tea">
+                  Ver todos os benefícios <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
               </Button>
             </div>
             <div className="space-y-3">
@@ -267,11 +353,17 @@ function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">Aprenda mais</p>
-              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">Do blog Turismo Azul</h2>
+              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
+                Aprenda mais
+              </p>
+              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
+                Do blog Turismo Azul
+              </h2>
             </div>
             <Button asChild variant="outline" className="hidden md:inline-flex">
-              <Link to="/conteudo">Todos os artigos <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              <Link to="/conteudo">
+                Todos os artigos <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -321,7 +413,8 @@ function Landing() {
             Pronto para a próxima viagem?
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Crie o perfil sensorial da sua família e descubra destinos preparados para receber vocês.
+            Crie o perfil sensorial da sua família e descubra destinos preparados para receber
+            vocês.
           </p>
           <Button asChild size="lg" className="mt-6 bg-primary hover:bg-primary/90">
             <Link to="/cadastro">Criar perfil gratuito</Link>

@@ -95,9 +95,7 @@ function cleanFotos(v: unknown): string[] {
  * Converte uma row crua do Supabase no shape seguro de UI.
  * Idempotente — passar um `EstabelecimentoNormalized` retorna o mesmo shape.
  */
-export function normalizeEstabelecimento(
-  row: EstabelecimentoFull,
-): EstabelecimentoNormalized {
+export function normalizeEstabelecimento(row: EstabelecimentoFull): EstabelecimentoNormalized {
   return {
     ...row,
     fotos: cleanFotos(row.fotos),
@@ -240,10 +238,7 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
 export async function fetchEstabelecimentosView(
   filters: EstabelecimentosViewFilters = {},
 ): Promise<EstabelecimentoView[]> {
-  const base = supabase
-    .from("estabelecimentos")
-    .select(ESTAB_VIEW_SELECT)
-    .eq("status", "ativo");
+  const base = supabase.from("estabelecimentos").select(ESTAB_VIEW_SELECT).eq("status", "ativo");
 
   const q = applyEstabelecimentosViewFilters(base, filters);
 
