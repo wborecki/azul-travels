@@ -285,16 +285,15 @@ function AdminReservas() {
 
   const limparSelecao = () => setSelecionadas(new Set());
 
-  /** Reservas selecionadas elegíveis para a transição alvo. */
+  /** Reservas selecionadas elegíveis para a transição alvo (mesma regra do banco). */
   const elegiveisParaBulk = (next: ReservaStatus): ReservaAdmin[] => {
     const ids = new Set(selecionadas);
     return rows.filter((r) => {
       if (!ids.has(r.id)) return false;
-      const cur = r.status ?? "pendente";
-      if (next === "confirmada") return cur === "pendente";
-      if (next === "concluida") return cur === "confirmada";
-      if (next === "cancelada") return cur === "pendente" || cur === "confirmada";
-      return false;
+      const cur = toReservaStatus(r.status, "pendente");
+      // Não conta "no-op" (cur === next) como elegível em lote.
+      if (cur === next) return false;
+      return podeTransicionarReserva(cur, next);
     });
   };
 
