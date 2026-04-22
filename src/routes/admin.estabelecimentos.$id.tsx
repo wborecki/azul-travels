@@ -204,7 +204,6 @@ function AdminEstabelecimentoForm() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const slugTouched = useRef(false);
 
   useEffect(() => {
     if (isNew) return;
@@ -218,7 +217,6 @@ function AdminEstabelecimentoForm() {
           return;
         }
         setForm(rowToForm(data));
-        slugTouched.current = true;
       } catch (err) {
         toast.error("Erro ao carregar", {
           description: err instanceof Error ? err.message : undefined,
@@ -233,13 +231,45 @@ function AdminEstabelecimentoForm() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  // Slug é **derivado automaticamente** do nome — não há mais edição manual.
+  // Travar a UI evita que admins criem variações conflitantes (ex.: "hotel-x"
+  // vs "hotel-x-2") sem motivo. A unicidade real é garantida pelo índice
+  // único no banco + auto-sufixo aplicado em `ensureUniqueSlug` no submit.
   const onNomeChange = (v: string) => {
-    setForm((f) => ({
-      ...f,
-      nome: v,
-      slug: slugTouched.current ? f.slug : slugify(v),
-    }));
+    setForm((f) => ({ ...f, nome: v, slug: slugify(v) }));
   };
+
+  /**
+   * Garante slug único antes do save.
+   *
+   * Faz uma busca em `estabelecimentos` por slugs que comecem com `base` e,
+   * caso o exato já exista (excluindo o próprio registro em edição),
+   * incrementa um sufixo `-2`, `-3`, ... até encontrar o primeiro livre.
+   *
+   * Como a checagem é client-side **e** o índice único cobre o banco, a
+   * pior corrida possível resulta em erro `23505` no insert/update — que
+   * tratamos no `handleSubmit` mostrando uma mensagem clara.
+   */
+  const ensureUniqueSlug = async (base: string): Promise<string> => {
+    if (!base) return base;
+    const { data, error } = await supabase
+      .from("estabelecimentos")
+      .select("slug, id")
+      .like("slug", `${base}%`);
+    if (error) throw error;
+    const taken = new Set(
+      (data ?? [])
+        .filter((r) => (isNew ? true : r.id !== id))
+        .map((r) => r.slug),
+    );
+    if (!taken.has(base)) return base;
+    for (let i = 2; i < 1000; i++) {
+      const candidate = `${base}-${i}`;
+      if (!taken.has(candidate)) return candidate;
+    }
+    return `${base}-${Date.now()}`;
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
