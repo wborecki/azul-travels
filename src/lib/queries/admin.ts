@@ -407,6 +407,48 @@ export async function fetchReservasAdminPaginated(
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Contagem global por status — usada no painel de filtros para mostrar
+ * o total real (todas as páginas) sem precisar carregar todas as linhas.
+ *
+ * Faz uma query `head: true` por status em paralelo + uma `total` geral.
+ * Sempre retorna todas as chaves (0 quando não há linhas).
+ */
+export async function fetchReservasAdminStatusCounts(): Promise<{
+  todas: number;
+  pendente: number;
+  confirmada: number;
+  cancelada: number;
+  concluida: number;
+}> {
+  const [todas, pendente, confirmada, cancelada, concluida] = await Promise.all([
+    supabase.from("reservas").select("id", { count: "exact", head: true }),
+    supabase
+      .from("reservas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pendente"),
+    supabase
+      .from("reservas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "confirmada"),
+    supabase
+      .from("reservas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "cancelada"),
+    supabase
+      .from("reservas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "concluida"),
+  ]);
+  return {
+    todas: todas.count ?? 0,
+    pendente: pendente.count ?? 0,
+    confirmada: confirmada.count ?? 0,
+    cancelada: cancelada.count ?? 0,
+    concluida: concluida.count ?? 0,
+  };
+}
+
 export type AuditoriaRow = Tables<"reservas_auditoria">;
 
 export async function fetchAuditoriaPorReserva(reservaId: string): Promise<AuditoriaRow[]> {

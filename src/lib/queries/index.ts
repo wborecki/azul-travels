@@ -116,6 +116,7 @@ export {
   fetchConteudoAdminPorId,
   fetchReservasAdmin,
   fetchReservasAdminPaginated,
+  fetchReservasAdminStatusCounts,
   fetchAuditoriaPorReserva,
   fetchAuditoriaAdminPaginated,
   fetchAuditoriaPorEstabelecimento,
