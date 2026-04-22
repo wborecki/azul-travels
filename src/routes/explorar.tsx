@@ -856,7 +856,7 @@ function Explorar() {
                 variant="outline"
                 size="sm"
                 onClick={copiarLink}
-                title="Copiar link com filtros"
+                title="Copiar URL completa com todos os filtros"
               >
                 {copiado ? (
                   <>
@@ -865,6 +865,28 @@ function Explorar() {
                 ) : (
                   <>
                     <LinkIcon className="h-4 w-4 mr-1" /> Compartilhar
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copiarLinkCurto}
+                disabled={gerandoCurto}
+                title={
+                  user
+                    ? "Gerar e copiar um link curto (ex.: /l/aB3xK9pQ)"
+                    : "Faça login para gerar links curtos"
+                }
+              >
+                {copiadoCurto ? (
+                  <>
+                    <CheckIcon className="h-4 w-4 mr-1" /> Copiado
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="h-4 w-4 mr-1" />
+                    {gerandoCurto ? "Gerando…" : "Link curto"}
                   </>
                 )}
               </Button>
