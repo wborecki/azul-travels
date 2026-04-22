@@ -21,6 +21,7 @@ export { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./ava
 
 export {
   fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentoDetalhe,
   fetchEstabelecimentosView,
   fetchEstabelecimentosCards, // deprecated alias
   applyEstabelecimentosViewFilters,
@@ -28,6 +29,7 @@ export {
   ESTAB_VIEW_SELECT,
   type EstabelecimentoFull,
   type EstabelecimentoNormalized,
+  type EstabelecimentoDetalhe,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type SeloFlag,
