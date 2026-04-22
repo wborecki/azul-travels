@@ -26,10 +26,13 @@ export {
   fetchEstabelecimentoPorSlug,
   fetchEstabelecimentosView,
   fetchEstabelecimentosCards, // deprecated alias
+  applyEstabelecimentosViewFilters,
   ESTAB_VIEW_SELECT,
   type EstabelecimentoFull,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
+  type SeloFlag,
+  type RecursoFlag,
   type Estabelecimento, // deprecated alias
   type EstabelecimentoCard, // deprecated alias
 } from "./estabelecimentos";
