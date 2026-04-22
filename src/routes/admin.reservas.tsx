@@ -85,6 +85,11 @@ function AdminReservas() {
   const [filter, setFilter] = useState<FilterKey>("todas");
   const [q, setQ] = useState("");
   const qDebounced = useDebouncedValue(q, 300);
+  // Filtros por intervalo de datas (YYYY-MM-DD). String vazia = sem limite.
+  const [checkinDe, setCheckinDe] = useState("");
+  const [checkinAte, setCheckinAte] = useState("");
+  const [criadoDe, setCriadoDe] = useState("");
+  const [criadoAte, setCriadoAte] = useState("");
   const [pagina, setPagina] = useState(1);
   const [tamanhoPagina, setTamanhoPagina] = useState<number>(TAMANHO_PAGINA_INICIAL);
   const [total, setTotal] = useState(0);
