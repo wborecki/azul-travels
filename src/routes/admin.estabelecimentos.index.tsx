@@ -201,16 +201,18 @@ function AdminEstabelecimentos() {
                       {[r.cidade, r.estado].filter(Boolean).join(" / ") || "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={r.status} />
+                      <StatusControl
+                        row={r}
+                        saving={savingIds.has(r.id)}
+                        onChange={(next) => void handleStatusChange(r, next)}
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      {r.destaque ? (
-                        <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-                          Destaque
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
+                      <DestaqueControl
+                        row={r}
+                        saving={savingIds.has(r.id)}
+                        onChange={(next) => void handleDestaqueToggle(r, next)}
+                      />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
