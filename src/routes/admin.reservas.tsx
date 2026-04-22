@@ -849,6 +849,7 @@ function AdminReservas() {
                     disabled={loading || filteredIds.length === 0}
                   />
                 </th>
+                <th className="px-2 py-3 w-8" aria-label="Expandir histórico" />
                 <th className="px-4 py-3">Estabelecimento</th>
                 <th className="px-4 py-3">Família</th>
                 <th className="px-4 py-3">Check-in</th>
@@ -860,68 +861,119 @@ function AdminReservas() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin inline mr-2" /> Carregando reservas...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhuma reserva encontrada para este filtro.
                   </td>
                 </tr>
               ) : (
                 filtered.map((r) => {
                   const checked = selecionadas.has(r.id);
+                  const isExpanded = expanded.has(r.id);
+                  const ultObs = ultimasObs.get(r.id);
+                  const inlineLogs = logsInline.get(r.id);
+                  const inlineLoading = loadingInline.has(r.id);
                   return (
-                    <tr
-                      key={r.id}
-                      data-state={checked ? "selected" : undefined}
-                      className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
-                      onClick={() => setSelected(r)}
-                    >
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          aria-label={`Selecionar reserva de ${
-                            r.familia_profiles?.nome_responsavel ?? "família"
-                          }`}
-                          checked={checked}
-                          onCheckedChange={(v) => toggleLinha(r.id, v === true)}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {r.estabelecimentos?.nome ?? "—"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
-                            .filter(Boolean)
-                            .join(" / ") || "—"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {r.familia_profiles?.nome_responsavel ?? "—"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {r.familia_profiles?.email ?? ""}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-foreground/80">
-                        {r.data_checkin
-                          ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
-                        {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
-                      </td>
-                      <td className="px-4 py-3">
-                        <ReservaStatusBadge status={r.status} />
-                      </td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <RowActions reserva={r} onAction={askAction} />
-                      </td>
-                    </tr>
+                    <Fragment key={r.id}>
+                      <tr
+                        data-state={checked ? "selected" : undefined}
+                        className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
+                        onClick={() => setSelected(r)}
+                      >
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            aria-label={`Selecionar reserva de ${
+                              r.familia_profiles?.nome_responsavel ?? "família"
+                            }`}
+                            checked={checked}
+                            onCheckedChange={(v) => toggleLinha(r.id, v === true)}
+                          />
+                        </td>
+                        <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => toggleExpand(r.id)}
+                            aria-expanded={isExpanded}
+                            aria-label={
+                              isExpanded ? "Recolher histórico" : "Expandir histórico"
+                            }
+                            title={isExpanded ? "Recolher histórico" : "Ver histórico inline"}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">
+                            {r.estabelecimentos?.nome ?? "—"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
+                              .filter(Boolean)
+                              .join(" / ") || "—"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">
+                            {r.familia_profiles?.nome_responsavel ?? "—"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {r.familia_profiles?.email ?? ""}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-foreground/80">
+                          {r.data_checkin
+                            ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
+                            : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
+                          {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <ReservaStatusBadge status={r.status} />
+                          {ultObs?.observacao && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpand(r.id);
+                              }}
+                              className="mt-1.5 flex items-start gap-1 text-xs text-muted-foreground hover:text-foreground transition max-w-[180px] text-left"
+                              title={ultObs.observacao}
+                            >
+                              <MessageSquare className="h-3 w-3 mt-0.5 shrink-0 text-primary/70" />
+                              <span className="truncate italic">
+                                {ultObs.observacao}
+                              </span>
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <RowActions reserva={r} onAction={askAction} />
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="bg-muted/20">
+                          <td colSpan={8} className="px-4 py-4">
+                            <InlineAuditoria
+                              logs={inlineLogs}
+                              loading={inlineLoading}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })
               )}
