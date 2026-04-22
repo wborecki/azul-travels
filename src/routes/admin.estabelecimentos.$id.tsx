@@ -369,7 +369,10 @@ function AdminEstabelecimentoForm() {
       selo_privado_nome: v.selo_privado_nome,
       latitude: v.latitude,
       longitude: v.longitude,
-      foto_capa: form.foto_capa || null,
+      // Capa = primeira foto da galeria. Mantemos `foto_capa` no DB por
+      // compatibilidade com cards/listagens que ainda leem o campo direto,
+      // mas ele agora é **derivado** — nunca editado manualmente.
+      foto_capa: form.fotos[0] ?? null,
       fotos: form.fotos,
       destaque: form.destaque,
       tem_beneficio_tea: form.tem_beneficio_tea,
