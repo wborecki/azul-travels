@@ -11,8 +11,7 @@ import {
   type PerfilOption,
   type ReservaFormInput,
 } from "@/lib/queries";
-import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
-import { useAvaliacoesPublicasPorEstab } from "@/hooks/useAvaliacoesPublicasPorEstab";
+import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { TIPO_LABEL, formatDateBR } from "@/lib/brazil";
-import { Camera, MapPin, Phone, Star, Gift, Globe } from "lucide-react";
+import { Camera, MapPin, Phone, Gift, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/estabelecimento/$slug")({
@@ -36,7 +35,6 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 });
 
 type Estab = EstabelecimentoNormalized;
-type Avaliacao = AvaliacaoComFamilia;
 
 function EstabPage() {
   const { slug } = Route.useParams();
@@ -107,10 +105,6 @@ function EstabPage() {
     );
 
   const e: Estab = detalhe.estabelecimento;
-  // Avaliações vivem fora do payload composto (`detalhe.avaliacoes` continua
-  // sendo a fonte do SSR/loader). O hook permite refetch independente quando
-  // o usuário publica uma nova avaliação, sem recarregar o estabelecimento.
-  const { data: avals }: { data: Avaliacao[] } = useAvaliacoesPublicasPorEstab(e.id);
   const recursoKeys = [
     "tem_sala_sensorial",
     "tem_concierge_tea",
@@ -300,36 +294,10 @@ function EstabPage() {
             </div>
           </section>
 
-          <section>
-            <h3 className="font-display font-bold text-lg text-primary mb-4">
-              Avaliações de famílias TEA
-            </h3>
-            {avals.length === 0 ? (
-              <div className="bg-muted/40 rounded-xl p-6 text-center text-sm text-muted-foreground">
-                Ainda não há avaliações para este estabelecimento.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {avals.map((a) => {
-                  const nome = a.familia_profiles?.nome_responsavel?.split(" ")[0] ?? "Família";
-                  return (
-                    <div key={a.id} className="bg-card border rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="font-semibold">{nome}</p>
-                        <div className="flex items-center gap-1 text-amarelo">
-                          {Array.from({ length: a.nota_geral ?? 0 }).map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{formatDateBR(a.criado_em)}</p>
-                      {a.comentario && <p className="mt-2 text-sm">{a.comentario}</p>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+          {/* Loading/error/empty/data tratados de forma exaustiva e tipada
+              dentro do componente — `nome_responsavel: string | null` é
+              respeitado sem cast. */}
+          <AvaliacoesPublicasSection estabelecimentoId={e.id} />
         </div>
 
         {/* Reserva */}
