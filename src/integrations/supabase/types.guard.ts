@@ -196,7 +196,6 @@ type _CheckReservaInsertEstabRequired = AssertEqual<
   "REGRESSION: reservas.Insert.estabelecimento_id virou opcional/nullable"
 >;
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
 // ─────────────────────────────────────────────────────────────────────────────
@@ -597,9 +596,10 @@ type _CheckViewIsMediaRow = EstabelecimentoView extends EstabMediaRow
 type _CheckNormalizedIsMediaRow = EstabelecimentoNormalized extends EstabMediaRow
   ? true
   : "REGRESSION: EstabelecimentoNormalized não satisfaz EstabMediaRow";
-type _CheckFullIsMediaRow = Tables<"estabelecimentos"> extends EstabMediaRow
-  ? true
-  : "REGRESSION: Tables<estabelecimentos> não satisfaz EstabMediaRow — admin form quebra";
+type _CheckFullIsMediaRow =
+  Tables<"estabelecimentos"> extends EstabMediaRow
+    ? true
+    : "REGRESSION: Tables<estabelecimentos> não satisfaz EstabMediaRow — admin form quebra";
 
 // 9.5 — `pickMediaFromView` (atalho exportado para cards/embeds) precisa
 // devolver o mesmo `EstabMedia` que `pickEstabMedia(detalhe)`.
@@ -608,7 +608,6 @@ type _CheckPickFromViewShape = AssertEqual<
   EstabMedia,
   "REGRESSION: pickMediaFromView divergiu de EstabMedia — cards e detalhe sairiam de sincronia"
 >;
-
 
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [

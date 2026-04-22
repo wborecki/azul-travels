@@ -1,0 +1,60 @@
+name: Type Safety
+
+# Roda em todo push e PR para garantir que os type guards do Supabase
+# (joins de avaliação, mídia/Tour 360°, payloads de reserva) não
+# regridam silenciosamente para `any`/`unknown`.
+#
+# Estratégia em três camadas, da mais barata/rápida (falha primeiro,
+# sinal isolado) para a mais ampla (cobertura completa do projeto):
+#
+#   1. typecheck:guards  — só os arquivos *.guard.ts e suas
+#                          dependências diretas. Quando quebra,
+#                          a causa é payload core, não UI.
+#   2. typecheck         — projeto inteiro (`tsc --noEmit`).
+#   3. lint              — eslint do repo.
+#
+# Qualquer falha bloqueia o merge.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancela jobs antigos da mesma branch quando um novo push chega.
+concurrency:
+  group: typecheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: TypeScript & Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # ── Camada 1 — Guards isolados ──────────────────────────────
+      # Falha primeiro com mensagem específica (e.g. "REGRESSION:
+      # familia_profiles embed é `unknown` — FK ausente").
+      - name: Type guards (Supabase joins, mídia, reservas)
+        run: bun run typecheck:guards
+
+      # ── Camada 2 — Projeto inteiro ──────────────────────────────
+      - name: Typecheck (full project)
+        run: bun run typecheck
+
+      # ── Camada 3 — Lint ─────────────────────────────────────────
+      - name: Lint
+        run: bun run lint

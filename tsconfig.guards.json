@@ -1,0 +1,21 @@
+{
+  "//": "Projeto TS isolado para rodar APENAS os type guards do Supabase.",
+  "//1": "Sinal limpo no CI: se este projeto quebra, é regressão de payload",
+  "//2": "core (avaliações, mídia, reservas, joins) — não ruído de UI.",
+  "//3": "",
+  "//4": "Uso: bun run typecheck:guards (ver package.json).",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"]
+  },
+  "include": [
+    "src/integrations/supabase/types.guard.ts",
+    "src/integrations/supabase/core-payloads.guard.ts",
+    "src/integrations/supabase/types.ts",
+    "src/integrations/supabase/client.ts",
+    "src/lib/queries/**/*.ts",
+    "src/lib/media.ts",
+    "src/lib/enums.ts"
+  ],
+  "exclude": ["node_modules", "src/routes", "src/components"]
+}
