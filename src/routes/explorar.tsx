@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { EstabCard } from "@/components/EstabCard";
 import {
-  fetchEstabelecimentosView,
+  fetchEstabelecimentosViewPaginated,
+  ESTAB_PAGE_SIZE_DEFAULT,
+  ESTAB_PAGE_SIZE_MAX,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type RecursoFlag,
