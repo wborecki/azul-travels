@@ -564,11 +564,49 @@ function Explorar() {
               </Button>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {list.map((e) => (
-                <EstabCard key={e.id} e={e} />
-              ))}
-            </div>
+            <>
+              <div className="mb-3 text-xs text-muted-foreground">
+                Mostrando{" "}
+                <strong className="text-foreground">
+                  {(search.pagina - 1) * search.tamanhoPagina + 1}–
+                  {Math.min(search.pagina * search.tamanhoPagina, total)}
+                </strong>{" "}
+                de <strong className="text-foreground">{total}</strong> resultado
+                {total === 1 ? "" : "s"}
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {list.map((e) => (
+                  <EstabCard key={e.id} e={e} />
+                ))}
+              </div>
+              {totalPaginas > 1 && (
+                <nav
+                  aria-label="Paginação dos resultados"
+                  className="mt-8 flex items-center justify-center gap-2"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={search.pagina <= 1}
+                    onClick={() => goToPage(search.pagina - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    Página <strong className="text-foreground">{search.pagina}</strong> de{" "}
+                    <strong className="text-foreground">{totalPaginas}</strong>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={search.pagina >= totalPaginas}
+                    onClick={() => goToPage(search.pagina + 1)}
+                  >
+                    Próxima
+                  </Button>
+                </nav>
+              )}
+            </>
           )}
 
           {!user && (
