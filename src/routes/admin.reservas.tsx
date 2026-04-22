@@ -1474,6 +1474,8 @@ function InlineAuditoria({
     </div>
   );
 }
+
+function ReservaStatusBadge({ status }: { status: Tables<"reservas">["status"] }) {
   switch (status) {
     case "confirmada":
       return <Badge className="bg-success/15 text-success hover:bg-success/15">Confirmada</Badge>;
