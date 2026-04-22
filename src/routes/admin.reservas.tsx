@@ -187,13 +187,75 @@ function AdminReservas() {
     void refreshCounts();
   }, [refreshCounts]);
 
+  // Sempre que a página de reservas mudar, busca em batch a última
+  // observação de cada uma para mostrar o indicador truncado na linha.
+  useEffect(() => {
+    if (rows.length === 0) {
+      setUltimasObs(new Map());
+      return;
+    }
+    let cancel = false;
+    void (async () => {
+      try {
+        const map = await fetchUltimaObservacaoPorReservas(rows.map((r) => r.id));
+        if (!cancel) setUltimasObs(map);
+      } catch {
+        // best-effort; não bloqueia a tela
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [rows]);
+
   // Reseta para página 1 quando qualquer filtro muda.
   useEffect(() => {
     setPagina(1);
+    setExpanded(new Set());
   }, [filter, qDebounced, tamanhoPagina, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   // Filtro/busca já vêm aplicados do servidor → a página atual é a "view".
   const filtered = rows;
+
+  /**
+   * Expande/recolhe o histórico inline de uma reserva. Lazy-loads o
+   * log na primeira expansão e mantém em cache enquanto a página
+   * não muda.
+   */
+  const toggleExpand = useCallback(
+    (reservaId: string) => {
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        if (next.has(reservaId)) {
+          next.delete(reservaId);
+        } else {
+          next.add(reservaId);
+          // Lazy-fetch só na primeira abertura
+          if (!logsInline.has(reservaId)) {
+            setLoadingInline((s) => new Set(s).add(reservaId));
+            void (async () => {
+              try {
+                const logs = await fetchAuditoriaPorReserva(reservaId);
+                setLogsInline((m) => new Map(m).set(reservaId, logs));
+              } catch (err) {
+                toast.error("Erro ao carregar histórico", {
+                  description: err instanceof Error ? err.message : undefined,
+                });
+              } finally {
+                setLoadingInline((s) => {
+                  const ns = new Set(s);
+                  ns.delete(reservaId);
+                  return ns;
+                });
+              }
+            })();
+          }
+        }
+        return next;
+      });
+    },
+    [logsInline],
+  );
 
   const askAction = (reserva: ReservaAdmin, next: ReservaStatus) => {
     setObservacao("");
