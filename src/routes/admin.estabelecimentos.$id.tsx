@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { fetchEstabelecimentoAdminPorId } from "@/lib/queries";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { normalizeFotos, normalizeUrl } from "@/lib/media";
 import {
@@ -209,18 +210,22 @@ function AdminEstabelecimentoForm() {
     if (isNew) return;
     void (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("estabelecimentos")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      if (error || !data) {
-        toast.error("Estabelecimento não encontrado");
+      try {
+        const data = await fetchEstabelecimentoAdminPorId(id);
+        if (!data) {
+          toast.error("Estabelecimento não encontrado");
+          navigate({ to: "/admin/estabelecimentos" });
+          return;
+        }
+        setForm(rowToForm(data));
+        slugTouched.current = true;
+      } catch (err) {
+        toast.error("Erro ao carregar", {
+          description: err instanceof Error ? err.message : undefined,
+        });
         navigate({ to: "/admin/estabelecimentos" });
         return;
       }
-      setForm(rowToForm(data));
-      slugTouched.current = true;
       setLoading(false);
     })();
   }, [id, isNew, navigate]);

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { fetchConteudoAdminPorId } from "@/lib/queries";
 import {
   CONTEUDO_CATEGORIAS,
   CONTEUDO_CATEGORIA_LABEL,
@@ -126,18 +127,22 @@ function AdminConteudoForm() {
     if (isNew) return;
     void (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("conteudo_tea")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-      if (error || !data) {
-        toast.error("Artigo não encontrado");
+      try {
+        const data = await fetchConteudoAdminPorId(id);
+        if (!data) {
+          toast.error("Artigo não encontrado");
+          navigate({ to: "/admin/conteudo" });
+          return;
+        }
+        setForm(rowToForm(data));
+        slugTouched.current = true;
+      } catch (err) {
+        toast.error("Erro ao carregar", {
+          description: err instanceof Error ? err.message : undefined,
+        });
         navigate({ to: "/admin/conteudo" });
         return;
       }
-      setForm(rowToForm(data));
-      slugTouched.current = true;
       setLoading(false);
     })();
   }, [id, isNew, navigate]);

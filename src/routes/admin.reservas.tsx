@@ -4,6 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import {
+  fetchReservasAdmin,
+  fetchAuditoriaPorReserva,
+  type ReservaAdminRow,
+  type AuditoriaRow,
+} from "@/lib/queries";
+import {
   RESERVA_STATUS,
   RESERVA_STATUS_LABEL,
   toReservaStatus,
@@ -50,18 +56,9 @@ export const Route = createFileRoute("/admin/reservas")({
   component: AdminReservas,
 });
 
-type ReservaAdmin = Tables<"reservas"> & {
-  estabelecimentos: Pick<
-    Tables<"estabelecimentos">,
-    "id" | "nome" | "slug" | "cidade" | "estado" | "tipo"
-  > | null;
-  familia_profiles: Pick<
-    Tables<"familia_profiles">,
-    "id" | "nome_responsavel" | "email" | "telefone" | "cidade" | "estado"
-  > | null;
-};
-
-type Auditoria = Tables<"reservas_auditoria">;
+// Aliases locais — payloads sempre vêm de `@/lib/queries`.
+type ReservaAdmin = ReservaAdminRow;
+type Auditoria = AuditoriaRow;
 
 /**
  * Filtros derivados do enum `reserva_status` — labels vêm de
@@ -91,20 +88,14 @@ function AdminReservas() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("reservas")
-      .select(
-        `*,
-         estabelecimentos(id, nome, slug, cidade, estado, tipo),
-         familia_profiles(id, nome_responsavel, email, telefone, cidade, estado)`,
-      )
-      .order("criado_em", { ascending: false })
-      .limit(300)
-      .returns<ReservaAdmin[]>();
-    if (error) {
-      toast.error("Erro ao carregar reservas", { description: error.message });
+    try {
+      const data = await fetchReservasAdmin();
+      setRows(data);
+    } catch (err) {
+      toast.error("Erro ao carregar reservas", {
+        description: err instanceof Error ? err.message : undefined,
+      });
     }
-    setRows(data ?? []);
     setLoading(false);
   }, []);
 
@@ -455,16 +446,20 @@ function DetalheReserva({
   useEffect(() => {
     let cancel = false;
     setLoadingLogs(true);
-    void supabase
-      .from("reservas_auditoria")
-      .select("*")
-      .eq("reserva_id", reserva.id)
-      .order("criado_em", { ascending: false })
-      .then(({ data }) => {
+    void (async () => {
+      try {
+        const data = await fetchAuditoriaPorReserva(reserva.id);
         if (cancel) return;
-        setLogs(data ?? []);
-        setLoadingLogs(false);
-      });
+        setLogs(data);
+      } catch (err) {
+        if (cancel) return;
+        toast.error("Erro ao carregar histórico", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        if (!cancel) setLoadingLogs(false);
+      }
+    })();
     return () => {
       cancel = true;
     };
