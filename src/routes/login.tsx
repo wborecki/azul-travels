@@ -61,6 +61,20 @@ function LoginPage() {
     navigate({ to: "/minha-conta" });
   };
 
+  const handleGoogle = async () => {
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/minha-conta`,
+    });
+    if (result.error) {
+      setLoading(false);
+      toast.error("Não foi possível entrar com Google");
+      return;
+    }
+    if (result.redirected) return;
+    navigate({ to: "/minha-conta" });
+  };
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
       <div className="text-center mb-6">
@@ -71,7 +85,26 @@ function LoginPage() {
         <p className="text-sm text-muted-foreground text-center mt-1">
           Acesse sua conta Turismo Azul
         </p>
-        <form onSubmit={submit} className="mt-6 space-y-4">
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleGoogle}
+          disabled={loading}
+          className="w-full mt-6 gap-2"
+          aria-label="Continuar com Google"
+        >
+          <GoogleIcon />
+          Continuar com Google
+        </Button>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">ou</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={submit} className="space-y-4">
           <div>
             <Label>Email</Label>
             <Input
@@ -97,7 +130,7 @@ function LoginPage() {
             disabled={loading}
             className="w-full bg-primary hover:bg-primary/90"
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Entrando..." : "Entrar com email"}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
