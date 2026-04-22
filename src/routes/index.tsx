@@ -311,7 +311,11 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = `/explorar?q=${encodeURIComponent(busca)}`;
+              const q = busca.trim();
+              void navigate({
+                to: "/explorar",
+                search: q ? { q } : {},
+              });
             }}
             className="mt-8 bg-white rounded-2xl p-2 shadow-elegant flex items-center gap-2 max-w-2xl mx-auto"
           >
@@ -328,26 +332,26 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
             <Button
               type="submit"
               size="lg"
-              className="rounded-xl bg-primary hover:bg-primary/90 px-6"
+              className="rounded-xl bg-primary hover:bg-primary/90 px-6 min-h-[44px]"
             >
               Buscar destinos
             </Button>
           </form>
 
-          {/* Chips */}
+          {/* Chips — passam o tipo via array (filtro multi-tipo do /explorar) */}
           <div className="mt-5 flex flex-wrap gap-2 justify-center">
             {[
-              { label: "🏨 Hotéis", q: "hotel" },
-              { label: "🍽️ Restaurantes", q: "restaurante" },
-              { label: "🎡 Parques", q: "parque" },
-              { label: "🌊 Resorts", q: "resort" },
-              { label: "🌳 Pousadas", q: "pousada" },
+              { label: "🏨 Hotéis", q: "hotel" as const },
+              { label: "🍽️ Restaurantes", q: "restaurante" as const },
+              { label: "🎡 Parques", q: "parque" as const },
+              { label: "🌊 Resorts", q: "resort" as const },
+              { label: "🌳 Pousadas", q: "pousada" as const },
             ].map((c) => (
               <Link
                 key={c.q}
                 to="/explorar"
-                search={{ tipo: c.q }}
-                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition"
+                search={{ tipos: [c.q] }}
+                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center"
               >
                 {c.label}
               </Link>
@@ -361,15 +365,21 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
             <Counter target={4.8} decimals={1} suffix="★" label="Avaliação média das famílias" />
           </div>
 
-          {/* Scroll indicator */}
-          <a
-            href="#como-funciona"
-            className="mt-14 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint"
-            aria-label="Veja como funciona"
+          {/* Scroll indicator — scroll suave até a seção "Como funciona" */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              document
+                .getElementById("como-funciona")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="mt-14 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint cursor-pointer"
+            aria-label="Veja como funciona — rolar para a seção"
           >
-            <span>Veja como funciona</span>
+            <span>↓ Veja como funciona</span>
             <ChevronDown className="h-5 w-5" />
-          </a>
+          </button>
         </div>
       </div>
     </section>
