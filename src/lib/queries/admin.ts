@@ -321,8 +321,60 @@ export async function fetchReservasAdmin(limit = 300): Promise<ReservaAdminRow[]
   return data ?? [];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Auditoria de reservas
+/** Filtros aceitos pela listagem paginada de reservas admin. */
+export interface ReservasAdminFilters {
+  /** Texto livre — busca em mensagem (ilike). Para campos de tabelas
+   * embutidas (estabelecimentos.nome, familia_profiles.email) o filtro
+   * **complementar** acontece no cliente sobre a página atual. */
+  busca?: string;
+  /** Filtra por status (omita para todos). */
+  status?: Database["public"]["Enums"]["reserva_status"];
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface ReservasAdminPage {
+  items: ReservaAdminRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada da listagem admin de reservas. Faz busca server-side
+ * por `mensagem` (ilike) e por `status` (eq); filtros adicionais por
+ * dados embutidos (`estabelecimentos.nome`, `familia_profiles.*`)
+ * permanecem opcionais no caller, sobre a página retornada.
+ */
+export async function fetchReservasAdminPaginated(
+  filters: ReservasAdminFilters = {},
+): Promise<ReservasAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("reservas")
+    .select(RESERVA_ADMIN_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.status) q = q.eq("status", filters.status);
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.ilike("mensagem", `%${term}%`);
+  }
+
+  const { data, error, count } = await q.returns<ReservaAdminRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type AuditoriaRow = Tables<"reservas_auditoria">;
