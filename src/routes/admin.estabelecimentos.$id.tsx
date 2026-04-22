@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { ESTADOS_BR } from "@/lib/brazil";
+import { normalizeFotos, normalizeUrl } from "@/lib/media";
 import {
   ESTAB_TIPOS,
   ESTAB_STATUS,
@@ -158,9 +159,6 @@ function emptyForm(): FormState {
 }
 
 function rowToForm(r: EstabRow): FormState {
-  const fotos = Array.isArray(r.fotos)
-    ? (r.fotos as unknown[]).filter((x): x is string => typeof x === "string")
-    : [];
   return {
     nome: r.nome ?? "",
     slug: r.slug ?? "",
@@ -175,13 +173,13 @@ function rowToForm(r: EstabRow): FormState {
     telefone: r.telefone ?? "",
     email: r.email ?? "",
     website: r.website ?? "",
-    tour_360_url: r.tour_360_url ?? "",
+    tour_360_url: normalizeUrl(r.tour_360_url) ?? "",
     beneficio_tea_descricao: r.beneficio_tea_descricao ?? "",
     selo_privado_nome: r.selo_privado_nome ?? "",
     latitude: r.latitude != null ? String(r.latitude) : "",
     longitude: r.longitude != null ? String(r.longitude) : "",
-    foto_capa: r.foto_capa ?? "",
-    fotos,
+    foto_capa: normalizeUrl(r.foto_capa) ?? "",
+    fotos: normalizeFotos(r.fotos),
     destaque: !!r.destaque,
     tem_beneficio_tea: !!r.tem_beneficio_tea,
     selo_azul: !!r.selo_azul,
