@@ -488,6 +488,29 @@ function Explorar() {
               </div>
             </FilterGroup>
 
+            {/* Ordenação — toggle independente que se combina com `ordem` */}
+            <FilterGroup label="Ordenação">
+              <ToggleRow
+                id="prioriza-perfil"
+                icon={<Sparkles className="h-4 w-4" />}
+                label="Priorizar perfil sensorial"
+                checked={search.priorizarPerfil}
+                onCheckedChange={(v) => patchSearchResetPage({ priorizarPerfil: v })}
+              />
+              {search.priorizarPerfil && !user && (
+                <p className="text-[11px] text-muted-foreground pl-7 -mt-1">
+                  Faça login e cadastre um perfil sensorial para ver o efeito.
+                </p>
+              )}
+              {search.priorizarPerfil &&
+                user &&
+                !Object.values(perfilNecessidades).some(Boolean) && (
+                  <p className="text-[11px] text-muted-foreground pl-7 -mt-1">
+                    Cadastre necessidades no perfil para ativar a priorização.
+                  </p>
+                )}
+            </FilterGroup>
+
             {/* Toggles avançados */}
             <FilterGroup label="Experiência">
               <ToggleRow
