@@ -418,9 +418,14 @@ function Hero({
 
           {/* Indicadores com contador animado */}
           <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
-            <Counter target={247} suffix="" label="Destinos verificados" />
-            <Counter target={12} suffix="" label="Estados do Brasil" />
-            <Counter target={4.8} decimals={1} suffix="★" label="Avaliação média das famílias" />
+            <Counter target={stats.destinos || 247} suffix="" label="Destinos verificados" />
+            <Counter target={stats.estados || 12} suffix="" label="Estados do Brasil" />
+            <Counter
+              target={stats.media}
+              decimals={1}
+              suffix="★"
+              label="Avaliação média das famílias"
+            />
           </div>
 
           {/* Scroll indicator — scroll suave até a seção "Como funciona" */}
