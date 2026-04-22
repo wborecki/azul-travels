@@ -320,3 +320,155 @@ function AdminConteudo() {
     </div>
   );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Editor rápido — título, categoria e status publicado em popover
+// ────────────────────────────────────────────────────────────────────────────
+
+type QuickEditPatch = Partial<Pick<Row, "titulo" | "categoria" | "publicado">>;
+
+interface QuickEditPopoverProps {
+  row: Row;
+  onSaved: (patch: QuickEditPatch) => void;
+}
+
+function QuickEditPopover({ row, onSaved }: QuickEditPopoverProps) {
+  const [open, setOpen] = useState(false);
+  const [titulo, setTitulo] = useState(row.titulo);
+  const [categoria, setCategoria] = useState<ConteudoCategoria | "">(row.categoria ?? "");
+  const [publicado, setPublicado] = useState(!!row.publicado);
+  const [saving, setSaving] = useState(false);
+
+  // Reset ao abrir para refletir valor mais recente
+  useEffect(() => {
+    if (open) {
+      setTitulo(row.titulo);
+      setCategoria(row.categoria ?? "");
+      setPublicado(!!row.publicado);
+    }
+  }, [open, row.titulo, row.categoria, row.publicado]);
+
+  const tituloTrim = titulo.trim();
+  const dirty =
+    tituloTrim !== row.titulo ||
+    (categoria || null) !== (row.categoria ?? null) ||
+    publicado !== !!row.publicado;
+
+  const handleSave = async () => {
+    if (!tituloTrim) {
+      toast.error("Título não pode ficar vazio");
+      return;
+    }
+    const novaCategoria: ConteudoCategoria | null =
+      categoria && isConteudoCategoria(categoria) ? categoria : null;
+
+    const patch: QuickEditPatch = {
+      titulo: tituloTrim,
+      categoria: novaCategoria,
+      publicado,
+    };
+
+    setSaving(true);
+    const { error } = await supabase.from("conteudo_tea").update(patch).eq("id", row.id);
+    setSaving(false);
+
+    if (error) {
+      toast.error("Não foi possível salvar", { description: error.message });
+      return;
+    }
+
+    onSaved(patch);
+    toast.success("Alterações salvas");
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 px-2"
+          aria-label="Edição rápida"
+          title="Edição rápida"
+        >
+          <Zap className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 space-y-4">
+        <div className="space-y-1">
+          <h4 className="font-semibold text-sm">Edição rápida</h4>
+          <p className="text-xs text-muted-foreground">
+            Para conteúdo, capa e SEO use o editor completo.
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor={`qe-titulo-${row.id}`} className="text-xs">
+            Título
+          </Label>
+          <Input
+            id={`qe-titulo-${row.id}`}
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            disabled={saving}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs">Categoria</Label>
+          <Select
+            value={categoria || "__none"}
+            onValueChange={(v) => setCategoria(v === "__none" ? "" : (v as ConteudoCategoria))}
+            disabled={saving}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none">Sem categoria</SelectItem>
+              {CONTEUDO_CATEGORIAS.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CONTEUDO_CATEGORIA_LABEL[c]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor={`qe-pub-${row.id}`} className="text-sm">
+              {publicado ? "Publicado" : "Rascunho"}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {publicado ? "Visível no site" : "Apenas no admin"}
+            </p>
+          </div>
+          <Switch
+            id={`qe-pub-${row.id}`}
+            checked={publicado}
+            onCheckedChange={setPublicado}
+            disabled={saving}
+            aria-label="Alternar publicado"
+          />
+        </div>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setOpen(false)}
+            disabled={saving}
+          >
+            Cancelar
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saving || !dirty} className="gap-1.5">
+            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Salvar
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
