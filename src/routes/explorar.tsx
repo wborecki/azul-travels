@@ -902,8 +902,40 @@ function Explorar() {
               </div>
             </div>
 
-            {/* Tipos como chips */}
-            <FilterGroup label="Tipo de estabelecimento">
+            {/* Categorias — chip ativa/desativa em bloco os tipos do grupo.
+                Mais legível que filtrar por 9 tipos individuais. */}
+            <FilterGroup label="Categoria">
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIAS.map((c) => {
+                  const tiposSet = new Set<EstabTipo>(c.tipos);
+                  const ativos = c.tipos.filter((t) => search.tipos.includes(t));
+                  const todosAtivos = ativos.length === c.tipos.length;
+                  const algumAtivo = ativos.length > 0;
+                  return (
+                    <Chip
+                      key={c.v}
+                      active={todosAtivos}
+                      onClick={() => {
+                        // Se tudo ativo, desliga toda a categoria; senão, liga tudo.
+                        const semCategoria = search.tipos.filter((t) => !tiposSet.has(t));
+                        const proximos = todosAtivos
+                          ? semCategoria
+                          : [...semCategoria, ...c.tipos];
+                        patchSearchResetPage({ tipos: proximos });
+                      }}
+                      label={
+                        algumAtivo && !todosAtivos
+                          ? `${c.l} (${ativos.length}/${c.tipos.length})`
+                          : c.l
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </FilterGroup>
+
+            {/* Tipos específicos como chips — refino dentro da categoria */}
+            <FilterGroup label="Tipo específico">
               <div className="flex flex-wrap gap-2">
                 {TIPOS.map((t) => (
                   <Chip
