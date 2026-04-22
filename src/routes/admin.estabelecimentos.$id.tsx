@@ -591,9 +591,19 @@ function AdminEstabelecimentoForm() {
       {/* Mapa */}
       <Section
         title="Localização no mapa"
-        description="Use latitude e longitude para posicionar o pino no mapa público."
+        description="Use latitude e longitude para posicionar o pino no mapa público. Você pode buscar automaticamente pelo endereço."
       >
-        <div className="grid sm:grid-cols-2 gap-4">
+        <GeocodeButton
+          endereco={form.endereco}
+          cidade={form.cidade}
+          estado={form.estado}
+          cep={form.cep}
+          onResult={(lat, lng) => {
+            set("latitude", String(lat));
+            set("longitude", String(lng));
+          }}
+        />
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
           <Field label="Latitude" error={errors.latitude} hint="Ex: -22.9711">
             <Input
               inputMode="decimal"
