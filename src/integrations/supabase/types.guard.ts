@@ -328,7 +328,51 @@ type _CheckDetalheAvaliacoesEmbed = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. Helper único de mídia (galeria + Tour 360°) — `pickEstabMedia`
+// 7. buildReservaPayload — ponte form → ReservaInsert sem coerção
+// ─────────────────────────────────────────────────────────────────────────────
+
+type BuildReservaArg = Parameters<typeof buildReservaPayload>[0];
+type BuildReservaReturn = ReturnType<typeof buildReservaPayload>;
+
+type _CheckBuildArgShape = AssertEqual<
+  BuildReservaArg,
+  ReservaFormInput,
+  "REGRESSION: buildReservaPayload deveria aceitar ReservaFormInput"
+>;
+type _CheckBuildReturnShape = AssertEqual<
+  BuildReservaReturn,
+  TablesInsert<"reservas">,
+  "REGRESSION: buildReservaPayload deveria devolver TablesInsert<reservas>"
+>;
+// Campos críticos do form precisam casar exatamente com as colunas da tabela.
+type _CheckFormFamiliaId = AssertEqual<
+  ReservaFormInput["familia_id"],
+  NonNullable<TablesInsert<"reservas">["familia_id"]>,
+  "REGRESSION: ReservaFormInput.familia_id divergiu da coluna"
+>;
+type _CheckFormEstabId = AssertEqual<
+  ReservaFormInput["estabelecimento_id"],
+  NonNullable<TablesInsert<"reservas">["estabelecimento_id"]>,
+  "REGRESSION: ReservaFormInput.estabelecimento_id divergiu da coluna"
+>;
+type _CheckFormPerfilId = AssertEqual<
+  ReservaFormInput["perfil_sensorial_id"],
+  NonNullable<TablesInsert<"reservas">["perfil_sensorial_id"]>,
+  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu da coluna"
+>;
+type _CheckFormAdultos = AssertEqual<
+  ReservaFormInput["num_adultos"],
+  NonNullable<Tables<"reservas">["num_adultos"]>,
+  "REGRESSION: ReservaFormInput.num_adultos divergiu da coluna"
+>;
+type _CheckFormAutistas = AssertEqual<
+  ReservaFormInput["num_autistas"],
+  NonNullable<Tables<"reservas">["num_autistas"]>,
+  "REGRESSION: ReservaFormInput.num_autistas divergiu da coluna"
+>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. Helper único de mídia (galeria + Tour 360°) — `pickEstabMedia`
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { pickEstabMedia, type EstabMedia } from "@/lib/media";
