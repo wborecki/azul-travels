@@ -39,7 +39,7 @@ function Artigo() {
         .or(filtroConteudoPublico())
         .maybeSingle();
       setA(data as ArtigoT | null);
-      if (data?.id) void registrarView(data.id);
+      if (data?.id) void registrarViewConteudo(data.id);
       if (data?.categoria) {
         const { data: r } = await supabase
           .from("conteudo_tea")
@@ -64,7 +64,7 @@ function Artigo() {
       if (!link) return;
       const href = link.getAttribute("href");
       if (!href || href.startsWith("#")) return;
-      void registrarClick(a.id, href);
+      void registrarClickConteudo(a.id, href);
     };
     node.addEventListener("click", handler);
     return () => node.removeEventListener("click", handler);
