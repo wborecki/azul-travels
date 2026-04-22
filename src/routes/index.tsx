@@ -882,27 +882,23 @@ function Depoimentos({ depoimentos }: { depoimentos: Depoimento[] }) {
       : `${d.cidade}`;
 
   return (
-    <section className="py-24 bg-primary text-primary-foreground">
+    <section className="py-16 bg-primary text-primary-foreground">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+        <Reveal className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
             Famílias que voltaram a viajar
           </h2>
-          <p className="mt-3 text-secondary italic text-lg">
+          <p className="mt-3 text-[15px] leading-relaxed text-white/75">
             Histórias reais de quem encontrou o lugar certo.
           </p>
         </Reveal>
 
         <Reveal className="relative max-w-3xl mx-auto">
-          <Quote
-            aria-hidden
-            className="absolute -top-6 -left-2 md:-left-8 h-28 w-28 md:h-32 md:w-32 text-secondary opacity-20"
-          />
           <div
             key={idx}
-            className="relative bg-white/5 backdrop-blur rounded-2xl p-8 md:p-10 border-l-4 border-secondary animate-fade-up"
+            className="relative bg-white/5 backdrop-blur rounded-2xl p-8 md:p-10 border-l-4 border-secondary animate-fade-in"
           >
-            <p className="text-lg md:text-xl text-white leading-relaxed italic">“{d.texto}”</p>
+            <p className="text-lg md:text-xl text-white leading-relaxed">{d.texto}</p>
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-display font-bold text-lg">
@@ -959,19 +955,16 @@ function Depoimentos({ depoimentos }: { depoimentos: Depoimento[] }) {
 
 function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | null }) {
   return (
-    <section className="py-20 bg-teal-claro">
+    <section className="py-16 bg-teal-claro">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <Reveal>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-secondary text-xs font-semibold border border-secondary/20">
-              <Gift className="h-3.5 w-3.5" /> Exclusivo para famílias TEA
-            </span>
-            <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold text-primary">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
               Benefícios que você não encontra em lugar nenhum
             </h2>
-            <p className="mt-4 text-foreground/80 leading-relaxed">
-              Parques, hotéis e restaurantes que oferecem entrada gratuita, filas prioritárias e
-              descontos exclusivos para pessoas autistas e seus acompanhantes.
+            <p className="mt-4 text-[15px] text-foreground/80 leading-relaxed">
+              Alguns estabelecimentos da plataforma oferecem entrada gratuita, meia-entrada e fila
+              prioritária para pessoas autistas. Tudo verificado pela nossa equipe.
             </p>
             <Button
               asChild
