@@ -1411,7 +1411,69 @@ function InfoLine({
   );
 }
 
-function ReservaStatusBadge({ status }: { status: Tables<"reservas">["status"] }) {
+/**
+ * Histórico de auditoria renderizado **inline** na linha expansível
+ * da tabela. Compacto, sem cabeçalhos — pensado para complementar a
+ * visualização rápida sem exigir abrir o drawer de detalhes.
+ */
+function InlineAuditoria({
+  logs,
+  loading,
+}: {
+  logs: Auditoria[] | undefined;
+  loading: boolean;
+}) {
+  if (loading || logs === undefined) {
+    return (
+      <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" /> Carregando histórico...
+      </p>
+    );
+  }
+  if (logs.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground italic">
+        Nenhuma alteração registrada ainda para esta reserva.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1.5">
+        <History className="h-3.5 w-3.5" /> Histórico ({logs.length})
+      </div>
+      <ol className="space-y-2">
+        {logs.map((log) => (
+          <li
+            key={log.id}
+            className="rounded-lg border bg-card px-3 py-2 text-sm"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground capitalize">{log.acao}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(log.status_anterior ?? "—") + " → " + (log.status_novo ?? "—")}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {new Date(log.criado_em).toLocaleString("pt-BR", {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                })}
+                {log.ator_email ? ` · ${log.ator_email}` : ""}
+              </span>
+            </div>
+            {log.observacao && (
+              <p className="text-sm text-foreground/80 mt-1.5 rounded bg-muted/40 px-2 py-1.5 whitespace-pre-wrap">
+                {log.observacao}
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
   switch (status) {
     case "confirmada":
       return <Badge className="bg-success/15 text-success hover:bg-success/15">Confirmada</Badge>;
