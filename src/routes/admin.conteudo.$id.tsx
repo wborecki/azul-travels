@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Constants } from "@/integrations/supabase/types";
+import {
+  CONTEUDO_CATEGORIAS,
+  CONTEUDO_CATEGORIA_LABEL,
+  isConteudoCategoria,
+  type ConteudoCategoria,
+} from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Save, Upload, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { CATEGORIA_LABEL, type ConteudoCategoria } from "@/lib/conteudo";
+// CATEGORIA_LABEL/CATEGORIAS importados de `@/lib/enums` no topo.
 
 export const Route = createFileRoute("/admin/conteudo/$id")({
   component: AdminConteudoForm,
@@ -27,7 +32,6 @@ export const Route = createFileRoute("/admin/conteudo/$id")({
 type ConteudoRow = Tables<"conteudo_tea">;
 type ConteudoInsert = TablesInsert<"conteudo_tea">;
 
-const CATEGORIAS = Constants.public.Enums.conteudo_categoria;
 const BUCKET = "conteudo-capas";
 
 const formSchema = z.object({
