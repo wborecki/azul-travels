@@ -466,28 +466,28 @@ function SelosImportantes() {
       cor: "bg-primary text-primary-foreground",
       nome: "Selo Azul",
       descricao:
-        "Absoluto Educacional — equipe treinada em TEA/ABA, mínimo 70% dos colaboradores certificados.",
+        "Emitido pela Absoluto Educacional. Exige que no mínimo 70% da equipe seja treinada em TEA/ABA com metodologia validada. O mais rigoroso do mercado.",
     },
     {
       Icon: Award,
       cor: "bg-success text-success-foreground",
       nome: "Certificação Governamental",
       descricao:
-        "Certificação pública (pós-aprovação PL 4108/2024). Estabelecimentos auditados por órgão federal.",
+        "Certificação pública federal. Passa a valer após a aprovação do PL 4108/2024, com auditoria por órgão governamental independente.",
     },
     {
       Icon: HomeIcon,
       cor: "bg-roxo-suave text-roxo-suave-foreground",
       nome: "Sala Sensorial",
       descricao:
-        "Ambiente físico adaptado, com controle de luz, som e texturas. Projeto validado por especialista TEA.",
+        "Espaço físico dedicado com controle de luz, volume e estímulos. Projeto validado por especialista em TEA. Seu filho tem para onde ir quando precisar.",
     },
     {
       Icon: Heart,
       cor: "bg-secondary text-secondary-foreground",
       nome: "Concierge TEA",
       descricao:
-        "Profissional dedicado ao acolhimento. Presente durante toda a experiência da família no estabelecimento.",
+        "Profissional especializado em autismo presente durante toda a sua estadia. Não é um funcionário treinado — é alguém que entende de verdade.",
     },
   ];
 
@@ -496,13 +496,13 @@ function SelosImportantes() {
       <div className="container mx-auto px-4">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Confiança real
+            Transparência total
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Aqui, cada certificação tem significado real
+            Cada selo que você vê foi ganho de verdade
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Não aceitamos simples declarações. Cada selo é auditado.
+            Qualquer hotel pode dizer que é inclusivo. Aqui, precisa provar.
           </p>
         </Reveal>
 
