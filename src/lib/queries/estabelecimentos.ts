@@ -104,20 +104,22 @@ export interface EstabelecimentosViewFilters {
  * /explorar, /beneficios-tea, etc. Evita duplicar `query.eq(...)`
  * espalhado pelas páginas.
  */
-export function applyEstabelecimentosViewFilters<
-  Q extends {
-    or: (s: string) => Q;
-    in: (col: string, vals: readonly string[]) => Q;
-    eq: (col: string, val: unknown) => Q;
-    not: (col: string, op: string, val: unknown) => Q;
-    limit: (n: number) => Q;
-  },
->(query: Q, filters: EstabelecimentosViewFilters = {}): Q {
+// Tipo aberto do builder do Postgrest — preserva o encadeamento tipado
+// no caller, ao mesmo tempo em que evita acoplar o helper a um shape
+// específico de Database/Schema (que mudaria o tipo dos parâmetros de
+// `eq`/`in` para union literal e quebraria o uso compartilhado).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyEstabBuilder = PostgrestFilterBuilder<any, any, any, any, any>;
+
+export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
+  query: Q,
+  filters: EstabelecimentosViewFilters = {},
+): Q {
   let q = query;
 
   if (filters.busca && filters.busca.trim()) {
     const term = filters.busca.trim().replace(/[,()]/g, " ");
-    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo.ilike.%${term}%`);
+    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo.ilike.%${term}%`) as Q;
   }
 
   const tiposCombinados: ReadonlyArray<EstabelecimentoFull["tipo"]> = [
@@ -125,20 +127,20 @@ export function applyEstabelecimentosViewFilters<
     ...(filters.tipo ? [filters.tipo] : []),
   ];
   if (tiposCombinados.length === 1) {
-    q = q.eq("tipo", tiposCombinados[0]);
+    q = q.eq("tipo", tiposCombinados[0]) as Q;
   } else if (tiposCombinados.length > 1) {
-    q = q.in("tipo", tiposCombinados as readonly string[]);
+    q = q.in("tipo", tiposCombinados as readonly string[]) as Q;
   }
 
-  if (filters.estado) q = q.eq("estado", filters.estado);
-  if (filters.apenasDestaque) q = q.eq("destaque", true);
-  if (filters.apenasComBeneficio) q = q.eq("tem_beneficio_tea", true);
-  if (filters.apenasComTour360) q = q.not("tour_360_url", "is", null);
+  if (filters.estado) q = q.eq("estado", filters.estado) as Q;
+  if (filters.apenasDestaque) q = q.eq("destaque", true) as Q;
+  if (filters.apenasComBeneficio) q = q.eq("tem_beneficio_tea", true) as Q;
+  if (filters.apenasComTour360) q = q.not("tour_360_url", "is", null) as Q;
 
-  for (const s of filters.selos ?? []) q = q.eq(s, true);
-  for (const r of filters.recursos ?? []) q = q.eq(r, true);
+  for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
+  for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;
 
-  if (filters.limite) q = q.limit(filters.limite);
+  if (filters.limite) q = q.limit(filters.limite) as Q;
 
   return q;
 }
