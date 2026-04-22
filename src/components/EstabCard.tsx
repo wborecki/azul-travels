@@ -10,30 +10,52 @@ export type Estab = EstabelecimentoView;
  * Props do EstabCard. Aceita:
  *  - `vm: EstabCardVM` (preferido — tipagem forte via `EstabCardProps`)
  *  - `e: EstabelecimentoView` (legado — mapeia internamente)
- *
- * Em ambos os casos as props são derivadas do payload central — você
- * não consegue passar um campo que não existe.
  */
 type EstabCardComponentProps = EstabCardProps | { e: EstabelecimentoView; maxRecursos?: number };
+
+/**
+ * Emoji de fallback quando o estabelecimento não tem `foto_capa`.
+ * Derivado de `tipoLabel` (já presente no VM) — evita adicionar campo
+ * novo ao VM e quebrar os guards em core-payloads.guard.ts.
+ */
+function emojiPorTipoLabel(tipoLabel: string): string {
+  const t = tipoLabel.toLowerCase();
+  if (t.includes("restaurante")) return "🍽️";
+  if (t.includes("parque") || t.includes("atra")) return "🎡";
+  if (t.includes("transporte")) return "✈️";
+  if (t.includes("agência") || t.includes("agencia")) return "🧳";
+  // hotel, pousada, resort, default
+  return "🏨";
+}
 
 export function EstabCard(props: EstabCardComponentProps) {
   const vm = "vm" in props ? props.vm : mapEstabCard(props.e);
   const maxRecursos = props.maxRecursos ?? 3;
+  const emojiFallback = emojiPorTipoLabel(vm.tipoLabel);
 
   return (
     <Link
       to="/estabelecimento/$slug"
       params={{ slug: vm.slug }}
-      className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-300 border border-border/50 flex flex-col animate-fade-up"
+      className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-300 border border-border/50 flex flex-col h-full animate-fade-up"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {vm.media.fotoCapa && (
+      {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
+      <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
+        {vm.media.fotoCapa ? (
           <img
             src={vm.media.fotoCapa}
             alt={vm.nome}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            style={{ objectPosition: "center 30%" }}
           />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-azul-claro to-teal-claro"
+          >
+            <span className="text-5xl opacity-30">{emojiFallback}</span>
+          </div>
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
           {vm.temSeloAzul && <Pill {...SELO_BADGES.selo_azul} />}
