@@ -16,6 +16,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
+  brtInputValueToIso,
+  derivarEstado,
+  formatBrtDateTime,
+  isoToBrtInputValue,
+  type PublicacaoEstado,
+} from "@/lib/agendamentoConteudo";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -72,6 +79,10 @@ interface FormState {
   conteudo: string;
   foto_capa: string;
   publicado: boolean;
+  /** Valor para `<input type="datetime-local">` em horário de Brasília. */
+  publicar_em_brt: string;
+  /** Estado escolhido pelo admin no seletor de Publicação. */
+  estado: PublicacaoEstado;
 }
 
 function emptyForm(): FormState {
@@ -84,10 +95,16 @@ function emptyForm(): FormState {
     conteudo: "",
     foto_capa: "",
     publicado: false,
+    publicar_em_brt: "",
+    estado: "rascunho",
   };
 }
 
 function rowToForm(r: ConteudoRow): FormState {
+  const estado = derivarEstado({
+    publicado: !!r.publicado,
+    publicar_em: r.publicar_em ?? null,
+  });
   return {
     titulo: r.titulo ?? "",
     slug: r.slug ?? "",
@@ -97,6 +114,8 @@ function rowToForm(r: ConteudoRow): FormState {
     conteudo: r.conteudo ?? "",
     foto_capa: r.foto_capa ?? "",
     publicado: !!r.publicado,
+    publicar_em_brt: isoToBrtInputValue(r.publicar_em),
+    estado,
   };
 }
 
@@ -201,6 +220,33 @@ function AdminConteudoForm() {
     }
 
     const v = parsed.data;
+
+    // Resolve estado → (publicado, publicar_em)
+    let publicado = false;
+    let publicarEmIso: string | null = null;
+    if (form.estado === "publicado") {
+      publicado = true;
+      publicarEmIso = null;
+    } else if (form.estado === "agendado") {
+      const iso = brtInputValueToIso(form.publicar_em_brt);
+      if (!iso) {
+        setErrors({ publicar_em: "Escolha data e hora para o agendamento" });
+        toast.error("Defina a data/hora do agendamento");
+        return;
+      }
+      if (new Date(iso).getTime() <= Date.now()) {
+        setErrors({ publicar_em: "A data deve estar no futuro" });
+        toast.error("Escolha uma data/hora futura");
+        return;
+      }
+      publicado = false;
+      publicarEmIso = iso;
+    } else {
+      // rascunho
+      publicado = false;
+      publicarEmIso = null;
+    }
+
     const payload: ConteudoInsert = {
       titulo: v.titulo,
       slug: v.slug,
@@ -209,7 +255,8 @@ function AdminConteudoForm() {
       resumo: v.resumo,
       conteudo: v.conteudo,
       foto_capa: v.foto_capa || null,
-      publicado: form.publicado,
+      publicado,
+      publicar_em: publicarEmIso,
     };
 
     setSaving(true);
@@ -369,21 +416,55 @@ function AdminConteudoForm() {
         {/* Sidebar */}
         <div className="space-y-6">
           <Section title="Publicação">
-            <div className="flex items-center gap-3 rounded-xl border bg-muted/30 px-3 py-2.5">
-              <div className="flex-1">
-                <Label htmlFor="pub" className="cursor-pointer text-sm font-medium">
-                  Publicado
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {form.publicado ? "Visível no site público" : "Apenas no painel admin"}
-                </p>
-              </div>
-              <Switch
-                id="pub"
-                checked={form.publicado}
-                onCheckedChange={(v) => set("publicado", v)}
-              />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-foreground/80">Estado</Label>
+              <Select
+                value={form.estado}
+                onValueChange={(v) => set("estado", v as PublicacaoEstado)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rascunho">📝 Rascunho — apenas no admin</SelectItem>
+                  <SelectItem value="agendado">⏰ Agendar publicação</SelectItem>
+                  <SelectItem value="publicado">🌐 Publicar agora</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {form.estado === "publicado" && "Vai ficar visível no site público assim que salvar."}
+                {form.estado === "rascunho" && "Visível apenas no painel admin."}
+                {form.estado === "agendado" && "Será publicado automaticamente na data abaixo."}
+              </p>
             </div>
+
+            {form.estado === "agendado" && (
+              <div className="space-y-1.5 mt-4">
+                <Label
+                  htmlFor="publicar_em"
+                  className="text-sm font-medium text-foreground/80"
+                >
+                  Publicar em <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="publicar_em"
+                  type="datetime-local"
+                  value={form.publicar_em_brt}
+                  onChange={(e) => set("publicar_em_brt", e.target.value)}
+                  min={isoToBrtInputValue(new Date().toISOString())}
+                />
+                {errors.publicar_em ? (
+                  <p className="text-xs text-destructive">{errors.publicar_em}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Horário de Brasília (BRT).
+                    {form.publicar_em_brt &&
+                      brtInputValueToIso(form.publicar_em_brt) &&
+                      ` Publicará em ${formatBrtDateTime(brtInputValueToIso(form.publicar_em_brt))}.`}
+                  </p>
+                )}
+              </div>
+            )}
 
             <Field label="Categoria" className="mt-4">
               <Select

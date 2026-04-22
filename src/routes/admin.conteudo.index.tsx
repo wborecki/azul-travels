@@ -46,6 +46,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatBrtDateTime } from "@/lib/agendamentoConteudo";
 
 export const Route = createFileRoute("/admin/conteudo/")({
   component: AdminConteudo,
@@ -297,6 +298,10 @@ function AdminConteudo() {
                       {r.publicado ? (
                         <Badge className="bg-success/15 text-success hover:bg-success/15">
                           Publicado
+                        </Badge>
+                      ) : r.publicar_em && new Date(r.publicar_em).getTime() > Date.now() ? (
+                        <Badge className="bg-amarelo/20 text-amarelo-foreground hover:bg-amarelo/20">
+                          ⏰ Agendado · {formatBrtDateTime(r.publicar_em)}
                         </Badge>
                       ) : (
                         <Badge variant="secondary">Rascunho</Badge>

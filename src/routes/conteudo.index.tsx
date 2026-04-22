@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Search, X } from "lucide-react";
 import { formatDateBR } from "@/lib/brazil";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
   CONTEUDO_CATEGORIAS,
   CONTEUDO_CATEGORIA_LABEL,
@@ -91,7 +92,7 @@ function ConteudoLista() {
       let query = supabase
         .from("conteudo_tea")
         .select("slug,titulo,resumo,foto_capa,categoria,criado_em,autor", { count: "exact" })
-        .eq("publicado", true)
+        .or(filtroConteudoPublico())
         .order("criado_em", { ascending: false })
         .range(from, to);
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateBR } from "@/lib/brazil";
 import { MarkdownView } from "@/components/MarkdownView";
+import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 
 export const Route = createFileRoute("/conteudo/$slug")({
   component: Artigo,
@@ -32,14 +33,14 @@ function Artigo() {
         .from("conteudo_tea")
         .select("*")
         .eq("slug", slug)
-        .eq("publicado", true)
+        .or(filtroConteudoPublico())
         .maybeSingle();
       setA(data as ArtigoT | null);
       if (data?.categoria) {
         const { data: r } = await supabase
           .from("conteudo_tea")
           .select("*")
-          .eq("publicado", true)
+          .or(filtroConteudoPublico())
           .eq("categoria", data.categoria)
           .neq("slug", slug)
           .limit(3);
