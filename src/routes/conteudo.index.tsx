@@ -52,6 +52,8 @@ const CATS: ReadonlyArray<{ v: "todas" | ConteudoCategoria; l: string }> = [
   ...CONTEUDO_CATEGORIAS.map((v) => ({ v, l: CONTEUDO_CATEGORIA_LABEL[v] })),
 ];
 
+type ConteudoSearch = { q: string; cat: string; page: number };
+
 function ConteudoLista() {
   const { q, cat, page } = Route.useSearch();
   const navigate = useNavigate({ from: "/conteudo" });
@@ -67,7 +69,7 @@ function ConteudoLista() {
   useEffect(() => {
     if (buscaDebounced !== q) {
       void navigate({
-        search: (prev) => ({ ...prev, q: buscaDebounced, page: 1 }),
+        search: (prev: ConteudoSearch) => ({ ...prev, q: buscaDebounced, page: 1 }),
         replace: true,
       });
     }
