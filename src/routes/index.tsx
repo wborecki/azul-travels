@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,6 +155,7 @@ function calcularCompatibilidade(
 
 function Landing() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
 
   const [destaques, setDestaques] = useState<EstabelecimentoView[] | null>(null);
@@ -229,16 +231,39 @@ function Landing() {
     })();
   }, [user]);
 
+  /**
+   * Roteamento contextual do CTA "criar perfil sensorial":
+   *   - sem login → /cadastro
+   *   - logado, sem perfil → /minha-conta/perfil-sensorial
+   *   - logado, com perfil → /explorar (já pode usar a plataforma)
+   */
+  const goCriarPerfil = useCallback(() => {
+    if (!user) {
+      void navigate({ to: "/cadastro" });
+      return;
+    }
+    if (!perfilPrincipal) {
+      void navigate({ to: "/minha-conta/perfil-sensorial" });
+      return;
+    }
+    void navigate({ to: "/explorar" });
+  }, [user, perfilPrincipal, navigate]);
+
   return (
     <div>
       <Hero busca={busca} setBusca={setBusca} />
       <ComoFunciona />
       <SelosImportantes />
-      <DestinosDestaque destaques={destaques} perfil={perfilPrincipal} userLogado={!!user} />
+      <DestinosDestaque
+        destaques={destaques}
+        perfil={perfilPrincipal}
+        userLogado={!!user}
+        onCriarPerfil={goCriarPerfil}
+      />
       <Depoimentos depoimentos={depoimentos} />
       <BeneficiosTea beneficios={beneficios} />
       <BlogTeaser artigos={artigos} />
-      <CtaFinal />
+      <CtaFinal onCriarPerfil={goCriarPerfil} />
     </div>
   );
 }
@@ -248,6 +273,7 @@ function Landing() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => void }) {
+  const navigate = useNavigate();
   return (
     <section id="hero" className="relative overflow-hidden">
       <img
@@ -286,7 +312,11 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = `/explorar?q=${encodeURIComponent(busca)}`;
+              const q = busca.trim();
+              void navigate({
+                to: "/explorar",
+                search: q ? { q } : {},
+              });
             }}
             className="mt-8 bg-white rounded-2xl p-2 shadow-elegant flex items-center gap-2 max-w-2xl mx-auto"
           >
@@ -303,26 +333,26 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
             <Button
               type="submit"
               size="lg"
-              className="rounded-xl bg-primary hover:bg-primary/90 px-6"
+              className="rounded-xl bg-primary hover:bg-primary/90 px-6 min-h-[44px]"
             >
               Buscar destinos
             </Button>
           </form>
 
-          {/* Chips */}
+          {/* Chips — passam o tipo via array (filtro multi-tipo do /explorar) */}
           <div className="mt-5 flex flex-wrap gap-2 justify-center">
             {[
-              { label: "🏨 Hotéis", q: "hotel" },
-              { label: "🍽️ Restaurantes", q: "restaurante" },
-              { label: "🎡 Parques", q: "parque" },
-              { label: "🌊 Resorts", q: "resort" },
-              { label: "🌳 Pousadas", q: "pousada" },
+              { label: "🏨 Hotéis", q: "hotel" as const },
+              { label: "🍽️ Restaurantes", q: "restaurante" as const },
+              { label: "🎡 Parques", q: "parque" as const },
+              { label: "🌊 Resorts", q: "resort" as const },
+              { label: "🌳 Pousadas", q: "pousada" as const },
             ].map((c) => (
               <Link
                 key={c.q}
                 to="/explorar"
-                search={{ tipo: c.q }}
-                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition"
+                search={{ tipos: [c.q] }}
+                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center"
               >
                 {c.label}
               </Link>
@@ -336,15 +366,21 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
             <Counter target={4.8} decimals={1} suffix="★" label="Avaliação média das famílias" />
           </div>
 
-          {/* Scroll indicator */}
-          <a
-            href="#como-funciona"
-            className="mt-14 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint"
-            aria-label="Veja como funciona"
+          {/* Scroll indicator — scroll suave até a seção "Como funciona" */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              document
+                .getElementById("como-funciona")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="mt-14 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint cursor-pointer"
+            aria-label="Veja como funciona — rolar para a seção"
           >
-            <span>Veja como funciona</span>
+            <span>↓ Veja como funciona</span>
             <ChevronDown className="h-5 w-5" />
-          </a>
+          </button>
         </div>
       </div>
     </section>
@@ -528,10 +564,10 @@ function SelosImportantes() {
 
         <Reveal className="mt-10 text-center">
           <Link
-            to="/conteudo"
+            to="/sobre-os-selos"
             className="inline-flex items-center gap-1 text-secondary font-semibold hover:text-primary transition"
           >
-            Como obtemos nossas certificações? <ArrowRight className="h-4 w-4" />
+            Entenda como auditamos cada estabelecimento <ArrowRight className="h-4 w-4" />
           </Link>
         </Reveal>
       </div>
@@ -547,10 +583,12 @@ function DestinosDestaque({
   destaques,
   perfil,
   userLogado,
+  onCriarPerfil,
 }: {
   destaques: EstabelecimentoView[] | null;
   perfil: PerfilSensorial | null;
   userLogado: boolean;
+  onCriarPerfil: () => void;
 }) {
   return (
     <section className="py-20 bg-background">
@@ -605,10 +643,13 @@ function DestinosDestaque({
           <p className="text-lg text-foreground">
             Quer ver estabelecimentos compatíveis com o perfil do seu filho?
           </p>
-          <Button asChild size="lg" className="mt-4 bg-primary hover:bg-primary/90">
-            <Link to="/cadastro">
-              Criar perfil sensorial gratuito <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+          <Button
+            type="button"
+            size="lg"
+            className="mt-4 bg-primary hover:bg-primary/90 min-h-[44px]"
+            onClick={onCriarPerfil}
+          >
+            Criar perfil sensorial — é gratuito <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </Reveal>
       </div>
@@ -1025,7 +1066,7 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
 // CTA FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CtaFinal() {
+function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
   return (
     <section className="py-24 gradient-cta-final text-white">
       <div className="container mx-auto px-4">
@@ -1038,13 +1079,12 @@ function CtaFinal() {
             Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos e muda tudo.
           </p>
           <Button
-            asChild
+            type="button"
             size="lg"
-            className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold"
+            onClick={onCriarPerfil}
+            className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold min-h-[44px]"
           >
-            <Link to="/cadastro">
-              Criar meu perfil sensorial <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+            Quero criar o perfil do meu filho <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
           <p className="mt-5 text-xs text-white/60">
             ✓ Gratuito · ✓ Sem compromisso · ✓ Dados protegidos pela LGPD

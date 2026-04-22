@@ -9,6 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ParaEstabelecimentosRouteImport } from './routes/para-estabelecimentos'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExplorarRouteImport } from './routes/explorar'
@@ -34,6 +39,31 @@ import { Route as AdminConteudoAnalyticsRouteImport } from './routes/admin.conte
 import { Route as AdminConteudoIdRouteImport } from './routes/admin.conteudo.$id'
 import { Route as AdminEstabelecimentosIdPreviewRouteImport } from './routes/admin.estabelecimentos.$id.preview'
 
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreOsSelosRoute = SobreOsSelosRouteImport.update({
+  id: '/sobre-os-selos',
+  path: '/sobre-os-selos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParaEstabelecimentosRoute = ParaEstabelecimentosRouteImport.update({
+  id: '/para-estabelecimentos',
+  path: '/para-estabelecimentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MinhaContaRoute = MinhaContaRouteImport.update({
   id: '/minha-conta',
   path: '/minha-conta',
@@ -166,6 +196,11 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sobre': typeof SobreRoute
+  '/sobre-os-selos': typeof SobreOsSelosRoute
+  '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -190,6 +225,11 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
+  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sobre': typeof SobreRoute
+  '/sobre-os-selos': typeof SobreOsSelosRoute
+  '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -217,6 +257,11 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sobre': typeof SobreRoute
+  '/sobre-os-selos': typeof SobreOsSelosRoute
+  '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -245,6 +290,11 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/para-estabelecimentos'
+    | '/privacidade'
+    | '/sobre'
+    | '/sobre-os-selos'
+    | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
@@ -269,6 +319,11 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/explorar'
     | '/login'
+    | '/para-estabelecimentos'
+    | '/privacidade'
+    | '/sobre'
+    | '/sobre-os-selos'
+    | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
@@ -295,6 +350,11 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/para-estabelecimentos'
+    | '/privacidade'
+    | '/sobre'
+    | '/sobre-os-selos'
+    | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
@@ -322,6 +382,11 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   LoginRoute: typeof LoginRoute
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
+  ParaEstabelecimentosRoute: typeof ParaEstabelecimentosRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  SobreRoute: typeof SobreRoute
+  SobreOsSelosRoute: typeof SobreOsSelosRoute
+  TermosRoute: typeof TermosRoute
   ConteudoSlugRoute: typeof ConteudoSlugRoute
   EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
   LSlugRoute: typeof LSlugRoute
@@ -330,6 +395,41 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre-os-selos': {
+      id: '/sobre-os-selos'
+      path: '/sobre-os-selos'
+      fullPath: '/sobre-os-selos'
+      preLoaderRoute: typeof SobreOsSelosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/para-estabelecimentos': {
+      id: '/para-estabelecimentos'
+      path: '/para-estabelecimentos'
+      fullPath: '/para-estabelecimentos'
+      preLoaderRoute: typeof ParaEstabelecimentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/minha-conta': {
       id: '/minha-conta'
       path: '/minha-conta'
@@ -565,6 +665,11 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   LoginRoute: LoginRoute,
   MinhaContaRoute: MinhaContaRouteWithChildren,
+  ParaEstabelecimentosRoute: ParaEstabelecimentosRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  SobreRoute: SobreRoute,
+  SobreOsSelosRoute: SobreOsSelosRoute,
+  TermosRoute: TermosRoute,
   ConteudoSlugRoute: ConteudoSlugRoute,
   EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
   LSlugRoute: LSlugRoute,
