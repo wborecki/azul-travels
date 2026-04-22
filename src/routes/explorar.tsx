@@ -191,9 +191,15 @@ function Explorar() {
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  // `loading` = primeira página dos filtros atuais (mostra skeletons).
+  // `loadingMore` = páginas subsequentes (infinite scroll, mostra spinner).
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
+  // Sentinel observado pelo IntersectionObserver — quando entra na
+  // viewport, dispara o carregamento da próxima página.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   /**
    * Atualiza a query string preservando outros params e **reseta a
