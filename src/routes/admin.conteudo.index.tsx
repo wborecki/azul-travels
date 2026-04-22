@@ -2,10 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchConteudosAdmin, type ConteudoAdminRow } from "@/lib/queries";
-import { CONTEUDO_CATEGORIAS, CONTEUDO_CATEGORIA_LABEL } from "@/lib/enums";
+import {
+  CONTEUDO_CATEGORIAS,
+  CONTEUDO_CATEGORIA_LABEL,
+  isConteudoCategoria,
+  type ConteudoCategoria,
+} from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -13,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +31,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, Pencil, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Loader2,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/conteudo/")({
