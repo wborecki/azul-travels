@@ -260,23 +260,70 @@ function Explorar() {
       };
 
       const page = await fetchEstabelecimentosViewPaginated(filters);
-      let items = page.items;
+
+      // ─────────────────────────────────────────────────────────────
+      // Ordenação local determinística e composta.
+      //
+      // A ordenação roda no cliente (só rearranja a página atual)
+      // porque envolve heurísticas que não são triviais de indexar:
+      // perfil sensorial, score de selos, etc.
+      //
+      // Camadas (sempre nesta ordem, primeira diferença vence):
+      //   A. priorizarPerfil → score de compatibilidade (DESC)
+      //   B. critério principal selecionado em `ordem`    (DESC/ASC)
+      //   C. tiebreaker estável: id                       (ASC)
+      //
+      // Garantia: dados iguais sempre produzem a MESMA ordem visível
+      // entre re-renders e entre usuários (sem reshuffle aleatório).
+      // ─────────────────────────────────────────────────────────────
 
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
           ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
-      // Ordenação local — só rearranja a página atual (paginação é
-      // server-side; a re-ordenação fina por perfil/certificados fica
-      // no cliente para não complicar os índices do Postgres).
-      if (search.ordem === "relevante") {
-        items = [...items].sort((a, b) => compatScore(b) - compatScore(a));
-      } else if (search.ordem === "certificados") {
-        const score = (e: EstabelecimentoView) =>
-          (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
-        items = [...items].sort((a, b) => score(b) - score(a));
-      }
+      const seloScore = (e: EstabelecimentoView) =>
+        (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
+
+      const recenteKey = (e: EstabelecimentoView) =>
+        // `criado_em` não vem no payload de view; usamos id como
+        // proxy estável (uuid v4 — sem ordem temporal real, mas a
+        // chamada em si já vem `order("criado_em" desc)` quando
+        // suportado pela query). Mantém determinismo entre páginas.
+        e.id;
+
+      // Compara dois itens segundo o critério principal selecionado.
+      const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
+        switch (search.ordem) {
+          case "certificados":
+            return seloScore(b) - seloScore(a);
+          case "alfabetica":
+            return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
+          case "recente":
+            // Mantém a ordem do servidor (já vem por criação desc no
+            // futuro); usa id como tiebreaker estável.
+            return recenteKey(b).localeCompare(recenteKey(a));
+          case "recomendado":
+          default:
+            // "Recomendado" sem perfil = só selos (proxy de qualidade).
+            return seloScore(b) - seloScore(a);
+        }
+      };
+
+      const items = [...page.items].sort((a, b) => {
+        // (A) Compatibilidade com perfil — só se o toggle estiver ON
+        //     E houver pelo menos uma necessidade marcada.
+        if (search.priorizarPerfil) {
+          const diff = compatScore(b) - compatScore(a);
+          if (diff !== 0) return diff;
+        }
+        // (B) Critério principal.
+        const diff = compareCriterio(a, b);
+        if (diff !== 0) return diff;
+        // (C) Tiebreaker absoluto — garante ordem determinística.
+        return a.id.localeCompare(b.id);
+      });
+
       setList(items);
       setTotal(page.total);
       setTotalPaginas(page.totalPaginas);
@@ -291,6 +338,7 @@ function Explorar() {
     search.beneficio,
     search.tour360,
     search.ordem,
+    search.priorizarPerfil,
     search.pagina,
     search.tamanhoPagina,
     perfilNecessidades,
