@@ -167,6 +167,33 @@ function Landing() {
   const [artigos, setArtigos] = useState<ArtigoCard[] | null>(null);
   const [perfilPrincipal, setPerfilPrincipal] = useState<PerfilSensorial | null>(null);
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>(DEPOIMENTOS_SEED);
+  const [stats, setStats] = useState<{ destinos: number; estados: number; media: number }>({
+    destinos: 0,
+    estados: 0,
+    media: 4.8,
+  });
+
+  // Stats reais para o Hero (contadores animados)
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("estabelecimentos")
+        .select("estado")
+        .eq("status", "ativo");
+      const { data: avs } = await supabase
+        .from("avaliacoes")
+        .select("nota_geral")
+        .eq("publica", true)
+        .not("nota_geral", "is", null);
+      const destinos = data?.length ?? 0;
+      const estados = new Set((data ?? []).map((e) => e.estado).filter(Boolean)).size;
+      const notas = (avs ?? []).map((a) => a.nota_geral as number);
+      const media = notas.length
+        ? Number((notas.reduce((s, n) => s + n, 0) / notas.length).toFixed(1))
+        : 4.8;
+      setStats({ destinos, estados, media });
+    })();
+  }, []);
 
   // Carrega dados públicos
   useEffect(() => {
@@ -271,7 +298,7 @@ function Landing() {
 
   return (
     <div>
-      <Hero busca={busca} setBusca={setBusca} />
+      <Hero busca={busca} setBusca={setBusca} stats={stats} />
       <ComoFunciona />
       <SelosImportantes />
       <DestinosDestaque
@@ -292,7 +319,15 @@ function Landing() {
 // HERO
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => void }) {
+function Hero({
+  busca,
+  setBusca,
+  stats,
+}: {
+  busca: string;
+  setBusca: (v: string) => void;
+  stats: { destinos: number; estados: number; media: number };
+}) {
   const navigate = useNavigate();
   return (
     <section id="hero" className="relative overflow-hidden">
@@ -383,9 +418,14 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
 
           {/* Indicadores com contador animado */}
           <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
-            <Counter target={247} suffix="" label="Destinos verificados" />
-            <Counter target={12} suffix="" label="Estados do Brasil" />
-            <Counter target={4.8} decimals={1} suffix="★" label="Avaliação média das famílias" />
+            <Counter target={stats.destinos || 247} suffix="" label="Destinos verificados" />
+            <Counter target={stats.estados || 12} suffix="" label="Estados do Brasil" />
+            <Counter
+              target={stats.media}
+              decimals={1}
+              suffix="★"
+              label="Avaliação média das famílias"
+            />
           </div>
 
           {/* Scroll indicator — scroll suave até a seção "Como funciona" */}
