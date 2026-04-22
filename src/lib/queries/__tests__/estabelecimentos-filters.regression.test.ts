@@ -28,7 +28,6 @@
  */
 
 import { describe, expectTypeOf, it } from "vitest";
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import {
   applyEstabelecimentosViewFilters,
   type EstabelecimentosViewFilters,
@@ -42,8 +41,21 @@ type EstabRow = Tables<"estabelecimentos">;
 // Builder mínimo apenas para satisfazer a assinatura genérica do
 // helper — nunca executado em runtime real. Stub fluente: cada método
 // devolve o próprio objeto para permitir o encadeamento que o helper faz.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyBuilder = PostgrestFilterBuilder<any, any, any, any, any>;
+//
+// Definimos o tipo aqui como interface estrutural (mesmos métodos que
+// `AnyEstabBuilder` espera no helper) em vez de importar
+// `@supabase/postgrest-js` — esse subpath não está exposto na
+// resolução do workspace.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+interface AnyBuilder {
+  or(...args: any[]): any;
+  eq(...args: any[]): any;
+  in(...args: any[]): any;
+  not(...args: any[]): any;
+  limit(...args: any[]): any;
+  range(...args: any[]): any;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 const fluentStub: Record<string, (...args: unknown[]) => unknown> = {};
 for (const m of ["eq", "in", "or", "not", "limit", "range"] as const) {
   fluentStub[m] = () => fluentStub;
