@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Tables } from "@/integrations/supabase/types";
 import {
-  fetchReservasAdmin,
+  fetchReservasAdminPaginated,
+  fetchReservasAdminStatusCounts,
   fetchAuditoriaPorReserva,
   type ReservaAdminRow,
   type AuditoriaRow,
@@ -21,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 import {
   Sheet,
   SheetContent,
@@ -73,12 +76,26 @@ const FILTERS = [
 
 type FilterKey = (typeof FILTERS)[number]["key"];
 
+const TAMANHO_PAGINA_INICIAL = 20;
+
 function AdminReservas() {
   const { user } = useAuth();
   const [rows, setRows] = useState<ReservaAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>("todas");
   const [q, setQ] = useState("");
+  const qDebounced = useDebouncedValue(q, 300);
+  const [pagina, setPagina] = useState(1);
+  const [tamanhoPagina, setTamanhoPagina] = useState<number>(TAMANHO_PAGINA_INICIAL);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [counts, setCounts] = useState<Record<string, number>>({
+    todas: 0,
+    pendente: 0,
+    confirmada: 0,
+    cancelada: 0,
+    concluida: 0,
+  });
   const [selected, setSelected] = useState<ReservaAdmin | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
     reserva: ReservaAdmin;
@@ -96,48 +113,60 @@ function AdminReservas() {
   const [bulkObservacao, setBulkObservacao] = useState("");
   const [savingBulk, setSavingBulk] = useState(false);
 
+  /** Recarrega contadores globais por status (independentes da página). */
+  const refreshCounts = useCallback(async () => {
+    try {
+      const c = await fetchReservasAdminStatusCounts();
+      setCounts({
+        todas: c.todas,
+        pendente: c.pendente,
+        confirmada: c.confirmada,
+        cancelada: c.cancelada,
+        concluida: c.concluida,
+      });
+    } catch {
+      // contadores são best-effort; não bloqueiam a tela
+    }
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchReservasAdmin();
-      setRows(data);
+      const page = await fetchReservasAdminPaginated({
+        pagina,
+        tamanhoPagina,
+        status: filter === "todas" ? undefined : filter,
+        busca: qDebounced.trim() || undefined,
+      });
+      setRows(page.items);
+      setTotal(page.total);
+      setTotalPaginas(page.totalPaginas);
+      if (page.pagina > page.totalPaginas) {
+        setPagina(page.totalPaginas);
+      }
     } catch (err) {
       toast.error("Erro ao carregar reservas", {
         description: err instanceof Error ? err.message : undefined,
       });
     }
     setLoading(false);
-  }, []);
+  }, [pagina, tamanhoPagina, filter, qDebounced]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const filtered = useMemo(() => {
-    const byStatus = filter === "todas" ? rows : rows.filter((r) => r.status === filter);
-    const term = q.trim().toLowerCase();
-    if (!term) return byStatus;
-    return byStatus.filter((r) =>
-      [
-        r.estabelecimentos?.nome,
-        r.estabelecimentos?.cidade,
-        r.familia_profiles?.nome_responsavel,
-        r.familia_profiles?.email,
-        r.mensagem,
-      ]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(term)),
-    );
-  }, [rows, filter, q]);
+  useEffect(() => {
+    void refreshCounts();
+  }, [refreshCounts]);
 
-  const counts = useMemo(() => {
-    const acc: Record<string, number> = { todas: rows.length };
-    for (const r of rows) {
-      const k = r.status ?? "pendente";
-      acc[k] = (acc[k] ?? 0) + 1;
-    }
-    return acc;
-  }, [rows]);
+  // Reseta para página 1 quando filtro/busca/tamanho mudam.
+  useEffect(() => {
+    setPagina(1);
+  }, [filter, qDebounced, tamanhoPagina]);
+
+  // Filtro/busca já vêm aplicados do servidor → a página atual é a "view".
+  const filtered = rows;
 
   const askAction = (reserva: ReservaAdmin, next: ReservaStatus) => {
     setObservacao("");
@@ -194,6 +223,7 @@ function AdminReservas() {
       setSelected({ ...reserva, status: next });
     }
     setConfirmAction(null);
+    void refreshCounts();
   };
 
   // ─── Seleção em lote ───────────────────────────────────────────────
@@ -318,6 +348,7 @@ function AdminReservas() {
     }
     setSelecionadas(new Set());
     setBulkAction(null);
+    void refreshCounts();
   };
 
   return (
@@ -326,7 +357,11 @@ function AdminReservas() {
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">Reservas</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {loading ? "Carregando..." : `${filtered.length} de ${rows.length} reserva(s)`}
+            {loading
+              ? "Carregando..."
+              : total === 0
+                ? "Nenhuma reserva encontrada"
+                : `${total} reserva(s)${filter !== "todas" || qDebounced ? " no filtro atual" : ""}`}
           </p>
         </div>
         <div className="relative w-full sm:w-80">
@@ -497,6 +532,16 @@ function AdminReservas() {
             </tbody>
           </table>
         </div>
+        <AdminPagination
+          pagina={pagina}
+          tamanhoPagina={tamanhoPagina}
+          totalPaginas={totalPaginas}
+          total={total}
+          onPaginaChange={setPagina}
+          onTamanhoChange={setTamanhoPagina}
+          loading={loading}
+          itemLabel="reserva(s)"
+        />
       </div>
 
       {/* Drawer de detalhes + auditoria */}
