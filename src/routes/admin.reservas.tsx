@@ -348,7 +348,7 @@ function AdminReservas() {
               {confirmAction && (
                 <>
                   Esta ação atualizará o status para{" "}
-                  <strong>{STATUS_LABEL[confirmAction.next]}</strong> e ficará registrada
+                  <strong>{RESERVA_STATUS_LABEL[confirmAction.next]}</strong> e ficará registrada
                   no log de auditoria.
                 </>
               )}
