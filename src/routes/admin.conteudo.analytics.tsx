@@ -84,9 +84,7 @@ function formatDayLabel(iso: string): string {
 
 function AnalyticsConteudoPage() {
   const [periodo, setPeriodo] = useState<Periodo>("30d");
-  const [customDe, setCustomDe] = useState<string>(
-    ymd(new Date(Date.now() - 30 * 86400000)),
-  );
+  const [customDe, setCustomDe] = useState<string>(ymd(new Date(Date.now() - 30 * 86400000)));
   const [customAte, setCustomAte] = useState<string>(ymd(new Date()));
   const [conteudoId, setConteudoId] = useState<string>("todos");
   const [seletor, setSeletor] = useState<{ id: string; titulo: string; slug: string }[]>([]);
@@ -106,11 +104,10 @@ function AnalyticsConteudoPage() {
     })();
   }, []);
 
-  const range = useMemo(() => periodoToRange(periodo, customDe, customAte), [
-    periodo,
-    customDe,
-    customAte,
-  ]);
+  const range = useMemo(
+    () => periodoToRange(periodo, customDe, customAte),
+    [periodo, customDe, customAte],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -143,13 +140,14 @@ function AnalyticsConteudoPage() {
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <Link to="/admin/conteudo" className="inline-flex items-center gap-1 hover:text-secondary">
+            <Link
+              to="/admin/conteudo"
+              className="inline-flex items-center gap-1 hover:text-secondary"
+            >
               <ArrowLeft className="h-3 w-3" /> Voltar para Conteúdo
             </Link>
           </div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Analytics de Conteúdo
-          </h1>
+          <h1 className="text-3xl font-display font-bold text-foreground">Analytics de Conteúdo</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Visualizações e cliques nos artigos por período.
           </p>
@@ -240,9 +238,7 @@ function AnalyticsConteudoPage() {
 
       {/* Gráfico de série temporal */}
       <div className="bg-card border rounded-2xl p-4">
-        <h2 className="text-lg font-display font-semibold text-foreground mb-3">
-          Evolução diária
-        </h2>
+        <h2 className="text-lg font-display font-semibold text-foreground mb-3">Evolução diária</h2>
         <div className="h-[320px]">
           {loading || !data ? (
             <div className="h-full grid place-items-center text-muted-foreground text-sm">
@@ -335,12 +331,8 @@ function AnalyticsConteudoPage() {
                       </div>
                       <div className="text-xs text-muted-foreground truncate">/{r.slug}</div>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {formatNumber(r.views)}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {formatNumber(r.clicks)}
-                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatNumber(r.views)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatNumber(r.clicks)}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
                       {formatPct(r.ctr)}
                     </td>
@@ -366,9 +358,7 @@ function AnalyticsConteudoPage() {
       {/* Top links clicados */}
       <div className="bg-card border rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b">
-          <h2 className="text-lg font-display font-semibold text-foreground">
-            Top links clicados
-          </h2>
+          <h2 className="text-lg font-display font-semibold text-foreground">Top links clicados</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -399,9 +389,7 @@ function AnalyticsConteudoPage() {
                         {l.url}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {formatNumber(l.clicks)}
-                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatNumber(l.clicks)}</td>
                   </tr>
                 ))
               )}
@@ -427,9 +415,7 @@ function KpiCard({ icon, label, value }: KpiCardProps) {
       </div>
       <div className="min-w-0">
         <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-        <div className="text-2xl font-display font-bold text-foreground tabular-nums">
-          {value}
-        </div>
+        <div className="text-2xl font-display font-bold text-foreground tabular-nums">{value}</div>
       </div>
     </div>
   );

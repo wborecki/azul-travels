@@ -57,10 +57,7 @@ export async function registrarViewConteudo(conteudoId: string): Promise<void> {
 }
 
 /** Registra um clique em link/elemento dentro do artigo. */
-export async function registrarClickConteudo(
-  conteudoId: string,
-  urlAlvo: string,
-): Promise<void> {
+export async function registrarClickConteudo(conteudoId: string, urlAlvo: string): Promise<void> {
   if (typeof window === "undefined" || !conteudoId) return;
   await inserirEvento({
     conteudo_id: conteudoId,

@@ -115,9 +115,7 @@ export async function fetchAnalyticsConteudo(
   const { data: eventos, error } = await q;
   if (error) throw error;
 
-  const rows = (eventos ?? []) as Array<
-    ConteudoEventoRow & { sessao_id: string | null }
-  >;
+  const rows = (eventos ?? []) as Array<ConteudoEventoRow & { sessao_id: string | null }>;
 
   // 2) Agregações
   const buckets = new Map<string, { views: number; clicks: number }>();
@@ -155,9 +153,7 @@ export async function fetchAnalyticsConteudo(
       .select("id, titulo, slug")
       .in("id", ids);
     if (artsErr) throw artsErr;
-    titulos = new Map(
-      (arts ?? []).map((a) => [a.id, { titulo: a.titulo, slug: a.slug }]),
-    );
+    titulos = new Map((arts ?? []).map((a) => [a.id, { titulo: a.titulo, slug: a.slug }]));
   }
 
   const porArtigo: PorArtigoRow[] = Array.from(porArtigoMap.entries())
