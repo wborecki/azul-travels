@@ -23,30 +23,106 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  ESTAB_VIEW_SELECT,
+  applyEstabelecimentosViewFilters,
+  type EstabelecimentoView,
+  type EstabelecimentosViewFilters,
+} from "./estabelecimentos";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Estabelecimentos — listagem admin
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Subset enxuto exibido na tabela `/admin/estabelecimentos`. */
+/**
+ * View administrativa de estabelecimento.
+ *
+ * **Reutiliza** integralmente `EstabelecimentoView` (mesmo shape do
+ * card público — selos, recursos, destaque, mídia) e **adiciona** apenas
+ * os campos exclusivos do painel admin:
+ *
+ *  - `status` — exibe inclusive `pendente`/`inativo`, que o público nunca vê.
+ *  - `criado_em` — ordenação cronológica e auditoria.
+ *  - `mensalidade_ativa` — flag comercial (assinatura paga).
+ *  - `listagem_basica` — controla se o estab aparece em listagens free.
+ *
+ * Garantia: qualquer mudança no payload base de view (novo selo,
+ * novo recurso) propaga automaticamente para o admin sem refator.
+ * O guard em `core-payloads.guard.ts` trava o build se algo regredir.
+ */
+export type EstabelecimentoAdminView = EstabelecimentoView &
+  Pick<
+    Tables<"estabelecimentos">,
+    "status" | "criado_em" | "mensalidade_ativa" | "listagem_basica"
+  >;
+
+/**
+ * SELECT do payload admin = SELECT da view + 4 campos administrativos.
+ * Mantido como template literal para reaproveitar `ESTAB_VIEW_SELECT`
+ * — fonte única, impossível divergir do shape público.
+ */
+export const ESTAB_ADMIN_VIEW_SELECT = `
+  ${ESTAB_VIEW_SELECT},
+  status, criado_em, mensalidade_ativa, listagem_basica
+` as const;
+
+/**
+ * Subset legado/enxuto da tabela `/admin/estabelecimentos`.
+ *
+ * Mantido como `Pick<EstabelecimentoAdminView, ...>` para garantir
+ * que qualquer renomeação de campo na view admin propague aqui.
+ *
+ * @deprecated Prefira `EstabelecimentoAdminView` para novas telas —
+ * inclui selos/recursos/destaque sem custo extra de banda.
+ */
 export type EstabAdminRow = Pick<
-  Tables<"estabelecimentos">,
+  EstabelecimentoAdminView,
   "id" | "nome" | "slug" | "tipo" | "cidade" | "estado" | "status" | "destaque" | "criado_em"
 >;
 
-const ESTAB_ADMIN_SELECT =
-  "id, nome, slug, tipo, cidade, estado, status, destaque, criado_em" as const;
-
-/** Lista até `limit` estabelecimentos para o painel admin (qualquer status). */
-export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdminRow[]> {
-  const { data, error } = await supabase
+/**
+ * Lista estabelecimentos no payload admin completo (qualquer status).
+ *
+ * Aceita os mesmos filtros de `fetchEstabelecimentosView` (busca, tipos,
+ * selos, recursos, paginação) — diferença é que **não** força
+ * `status = 'ativo'`, então traz pendentes/inativos para o painel.
+ */
+export async function fetchEstabelecimentosAdminView(
+  filters: EstabelecimentosViewFilters = {},
+): Promise<EstabelecimentoAdminView[]> {
+  const base = supabase
     .from("estabelecimentos")
-    .select(ESTAB_ADMIN_SELECT)
-    .order("criado_em", { ascending: false })
-    .limit(limit)
-    .returns<EstabAdminRow[]>();
+    .select(ESTAB_ADMIN_VIEW_SELECT)
+    .order("criado_em", { ascending: false });
+
+  const q = applyEstabelecimentosViewFilters(base, filters);
+
+  const { data, error } = await q.returns<EstabelecimentoAdminView[]>();
   if (error) throw error;
   return data ?? [];
+}
+
+/**
+ * Versão legada/enxuta — devolve apenas as colunas de `EstabAdminRow`.
+ *
+ * Implementada por cima de `fetchEstabelecimentosAdminView` para nunca
+ * divergir do shape canônico. Filtra colunas via `Pick` em runtime.
+ *
+ * @deprecated Prefira `fetchEstabelecimentosAdminView` para novas telas.
+ */
+export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdminRow[]> {
+  const rows = await fetchEstabelecimentosAdminView({ limite: limit });
+  return rows.map((r) => ({
+    id: r.id,
+    nome: r.nome,
+    slug: r.slug,
+    tipo: r.tipo,
+    cidade: r.cidade,
+    estado: r.estado,
+    status: r.status,
+    destaque: r.destaque,
+    criado_em: r.criado_em,
+  }));
 }
 
 /** Busca uma row completa para o form de edição. */
