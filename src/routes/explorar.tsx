@@ -76,6 +76,12 @@ const searchSchema = z.object({
   beneficio: fallback(z.boolean(), false).default(false),
   tour360: fallback(z.boolean(), false).default(false),
   ordem: fallback(z.enum(ORDEM_VALORES), "relevante").default("relevante"),
+  // Paginação tipada — clampada na fetcher (resolvePagination).
+  pagina: fallback(z.number().int().min(1), 1).default(1),
+  tamanhoPagina: fallback(
+    z.number().int().min(1).max(ESTAB_PAGE_SIZE_MAX),
+    ESTAB_PAGE_SIZE_DEFAULT,
+  ).default(ESTAB_PAGE_SIZE_DEFAULT),
 });
 
 const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
