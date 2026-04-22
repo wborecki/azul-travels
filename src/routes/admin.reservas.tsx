@@ -128,6 +128,14 @@ function AdminReservas() {
   // Exportação CSV
   const [exporting, setExporting] = useState(false);
 
+  // Última observação por reserva (para indicador truncado na linha)
+  const [ultimasObs, setUltimasObs] = useState<Map<string, AuditoriaRow>>(new Map());
+
+  // Linhas expandidas inline (id → histórico carregado)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [logsInline, setLogsInline] = useState<Map<string, AuditoriaRow[]>>(new Map());
+  const [loadingInline, setLoadingInline] = useState<Set<string>>(new Set());
+
   /** Recarrega contadores globais por status (independentes da página). */
   const refreshCounts = useCallback(async () => {
     try {
