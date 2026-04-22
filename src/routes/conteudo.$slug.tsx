@@ -115,7 +115,7 @@ function Artigo() {
               {a.resumo}
             </p>
           )}
-          <div className="mt-8">
+          <div className="mt-8" ref={conteudoRef}>
             {a.conteudo ? (
               <MarkdownView source={a.conteudo} />
             ) : (
