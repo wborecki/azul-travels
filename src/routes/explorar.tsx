@@ -917,7 +917,7 @@ function Explorar() {
                       active={todosAtivos}
                       onClick={() => {
                         // Se tudo ativo, desliga toda a categoria; senão, liga tudo.
-                        const semCategoria = search.tipos.filter((t) => !tiposSet.has(t));
+                        const semCategoria = search.tipos.filter((t: EstabTipo) => !tiposSet.has(t));
                         const proximos = todosAtivos
                           ? semCategoria
                           : [...semCategoria, ...c.tipos];
