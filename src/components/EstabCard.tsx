@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Star } from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
 import { TIPO_LABEL } from "@/lib/brazil";
-import type { EstabelecimentoView } from "@/lib/queries";
+import { pickEstabMedia, type EstabelecimentoView } from "@/lib/queries";
 
 /** @deprecated use `EstabelecimentoView` de `@/lib/queries`. Mantido como alias. */
 export type Estab = EstabelecimentoView;
@@ -19,6 +19,9 @@ export function EstabCard({ e }: { e: EstabelecimentoView }) {
     ] as const
   ).filter((k) => e[k]);
 
+  // Mídia padronizada — mesmo shape do detalhe e do admin.
+  const { fotoCapa, tour360Url } = pickEstabMedia(e);
+
   return (
     <Link
       to="/estabelecimento/$slug"
@@ -26,9 +29,9 @@ export function EstabCard({ e }: { e: EstabelecimentoView }) {
       className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-300 border border-border/50 flex flex-col animate-fade-up"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {e.foto_capa && (
+        {fotoCapa && (
           <img
-            src={e.foto_capa}
+            src={fotoCapa}
             alt={e.nome}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -36,7 +39,7 @@ export function EstabCard({ e }: { e: EstabelecimentoView }) {
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
           {e.selo_azul && <Pill {...SELO_BADGES.selo_azul} />}
-          {e.tour_360_url && <Pill {...SELO_BADGES.tour_360} />}
+          {tour360Url && <Pill {...SELO_BADGES.tour_360} />}
         </div>
         {e.tem_beneficio_tea && (
           <div className="absolute bottom-3 left-3">
