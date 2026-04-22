@@ -351,7 +351,7 @@ function Explorar() {
                   <Chip
                     key={t.v}
                     active={search.tipos.includes(t.v)}
-                    onClick={() => patchSearch({ tipos: toggleInArray(search.tipos, t.v) })}
+                    onClick={() => patchSearchResetPage({ tipos: toggleInArray(search.tipos, t.v) })}
                     label={t.l}
                   />
                 ))}
@@ -367,7 +367,7 @@ function Explorar() {
                     <ChipBadge
                       key={s}
                       active={search.selos.includes(s)}
-                      onClick={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
+                      onClick={() => patchSearchResetPage({ selos: toggleInArray(search.selos, s) })}
                       icon={b.icon}
                       label={b.label}
                       activeClassName={b.className}
@@ -387,7 +387,7 @@ function Explorar() {
                       key={r}
                       active={search.recursos.includes(r)}
                       onClick={() =>
-                        patchSearch({
+                        patchSearchResetPage({
                           recursos: toggleInArray(search.recursos, r),
                         })
                       }
@@ -407,14 +407,14 @@ function Explorar() {
                 icon={<Camera className="h-4 w-4" />}
                 label="Tour 360° disponível"
                 checked={search.tour360}
-                onCheckedChange={(v) => patchSearch({ tour360: v })}
+                onCheckedChange={(v) => patchSearchResetPage({ tour360: v })}
               />
               <ToggleRow
                 id="ben"
                 icon={<Gift className="h-4 w-4" />}
                 label="Possui Benefício TEA"
                 checked={search.beneficio}
-                onCheckedChange={(v) => patchSearch({ beneficio: v })}
+                onCheckedChange={(v) => patchSearchResetPage({ beneficio: v })}
               />
             </FilterGroup>
 
@@ -422,7 +422,7 @@ function Explorar() {
               <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
                 Estado
               </Label>
-              <Select value={search.estado} onValueChange={(v) => patchSearch({ estado: v })}>
+              <Select value={search.estado} onValueChange={(v) => patchSearchResetPage({ estado: v })}>
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Todos os estados" />
                 </SelectTrigger>
@@ -480,7 +480,7 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) => patchSearch({ ordem: v as (typeof ORDEM_VALORES)[number] })}
+                onValueChange={(v) => patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })}
               >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue />
@@ -506,7 +506,7 @@ function Explorar() {
                   <ActiveChip
                     key={`a-t-${t}`}
                     label={def?.l ?? t}
-                    onRemove={() => patchSearch({ tipos: toggleInArray(search.tipos, t) })}
+                    onRemove={() => patchSearchResetPage({ tipos: toggleInArray(search.tipos, t) })}
                   />
                 );
               })}
@@ -514,7 +514,7 @@ function Explorar() {
                 <ActiveChip
                   key={`a-s-${s}`}
                   label={SELO_BADGES[s].label}
-                  onRemove={() => patchSearch({ selos: toggleInArray(search.selos, s) })}
+                  onRemove={() => patchSearchResetPage({ selos: toggleInArray(search.selos, s) })}
                 />
               ))}
               {search.recursos.map((r: (typeof RECURSOS_VALORES)[number]) => (
@@ -522,7 +522,7 @@ function Explorar() {
                   key={`a-r-${r}`}
                   label={RECURSO_BADGES[r].label}
                   onRemove={() =>
-                    patchSearch({
+                    patchSearchResetPage({
                       recursos: toggleInArray(search.recursos, r),
                     })
                   }
@@ -531,17 +531,17 @@ function Explorar() {
               {search.estado !== "todos" && (
                 <ActiveChip
                   label={ESTADOS_BR.find((e) => e.sigla === search.estado)?.nome ?? search.estado}
-                  onRemove={() => patchSearch({ estado: "todos" })}
+                  onRemove={() => patchSearchResetPage({ estado: "todos" })}
                 />
               )}
               {search.beneficio && (
                 <ActiveChip
                   label="Benefício TEA"
-                  onRemove={() => patchSearch({ beneficio: false })}
+                  onRemove={() => patchSearchResetPage({ beneficio: false })}
                 />
               )}
               {search.tour360 && (
-                <ActiveChip label="Tour 360°" onRemove={() => patchSearch({ tour360: false })} />
+                <ActiveChip label="Tour 360°" onRemove={() => patchSearchResetPage({ tour360: false })} />
               )}
             </div>
           )}
