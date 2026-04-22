@@ -22,9 +22,7 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 interface PerfilOpt { id: string; nome_autista: string }
 
 type Estab = Tables<"estabelecimentos">;
-type Avaliacao = Tables<"avaliacoes"> & {
-  familia_profiles: { nome_responsavel: string | null } | null;
-};
+type Avaliacao = AvaliacaoComFamilia;
 
 function EstabPage() {
   const { slug } = Route.useParams();
