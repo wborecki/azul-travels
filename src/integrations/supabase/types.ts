@@ -652,6 +652,7 @@ export type Database = {
         | "atracoes"
         | "agencia"
         | "transporte"
+        | "excursao"
       reserva_status: "pendente" | "confirmada" | "cancelada" | "concluida"
       tea_nivel: "leve" | "moderado" | "severo"
     }
@@ -799,6 +800,7 @@ export const Constants = {
         "atracoes",
         "agencia",
         "transporte",
+        "excursao",
       ],
       reserva_status: ["pendente", "confirmada", "cancelada", "concluida"],
       tea_nivel: ["leve", "moderado", "severo"],
