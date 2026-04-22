@@ -42,7 +42,7 @@ const formSchema = z.object({
     .min(2, "Slug obrigatório")
     .max(160)
     .regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífen"),
-  categoria: z.enum(CATEGORIAS).nullable(),
+  categoria: z.enum(CONTEUDO_CATEGORIAS).nullable(),
   autor: z.string().max(120).optional().nullable(),
   resumo: z.string().max(500).optional().nullable(),
   conteudo: z.string().max(50_000).optional().nullable(),
@@ -356,7 +356,10 @@ function AdminConteudoForm() {
               <Select
                 value={form.categoria || "none"}
                 onValueChange={(v) =>
-                  set("categoria", v === "none" ? "" : (v as ConteudoCategoria))
+                  set(
+                    "categoria",
+                    v === "none" ? "" : isConteudoCategoria(v) ? v : "",
+                  )
                 }
               >
                 <SelectTrigger>
@@ -364,9 +367,9 @@ function AdminConteudoForm() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— Sem categoria</SelectItem>
-                  {CATEGORIAS.map((c) => (
+                  {CONTEUDO_CATEGORIAS.map((c) => (
                     <SelectItem key={c} value={c}>
-                      {CATEGORIA_LABEL[c]}
+                      {CONTEUDO_CATEGORIA_LABEL[c]}
                     </SelectItem>
                   ))}
                 </SelectContent>
