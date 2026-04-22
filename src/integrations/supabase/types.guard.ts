@@ -325,6 +325,42 @@ type _CheckDetalheAvaliacoesEmbed = AssertEqual<
   "REGRESSION: detalhe.avaliacoes[].familia_profiles.nome_responsavel quebrou"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. Helper único de mídia (galeria + Tour 360°) — `pickEstabMedia`
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { pickEstabMedia, type EstabMedia } from "@/lib/media";
+
+type MediaReturn = ReturnType<typeof pickEstabMedia>;
+
+type _CheckMediaNotAny = AssertNotAny<MediaReturn, "REGRESSION: pickEstabMedia -> any">;
+type _CheckMediaShape = AssertEqual<
+  MediaReturn,
+  EstabMedia,
+  "REGRESSION: pickEstabMedia divergiu de EstabMedia"
+>;
+type _CheckMediaFotos = AssertEqual<
+  MediaReturn["fotos"],
+  string[],
+  "REGRESSION: EstabMedia.fotos deveria ser string[]"
+>;
+type _CheckMediaCapa = AssertEqual<
+  MediaReturn["fotoCapa"],
+  string | null,
+  "REGRESSION: EstabMedia.fotoCapa quebrou"
+>;
+type _CheckMediaTour = AssertEqual<
+  MediaReturn["tour360Url"],
+  string | null,
+  "REGRESSION: EstabMedia.tour360Url quebrou"
+>;
+// O Normalized continua compatível com o helper de mídia (mesmas três fontes).
+type _CheckNormalizedFeedsMedia = AssertEqual<
+  ReturnType<typeof pickEstabMedia>,
+  EstabMedia,
+  "REGRESSION: pickEstabMedia(Normalized) deveria devolver EstabMedia"
+>;
+
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
   _CheckRowNotAny,
@@ -368,4 +404,10 @@ export type __SupabaseTypeGuards = [
   _CheckDetalheShape,
   _CheckDetalheEstab,
   _CheckDetalheAvaliacoesEmbed,
+  _CheckMediaNotAny,
+  _CheckMediaShape,
+  _CheckMediaFotos,
+  _CheckMediaCapa,
+  _CheckMediaTour,
+  _CheckNormalizedFeedsMedia,
 ];

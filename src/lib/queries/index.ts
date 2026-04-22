@@ -26,6 +26,7 @@ export {
   fetchEstabelecimentosCards, // deprecated alias
   applyEstabelecimentosViewFilters,
   normalizeEstabelecimento,
+  pickMediaFromView,
   ESTAB_VIEW_SELECT,
   type EstabelecimentoFull,
   type EstabelecimentoNormalized,
@@ -37,6 +38,16 @@ export {
   type Estabelecimento, // deprecated alias
   type EstabelecimentoCard, // deprecated alias
 } from "./estabelecimentos";
+
+// Helpers únicos de mídia (galeria + Tour 360°) — mesmo shape em
+// página de detalhe, card de listagem, form admin e embeds.
+export {
+  pickEstabMedia,
+  normalizeFotos,
+  normalizeUrl,
+  type EstabMedia,
+  type EstabMediaRow,
+} from "../media";
 
 export {
   fetchReservasDaFamilia,

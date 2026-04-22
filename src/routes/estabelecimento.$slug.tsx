@@ -4,6 +4,7 @@ import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   criarReserva,
+  pickEstabMedia,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
@@ -154,8 +155,10 @@ function EstabPage() {
     }
   };
 
-  // `e.fotos` e `e.foto_capa` já chegam normalizados (string[] / string|null).
-  const { fotos, foto_capa: fotoCapa } = e;
+  // Mídia padronizada (galeria + Tour 360°) — mesmo shape consumido
+  // em cards, embeds e admin. Acesso direto a `e.fotos`/`e.foto_capa`/
+  // `e.tour_360_url` é desencorajado; use `pickEstabMedia`.
+  const { fotoCapa, fotos, tour360Url } = pickEstabMedia(e);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -163,9 +166,9 @@ function EstabPage() {
       <div className="grid lg:grid-cols-3 gap-3 mb-8 max-h-[480px]">
         <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-muted">
           {fotoCapa && <img src={fotoCapa} alt={e.nome} className="w-full h-full object-cover" />}
-          {e.tour_360_url && (
+          {tour360Url && (
             <a
-              href={e.tour_360_url}
+              href={tour360Url}
               target="_blank"
               rel="noreferrer"
               className="absolute bottom-4 right-4 bg-amarelo text-amarelo-foreground rounded-xl px-4 py-2 font-semibold text-sm flex items-center gap-2 shadow-elegant hover:scale-105 transition"
@@ -202,7 +205,7 @@ function EstabPage() {
               {e.selo_privado && (
                 <Pill {...SELO_BADGES.selo_privado} label={e.selo_privado_nome || "Selo Privado"} />
               )}
-              {e.tour_360_url && <Pill {...SELO_BADGES.tour_360} />}
+              {tour360Url && <Pill {...SELO_BADGES.tour_360} />}
               {e.tem_beneficio_tea && <Pill {...SELO_BADGES.beneficio_tea} />}
             </div>
           </div>
