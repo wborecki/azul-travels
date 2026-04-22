@@ -77,6 +77,7 @@ export type Database = {
           foto_capa: string | null
           id: string
           publicado: boolean | null
+          publicar_em: string | null
           resumo: string | null
           slug: string
           titulo: string
@@ -89,6 +90,7 @@ export type Database = {
           foto_capa?: string | null
           id?: string
           publicado?: boolean | null
+          publicar_em?: string | null
           resumo?: string | null
           slug: string
           titulo: string
@@ -101,6 +103,7 @@ export type Database = {
           foto_capa?: string | null
           id?: string
           publicado?: boolean | null
+          publicar_em?: string | null
           resumo?: string | null
           slug?: string
           titulo?: string
@@ -590,6 +593,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      publicar_conteudo_agendado: { Args: never; Returns: number }
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
     }
     Enums: {
