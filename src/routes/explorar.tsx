@@ -9,14 +9,22 @@ import {
   type RecursoFlag,
   type SeloFlag,
 } from "@/lib/queries";
+import { SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Search, SlidersHorizontal, X, Camera, Gift } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 interface Search {
   q?: string;
@@ -31,13 +39,27 @@ export const Route = createFileRoute("/explorar")({
   head: () => ({
     meta: [
       { title: "Explorar destinos — Turismo Azul" },
-      { name: "description", content: "Encontre hotéis, restaurantes e parques realmente preparados para famílias TEA." },
+      {
+        name: "description",
+        content:
+          "Encontre hotéis, restaurantes e parques realmente preparados para famílias TEA.",
+      },
     ],
   }),
   component: Explorar,
 });
 
-const TIPOS = [
+type EstabTipo =
+  | "hotel"
+  | "pousada"
+  | "resort"
+  | "restaurante"
+  | "parque"
+  | "atracoes"
+  | "agencia"
+  | "transporte";
+
+const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
   { v: "hotel", l: "Hotel" },
   { v: "pousada", l: "Pousada" },
   { v: "resort", l: "Resort" },
@@ -48,19 +70,19 @@ const TIPOS = [
   { v: "transporte", l: "Transporte" },
 ];
 
-const RECURSOS = [
-  { v: "tem_sala_sensorial", l: "Sala Sensorial" },
-  { v: "tem_concierge_tea", l: "Concierge TEA" },
-  { v: "tem_checkin_antecipado", l: "Check-in Antecipado" },
-  { v: "tem_fila_prioritaria", l: "Fila Prioritária" },
-  { v: "tem_cardapio_visual", l: "Cardápio Visual" },
-  { v: "tem_caa", l: "CAA Disponível" },
-] as const;
+const SELOS_LIST: ReadonlyArray<SeloFlag> = [
+  "selo_azul",
+  "selo_governamental",
+  "selo_privado",
+];
 
-const SELOS = [
-  { v: "selo_azul", l: "Selo Azul (Absoluto Educacional)" },
-  { v: "selo_governamental", l: "Certificado Governamental" },
-  { v: "selo_privado", l: "Selo Privado" },
+const RECURSOS_LIST: ReadonlyArray<RecursoFlag> = [
+  "tem_sala_sensorial",
+  "tem_concierge_tea",
+  "tem_checkin_antecipado",
+  "tem_fila_prioritaria",
+  "tem_cardapio_visual",
+  "tem_caa",
 ];
 
 function Explorar() {
@@ -68,19 +90,27 @@ function Explorar() {
   const { user } = useAuth();
 
   const [busca, setBusca] = useState(q ?? "");
-  const [tipos, setTipos] = useState<string[]>(tipo ? [tipo] : []);
-  const [selos, setSelos] = useState<string[]>([]);
-  const [recursos, setRecursos] = useState<string[]>([]);
+  const buscaDebounced = useDebouncedValue(busca, 350);
+
+  const [tipos, setTipos] = useState<EstabTipo[]>(
+    tipo ? [tipo as EstabTipo] : [],
+  );
+  const [selos, setSelos] = useState<SeloFlag[]>([]);
+  const [recursos, setRecursos] = useState<RecursoFlag[]>([]);
   const [estado, setEstado] = useState<string>("todos");
   const [beneficio, setBeneficio] = useState(false);
   const [tour360, setTour360] = useState(false);
-  const [ordem, setOrdem] = useState<"relevante" | "recente" | "certificados">("relevante");
+  const [ordem, setOrdem] = useState<"relevante" | "recente" | "certificados">(
+    "relevante",
+  );
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
+  const [perfilNecessidades, setPerfilNecessidades] = useState<
+    Record<string, boolean>
+  >({});
 
-  // Carrega necessidades do primeiro perfil sensorial da família para personalizar
+  // Carrega necessidades do primeiro perfil sensorial da família
   useEffect(() => {
     if (!user) return;
     void (async () => {
@@ -104,15 +134,16 @@ function Explorar() {
     })();
   }, [user]);
 
+  // Refetch a cada mudança de filtro (busca debouncada)
   useEffect(() => {
     void (async () => {
       setLoading(true);
 
       const filters: EstabelecimentosViewFilters = {
-        busca: busca || undefined,
-        tipos: tipos as EstabelecimentosViewFilters["tipos"],
-        selos: selos as ReadonlyArray<SeloFlag>,
-        recursos: recursos as ReadonlyArray<RecursoFlag>,
+        busca: buscaDebounced || undefined,
+        tipos: tipos.length > 0 ? tipos : undefined,
+        selos: selos.length > 0 ? selos : undefined,
+        recursos: recursos.length > 0 ? recursos : undefined,
         estado: estado !== "todos" ? estado : undefined,
         apenasComBeneficio: beneficio,
         apenasComTour360: tour360,
@@ -120,40 +151,84 @@ function Explorar() {
 
       let res = await fetchEstabelecimentosView(filters);
 
-      // Sort by perfil compatibility
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
-          ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
+          ([k, v]) =>
+            v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
       if (ordem === "relevante") {
         res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
       } else if (ordem === "certificados") {
-        const score = (e: EstabelecimentoView) => (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
+        const score = (e: EstabelecimentoView) =>
+          (e.selo_azul ? 3 : 0) +
+          (e.selo_governamental ? 2 : 0) +
+          (e.selo_privado ? 1 : 0);
         res = [...res].sort((a, b) => score(b) - score(a));
       }
       setList(res);
       setLoading(false);
     })();
-  }, [busca, tipos, selos, recursos, estado, beneficio, tour360, ordem, perfilNecessidades]);
+  }, [
+    buscaDebounced,
+    tipos,
+    selos,
+    recursos,
+    estado,
+    beneficio,
+    tour360,
+    ordem,
+    perfilNecessidades,
+  ]);
 
-  const toggle = (arr: string[], setArr: (v: string[]) => void, v: string) =>
-    setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+  function toggleTipo(v: EstabTipo) {
+    setTipos((arr) =>
+      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
+    );
+  }
+  function toggleSelo(v: SeloFlag) {
+    setSelos((arr) =>
+      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
+    );
+  }
+  function toggleRecurso(v: RecursoFlag) {
+    setRecursos((arr) =>
+      arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
+    );
+  }
 
   const limpar = () => {
-    setBusca(""); setTipos([]); setSelos([]); setRecursos([]); setEstado("todos"); setBeneficio(false); setTour360(false);
+    setBusca("");
+    setTipos([]);
+    setSelos([]);
+    setRecursos([]);
+    setEstado("todos");
+    setBeneficio(false);
+    setTour360(false);
   };
 
   const filtrosAtivos = useMemo(
-    () => tipos.length + selos.length + recursos.length + (estado !== "todos" ? 1 : 0) + (beneficio ? 1 : 0) + (tour360 ? 1 : 0),
+    () =>
+      tipos.length +
+      selos.length +
+      recursos.length +
+      (estado !== "todos" ? 1 : 0) +
+      (beneficio ? 1 : 0) +
+      (tour360 ? 1 : 0),
     [tipos, selos, recursos, estado, beneficio, tour360],
   );
+
+  const buscando = busca !== buscaDebounced;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-display font-bold text-primary">Explorar destinos</h1>
-        <p className="text-muted-foreground mt-1">Encontre estabelecimentos preparados para sua família.</p>
+        <h1 className="text-3xl font-display font-bold text-primary">
+          Explorar destinos
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Encontre estabelecimentos preparados para sua família.
+        </p>
         {user && Object.values(perfilNecessidades).some(Boolean) && (
           <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-teal-claro text-secondary font-medium">
             ✨ Resultados priorizados pelo perfil sensorial da sua família
@@ -162,53 +237,122 @@ function Explorar() {
       </div>
 
       <div className="flex gap-6">
-        {/* Filtros */}
+        {/* Painel de filtros */}
         <aside
           className={`${
-            showFilters ? "fixed inset-0 z-50 bg-background overflow-y-auto p-6" : "hidden"
-          } md:relative md:block md:w-72 md:p-0 md:bg-transparent shrink-0`}
+            showFilters
+              ? "fixed inset-0 z-50 bg-background overflow-y-auto p-6"
+              : "hidden"
+          } md:relative md:block md:w-80 md:p-0 md:bg-transparent shrink-0`}
         >
           <div className="md:sticky md:top-20 space-y-6">
             <div className="flex items-center justify-between md:hidden">
-              <h2 className="font-display font-bold">Filtros</h2>
-              <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
+              <h2 className="font-display font-bold">Filtros avançados</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowFilters(false)}
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>
 
+            {/* Busca com indicador de debounce */}
             <div>
-              <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">Busca</Label>
+              <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
+                Busca
+              </Label>
               <div className="relative mt-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome, cidade..." className="pl-9" />
+                <Input
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder="Nome, cidade, tipo..."
+                  className="pl-9 pr-9"
+                />
+                {buscando && (
+                  <span
+                    aria-label="Buscando"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full border-2 border-primary border-r-transparent animate-spin"
+                  />
+                )}
               </div>
             </div>
 
-            <FilterGroup label="Tipo">
-              {TIPOS.map((t) => (
-                <Check key={t.v} id={`t-${t.v}`} checked={tipos.includes(t.v)} onChange={() => toggle(tipos, setTipos, t.v)} label={t.l} />
-              ))}
+            {/* Tipos como chips */}
+            <FilterGroup label="Tipo de estabelecimento">
+              <div className="flex flex-wrap gap-2">
+                {TIPOS.map((t) => (
+                  <Chip
+                    key={t.v}
+                    active={tipos.includes(t.v)}
+                    onClick={() => toggleTipo(t.v)}
+                    label={t.l}
+                  />
+                ))}
+              </div>
             </FilterGroup>
 
-            <FilterGroup label="Selos">
-              {SELOS.map((s) => (
-                <Check key={s.v} id={`s-${s.v}`} checked={selos.includes(s.v)} onChange={() => toggle(selos, setSelos, s.v)} label={s.l} />
-              ))}
+            {/* Selos como chips com ícone/cor da badge */}
+            <FilterGroup label="Selos & certificações">
+              <div className="flex flex-wrap gap-2">
+                {SELOS_LIST.map((s) => {
+                  const b = SELO_BADGES[s];
+                  return (
+                    <ChipBadge
+                      key={s}
+                      active={selos.includes(s)}
+                      onClick={() => toggleSelo(s)}
+                      icon={b.icon}
+                      label={b.label}
+                      activeClassName={b.className}
+                    />
+                  );
+                })}
+              </div>
             </FilterGroup>
 
+            {/* Recursos sensoriais como chips */}
             <FilterGroup label="Recursos sensoriais">
-              {RECURSOS.map((r) => (
-                <Check key={r.v} id={`r-${r.v}`} checked={recursos.includes(r.v)} onChange={() => toggle(recursos, setRecursos, r.v)} label={r.l} />
-              ))}
-              <Check id="tour360" checked={tour360} onChange={() => setTour360((v) => !v)} label="Tour 360° disponível" />
+              <div className="flex flex-wrap gap-2">
+                {RECURSOS_LIST.map((r) => {
+                  const b = RECURSO_BADGES[r];
+                  return (
+                    <ChipBadge
+                      key={r}
+                      active={recursos.includes(r)}
+                      onClick={() => toggleRecurso(r)}
+                      icon={b.icon}
+                      label={b.label}
+                      activeClassName={b.className}
+                    />
+                  );
+                })}
+              </div>
             </FilterGroup>
 
-            <FilterGroup label="Benefícios">
-              <Check id="ben" checked={beneficio} onChange={() => setBeneficio((v) => !v)} label="Possui Benefício TEA" />
+            {/* Toggles avançados */}
+            <FilterGroup label="Experiência">
+              <ToggleRow
+                id="tour360"
+                icon={<Camera className="h-4 w-4" />}
+                label="Tour 360° disponível"
+                checked={tour360}
+                onCheckedChange={setTour360}
+              />
+              <ToggleRow
+                id="ben"
+                icon={<Gift className="h-4 w-4" />}
+                label="Possui Benefício TEA"
+                checked={beneficio}
+                onCheckedChange={setBeneficio}
+              />
             </FilterGroup>
 
             <div>
-              <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">Estado</Label>
+              <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
+                Estado
+              </Label>
               <Select value={estado} onValueChange={setEstado}>
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Todos os estados" />
@@ -216,14 +360,22 @@ function Explorar() {
                 <SelectContent>
                   <SelectItem value="todos">Todos os estados</SelectItem>
                   {ESTADOS_BR.map((e) => (
-                    <SelectItem key={e.sigla} value={e.sigla}>{e.nome}</SelectItem>
+                    <SelectItem key={e.sigla} value={e.sigla}>
+                      {e.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             {filtrosAtivos > 0 && (
-              <Button variant="outline" onClick={limpar} className="w-full">Limpar filtros ({filtrosAtivos})</Button>
+              <Button
+                variant="outline"
+                onClick={limpar}
+                className="w-full"
+              >
+                Limpar filtros ({filtrosAtivos})
+              </Button>
             )}
           </div>
         </aside>
@@ -232,13 +384,25 @@ function Explorar() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4 gap-3">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{list.length}</span> estabelecimentos encontrados
+              <span className="font-semibold text-foreground">
+                {list.length}
+              </span>{" "}
+              estabelecimentos encontrados
             </p>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="md:hidden" onClick={() => setShowFilters(true)}>
-                <SlidersHorizontal className="h-4 w-4 mr-1" /> Filtros {filtrosAtivos > 0 && `(${filtrosAtivos})`}
+              <Button
+                variant="outline"
+                size="sm"
+                className="md:hidden"
+                onClick={() => setShowFilters(true)}
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-1" /> Filtros
+                {filtrosAtivos > 0 && ` (${filtrosAtivos})`}
               </Button>
-              <Select value={ordem} onValueChange={(v) => setOrdem(v as typeof ordem)}>
+              <Select
+                value={ordem}
+                onValueChange={(v) => setOrdem(v as typeof ordem)}
+              >
                 <SelectTrigger className="w-[180px] h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -251,18 +415,80 @@ function Explorar() {
             </div>
           </div>
 
+          {/* Chips ativos (resumo dos filtros) */}
+          {filtrosAtivos > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2 items-center">
+              <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider mr-1">
+                Ativos:
+              </span>
+              {tipos.map((t) => {
+                const def = TIPOS.find((x) => x.v === t);
+                return (
+                  <ActiveChip
+                    key={`a-t-${t}`}
+                    label={def?.l ?? t}
+                    onRemove={() => toggleTipo(t)}
+                  />
+                );
+              })}
+              {selos.map((s) => (
+                <ActiveChip
+                  key={`a-s-${s}`}
+                  label={SELO_BADGES[s].label}
+                  onRemove={() => toggleSelo(s)}
+                />
+              ))}
+              {recursos.map((r) => (
+                <ActiveChip
+                  key={`a-r-${r}`}
+                  label={RECURSO_BADGES[r].label}
+                  onRemove={() => toggleRecurso(r)}
+                />
+              ))}
+              {estado !== "todos" && (
+                <ActiveChip
+                  label={
+                    ESTADOS_BR.find((e) => e.sigla === estado)?.nome ?? estado
+                  }
+                  onRemove={() => setEstado("todos")}
+                />
+              )}
+              {beneficio && (
+                <ActiveChip
+                  label="Benefício TEA"
+                  onRemove={() => setBeneficio(false)}
+                />
+              )}
+              {tour360 && (
+                <ActiveChip
+                  label="Tour 360°"
+                  onRemove={() => setTour360(false)}
+                />
+              )}
+            </div>
+          )}
+
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="aspect-[4/3] rounded-2xl bg-muted animate-pulse" />
+                <div
+                  key={i}
+                  className="aspect-[4/3] rounded-2xl bg-muted animate-pulse"
+                />
               ))}
             </div>
           ) : list.length === 0 ? (
             <div className="text-center py-20 bg-muted/40 rounded-2xl">
               <Search className="h-10 w-10 mx-auto text-muted-foreground" />
-              <p className="mt-4 font-display font-semibold text-lg text-primary">Nenhum estabelecimento encontrado</p>
-              <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros.</p>
-              <Button variant="outline" onClick={limpar} className="mt-4">Limpar filtros</Button>
+              <p className="mt-4 font-display font-semibold text-lg text-primary">
+                Nenhum estabelecimento encontrado
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Tente ajustar os filtros.
+              </p>
+              <Button variant="outline" onClick={limpar} className="mt-4">
+                Limpar filtros
+              </Button>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -274,9 +500,12 @@ function Explorar() {
 
           {!user && (
             <div className="mt-10 bg-azul-claro p-6 rounded-2xl text-center">
-              <p className="text-primary font-display font-semibold">Quer resultados personalizados?</p>
+              <p className="text-primary font-display font-semibold">
+                Quer resultados personalizados?
+              </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Crie um perfil sensorial gratuito e veja os destinos mais compatíveis com sua família.
+                Crie um perfil sensorial gratuito e veja os destinos mais
+                compatíveis com sua família.
               </p>
               <Button asChild className="mt-4">
                 <Link to="/cadastro">Criar perfil</Link>
@@ -289,20 +518,123 @@ function Explorar() {
   );
 }
 
-function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
+function FilterGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">{label}</Label>
-      <div className="mt-2 space-y-2">{children}</div>
+      <Label className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
+        {label}
+      </Label>
+      <div className="mt-2">{children}</div>
     </div>
   );
 }
 
-function Check({ id, checked, onChange, label }: { id: string; checked: boolean; onChange: () => void; label: string }) {
+function Chip({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
   return (
-    <label htmlFor={id} className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
-      <Checkbox id={id} checked={checked} onCheckedChange={onChange} />
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+        active
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-background text-foreground border-border hover:border-primary/40 hover:bg-muted"
+      }`}
+    >
       {label}
-    </label>
+    </button>
+  );
+}
+
+function ChipBadge({
+  active,
+  onClick,
+  icon,
+  label,
+  activeClassName,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  activeClassName: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+        active
+          ? `${activeClassName} border-transparent shadow-sm`
+          : "bg-background text-foreground border-border hover:border-primary/40 hover:bg-muted"
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function ToggleRow({
+  id,
+  icon,
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  id: string;
+  icon: React.ReactNode;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-1">
+      <Label
+        htmlFor={id}
+        className="flex items-center gap-2 text-sm font-normal cursor-pointer"
+      >
+        <span className="text-muted-foreground">{icon}</span>
+        {label}
+      </Label>
+      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
+
+function ActiveChip({
+  label,
+  onRemove,
+}: {
+  label: string;
+  onRemove: () => void;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-muted text-foreground border border-border">
+      {label}
+      <button
+        type="button"
+        aria-label={`Remover filtro ${label}`}
+        onClick={onRemove}
+        className="ml-0.5 rounded-full hover:bg-foreground/10 p-0.5"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </span>
   );
 }
