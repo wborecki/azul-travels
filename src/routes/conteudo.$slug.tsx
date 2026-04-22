@@ -1,15 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateBR } from "@/lib/brazil";
 import { MarkdownView } from "@/components/MarkdownView";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
+import { registrarView, registrarClick } from "@/lib/analyticsConteudo";
 
 export const Route = createFileRoute("/conteudo/$slug")({
   component: Artigo,
 });
 
 interface ArtigoT {
+  id: string;
   slug: string;
   titulo: string;
   resumo: string | null;
