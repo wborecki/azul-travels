@@ -283,3 +283,90 @@ function StatusBadge({ status }: { status: Row["status"] }) {
   if (!status) return <Badge variant="secondary">—</Badge>;
   return <Badge className={STATUS_BADGE[status]}>{ESTAB_STATUS_LABEL[status]}</Badge>;
 }
+
+/**
+ * Dropdown que troca o status do estabelecimento direto na lista.
+ * O badge serve como trigger; ao abrir, lista os status disponíveis e
+ * marca o atual como desabilitado.
+ */
+function StatusControl({
+  row,
+  saving,
+  onChange,
+}: {
+  row: Row;
+  saving: boolean;
+  onChange: (next: EstabStatus) => void;
+}) {
+  const status = row.status;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          disabled={saving}
+          aria-label={`Alterar status de ${row.nome}`}
+          className="inline-flex items-center gap-1.5 rounded-full disabled:opacity-60"
+        >
+          {saving ? (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground px-2 py-1">
+              <Loader2 className="h-3 w-3 animate-spin" /> salvando...
+            </span>
+          ) : (
+            <>
+              <StatusBadge status={status} />
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-44">
+        <DropdownMenuLabel>Mudar status</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {ESTAB_STATUS.map((s) => (
+          <DropdownMenuItem
+            key={s}
+            disabled={s === status}
+            onSelect={() => onChange(s)}
+            className="flex items-center justify-between gap-2"
+          >
+            <span>{ESTAB_STATUS_LABEL[s]}</span>
+            {s === status && <span className="text-xs text-muted-foreground">atual</span>}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Toggle inline do flag `destaque`, com ícone e estado de loading. */
+function DestaqueControl({
+  row,
+  saving,
+  onChange,
+}: {
+  row: Row;
+  saving: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const checked = !!row.destaque;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <Switch
+        checked={checked}
+        disabled={saving}
+        onCheckedChange={(v) => onChange(v === true)}
+        aria-label={`${checked ? "Remover" : "Marcar como"} destaque para ${row.nome}`}
+      />
+      {saving ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+      ) : checked ? (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+          <Star className="h-3.5 w-3.5 fill-primary" /> Destaque
+        </span>
+      ) : (
+        <span className="text-xs text-muted-foreground">—</span>
+      )}
+    </div>
+  );
+}
