@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const [destaques, setDestaques] = useState<Estab[]>([]);
   const [beneficios, setBeneficios] = useState<Estab[]>([]);
-  const [artigos, setArtigos] = useState<{ slug: string; titulo: string; resumo: string; foto_capa: string | null; categoria: string | null; criado_em: string }[]>([]);
+  const [artigos, setArtigos] = useState<{ slug: string; titulo: string; resumo: string | null; foto_capa: string | null; categoria: string | null; criado_em: string }[]>([]);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {

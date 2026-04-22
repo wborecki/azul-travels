@@ -102,7 +102,7 @@ function Explorar() {
       setLoading(true);
       let query = supabase.from("estabelecimentos").select("*").eq("status", "ativo");
       if (busca) query = query.or(`nome.ilike.%${busca}%,cidade.ilike.%${busca}%,descricao.ilike.%${busca}%,tipo.ilike.%${busca}%`);
-      if (tipos.length > 0) query = query.in("tipo", tipos);
+      if (tipos.length > 0) query = query.in("tipo", tipos as ("hotel"|"pousada"|"resort"|"restaurante"|"parque"|"atracoes"|"agencia"|"transporte")[]);
       if (estado !== "todos") query = query.eq("estado", estado);
       if (beneficio) query = query.eq("tem_beneficio_tea", true);
       if (tour360) query = query.not("tour_360_url", "is", null);

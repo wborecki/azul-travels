@@ -35,7 +35,7 @@ function ConteudoLista() {
     void (async () => {
       setLoading(true);
       let q = supabase.from("conteudo_tea").select("*").eq("publicado", true).order("criado_em", { ascending: false });
-      if (cat !== "todas") q = q.eq("categoria", cat);
+      if (cat !== "todas") q = q.eq("categoria", cat as "legislacao" | "dicas_viagem" | "boas_praticas" | "novidades" | "destinos");
       const { data } = await q;
       setArtigos((data as Artigo[]) ?? []);
       setLoading(false);
