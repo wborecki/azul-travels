@@ -880,6 +880,14 @@ function Explorar() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={restaurarPadrao}
+                title="Restaurar todos os filtros aos valores iniciais"
+              >
+                <RotateCcw className="h-4 w-4 mr-1" /> Restaurar padrão
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={copiarLink}
                 title="Copiar URL completa com todos os filtros"
               >
