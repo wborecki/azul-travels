@@ -160,6 +160,7 @@ type _CheckFetchEmbed = AssertEqual<
 
 import type {
   EstabelecimentoFull,
+  EstabelecimentoNormalized,
   EstabelecimentoView,
   ReservaComContexto,
   PerfilOption,
@@ -180,7 +181,16 @@ type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisDaFamilia>>[number];
 
 // Cada função precisa retornar shape concreto, nunca any/unknown.
 type _CheckEstabNotAny = AssertNotAny<EstabReturn, "REGRESSION: fetchEstabelecimentoPorSlug -> any">;
-type _CheckEstabShape = AssertEqual<EstabReturn, EstabelecimentoFull, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoFull">;
+// Após a normalização, o retorno é EstabelecimentoNormalized (não Full).
+type _CheckEstabShape = AssertEqual<EstabReturn, EstabelecimentoNormalized, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoNormalized">;
+// Garantias do shape normalizado — UI não precisa mais lidar com Json/cast.
+type _CheckEstabFotos = AssertEqual<EstabReturn["fotos"], string[], "REGRESSION: Normalized.fotos deveria ser string[]">;
+type _CheckEstabTour = AssertEqual<EstabReturn["tour_360_url"], string | null, "REGRESSION: Normalized.tour_360_url quebrou">;
+type _CheckEstabCapa = AssertEqual<EstabReturn["foto_capa"], string | null, "REGRESSION: Normalized.foto_capa quebrou">;
+type _CheckEstabLat = AssertEqual<EstabReturn["latitude"], number | null, "REGRESSION: Normalized.latitude quebrou">;
+type _CheckEstabLng = AssertEqual<EstabReturn["longitude"], number | null, "REGRESSION: Normalized.longitude quebrou">;
+// Normalized continua compatível com Full em campos invariantes.
+type _CheckEstabIdMatchesFull = AssertEqual<EstabReturn["id"], EstabelecimentoFull["id"], "REGRESSION: Normalized.id divergiu de Full.id">;
 
 // Payload View unificado — usado em listagem, cards, destaques, benefícios.
 type _CheckViewNotAny = AssertNotAny<ViewReturn, "REGRESSION: fetchEstabelecimentosView -> any">;
