@@ -178,11 +178,26 @@ const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
 
 export const Route = createFileRoute("/explorar")({
   validateSearch: zodValidator(searchSchema),
-  // Mantém a URL limpa: params iguais ao default não aparecem na barra
-  // de endereços. Compartilhar `/explorar?estado=SP` é equivalente a
-  // visitar `/explorar?q=&tipos=[]&estado=SP&pagina=1&...`.
+  // Mantém a URL limpa, MAS preserva `pagina` e `tamanhoPagina` quando
+  // diferentes do default — eles são essenciais para que um link
+  // compartilhado abra exatamente na mesma seção/densidade de lista
+  // que o remetente estava vendo. Os demais filtros continuam strippados
+  // quando iguais ao default (links curtos e legíveis).
   search: {
-    middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+    middlewares: [
+      stripSearchParams({
+        q: SEARCH_DEFAULTS.q,
+        tipos: SEARCH_DEFAULTS.tipos,
+        selos: SEARCH_DEFAULTS.selos,
+        recursos: SEARCH_DEFAULTS.recursos,
+        estado: SEARCH_DEFAULTS.estado,
+        beneficio: SEARCH_DEFAULTS.beneficio,
+        tour360: SEARCH_DEFAULTS.tour360,
+        ordem: SEARCH_DEFAULTS.ordem,
+        priorizarPerfil: SEARCH_DEFAULTS.priorizarPerfil,
+        // pagina e tamanhoPagina ficam de fora — viajam no link quando ≠ default.
+      }),
+    ],
   },
   head: () => ({
     meta: [
@@ -230,8 +245,8 @@ function Explorar() {
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
-  // `loading` = primeira página dos filtros atuais (mostra skeletons).
-  // `loadingMore` = páginas subsequentes (infinite scroll, mostra spinner).
+  // `loading` = primeira página visível dos filtros atuais (skeletons).
+  // `loadingMore` = páginas seguintes via scroll/Carregar mais (spinner).
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -249,6 +264,22 @@ function Explorar() {
   // viewport, dispara o carregamento da próxima página.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // ───────────────────────────────────────────────────────────────
+  // Desacoplamento URL ⇄ scroll infinito.
+  //
+  // `search.pagina` (URL) = "página inicial visível" — ponto de entrada
+  // estável para links compartilhados. Abrir `/explorar?pagina=3` mostra
+  // a partir da página 3 (sem carregar 1 e 2 — escolha do PO).
+  //
+  // `paginaAtual` (estado local) = última página acumulada via scroll.
+  // Cresce com o IntersectionObserver / "Carregar mais", **sem mexer
+  // na URL**, mantendo o link compartilhado estável.
+  //
+  // Quando filtros (não a página) mudam, resetamos `paginaAtual` para
+  // `search.pagina` — começamos de novo do ponto de entrada da URL.
+  // ───────────────────────────────────────────────────────────────
+  const [paginaAtual, setPaginaAtual] = useState(search.pagina);
+
   /**
    * Atualiza a query string preservando outros params e **reseta a
    * paginação para 1** — todos os controles de filtro/ordem chamam
@@ -261,7 +292,7 @@ function Explorar() {
     });
   }
 
-  /** Navega para uma página específica (usado pelo paginador). */
+  /** Navega para uma página específica (usado pelo paginador / link compartilhado). */
   function goToPage(pagina: number) {
     void navigate({
       search: (prev: ExplorarSearch) => ({ ...prev, pagina }),
@@ -413,13 +444,36 @@ function Explorar() {
     );
   }
 
-  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
+  // Ressincroniza `paginaAtual` quando os FILTROS (não a página) mudam,
+  // ou quando o usuário navega para uma URL com `pagina` diferente
+  // (ex.: clicou num link compartilhado). Sem isso, mudar de filtro
+  // continuaria mostrando a página acumulada anterior.
+  useEffect(() => {
+    setPaginaAtual(search.pagina);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    search.q,
+    search.tipos,
+    search.selos,
+    search.recursos,
+    search.estado,
+    search.beneficio,
+    search.tour360,
+    search.ordem,
+    search.priorizarPerfil,
+    search.pagina,
+    search.tamanhoPagina,
+  ]);
+
+  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade
+  // para filtros; `paginaAtual` é o cursor local do scroll infinito).
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      // Página 1 → reset visual (skeletons). Páginas seguintes → spinner
-      // discreto no fim da lista (loadingMore).
-      if (search.pagina === 1) setLoading(true);
+      // Primeira página visível dos filtros atuais → skeletons.
+      // Páginas seguintes (acumuladas via scroll) → spinner discreto.
+      const ehPrimeiraVisivel = paginaAtual === search.pagina;
+      if (ehPrimeiraVisivel) setLoading(true);
       else setLoadingMore(true);
 
       const filters: EstabelecimentosViewFilters = {
@@ -430,7 +484,7 @@ function Explorar() {
         estado: search.estado !== "todos" ? search.estado : undefined,
         apenasComBeneficio: search.beneficio,
         apenasComTour360: search.tour360,
-        pagina: search.pagina,
+        pagina: paginaAtual,
         tamanhoPagina: search.tamanhoPagina,
       };
 
@@ -497,17 +551,16 @@ function Explorar() {
         });
 
       setList((prev) => {
-        // Página 1 → substitui (filtros mudaram, ou load inicial).
-        // Página >1 → concatena, deduplicando por id (proteção contra
-        // race conditions e contra mesma página vir duas vezes).
-        const merged =
-          search.pagina === 1
-            ? page.items
-            : (() => {
-                const seen = new Set(prev.map((p) => p.id));
-                const novos = page.items.filter((it) => !seen.has(it.id));
-                return [...prev, ...novos];
-              })();
+        // Primeira página visível → substitui (filtros mudaram, ou
+        // navegou direto para `pagina=N` via link compartilhado).
+        // Páginas seguintes → concatena, deduplicando por id.
+        const merged = ehPrimeiraVisivel
+          ? page.items
+          : (() => {
+              const seen = new Set(prev.map((p) => p.id));
+              const novos = page.items.filter((it) => !seen.has(it.id));
+              return [...prev, ...novos];
+            })();
         return sortItems(merged);
       });
       setTotal(page.total);
@@ -531,6 +584,7 @@ function Explorar() {
     search.priorizarPerfil,
     search.pagina,
     search.tamanhoPagina,
+    paginaAtual,
     perfilNecessidades,
   ]);
 
@@ -538,12 +592,16 @@ function Explorar() {
   // Infinite scroll — IntersectionObserver no sentinel pós-grid.
   //
   // Quando o sentinel entra na viewport (com 200px de antecedência),
-  // dispara `goToPage(pagina + 1)`. Guards:
+  // incrementa `paginaAtual` (estado local). A URL **não muda** —
+  // assim o link compartilhado fica estável no ponto de entrada
+  // escolhido pelo usuário (`search.pagina`).
+  //
+  // Guards:
   //   - não está carregando uma página ainda
-  //   - existe próxima página (`pagina < totalPaginas`)
+  //   - existe próxima página (`paginaAtual < totalPaginas`)
   //   - lista não está vazia (evita loop em "nenhum resultado")
   // ───────────────────────────────────────────────────────────────
-  const podeCarregarMais = !loading && !loadingMore && search.pagina < totalPaginas;
+  const podeCarregarMais = !loading && !loadingMore && paginaAtual < totalPaginas;
 
   useEffect(() => {
     const node = sentinelRef.current;
@@ -552,15 +610,14 @@ function Explorar() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          goToPage(search.pagina + 1);
+          setPaginaAtual((p: number) => p + 1);
         }
       },
       { rootMargin: "200px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [podeCarregarMais, search.pagina, totalPaginas]);
+  }, [podeCarregarMais]);
 
 
   const limpar = () => {
@@ -1054,18 +1111,20 @@ function Explorar() {
               {/*
                 Sentinel + fallback acessível.
                 - O sentinel (div vazia) é observada pelo IntersectionObserver
-                  e dispara `goToPage` automaticamente ao entrar na viewport.
+                  e incrementa `paginaAtual` automaticamente ao entrar na viewport.
                 - O botão "Carregar mais" é um fallback para teclado, leitores
                   de tela e navegadores sem IntersectionObserver — tem o mesmo
                   efeito programático.
+                - Importante: estes controles **não** alteram a URL — o link
+                  compartilhado preserva o ponto de entrada (`search.pagina`).
               */}
-              {search.pagina < totalPaginas && (
+              {paginaAtual < totalPaginas && (
                 <div className="mt-8 flex flex-col items-center gap-3">
                   <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => goToPage(search.pagina + 1)}
+                    onClick={() => setPaginaAtual((p: number) => p + 1)}
                     disabled={loadingMore}
                   >
                     {loadingMore ? "Carregando..." : "Carregar mais"}
@@ -1074,7 +1133,7 @@ function Explorar() {
               )}
 
               {/* Mensagem final quando tudo foi carregado */}
-              {search.pagina >= totalPaginas && totalPaginas > 1 && (
+              {paginaAtual >= totalPaginas && totalPaginas > 1 && (
                 <p className="mt-8 text-center text-xs text-muted-foreground">
                   Você chegou ao fim — {total} resultado{total === 1 ? "" : "s"}.
                 </p>
