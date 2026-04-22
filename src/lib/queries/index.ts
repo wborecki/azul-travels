@@ -124,3 +124,14 @@ export {
   type PerfilSensorialRow,
   type AdminCounts,
 } from "./admin";
+
+// Filtros padrão de exploração — preferências por usuário (1:1).
+export {
+  fetchFiltrosPadrao,
+  salvarFiltrosPadrao,
+  limparFiltrosPadrao,
+  temFiltrosSalvos,
+  type FiltrosPadraoUI,
+  type ExplorarFiltrosPadrao,
+  type ExplorarFiltrosPadraoInsert,
+} from "./explorar-filtros";
