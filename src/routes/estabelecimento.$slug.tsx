@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +20,17 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 
 interface PerfilOpt { id: string; nome_autista: string }
 
+type Estab = Tables<"estabelecimentos">;
+type Avaliacao = Tables<"avaliacoes"> & {
+  familia_profiles: { nome_responsavel: string | null } | null;
+};
+
 function EstabPage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [estab, setEstab] = useState<Record<string, unknown> | null>(null);
+  const [estab, setEstab] = useState<Estab | null>(null);
   const [loading, setLoading] = useState(true);
   const [perfis, setPerfis] = useState<PerfilOpt[]>([]);
   const [perfilSel, setPerfilSel] = useState<string>("");
@@ -35,7 +41,7 @@ function EstabPage() {
   const [mensagem, setMensagem] = useState("");
   const [autoriza, setAutoriza] = useState(true);
   const [enviando, setEnviando] = useState(false);
-  const [avals, setAvals] = useState<Record<string, unknown>[]>([]);
+  const [avals, setAvals] = useState<Avaliacao[]>([]);
 
   useEffect(() => {
     void (async () => {
@@ -75,7 +81,7 @@ function EstabPage() {
       </div>
     );
 
-  const e = estab as Record<string, unknown>;
+  const e = estab;
   const recursoKeys = ["tem_sala_sensorial","tem_concierge_tea","tem_checkin_antecipado","tem_fila_prioritaria","tem_cardapio_visual","tem_caa"] as const;
   const recursosAtivos = recursoKeys.filter((k) => e[k]);
 
@@ -95,7 +101,7 @@ function EstabPage() {
     setEnviando(true);
     const { error } = await supabase.from("reservas").insert({
       familia_id: user.id,
-      estabelecimento_id: e.id as string,
+      estabelecimento_id: e.id,
       perfil_sensorial_id: perfilSel,
       data_checkin: checkin,
       data_checkout: checkout,
@@ -114,18 +120,18 @@ function EstabPage() {
     navigate({ to: "/minha-conta/reservas" });
   };
 
-  const fotos = (e.fotos as string[] | null) ?? [];
-  const fotoCapa = (e.foto_capa as string | null) ?? "";
+  const fotos: string[] = Array.isArray(e.fotos) ? (e.fotos as string[]) : [];
+  const fotoCapa = e.foto_capa ?? "";
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Galeria */}
       <div className="grid lg:grid-cols-3 gap-3 mb-8 max-h-[480px]">
         <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-muted">
-          {fotoCapa && <img src={fotoCapa} alt={e.nome as string} className="w-full h-full object-cover" />}
-          {(e.tour_360_url as string | null) && (
+          {fotoCapa && <img src={fotoCapa} alt={e.nome} className="w-full h-full object-cover" />}
+          {e.tour_360_url && (
             <a
-              href={e.tour_360_url as string}
+              href={e.tour_360_url}
               target="_blank"
               rel="noreferrer"
               className="absolute bottom-4 right-4 bg-amarelo text-amarelo-foreground rounded-xl px-4 py-2 font-semibold text-sm flex items-center gap-2 shadow-elegant hover:scale-105 transition"
@@ -147,15 +153,15 @@ function EstabPage() {
         {/* Conteúdo */}
         <div className="lg:col-span-2 space-y-8">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">{TIPO_LABEL[e.tipo as string]}</span>
-            <h1 className="mt-1 text-3xl md:text-4xl font-display font-bold text-primary">{e.nome as string}</h1>
+            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">{TIPO_LABEL[e.tipo]}</span>
+            <h1 className="mt-1 text-3xl md:text-4xl font-display font-bold text-primary">{e.nome}</h1>
             <p className="mt-1 text-muted-foreground flex items-center gap-1">
-              <MapPin className="h-4 w-4" /> {e.cidade as string}, {e.estado as string}
+              <MapPin className="h-4 w-4" /> {e.cidade}, {e.estado}
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {e.selo_azul && <Pill {...SELO_BADGES.selo_azul} />}
               {e.selo_governamental && <Pill {...SELO_BADGES.selo_governamental} />}
-              {e.selo_privado && <Pill {...SELO_BADGES.selo_privado} label={(e.selo_privado_nome as string) || "Selo Privado"} />}
+              {e.selo_privado && <Pill {...SELO_BADGES.selo_privado} label={e.selo_privado_nome || "Selo Privado"} />}
               {e.tour_360_url && <Pill {...SELO_BADGES.tour_360} />}
               {e.tem_beneficio_tea && <Pill {...SELO_BADGES.beneficio_tea} />}
             </div>
@@ -163,7 +169,7 @@ function EstabPage() {
 
           <section>
             <h2 className="font-display font-bold text-xl text-primary">Sobre o local para famílias TEA</h2>
-            <p className="mt-3 text-foreground leading-relaxed">{(e.descricao_tea as string) || (e.descricao as string)}</p>
+            <p className="mt-3 text-foreground leading-relaxed">{e.descricao_tea || e.descricao}</p>
           </section>
 
           {recursosAtivos.length > 0 && (
@@ -184,7 +190,7 @@ function EstabPage() {
               <div className="flex items-center gap-2 text-secondary font-display font-bold text-lg">
                 <Gift className="h-5 w-5" /> Benefício especial para pessoas autistas
               </div>
-              <p className="mt-2 text-foreground">{e.beneficio_tea_descricao as string}</p>
+              <p className="mt-2 text-foreground">{e.beneficio_tea_descricao}</p>
             </section>
           )}
 
@@ -194,20 +200,20 @@ function EstabPage() {
               {e.selo_azul && (
                 <li className="flex justify-between py-2 border-b">
                   <span className="font-semibold">Selo Azul (Absoluto Educacional)</span>
-                  {e.selo_azul_validade && <span className="text-muted-foreground">Válido até {formatDateBR(e.selo_azul_validade as string)}</span>}
+                  {e.selo_azul_validade && <span className="text-muted-foreground">Válido até {formatDateBR(e.selo_azul_validade)}</span>}
                 </li>
               )}
               {e.selo_governamental && <li className="py-2 border-b font-semibold">Certificado Governamental</li>}
-              {e.selo_privado && <li className="py-2 border-b font-semibold">{(e.selo_privado_nome as string) || "Selo Privado"}</li>}
+              {e.selo_privado && <li className="py-2 border-b font-semibold">{e.selo_privado_nome || "Selo Privado"}</li>}
             </ul>
           </section>
 
           <section>
             <h3 className="font-display font-bold text-lg text-primary mb-3">Contato</h3>
             <div className="space-y-2 text-sm">
-              {e.telefone && <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-secondary" /> {e.telefone as string}</p>}
-              {e.website && <p className="flex items-center gap-2"><Globe className="h-4 w-4 text-secondary" /> <a href={e.website as string} target="_blank" rel="noreferrer" className="text-secondary hover:underline">{e.website as string}</a></p>}
-              {e.endereco && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-secondary" /> {e.endereco as string}</p>}
+              {e.telefone && <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-secondary" /> {e.telefone}</p>}
+              {e.website && <p className="flex items-center gap-2"><Globe className="h-4 w-4 text-secondary" /> <a href={e.website} target="_blank" rel="noreferrer" className="text-secondary hover:underline">{e.website}</a></p>}
+              {e.endereco && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-secondary" /> {e.endereco}</p>}
             </div>
           </section>
 
@@ -220,20 +226,19 @@ function EstabPage() {
             ) : (
               <div className="space-y-3">
                 {avals.map((a) => {
-                  const fp = a.familia_profiles as { nome_responsavel: string | null } | null;
-                  const nome = fp?.nome_responsavel?.split(" ")[0] ?? "Família";
+                  const nome = a.familia_profiles?.nome_responsavel?.split(" ")[0] ?? "Família";
                   return (
-                    <div key={a.id as string} className="bg-card border rounded-xl p-4">
+                    <div key={a.id} className="bg-card border rounded-xl p-4">
                       <div className="flex items-center justify-between">
                         <p className="font-semibold">{nome}</p>
                         <div className="flex items-center gap-1 text-amarelo">
-                          {Array.from({ length: a.nota_geral as number }).map((_, i) => (
+                          {Array.from({ length: a.nota_geral ?? 0 }).map((_, i) => (
                             <Star key={i} className="h-4 w-4 fill-current" />
                           ))}
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">{formatDateBR(a.criado_em as string)}</p>
-                      {a.comentario && <p className="mt-2 text-sm">{a.comentario as string}</p>}
+                      <p className="text-xs text-muted-foreground">{formatDateBR(a.criado_em)}</p>
+                      {a.comentario && <p className="mt-2 text-sm">{a.comentario}</p>}
                     </div>
                   );
                 })}
