@@ -41,6 +41,7 @@ import {
   Sparkles,
   Bookmark,
   BookmarkX,
+  Wand2,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,6 +74,25 @@ const RECURSOS_VALORES = [
   "tem_cardapio_visual",
   "tem_caa",
 ] as const;
+
+/**
+ * Recursos considerados "necessidades mais comuns" do público TEA — base
+ * do atalho rápido na toolbar. Escolhidos pelo PO como o trio que cobre
+ * a maior fatia das demandas de famílias autistas:
+ *
+ *  - sala sensorial (ambiente de regulação),
+ *  - fila prioritária (reduz tempo de espera, gatilho clássico),
+ *  - CAA — Comunicação Aumentativa e Alternativa.
+ *
+ * Quando há perfil sensorial logado, o atalho **filtra esse trio** pelos
+ * recursos de fato necessários à família (`perfilNecessidades`). Sem
+ * perfil/login, aplica os três brutos como heurística geral.
+ */
+const RECURSOS_COMUNS = [
+  "tem_sala_sensorial",
+  "tem_fila_prioritaria",
+  "tem_caa",
+] as const satisfies ReadonlyArray<(typeof RECURSOS_VALORES)[number]>;
 /**
  * Critério principal de ordenação.
  *
@@ -346,6 +366,48 @@ function Explorar() {
     } finally {
       setSalvandoPadrao(false);
     }
+  }
+
+  /**
+   * Atalho "Necessidades mais comuns".
+   *
+   * Liga em um clique os recursos sensoriais mais demandados (sala
+   * sensorial, fila prioritária, CAA). Quando há perfil sensorial da
+   * família carregado, **intersecta** com o que esse perfil de fato
+   * marca como necessário — assim o atalho não impõe filtros que a
+   * família não usa. Sem perfil/login, aplica os três como heurística.
+   *
+   * Também liga `priorizarPerfil` para que a ordenação leve em conta a
+   * compatibilidade — coerente com o intent do botão.
+   */
+  function aplicarNecessidadesComuns() {
+    const temPerfil = user && Object.values(perfilNecessidades).some(Boolean);
+    const recursosParaAplicar = temPerfil
+      ? RECURSOS_COMUNS.filter((r) => perfilNecessidades[r])
+      : [...RECURSOS_COMUNS];
+
+    if (recursosParaAplicar.length === 0) {
+      toast.info(
+        "Seu perfil sensorial não marca nenhuma das necessidades mais comuns. Atualize-o em Minha conta › Perfil sensorial.",
+      );
+      return;
+    }
+
+    // Mescla com o que já está marcado — não desativa filtros que o
+    // usuário tenha ligado manualmente (ex.: cardápio visual).
+    const merged = Array.from(
+      new Set<(typeof RECURSOS_VALORES)[number]>([
+        ...search.recursos,
+        ...recursosParaAplicar,
+      ]),
+    );
+
+    patchSearchResetPage({ recursos: merged, priorizarPerfil: true });
+    toast.success(
+      temPerfil
+        ? `Atalho aplicado com base no perfil sensorial (${recursosParaAplicar.length} recurso${recursosParaAplicar.length > 1 ? "s" : ""}).`
+        : `Atalho aplicado: sala sensorial, fila prioritária e CAA.`,
+    );
   }
 
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
@@ -739,6 +801,18 @@ function Explorar() {
               >
                 <SlidersHorizontal className="h-4 w-4 mr-1" /> Filtros
                 {filtrosAtivos > 0 && ` (${filtrosAtivos})`}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={aplicarNecessidadesComuns}
+                title={
+                  user && Object.values(perfilNecessidades).some(Boolean)
+                    ? "Ativa rapidamente sala sensorial, fila prioritária e CAA — filtrados pelo seu perfil sensorial."
+                    : "Ativa rapidamente sala sensorial, fila prioritária e CAA."
+                }
+              >
+                <Wand2 className="h-4 w-4 mr-1" /> Necessidades mais comuns
               </Button>
               <Button
                 variant="outline"
