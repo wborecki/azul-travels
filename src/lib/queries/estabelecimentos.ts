@@ -14,10 +14,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import {
-  fetchAvaliacoesPublicasPorEstab,
-  type AvaliacaoComFamilia,
-} from "./avaliacoes";
+import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
