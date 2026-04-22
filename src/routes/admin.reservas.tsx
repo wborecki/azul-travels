@@ -565,6 +565,75 @@ function AdminReservas() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirmação de ação em lote */}
+      <AlertDialog
+        open={!!bulkAction}
+        onOpenChange={(o) => !o && !savingBulk && setBulkAction(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction
+                ? `${verboLabel(bulkAction.next)} ${bulkAction.ids.length} reserva(s)?`
+                : "Confirmar ação em lote"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction && (
+                <>
+                  Esta ação atualizará <strong>{bulkAction.ids.length}</strong> reserva(s) para o
+                  status <strong>{RESERVA_STATUS_LABEL[bulkAction.next]}</strong>. Cada alteração
+                  ficará registrada individualmente no log de auditoria.
+                  {selecionadas.size !== bulkAction.ids.length && (
+                    <>
+                      {" "}
+                      <span className="text-warning">
+                        ({selecionadas.size - bulkAction.ids.length} reserva(s) selecionada(s) serão
+                        ignoradas por não estarem em um status compatível.)
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="bulk-obs" className="text-sm">
+              Observação (opcional, aplicada a todas)
+            </Label>
+            <Textarea
+              id="bulk-obs"
+              rows={3}
+              placeholder="Ex: lote confirmado após reunião com parceiro..."
+              value={bulkObservacao}
+              onChange={(e) => setBulkObservacao(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={savingBulk}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void applyBulk();
+              }}
+              disabled={savingBulk}
+              className={
+                bulkAction?.next === "cancelada"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+            >
+              {savingBulk ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Aplicando em lote...
+                </>
+              ) : (
+                bulkAction && `${verboLabel(bulkAction.next)} ${bulkAction.ids.length}`
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
