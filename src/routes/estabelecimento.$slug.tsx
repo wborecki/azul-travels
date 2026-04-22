@@ -4,6 +4,7 @@ import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   criarReserva,
+  pickEstabMedia,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
