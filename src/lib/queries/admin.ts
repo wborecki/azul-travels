@@ -224,11 +224,19 @@ export async function fetchEstabelecimentoAdminDetalhe(
 
 export type ConteudoAdminRow = Pick<
   Tables<"conteudo_tea">,
-  "id" | "titulo" | "slug" | "categoria" | "publicado" | "autor" | "criado_em" | "foto_capa"
+  | "id"
+  | "titulo"
+  | "slug"
+  | "categoria"
+  | "publicado"
+  | "publicar_em"
+  | "autor"
+  | "criado_em"
+  | "foto_capa"
 >;
 
 const CONTEUDO_ADMIN_SELECT =
-  "id, titulo, slug, categoria, publicado, autor, criado_em, foto_capa" as const;
+  "id, titulo, slug, categoria, publicado, publicar_em, autor, criado_em, foto_capa" as const;
 
 export async function fetchConteudosAdmin(limit = 300): Promise<ConteudoAdminRow[]> {
   const { data, error } = await supabase
