@@ -204,7 +204,6 @@ function AdminEstabelecimentoForm() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const slugTouched = useRef(false);
 
   useEffect(() => {
     if (isNew) return;
@@ -218,7 +217,6 @@ function AdminEstabelecimentoForm() {
           return;
         }
         setForm(rowToForm(data));
-        slugTouched.current = true;
       } catch (err) {
         toast.error("Erro ao carregar", {
           description: err instanceof Error ? err.message : undefined,
@@ -233,21 +231,68 @@ function AdminEstabelecimentoForm() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  // Slug é **derivado automaticamente** do nome — não há mais edição manual.
+  // Travar a UI evita que admins criem variações conflitantes (ex.: "hotel-x"
+  // vs "hotel-x-2") sem motivo. A unicidade real é garantida pelo índice
+  // único no banco + auto-sufixo aplicado em `ensureUniqueSlug` no submit.
   const onNomeChange = (v: string) => {
-    setForm((f) => ({
-      ...f,
-      nome: v,
-      slug: slugTouched.current ? f.slug : slugify(v),
-    }));
+    setForm((f) => ({ ...f, nome: v, slug: slugify(v) }));
   };
+
+  /**
+   * Garante slug único antes do save.
+   *
+   * Faz uma busca em `estabelecimentos` por slugs que comecem com `base` e,
+   * caso o exato já exista (excluindo o próprio registro em edição),
+   * incrementa um sufixo `-2`, `-3`, ... até encontrar o primeiro livre.
+   *
+   * Como a checagem é client-side **e** o índice único cobre o banco, a
+   * pior corrida possível resulta em erro `23505` no insert/update — que
+   * tratamos no `handleSubmit` mostrando uma mensagem clara.
+   */
+  const ensureUniqueSlug = async (base: string): Promise<string> => {
+    if (!base) return base;
+    const { data, error } = await supabase
+      .from("estabelecimentos")
+      .select("slug, id")
+      .like("slug", `${base}%`);
+    if (error) throw error;
+    const taken = new Set(
+      (data ?? [])
+        .filter((r) => (isNew ? true : r.id !== id))
+        .map((r) => r.slug),
+    );
+    if (!taken.has(base)) return base;
+    for (let i = 2; i < 1000; i++) {
+      const candidate = `${base}-${i}`;
+      if (!taken.has(candidate)) return candidate;
+    }
+    return `${base}-${Date.now()}`;
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
+    // Slug é sempre derivado do nome no submit — protege contra estados
+    // intermediários (ex.: form recém-carregado de um registro antigo cujo
+    // slug não bate exatamente com `slugify(nome)`).
+    const baseSlug = slugify(form.nome);
+    let finalSlug = baseSlug;
+    try {
+      finalSlug = await ensureUniqueSlug(baseSlug);
+    } catch (err) {
+      toast.error("Não foi possível validar o slug", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+      return;
+    }
+    if (finalSlug !== form.slug) setForm((f) => ({ ...f, slug: finalSlug }));
+
     const parsed = formSchema.safeParse({
       nome: form.nome,
-      slug: form.slug,
+      slug: finalSlug,
       tipo: form.tipo,
       status: form.status,
       descricao: form.descricao || null,
@@ -321,7 +366,11 @@ function AdminEstabelecimentoForm() {
         .single();
       setSaving(false);
       if (error) {
-        toast.error("Erro ao criar", { description: error.message });
+        const msg =
+          error.code === "23505"
+            ? "Já existe um estabelecimento com este slug. Ajuste o nome e tente novamente."
+            : error.message;
+        toast.error("Erro ao criar", { description: msg });
         return;
       }
       toast.success("Estabelecimento criado");
@@ -330,7 +379,11 @@ function AdminEstabelecimentoForm() {
       const { error } = await supabase.from("estabelecimentos").update(payload).eq("id", id);
       setSaving(false);
       if (error) {
-        toast.error("Erro ao salvar", { description: error.message });
+        const msg =
+          error.code === "23505"
+            ? "Já existe um estabelecimento com este slug. Ajuste o nome e tente novamente."
+            : error.message;
+        toast.error("Erro ao salvar", { description: msg });
         return;
       }
       toast.success("Alterações salvas");
@@ -384,13 +437,17 @@ function AdminEstabelecimentoForm() {
           <Field label="Nome" error={errors.nome} required>
             <Input value={form.nome} onChange={(e) => onNomeChange(e.target.value)} />
           </Field>
-          <Field label="Slug" error={errors.slug} required hint="Usado na URL pública">
+          <Field
+            label="Slug (gerado automaticamente)"
+            error={errors.slug}
+            hint="Derivado do nome — sufixo numérico é adicionado se houver conflito."
+          >
             <Input
               value={form.slug}
-              onChange={(e) => {
-                slugTouched.current = true;
-                set("slug", slugify(e.target.value));
-              }}
+              readOnly
+              disabled
+              className="font-mono text-sm bg-muted/40 cursor-not-allowed"
+              aria-label="Slug gerado automaticamente"
             />
           </Field>
           <Field label="Tipo" required>
