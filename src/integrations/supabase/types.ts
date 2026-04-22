@@ -68,6 +68,54 @@ export type Database = {
           },
         ]
       }
+      contatos_estabelecimentos: {
+        Row: {
+          cidade: string
+          criado_em: string
+          email: string
+          estado: string
+          id: string
+          interesses: string[]
+          mensagem: string | null
+          nome_estabelecimento: string
+          nome_responsavel: string
+          num_colaboradores: string
+          origem: string | null
+          telefone: string
+          tipo_estabelecimento: string
+        }
+        Insert: {
+          cidade: string
+          criado_em?: string
+          email: string
+          estado: string
+          id?: string
+          interesses?: string[]
+          mensagem?: string | null
+          nome_estabelecimento: string
+          nome_responsavel: string
+          num_colaboradores: string
+          origem?: string | null
+          telefone: string
+          tipo_estabelecimento: string
+        }
+        Update: {
+          cidade?: string
+          criado_em?: string
+          email?: string
+          estado?: string
+          id?: string
+          interesses?: string[]
+          mensagem?: string | null
+          nome_estabelecimento?: string
+          nome_responsavel?: string
+          num_colaboradores?: string
+          origem?: string | null
+          telefone?: string
+          tipo_estabelecimento?: string
+        }
+        Relationships: []
+      }
       conteudo_eventos: {
         Row: {
           conteudo_id: string
