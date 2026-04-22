@@ -15,6 +15,57 @@
 
 import { supabase } from "./client";
 import type { Tables, TablesInsert } from "./types";
+import {
+  ESTAB_TIPO_LABEL,
+  ESTAB_STATUS_LABEL,
+  RESERVA_STATUS_LABEL,
+  TEA_NIVEL_LABEL,
+  APP_ROLE_LABEL,
+  CONTEUDO_CATEGORIA_LABEL,
+  type EstabTipo,
+  type EstabStatus,
+  type ReservaStatus,
+  type TeaNivel,
+  type AppRole,
+  type ConteudoCategoria,
+} from "@/lib/enums";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0. Labels de enums devem ser EXHAUSTIVOS (Record<Enum, string>).
+// Se o banco ganhar um valor de enum novo, o tipo `Record<Enum, string>`
+// passa a exigir a chave nova — o build quebra até traduzirmos.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type _CheckEstabTipoLabel = AssertEqual<
+  keyof typeof ESTAB_TIPO_LABEL,
+  EstabTipo,
+  "REGRESSION: ESTAB_TIPO_LABEL não cobre exatamente o enum estab_tipo"
+>;
+type _CheckEstabStatusLabel = AssertEqual<
+  keyof typeof ESTAB_STATUS_LABEL,
+  EstabStatus,
+  "REGRESSION: ESTAB_STATUS_LABEL não cobre exatamente o enum estab_status"
+>;
+type _CheckReservaStatusLabel = AssertEqual<
+  keyof typeof RESERVA_STATUS_LABEL,
+  ReservaStatus,
+  "REGRESSION: RESERVA_STATUS_LABEL não cobre exatamente o enum reserva_status"
+>;
+type _CheckTeaNivelLabel = AssertEqual<
+  keyof typeof TEA_NIVEL_LABEL,
+  TeaNivel,
+  "REGRESSION: TEA_NIVEL_LABEL não cobre exatamente o enum tea_nivel"
+>;
+type _CheckAppRoleLabel = AssertEqual<
+  keyof typeof APP_ROLE_LABEL,
+  AppRole,
+  "REGRESSION: APP_ROLE_LABEL não cobre exatamente o enum app_role"
+>;
+type _CheckConteudoCategoriaLabel = AssertEqual<
+  keyof typeof CONTEUDO_CATEGORIA_LABEL,
+  ConteudoCategoria,
+  "REGRESSION: CONTEUDO_CATEGORIA_LABEL não cobre exatamente o enum conteudo_categoria"
+>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers de asserção em tempo de compilação
