@@ -414,13 +414,17 @@ function AdminEstabelecimentoForm() {
           <Field label="Nome" error={errors.nome} required>
             <Input value={form.nome} onChange={(e) => onNomeChange(e.target.value)} />
           </Field>
-          <Field label="Slug" error={errors.slug} required hint="Usado na URL pública">
+          <Field
+            label="Slug (gerado automaticamente)"
+            error={errors.slug}
+            hint="Derivado do nome — sufixo numérico é adicionado se houver conflito."
+          >
             <Input
               value={form.slug}
-              onChange={(e) => {
-                slugTouched.current = true;
-                set("slug", slugify(e.target.value));
-              }}
+              readOnly
+              disabled
+              className="font-mono text-sm bg-muted/40 cursor-not-allowed"
+              aria-label="Slug gerado automaticamente"
             />
           </Field>
           <Field label="Tipo" required>
