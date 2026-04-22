@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Building2, CalendarCheck, FileText, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Building2, CalendarCheck, FileText, ShieldAlert, History } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -83,6 +83,11 @@ function AdminLayout() {
             to="/admin/conteudo"
             icon={<FileText className="h-4 w-4" />}
             label="Conteúdo TEA"
+          />
+          <NavItem
+            to="/admin/auditoria"
+            icon={<History className="h-4 w-4" />}
+            label="Auditoria"
           />
         </div>
       </aside>

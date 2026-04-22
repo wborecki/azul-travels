@@ -116,6 +116,7 @@ export {
   fetchReservasAdmin,
   fetchReservasAdminPaginated,
   fetchAuditoriaPorReserva,
+  fetchAuditoriaAdminPaginated,
   fetchPerfisSensoriaisDaFamilia,
   fetchAdminCounts,
   ESTAB_ADMIN_VIEW_SELECT,
@@ -129,6 +130,8 @@ export {
   type ReservasAdminFilters,
   type ReservasAdminPage,
   type AuditoriaRow,
+  type AuditoriaAdminFilters,
+  type AuditoriaAdminPage,
   type PerfilSensorialRow,
   type AdminCounts,
 } from "./admin";
