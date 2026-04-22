@@ -1,9 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
   fetchEstabelecimentoPorSlug,
+  fetchPerfisDaFamilia,
+  criarReserva,
   type EstabelecimentoNormalized,
+  type PerfilOption,
+  type ReservaInsert,
 } from "@/lib/queries";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
@@ -22,8 +25,6 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
   component: EstabPage,
 });
 
-interface PerfilOpt { id: string; nome_autista: string }
-
 type Estab = EstabelecimentoNormalized;
 type Avaliacao = AvaliacaoComFamilia;
 
@@ -34,10 +35,10 @@ function EstabPage() {
 
   const [estab, setEstab] = useState<Estab | null>(null);
   const [loading, setLoading] = useState(true);
-  const [perfis, setPerfis] = useState<PerfilOpt[]>([]);
+  const [perfis, setPerfis] = useState<PerfilOption[]>([]);
   const [perfilSel, setPerfilSel] = useState<string>("");
-  const [checkin, setCheckin] = useState("");
-  const [checkout, setCheckout] = useState("");
+  const [checkin, setCheckin] = useState<string>("");
+  const [checkout, setCheckout] = useState<string>("");
   const [adultos, setAdultos] = useState(2);
   const [autistas, setAutistas] = useState(1);
   const [mensagem, setMensagem] = useState("");
@@ -69,9 +70,15 @@ function EstabPage() {
   useEffect(() => {
     if (!user) return;
     void (async () => {
-      const { data } = await supabase.from("perfil_sensorial").select("id, nome_autista").eq("familia_id", user.id);
-      setPerfis(data ?? []);
-      if (data && data.length > 0) setPerfilSel(data[0].id);
+      try {
+        const data = await fetchPerfisDaFamilia(user.id);
+        setPerfis(data);
+        if (data.length > 0) setPerfilSel(data[0].id);
+      } catch (err) {
+        toast.error("Erro ao carregar perfis sensoriais", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
     })();
   }, [user]);
 
@@ -103,8 +110,7 @@ function EstabPage() {
       toast.error("Selecione as datas de check-in e check-out.");
       return;
     }
-    setEnviando(true);
-    const { error } = await supabase.from("reservas").insert({
+    const payload: ReservaInsert = {
       familia_id: user.id,
       estabelecimento_id: e.id,
       perfil_sensorial_id: perfilSel,
@@ -112,17 +118,22 @@ function EstabPage() {
       data_checkout: checkout,
       num_adultos: adultos,
       num_autistas: autistas,
-      mensagem,
+      mensagem: mensagem.trim() || null,
       status: "pendente",
       perfil_enviado_ao_estabelecimento: autoriza,
-    });
-    setEnviando(false);
-    if (error) {
-      toast.error("Erro ao enviar reserva: " + error.message);
-      return;
+    };
+    setEnviando(true);
+    try {
+      await criarReserva(payload);
+      toast.success("Reserva solicitada! O estabelecimento entrará em contato.");
+      navigate({ to: "/minha-conta/reservas" });
+    } catch (err) {
+      toast.error("Erro ao enviar reserva", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setEnviando(false);
     }
-    toast.success("Reserva solicitada! O estabelecimento entrará em contato.");
-    navigate({ to: "/minha-conta/reservas" });
   };
 
   // `e.fotos` e `e.foto_capa` já chegam normalizados (string[] / string|null).
