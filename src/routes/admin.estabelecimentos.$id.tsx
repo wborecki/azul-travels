@@ -363,10 +363,19 @@ function AdminEstabelecimentoForm() {
             </p>
           </div>
         </div>
-        <Button type="submit" disabled={saving} className="gap-2">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {isNew ? "Criar" : "Salvar"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {!isNew && (
+            <Button asChild type="button" variant="outline" className="gap-2">
+              <Link to="/admin/estabelecimentos/$id/preview" params={{ id }}>
+                <Eye className="h-4 w-4" /> Pré-visualizar
+              </Link>
+            </Button>
+          )}
+          <Button type="submit" disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {isNew ? "Criar" : "Salvar"}
+          </Button>
+        </div>
       </header>
 
       {/* Dados básicos */}
