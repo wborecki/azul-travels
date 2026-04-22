@@ -357,6 +357,21 @@ function AdminConteudo() {
                         <Button
                           size="sm"
                           variant="ghost"
+                          className="h-8 px-2"
+                          onClick={() => handleDuplicate(r)}
+                          disabled={duplicatingId === r.id}
+                          aria-label="Duplicar artigo"
+                          title="Duplicar artigo"
+                        >
+                          {duplicatingId === r.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => setToDelete(r)}
                           aria-label="Excluir"
