@@ -29,7 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Eye, Loader2, MapPin, Save, Upload, Star as StarIcon, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  GripVertical,
+  Loader2,
+  MapPin,
+  Save,
+  Star as StarIcon,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/estabelecimentos/$id")({
