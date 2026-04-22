@@ -687,9 +687,8 @@ function AdminEstabelecimentoForm() {
       {/* Fotos */}
       <Section
         title="Fotos"
-        description="Capa principal + galeria. Faça upload ou cole URLs externas."
+        description="Arraste para reordenar. A primeira foto vira a capa automaticamente."
       >
-        <FotosCapa value={form.foto_capa} onChange={(v) => set("foto_capa", v)} />
         <FotosGaleria value={form.fotos} onChange={(v) => set("fotos", v)} />
       </Section>
 
