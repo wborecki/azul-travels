@@ -147,22 +147,22 @@ function Explorar() {
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
 
-  // Helper único para atualizar a query string preservando outros params.
-  function patchSearch(patch: Partial<ExplorarSearch>) {
-    void navigate({
-      search: (prev: ExplorarSearch) => ({ ...prev, ...patch }),
-      replace: true,
-    });
-  }
-
   /**
-   * Patch que **reseta a paginação para 1**. Use sempre que um filtro
-   * mudar — caso contrário, o usuário pode ficar numa página vazia
-   * (ex.: estava na pág. 7 e aplicou um filtro que só tem 2 páginas).
+   * Atualiza a query string preservando outros params e **reseta a
+   * paginação para 1** — todos os controles de filtro/ordem chamam
+   * isso para que o usuário não fique numa página vazia ao filtrar.
    */
   function patchSearchResetPage(patch: Partial<ExplorarSearch>) {
     void navigate({
       search: (prev: ExplorarSearch) => ({ ...prev, ...patch, pagina: 1 }),
+      replace: true,
+    });
+  }
+
+  /** Navega para uma página específica (usado pelo paginador). */
+  function goToPage(pagina: number) {
+    void navigate({
+      search: (prev: ExplorarSearch) => ({ ...prev, pagina }),
       replace: true,
     });
   }
