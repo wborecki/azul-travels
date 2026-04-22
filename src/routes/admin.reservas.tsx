@@ -541,14 +541,30 @@ function AdminReservas() {
                 : `${total} reserva(s)${filter !== "todas" || qDebounced ? " no filtro atual" : ""}`}
           </p>
         </div>
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por estabelecimento, família ou e-mail..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por estabelecimento, família ou e-mail..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={exportarCSV}
+            disabled={exporting || loading || total === 0}
+            title="Exporta todas as reservas que casam com os filtros atuais"
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            {exporting ? "Exportando..." : "Exportar CSV"}
+          </Button>
         </div>
       </header>
 
