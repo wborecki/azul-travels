@@ -19,7 +19,9 @@ export function Logo({ light = false }: { light?: boolean }) {
           opacity="0.85"
         />
       </svg>
-      <span className={`font-display font-extrabold text-lg tracking-tight ${light ? "text-white" : "text-primary"}`}>
+      <span
+        className={`font-display font-extrabold text-lg tracking-tight ${light ? "text-white" : "text-primary"}`}
+      >
         Turismo <span className="text-secondary">Azul</span>
       </span>
     </Link>

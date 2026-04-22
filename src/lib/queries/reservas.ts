@@ -16,10 +16,7 @@ export type ReservaComContexto = Reserva & {
     Tables<"estabelecimentos">,
     "id" | "slug" | "nome" | "cidade" | "estado" | "foto_capa" | "tipo"
   > | null;
-  perfil_sensorial: Pick<
-    Tables<"perfil_sensorial">,
-    "id" | "nome_autista" | "nivel_tea"
-  > | null;
+  perfil_sensorial: Pick<Tables<"perfil_sensorial">, "id" | "nome_autista" | "nivel_tea"> | null;
 };
 
 const SELECT = `
@@ -29,9 +26,7 @@ const SELECT = `
 ` as const;
 
 /** Reservas da família logada, ordenadas por data desc. */
-export async function fetchReservasDaFamilia(
-  familiaId: string,
-): Promise<ReservaComContexto[]> {
+export async function fetchReservasDaFamilia(familiaId: string): Promise<ReservaComContexto[]> {
   const { data, error } = await supabase
     .from("reservas")
     .select(SELECT)
@@ -45,11 +40,7 @@ export async function fetchReservasDaFamilia(
 
 /** Cria uma nova reserva (payload tipado). */
 export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
-  const { data, error } = await supabase
-    .from("reservas")
-    .insert(payload)
-    .select("*")
-    .single();
+  const { data, error } = await supabase.from("reservas").insert(payload).select("*").single();
 
   if (error) throw error;
   return data;

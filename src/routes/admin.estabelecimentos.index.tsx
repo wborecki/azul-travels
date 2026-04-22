@@ -61,10 +61,7 @@ function AdminEstabelecimentos() {
   const handleDelete = async () => {
     if (!toDelete) return;
     setDeleting(true);
-    const { error } = await supabase
-      .from("estabelecimentos")
-      .delete()
-      .eq("id", toDelete.id);
+    const { error } = await supabase.from("estabelecimentos").delete().eq("id", toDelete.id);
     setDeleting(false);
     if (error) {
       toast.error("Erro ao excluir", { description: error.message });

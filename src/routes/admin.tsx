@@ -1,13 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  LayoutDashboard,
-  Building2,
-  CalendarCheck,
-  FileText,
-  ShieldAlert,
-} from "lucide-react";
+import { LayoutDashboard, Building2, CalendarCheck, FileText, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -26,9 +20,7 @@ function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-12 text-center text-muted-foreground">
-        Carregando...
-      </div>
+      <div className="container mx-auto p-12 text-center text-muted-foreground">Carregando...</div>
     );
   }
 
@@ -41,9 +33,7 @@ function AdminLayout() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
             <ShieldAlert className="h-7 w-7 text-destructive" />
           </div>
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            Acesso restrito
-          </h1>
+          <h1 className="text-2xl font-display font-bold text-foreground">Acesso restrito</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Esta área é exclusiva para administradores do Turismo Azul.
           </p>

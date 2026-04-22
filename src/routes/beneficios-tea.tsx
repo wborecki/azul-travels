@@ -9,7 +9,11 @@ export const Route = createFileRoute("/beneficios-tea")({
   head: () => ({
     meta: [
       { title: "Benefícios TEA — Turismo Azul" },
-      { name: "description", content: "Estabelecimentos com entrada gratuita, descontos e privilégios para pessoas autistas." },
+      {
+        name: "description",
+        content:
+          "Estabelecimentos com entrada gratuita, descontos e privilégios para pessoas autistas.",
+      },
     ],
   }),
   component: Beneficios,
@@ -45,10 +49,14 @@ function Beneficios() {
       <section className="container mx-auto px-4 py-12">
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[1, 2, 3].map((i) => <div key={i} className="aspect-[4/3] bg-muted animate-pulse rounded-2xl" />)}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="aspect-[4/3] bg-muted animate-pulse rounded-2xl" />
+            ))}
           </div>
         ) : list.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">Em breve mais estabelecimentos com benefícios.</div>
+          <div className="text-center py-12 text-muted-foreground">
+            Em breve mais estabelecimentos com benefícios.
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {list.map((e) => (
@@ -59,13 +67,23 @@ function Beneficios() {
                 className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border animate-fade-up flex flex-col"
               >
                 <div className="aspect-[4/3] overflow-hidden bg-muted">
-                  {e.foto_capa && <img src={e.foto_capa} alt={e.nome} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
+                  {e.foto_capa && (
+                    <img
+                      src={e.foto_capa}
+                      alt={e.nome}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                 </div>
                 <div className="p-5 flex-1 flex flex-col gap-3">
                   <div>
-                    <h3 className="font-display font-bold text-lg text-primary group-hover:text-secondary transition">{e.nome}</h3>
+                    <h3 className="font-display font-bold text-lg text-primary group-hover:text-secondary transition">
+                      {e.nome}
+                    </h3>
                     <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <span>{TIPO_LABEL[e.tipo]}</span> · <MapPin className="h-3 w-3" /> {e.cidade}, {e.estado}
+                      <span>{TIPO_LABEL[e.tipo]}</span> · <MapPin className="h-3 w-3" /> {e.cidade},{" "}
+                      {e.estado}
                     </p>
                   </div>
                   <div className="bg-success/10 border border-success/20 rounded-xl p-3 flex items-start gap-2">
@@ -82,7 +100,9 @@ function Beneficios() {
         )}
 
         <div className="mt-14 bg-azul-claro rounded-2xl p-8 text-center">
-          <h3 className="font-display font-bold text-xl text-primary">É um estabelecimento e quer oferecer benefícios TEA?</h3>
+          <h3 className="font-display font-bold text-xl text-primary">
+            É um estabelecimento e quer oferecer benefícios TEA?
+          </h3>
           <p className="mt-2 text-muted-foreground">Entre em contato e faça parte da nossa rede.</p>
           <Button className="mt-4">Quero participar</Button>
         </div>

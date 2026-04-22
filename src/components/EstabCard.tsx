@@ -57,7 +57,10 @@ export function EstabCard({ e }: { e: EstabelecimentoView }) {
             <>
               <span>·</span>
               <MapPin className="h-3 w-3" />
-              <span>{e.cidade}{e.estado ? `, ${e.estado}` : ""}</span>
+              <span>
+                {e.cidade}
+                {e.estado ? `, ${e.estado}` : ""}
+              </span>
             </>
           )}
         </div>

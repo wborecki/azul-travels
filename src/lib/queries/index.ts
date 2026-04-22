@@ -17,10 +17,7 @@
  * qualquer um destes payloads regredir.
  */
 
-export {
-  fetchAvaliacoesPublicasPorEstab,
-  type AvaliacaoComFamilia,
-} from "./avaliacoes";
+export { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 
 export {
   fetchEstabelecimentoPorSlug,

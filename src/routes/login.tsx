@@ -39,26 +39,48 @@ function LoginPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
-      <div className="text-center mb-6"><Logo /></div>
+      <div className="text-center mb-6">
+        <Logo />
+      </div>
       <div className="bg-card rounded-2xl border shadow-soft p-8">
         <h1 className="text-2xl font-display font-bold text-primary text-center">Entrar</h1>
-        <p className="text-sm text-muted-foreground text-center mt-1">Acesse sua conta Turismo Azul</p>
+        <p className="text-sm text-muted-foreground text-center mt-1">
+          Acesse sua conta Turismo Azul
+        </p>
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div>
             <Label>Email</Label>
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1"
+            />
           </div>
           <div>
             <Label>Senha</Label>
-            <Input type="password" required value={senha} onChange={(e) => setSenha(e.target.value)} className="mt-1" />
+            <Input
+              type="password"
+              required
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="mt-1"
+            />
           </div>
-          <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Ainda não tem conta?{" "}
-          <Link to="/cadastro" className="text-secondary font-semibold hover:underline">Cadastre-se</Link>
+          <Link to="/cadastro" className="text-secondary font-semibold hover:underline">
+            Cadastre-se
+          </Link>
         </p>
       </div>
     </div>

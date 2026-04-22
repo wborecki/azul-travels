@@ -27,15 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowLeft,
-  Loader2,
-  MapPin,
-  Save,
-  Upload,
-  Star as StarIcon,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Save, Upload, Star as StarIcon, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/estabelecimentos/$id")({
@@ -332,10 +324,7 @@ function AdminEstabelecimentoForm() {
       toast.success("Estabelecimento criado");
       navigate({ to: "/admin/estabelecimentos/$id", params: { id: data.id } });
     } else {
-      const { error } = await supabase
-        .from("estabelecimentos")
-        .update(payload)
-        .eq("id", id);
+      const { error } = await supabase.from("estabelecimentos").update(payload).eq("id", id);
       setSaving(false);
       if (error) {
         toast.error("Erro ao salvar", { description: error.message });
@@ -372,11 +361,7 @@ function AdminEstabelecimentoForm() {
           </div>
         </div>
         <Button type="submit" disabled={saving} className="gap-2">
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isNew ? "Criar" : "Salvar"}
         </Button>
       </header>
@@ -397,10 +382,7 @@ function AdminEstabelecimentoForm() {
             />
           </Field>
           <Field label="Tipo" required>
-            <Select
-              value={form.tipo}
-              onValueChange={(v) => set("tipo", v as Tipo)}
-            >
+            <Select value={form.tipo} onValueChange={(v) => set("tipo", v as Tipo)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -467,11 +449,7 @@ function AdminEstabelecimentoForm() {
             <Input value={form.telefone} onChange={(e) => set("telefone", e.target.value)} />
           </Field>
           <Field label="E-mail" error={errors.email}>
-            <Input
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-            />
+            <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
           </Field>
           <Field label="Website" error={errors.website}>
             <Input
@@ -548,7 +526,10 @@ function AdminEstabelecimentoForm() {
           ))}
         </div>
         <div className="grid sm:grid-cols-2 gap-4 mt-4">
-          <Field label="Nome do selo privado" hint="Visível somente se o selo privado estiver ativo">
+          <Field
+            label="Nome do selo privado"
+            hint="Visível somente se o selo privado estiver ativo"
+          >
             <Input
               value={form.selo_privado_nome}
               onChange={(e) => set("selo_privado_nome", e.target.value)}
@@ -618,11 +599,7 @@ function AdminEstabelecimentoForm() {
           <Link to="/admin/estabelecimentos">Cancelar</Link>
         </Button>
         <Button type="submit" disabled={saving} className="gap-2">
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isNew ? "Criar" : "Salvar alterações"}
         </Button>
       </div>
@@ -645,9 +622,7 @@ function Section({
     <section className="bg-card border rounded-2xl p-5 sm:p-6">
       <header className="mb-4">
         <h2 className="text-lg font-display font-semibold text-foreground">{title}</h2>
-        {description && (
-          <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
       </header>
       {children}
     </section>
@@ -698,9 +673,7 @@ function ToggleCard({
       type="button"
       onClick={() => onChange(!checked)}
       className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
-        checked
-          ? "border-primary bg-primary/5"
-          : "border-border bg-card hover:border-primary/40"
+        checked ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"
       }`}
     >
       <Pill icon={badge.icon} label={badge.label} className={badge.className} />
@@ -772,13 +745,7 @@ async function uploadToBucket(file: File): Promise<string> {
   return data.publicUrl;
 }
 
-function FotosCapa({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+function FotosCapa({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -859,13 +826,7 @@ function FotosCapa({
   );
 }
 
-function FotosGaleria({
-  value,
-  onChange,
-}: {
-  value: string[];
-  onChange: (v: string[]) => void;
-}) {
+function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [urlInput, setUrlInput] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -904,7 +865,10 @@ function FotosGaleria({
     <div className="space-y-3 mt-6">
       <div className="flex items-center justify-between">
         <Label className="text-sm font-medium text-foreground/80">
-          Galeria <Badge variant="secondary" className="ml-1">{count}</Badge>
+          Galeria{" "}
+          <Badge variant="secondary" className="ml-1">
+            {count}
+          </Badge>
         </Label>
       </div>
 

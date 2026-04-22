@@ -10,8 +10,16 @@ export const Route = createFileRoute("/minha-conta/reservas")({
 });
 
 interface R {
-  id: string; status: string; data_checkin: string | null; data_checkout: string | null;
-  estabelecimentos: { nome: string; slug: string; cidade: string | null; estado: string | null } | null;
+  id: string;
+  status: string;
+  data_checkin: string | null;
+  data_checkout: string | null;
+  estabelecimentos: {
+    nome: string;
+    slug: string;
+    cidade: string | null;
+    estado: string | null;
+  } | null;
 }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -30,7 +38,9 @@ function ReservasPage() {
     void (async () => {
       const { data } = await supabase
         .from("reservas")
-        .select("id, status, data_checkin, data_checkout, estabelecimentos(nome, slug, cidade, estado)")
+        .select(
+          "id, status, data_checkin, data_checkout, estabelecimentos(nome, slug, cidade, estado)",
+        )
         .eq("familia_id", user.id)
         .order("criado_em", { ascending: false });
       setList((data as unknown as R[]) ?? []);
@@ -47,7 +57,9 @@ function ReservasPage() {
       {list.length === 0 ? (
         <div className="bg-azul-claro rounded-2xl p-8 text-center">
           <p className="text-muted-foreground">Você ainda não tem reservas.</p>
-          <Button asChild className="mt-3"><Link to="/explorar">Explorar destinos</Link></Button>
+          <Button asChild className="mt-3">
+            <Link to="/explorar">Explorar destinos</Link>
+          </Button>
         </div>
       ) : (
         <div className="bg-card border rounded-2xl overflow-hidden">
@@ -65,16 +77,30 @@ function ReservasPage() {
                 <tr key={r.id} className="border-t">
                   <td className="p-3">
                     <div className="font-semibold text-primary">{r.estabelecimentos?.nome}</div>
-                    <div className="text-xs text-muted-foreground">{r.estabelecimentos?.cidade}, {r.estabelecimentos?.estado}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {r.estabelecimentos?.cidade}, {r.estabelecimentos?.estado}
+                    </div>
                   </td>
                   <td className="p-3 text-xs">
-                    {r.data_checkin && formatDateBR(r.data_checkin)} {r.data_checkout && `→ ${formatDateBR(r.data_checkout)}`}
+                    {r.data_checkin && formatDateBR(r.data_checkin)}{" "}
+                    {r.data_checkout && `→ ${formatDateBR(r.data_checkout)}`}
                   </td>
-                  <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_COLOR[r.status]}`}>{r.status}</span></td>
+                  <td className="p-3">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_COLOR[r.status]}`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
                   <td className="p-3 text-right">
                     {r.estabelecimentos && (
                       <Button size="sm" variant="ghost" asChild>
-                        <Link to="/estabelecimento/$slug" params={{ slug: r.estabelecimentos.slug }}>Ver</Link>
+                        <Link
+                          to="/estabelecimento/$slug"
+                          params={{ slug: r.estabelecimentos.slug }}
+                        >
+                          Ver
+                        </Link>
                       </Button>
                     )}
                   </td>
