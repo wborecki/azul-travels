@@ -1,46 +1,42 @@
 
 
-## Versão da logo para fundo branco
+## Substituir emojis por ícones Lucide
 
-Hoje a logo no header (fundo branco) usa um traço azul-claro/ciano (`oklch(0.66 0.10 195)`) que se confunde com o branco da barra. Vou criar uma variante "para fundo claro" mantendo exatamente o mesmo desenho — só ajustando as cores para garantir contraste.
+Vou trocar todos os emojis decorativos por ícones da biblioteca Lucide (já em uso no projeto), que têm aparência profissional, consistente com o resto da UI e não remetem a interfaces geradas por IA.
 
-### O que muda
+### Mapa de substituição
 
-- **Mantido**: formato dos dois traços ondulados, espaçamento, fonte "Turismo Azul", peso e tamanho.
-- **Ajustado** (apenas para fundo branco):
-  - Onda inferior: continua em `hsl(var(--primary))` (azul forte) — já tem bom contraste.
-  - Onda superior: troca de `oklch(0.66 0.10 195)` (ciano claro) por um **azul-secundário mais escuro/saturado** que contraste com o branco. Usaremos `hsl(var(--secondary))` (mesma cor do "Azul" no texto, criando coerência visual) ou um tom 1 grau mais escuro se o secondary atual estiver muito claro.
-  - Opacidade da onda superior sobe de `0.85` para `1`.
+| Local | Hoje | Vai virar |
+|---|---|---|
+| Hotel / Pousada / Resort | 🏨 / 🌳 / 🌊 | `Hotel` (Lucide) |
+| Restaurante | 🍽️ | `UtensilsCrossed` |
+| Parque / Atração | 🎡 | `Trees` |
+| Transporte | ✈️ | `Plane` |
+| Agência | 🧳 | `Briefcase` |
 
-A versão `light` (header escuro/hero) continua igual — traços brancos.
+### Mudanças por arquivo
 
-### Implementação
+**1. `src/components/EstabCard.tsx` — fallback de imagem**
+- Remover função `emojiPorTipoLabel` (string).
+- Criar `IconePorTipoLabel` que retorna o componente Lucide apropriado.
+- No bloco de fallback (quando não há `fotoCapa`), trocar `<span className="text-5xl opacity-30">{emojiFallback}</span>` por `<Icone className="h-16 w-16 text-primary/25" strokeWidth={1.5} />`.
+- Resultado: ícone de linha fina, monocromático na cor da marca, sobre o gradiente azul/teal já existente. Mantém a hierarquia visual sem o tom infantil do emoji.
 
-1. **`src/components/Logo.tsx`**
-   - Manter a prop `light?: boolean` (já existe, usada no Footer/hero escuros).
-   - Substituir o `stroke` hard-coded `oklch(0.66 0.10 195)` da segunda onda por `hsl(var(--secondary))` quando `!light`, e manter `#fff` quando `light`.
-   - Remover o `opacity="0.85"` no modo claro (ou reduzir para `0.95`) para reforçar o contraste.
+**2. `src/routes/index.tsx` — chips de categoria no hero**
+- Trocar o array `{ label: "🏨 Hotéis", ... }` por `{ icon: Hotel, label: "Hotéis", ... }`.
+- Renderizar o ícone inline com o texto: `<Icon className="h-4 w-4" /> {label}` dentro do Link.
+- Spacing: `gap-1.5` entre ícone e texto, `strokeWidth={2}` para boa leitura sobre fundo translúcido.
 
-2. **Verificação visual**
-   - Header (`src/components/Header.tsx`) usa `<Logo />` sem prop → pega a nova versão clara.
-   - Footer / qualquer hero escuro que use `<Logo light />` permanece intacto.
+**3. `src/routes/index.tsx` — fallback duplicado no card destaque (linhas ~727-763)**
+- Aplicar a mesma substituição feita no `EstabCard` (helper de ícone + render Lucide).
+- Idealmente esse card destaque deveria reusar `EstabCard`, mas isso está fora do escopo desta mudança — apenas alinho o visual.
 
-### Detalhes técnicos
+### Correção paralela (hidratação)
 
-```tsx
-// src/components/Logo.tsx — onda superior
-<path
-  d="M2 13c3-2 5-2 8 0s5 2 8 0 5-2 8 0"
-  stroke={light ? "#fff" : "hsl(var(--secondary))"}
-  strokeWidth="2.5"
-  strokeLinecap="round"
-  opacity={light ? 0.85 : 1}
-/>
-```
+Os erros de hydration nos logs vêm de SSR cacheado servindo o HTML antigo (`py-20`, `text-3xl`, `<svg lucide-quote>`) enquanto o cliente já tem o novo. Não é um bug no código atual — vai se resolver no próximo build. Não precisa de ação.
 
-Nenhum token de cor novo precisa ser criado — reaproveitamos `--secondary` que já é o azul usado na palavra "Azul" do wordmark, garantindo harmonia.
-
-### Arquivos afetados
-
-- `src/components/Logo.tsx` (editado)
+### O que NÃO muda
+- Paleta, tipografia, layout, rotas, queries Supabase, copy.
+- Ícones funcionais já existentes no projeto (Star, MapPin, etc.).
+- O componente `Pill` dos badges (selo azul, tour 360, etc.) — esses já usam ícones Lucide.
 
