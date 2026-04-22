@@ -189,6 +189,18 @@ function AdminReservas() {
     const { reserva, next } = confirmAction;
     const previous = toReservaStatus(reserva.status, "pendente");
 
+    // Guarda no cliente — espelha a regra do banco e evita ida desnecessária.
+    if (!podeTransicionarReserva(previous, next)) {
+      const msg =
+        mensagemTransicaoInvalida(
+          { message: "INVALID_STATUS_TRANSITION" },
+          previous,
+          next,
+        ) ?? "Transição de status inválida.";
+      toast.error("Transição não permitida", { description: msg });
+      return;
+    }
+
     setSavingAction(true);
     const { error: updErr } = await supabase
       .from("reservas")
@@ -197,7 +209,12 @@ function AdminReservas() {
 
     if (updErr) {
       setSavingAction(false);
-      toast.error("Não foi possível atualizar", { description: updErr.message });
+      const friendly = mensagemTransicaoInvalida(updErr, previous, next);
+      if (friendly) {
+        toast.error("Transição não permitida", { description: friendly });
+      } else {
+        toast.error("Não foi possível atualizar", { description: updErr.message });
+      }
       return;
     }
 
