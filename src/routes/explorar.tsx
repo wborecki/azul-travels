@@ -69,7 +69,7 @@ function Explorar() {
   const [beneficio, setBeneficio] = useState(false);
   const [tour360, setTour360] = useState(false);
   const [ordem, setOrdem] = useState<"relevante" | "recente" | "certificados">("relevante");
-  const [list, setList] = useState<Estab[]>([]);
+  const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
@@ -101,8 +101,8 @@ function Explorar() {
   useEffect(() => {
     void (async () => {
       setLoading(true);
-      let query = supabase.from("estabelecimentos").select("*").eq("status", "ativo");
-      if (busca) query = query.or(`nome.ilike.%${busca}%,cidade.ilike.%${busca}%,descricao.ilike.%${busca}%,tipo.ilike.%${busca}%`);
+      let query = supabase.from("estabelecimentos").select(ESTAB_VIEW_SELECT).eq("status", "ativo");
+      if (busca) query = query.or(`nome.ilike.%${busca}%,cidade.ilike.%${busca}%,tipo.ilike.%${busca}%`);
       if (tipos.length > 0) query = query.in("tipo", tipos as ("hotel"|"pousada"|"resort"|"restaurante"|"parque"|"atracoes"|"agencia"|"transporte")[]);
       if (estado !== "todos") query = query.eq("estado", estado);
       if (beneficio) query = query.eq("tem_beneficio_tea", true);
@@ -110,17 +110,19 @@ function Explorar() {
       for (const s of selos) query = query.eq(s, true);
       for (const r of recursos) query = query.eq(r, true);
 
-      const { data } = await query;
-      let res = (data as Estab[]) ?? [];
+      const { data } = await query.returns<EstabelecimentoView[]>();
+      let res: EstabelecimentoView[] = data ?? [];
 
       // Sort by perfil compatibility
-      const compatScore = (e: Estab) =>
-        Object.entries(perfilNecessidades).filter(([k, v]) => v && (e as unknown as Record<string, boolean>)[k]).length;
+      const compatScore = (e: EstabelecimentoView) =>
+        Object.entries(perfilNecessidades).filter(
+          ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
+        ).length;
 
       if (ordem === "relevante") {
         res = res.sort((a, b) => compatScore(b) - compatScore(a));
       } else if (ordem === "certificados") {
-        const score = (e: Estab) => (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
+        const score = (e: EstabelecimentoView) => (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
         res = res.sort((a, b) => score(b) - score(a));
       }
       setList(res);
