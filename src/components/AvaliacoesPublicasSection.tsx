@@ -4,22 +4,14 @@
  *
  * Responsabilidades:
  *  - Consumir `useAvaliacoesPublicasPorEstab` (encapsula loading/error/data).
+ *  - Mapear cada row em `AvaliacaoVM` via `mapAvaliacoes` — derivações
+ *    (primeiro nome, data formatada, fallback de nota, comentário trimado)
+ *    ficam num só lugar, fora do JSX.
  *  - Renderizar de forma **exaustiva** cada estado possível:
  *      1. loading       → skeleton acessível
  *      2. error         → toast + bloco de erro com botão "Tentar de novo"
- *      3. empty (sem dados) → mensagem amigável
- *      4. data          → lista das avaliações
- *  - Manter o **type contract** intacto: `AvaliacaoComFamilia[]` chega na
- *    UI sem cast/coerção. `nome_responsavel` continua `string | null` —
- *    fallback para "Família" quando vazio.
- *
- * Por que componente próprio?
- *  - Isola o ciclo loading/error da página gigante de detalhe (~460
- *    linhas). Page só precisa renderizar `<AvaliacoesPublicasSection
- *    estabelecimentoId={e.id} />`.
- *  - Cobre o requisito "tratar erro e loading de forma tipada" num só
- *    lugar — qualquer outra rota que liste avaliações ganha o mesmo
- *    tratamento gratuitamente.
+ *      3. empty         → mensagem amigável
+ *      4. data          → lista das avaliações (`AvaliacaoVM[]`)
  */
 
 import { useEffect } from "react";
@@ -28,8 +20,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAvaliacoesPublicasPorEstab } from "@/hooks/useAvaliacoesPublicasPorEstab";
-import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
-import { formatDateBR } from "@/lib/brazil";
+import { mapAvaliacoes, type AvaliacaoVM } from "@/lib/queries";
 
 interface AvaliacoesPublicasSectionProps {
   /** ID do estabelecimento — `null`/`undefined` deixa o hook em "pause". */
@@ -52,6 +43,10 @@ export function AvaliacoesPublicasSection({
     });
   }, [error]);
 
+  // Row → ViewModel: feito uma única vez por fetch, não a cada render
+  // de subcomponente. Garante que toda a UI consome o mesmo shape.
+  const avaliacoes = mapAvaliacoes(data);
+
   return (
     <section aria-labelledby="avaliacoes-titulo">
       <h3 id="avaliacoes-titulo" className="font-display font-bold text-lg text-primary mb-4">
@@ -62,10 +57,10 @@ export function AvaliacoesPublicasSection({
         <AvaliacoesSkeleton />
       ) : error ? (
         <AvaliacoesErrorBlock message={error.message} onRetry={refetch} />
-      ) : data.length === 0 ? (
+      ) : avaliacoes.length === 0 ? (
         <AvaliacoesEmpty />
       ) : (
-        <AvaliacoesLista avaliacoes={data} />
+        <AvaliacoesLista avaliacoes={avaliacoes} />
       )}
     </section>
   );
@@ -125,7 +120,7 @@ function AvaliacoesEmpty() {
   );
 }
 
-function AvaliacoesLista({ avaliacoes }: { avaliacoes: AvaliacaoComFamilia[] }) {
+function AvaliacoesLista({ avaliacoes }: { avaliacoes: AvaliacaoVM[] }) {
   return (
     <div className="space-y-3">
       {avaliacoes.map((a) => (
@@ -135,26 +130,21 @@ function AvaliacoesLista({ avaliacoes }: { avaliacoes: AvaliacaoComFamilia[] }) 
   );
 }
 
-function AvaliacaoCard({ avaliacao }: { avaliacao: AvaliacaoComFamilia }) {
-  // `nome_responsavel` é `string | null` por contrato — fallback explícito.
-  const nomeCompleto = avaliacao.familia_profiles?.nome_responsavel ?? null;
-  const primeiroNome = nomeCompleto?.split(" ")[0] ?? "Família";
-  const nota = avaliacao.nota_geral ?? 0;
-
+function AvaliacaoCard({ avaliacao }: { avaliacao: AvaliacaoVM }) {
   return (
     <article className="bg-card border rounded-xl p-4">
       <div className="flex items-center justify-between">
-        <p className="font-semibold">{primeiroNome}</p>
+        <p className="font-semibold">{avaliacao.nomeExibicao}</p>
         <div
           className="flex items-center gap-1 text-amarelo"
-          aria-label={`Nota: ${nota} de 5`}
+          aria-label={`Nota: ${avaliacao.nota} de 5`}
         >
-          {Array.from({ length: nota }).map((_, i) => (
+          {Array.from({ length: avaliacao.nota }).map((_, i) => (
             <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
           ))}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{formatDateBR(avaliacao.criado_em)}</p>
+      <p className="text-xs text-muted-foreground">{avaliacao.dataFormatada}</p>
       {avaliacao.comentario && <p className="mt-2 text-sm">{avaliacao.comentario}</p>}
     </article>
   );
