@@ -87,6 +87,15 @@ function AdminReservas() {
   const [observacao, setObservacao] = useState("");
   const [savingAction, setSavingAction] = useState(false);
 
+  // Seleção em lote
+  const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<{
+    next: ReservaStatus;
+    ids: string[];
+  } | null>(null);
+  const [bulkObservacao, setBulkObservacao] = useState("");
+  const [savingBulk, setSavingBulk] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
