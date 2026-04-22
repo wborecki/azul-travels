@@ -489,7 +489,7 @@ function Explorar() {
               <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider mr-1">
                 Ativos:
               </span>
-              {search.tipos.map((t) => {
+              {search.tipos.map((t: EstabTipo) => {
                 const def = TIPOS.find((x) => x.v === t);
                 return (
                   <ActiveChip
@@ -501,7 +501,7 @@ function Explorar() {
                   />
                 );
               })}
-              {search.selos.map((s) => (
+              {search.selos.map((s: (typeof SELOS_VALORES)[number]) => (
                 <ActiveChip
                   key={`a-s-${s}`}
                   label={SELO_BADGES[s].label}
@@ -510,7 +510,7 @@ function Explorar() {
                   }
                 />
               ))}
-              {search.recursos.map((r) => (
+              {search.recursos.map((r: (typeof RECURSOS_VALORES)[number]) => (
                 <ActiveChip
                   key={`a-r-${r}`}
                   label={RECURSO_BADGES[r].label}
