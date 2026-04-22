@@ -481,6 +481,86 @@ function isUuid(s: string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Auditoria de estabelecimentos (diff campo a campo via trigger no banco)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type EstabAuditoriaRow = Tables<"estabelecimentos_auditoria">;
+
+/** Histórico completo de um estabelecimento, mais recente primeiro. */
+export async function fetchAuditoriaPorEstabelecimento(
+  estabelecimentoId: string,
+  limit = 200,
+): Promise<EstabAuditoriaRow[]> {
+  const { data, error } = await supabase
+    .from("estabelecimentos_auditoria")
+    .select("*")
+    .eq("estabelecimento_id", estabelecimentoId)
+    .order("criado_em", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Filtros aceitos pela listagem global de auditoria de estabelecimentos. */
+export interface EstabAuditoriaAdminFilters {
+  /** Busca livre — case-insensitive em ator_email, campo, nome do estabelecimento. */
+  busca?: string;
+  /** ISO inicial (`>=`) de `criado_em`. */
+  desde?: string;
+  /** ISO final (`<=`) de `criado_em`. */
+  ate?: string;
+  /** Filtra por ação. */
+  acao?: "criado" | "editado" | "excluido";
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface EstabAuditoriaAdminPage {
+  items: EstabAuditoriaRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada e global da auditoria de estabelecimentos. Mesmo padrão
+ * de `fetchAuditoriaAdminPaginated` (reservas), com filtros server-side.
+ */
+export async function fetchEstabAuditoriaAdminPaginated(
+  filters: EstabAuditoriaAdminFilters = {},
+): Promise<EstabAuditoriaAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("estabelecimentos_auditoria")
+    .select("*", { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.desde) q = q.gte("criado_em", filters.desde);
+  if (filters.ate) q = q.lte("criado_em", filters.ate);
+  if (filters.acao) q = q.eq("acao", filters.acao);
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.or(
+      `ator_email.ilike.%${term}%,campo.ilike.%${term}%,estabelecimento_nome.ilike.%${term}%,estabelecimento_id.eq.${isUuid(term) ? term : "00000000-0000-0000-0000-000000000000"}`,
+    );
+  }
+
+  const { data, error, count } = await q.returns<EstabAuditoriaRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Perfis sensoriais — listagem rica para `/minha-conta/perfil-sensorial`
 // ─────────────────────────────────────────────────────────────────────────────
 
