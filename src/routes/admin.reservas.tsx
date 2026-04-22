@@ -367,11 +367,57 @@ function AdminReservas() {
         })}
       </div>
 
+      {selecionadas.size > 0 && (
+        <div
+          className="sticky top-16 z-10 bg-card border rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm"
+          role="region"
+          aria-label="Ações em lote"
+        >
+          <div className="text-sm text-foreground/80">
+            <strong className="text-foreground">{selecionadas.size}</strong> reserva(s)
+            selecionada(s)
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              className="bg-success text-success-foreground hover:bg-success/90"
+              onClick={() => askBulk("confirmada")}
+            >
+              <Check className="h-4 w-4 mr-1" /> Confirmar
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => askBulk("concluida")}>
+              <CheckCheck className="h-4 w-4 mr-1" /> Concluir
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/40 hover:bg-destructive/10"
+              onClick={() => askBulk("cancelada")}
+            >
+              <X className="h-4 w-4 mr-1" /> Cancelar
+            </Button>
+            <Button size="sm" variant="ghost" onClick={limparSelecao}>
+              Limpar seleção
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-card border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
+                <th className="px-4 py-3 w-10">
+                  <Checkbox
+                    aria-label="Selecionar todas as reservas visíveis"
+                    checked={
+                      todasNaViewMarcadas ? true : algumaNaViewMarcada ? "indeterminate" : false
+                    }
+                    onCheckedChange={(v) => toggleTodasNaView(v === true)}
+                    disabled={loading || filteredIds.length === 0}
+                  />
+                </th>
                 <th className="px-4 py-3">Estabelecimento</th>
                 <th className="px-4 py-3">Família</th>
                 <th className="px-4 py-3">Check-in</th>
@@ -383,55 +429,70 @@ function AdminReservas() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin inline mr-2" /> Carregando reservas...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhuma reserva encontrada para este filtro.
                   </td>
                 </tr>
               ) : (
-                filtered.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="hover:bg-muted/30 cursor-pointer"
-                    onClick={() => setSelected(r)}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">
-                        {r.estabelecimentos?.nome ?? "—"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
-                          .filter(Boolean)
-                          .join(" / ") || "—"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">
-                        {r.familia_profiles?.nome_responsavel ?? "—"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {r.familia_profiles?.email ?? ""}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-foreground/80">
-                      {r.data_checkin ? new Date(r.data_checkin).toLocaleDateString("pt-BR") : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
-                      {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
-                    </td>
-                    <td className="px-4 py-3">
-                      <ReservaStatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <RowActions reserva={r} onAction={askAction} />
-                    </td>
-                  </tr>
-                ))
+                filtered.map((r) => {
+                  const checked = selecionadas.has(r.id);
+                  return (
+                    <tr
+                      key={r.id}
+                      data-state={checked ? "selected" : undefined}
+                      className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
+                      onClick={() => setSelected(r)}
+                    >
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          aria-label={`Selecionar reserva de ${
+                            r.familia_profiles?.nome_responsavel ?? "família"
+                          }`}
+                          checked={checked}
+                          onCheckedChange={(v) => toggleLinha(r.id, v === true)}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground">
+                          {r.estabelecimentos?.nome ?? "—"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
+                            .filter(Boolean)
+                            .join(" / ") || "—"}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground">
+                          {r.familia_profiles?.nome_responsavel ?? "—"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {r.familia_profiles?.email ?? ""}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-foreground/80">
+                        {r.data_checkin
+                          ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
+                        {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
+                      </td>
+                      <td className="px-4 py-3">
+                        <ReservaStatusBadge status={r.status} />
+                      </td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <RowActions reserva={r} onAction={askAction} />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
