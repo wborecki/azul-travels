@@ -1,5 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Star } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Hotel,
+  UtensilsCrossed,
+  Trees,
+  Plane,
+  Briefcase,
+  type LucideIcon,
+} from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
 import { mapEstabCard, type EstabelecimentoView, type EstabCardProps } from "@/lib/queries";
 
@@ -14,24 +23,24 @@ export type Estab = EstabelecimentoView;
 type EstabCardComponentProps = EstabCardProps | { e: EstabelecimentoView; maxRecursos?: number };
 
 /**
- * Emoji de fallback quando o estabelecimento não tem `foto_capa`.
+ * Ícone Lucide de fallback quando o estabelecimento não tem `foto_capa`.
  * Derivado de `tipoLabel` (já presente no VM) — evita adicionar campo
  * novo ao VM e quebrar os guards em core-payloads.guard.ts.
  */
-function emojiPorTipoLabel(tipoLabel: string): string {
+function iconePorTipoLabel(tipoLabel: string): LucideIcon {
   const t = tipoLabel.toLowerCase();
-  if (t.includes("restaurante")) return "🍽️";
-  if (t.includes("parque") || t.includes("atra")) return "🎡";
-  if (t.includes("transporte")) return "✈️";
-  if (t.includes("agência") || t.includes("agencia")) return "🧳";
+  if (t.includes("restaurante")) return UtensilsCrossed;
+  if (t.includes("parque") || t.includes("atra")) return Trees;
+  if (t.includes("transporte")) return Plane;
+  if (t.includes("agência") || t.includes("agencia")) return Briefcase;
   // hotel, pousada, resort, default
-  return "🏨";
+  return Hotel;
 }
 
 export function EstabCard(props: EstabCardComponentProps) {
   const vm = "vm" in props ? props.vm : mapEstabCard(props.e);
   const maxRecursos = props.maxRecursos ?? 3;
-  const emojiFallback = emojiPorTipoLabel(vm.tipoLabel);
+  const IconeFallback = iconePorTipoLabel(vm.tipoLabel);
 
   return (
     <Link
@@ -54,7 +63,7 @@ export function EstabCard(props: EstabCardComponentProps) {
             aria-hidden="true"
             className="w-full h-full flex items-center justify-center bg-gradient-to-br from-azul-claro to-teal-claro"
           >
-            <span className="text-5xl opacity-30">{emojiFallback}</span>
+            <IconeFallback className="h-16 w-16 text-primary/25" strokeWidth={1.5} />
           </div>
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
