@@ -298,7 +298,7 @@ function Landing() {
 
   return (
     <div>
-      <Hero busca={busca} setBusca={setBusca} />
+      <Hero busca={busca} setBusca={setBusca} stats={stats} />
       <ComoFunciona />
       <SelosImportantes />
       <DestinosDestaque
