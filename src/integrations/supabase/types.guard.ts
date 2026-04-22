@@ -154,6 +154,55 @@ type _CheckFetchEmbed = AssertEqual<
   "REGRESSION: familia_profiles.nome_responsavel no payload da função quebrou"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. Camada central /lib/queries — cada função pública precisa estar tipada
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type {
+  Estabelecimento,
+  EstabelecimentoCard,
+  ReservaComContexto,
+  PerfilOption,
+} from "@/lib/queries";
+import {
+  fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentosCards,
+  fetchReservasDaFamilia,
+  criarReserva,
+  fetchPerfisDaFamilia,
+} from "@/lib/queries";
+
+type EstabReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoPorSlug>>>;
+type CardsReturn = Awaited<ReturnType<typeof fetchEstabelecimentosCards>>[number];
+type ReservasReturn = Awaited<ReturnType<typeof fetchReservasDaFamilia>>[number];
+type CriarReservaReturn = Awaited<ReturnType<typeof criarReserva>>;
+type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisDaFamilia>>[number];
+
+// Cada função precisa retornar shape concreto, nunca any/unknown.
+type _CheckEstabNotAny = AssertNotAny<EstabReturn, "REGRESSION: fetchEstabelecimentoPorSlug -> any">;
+type _CheckEstabShape = AssertEqual<EstabReturn, Estabelecimento, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de Estabelecimento">;
+
+type _CheckCardsNotAny = AssertNotAny<CardsReturn, "REGRESSION: fetchEstabelecimentosCards -> any">;
+type _CheckCardsShape = AssertEqual<CardsReturn, EstabelecimentoCard, "REGRESSION: fetchEstabelecimentosCards divergiu de EstabelecimentoCard">;
+
+type _CheckReservasNotAny = AssertNotAny<ReservasReturn, "REGRESSION: fetchReservasDaFamilia -> any">;
+type _CheckReservasShape = AssertEqual<ReservasReturn, ReservaComContexto, "REGRESSION: fetchReservasDaFamilia divergiu de ReservaComContexto">;
+type _CheckReservasEmbedEstab = AssertEqual<
+  NonNullable<ReservasReturn["estabelecimentos"]>["slug"],
+  string,
+  "REGRESSION: estabelecimentos.slug embutido em reserva quebrou"
+>;
+type _CheckReservasEmbedPerfil = AssertEqual<
+  NonNullable<ReservasReturn["perfil_sensorial"]>["nome_autista"],
+  string,
+  "REGRESSION: perfil_sensorial.nome_autista embutido em reserva quebrou"
+>;
+
+type _CheckCriarReservaShape = AssertEqual<CriarReservaReturn, Tables<"reservas">, "REGRESSION: criarReserva divergiu de Tables<reservas>">;
+
+type _CheckPerfisNotAny = AssertNotAny<PerfisReturn, "REGRESSION: fetchPerfisDaFamilia -> any">;
+type _CheckPerfisShape = AssertEqual<PerfisReturn, PerfilOption, "REGRESSION: fetchPerfisDaFamilia divergiu de PerfilOption">;
+
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
   _CheckRowNotAny,
@@ -171,5 +220,16 @@ export type __SupabaseTypeGuards = [
   _CheckFetchNotUnknown,
   _CheckFetchShape,
   _CheckFetchEmbed,
+  _CheckEstabNotAny,
+  _CheckEstabShape,
+  _CheckCardsNotAny,
+  _CheckCardsShape,
+  _CheckReservasNotAny,
+  _CheckReservasShape,
+  _CheckReservasEmbedEstab,
+  _CheckReservasEmbedPerfil,
+  _CheckCriarReservaShape,
+  _CheckPerfisNotAny,
+  _CheckPerfisShape,
 ];
 
