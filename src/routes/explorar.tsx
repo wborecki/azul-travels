@@ -38,6 +38,7 @@ import {
   Camera,
   Gift,
   Link as LinkIcon,
+  Link2,
   Check as CheckIcon,
   Sparkles,
   Bookmark,
