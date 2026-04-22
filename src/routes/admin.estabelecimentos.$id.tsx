@@ -3,8 +3,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Constants } from "@/integrations/supabase/types";
-import { ESTADOS_BR, TIPO_LABEL } from "@/lib/brazil";
+import { ESTADOS_BR } from "@/lib/brazil";
+import {
+  ESTAB_TIPOS,
+  ESTAB_STATUS,
+  ESTAB_TIPO_LABEL,
+  ESTAB_STATUS_LABEL,
+  toEstabStatus,
+  type EstabTipo,
+  type EstabStatus,
+} from "@/lib/enums";
 import { SELO_BADGES, RECURSO_BADGES, Pill } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,11 +44,9 @@ export const Route = createFileRoute("/admin/estabelecimentos/$id")({
 
 type EstabRow = Tables<"estabelecimentos">;
 type EstabInsert = TablesInsert<"estabelecimentos">;
-type Tipo = EstabRow["tipo"];
-type Status = NonNullable<EstabRow["status"]>;
-
-const TIPOS = Constants.public.Enums.estab_tipo;
-const STATUS_OPTS: Status[] = ["ativo", "pendente", "inativo"];
+// Aliases locais — apontam para os enums centralizados em `@/lib/enums`.
+type Tipo = EstabTipo;
+type Status = EstabStatus;
 
 const SELO_KEYS = ["selo_azul", "selo_governamental", "selo_privado"] as const;
 const RECURSO_KEYS = [
