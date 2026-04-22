@@ -68,6 +68,44 @@ export type Database = {
           },
         ]
       }
+      conteudo_eventos: {
+        Row: {
+          conteudo_id: string
+          criado_em: string
+          id: string
+          referrer: string | null
+          sessao_id: string | null
+          tipo: string
+          url_alvo: string | null
+        }
+        Insert: {
+          conteudo_id: string
+          criado_em?: string
+          id?: string
+          referrer?: string | null
+          sessao_id?: string | null
+          tipo: string
+          url_alvo?: string | null
+        }
+        Update: {
+          conteudo_id?: string
+          criado_em?: string
+          id?: string
+          referrer?: string | null
+          sessao_id?: string | null
+          tipo?: string
+          url_alvo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conteudo_eventos_conteudo_id_fkey"
+            columns: ["conteudo_id"]
+            isOneToOne: false
+            referencedRelation: "conteudo_tea"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conteudo_tea: {
         Row: {
           autor: string | null
