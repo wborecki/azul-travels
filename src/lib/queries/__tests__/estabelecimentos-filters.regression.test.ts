@@ -154,17 +154,14 @@ describe("EstabelecimentosViewFilters — contratos de tipo (regressão)", () =>
   it("preserva o tipo do builder original (não vira any/unknown)", () => {
     // O genérico `Q extends AnyEstabBuilder` deve devolver exatamente
     // o mesmo subtipo recebido — crítico para manter `.returns<...>()`
-    // tipado nos callers.
-    type Builder = PostgrestFilterBuilder<
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any,
-      EstabRow,
-      EstabRow[],
-      "estabelecimentos",
-      []
-    >;
-    const typed = fakeBuilder as Builder;
-    const out = applyEstabelecimentosViewFilters(typed, { selos: ["selo_azul"] });
-    expectTypeOf(out).toEqualTypeOf<Builder>();
+    // tipado nos callers. Usamos uma marca de fantasia (`__brand`) para
+    // distinguir o subtipo sem precisar reconstruir um GenericSchema válido.
+    type BrandedBuilder = AnyBuilder & { readonly __brand: "estab-view" };
+    const branded = fakeBuilder as BrandedBuilder;
+    const out = applyEstabelecimentosViewFilters(branded, { selos: ["selo_azul"] });
+    expectTypeOf(out).toEqualTypeOf<BrandedBuilder>();
+    // Garantia explícita: o retorno NÃO foi alargado para any/unknown.
+    expectTypeOf(out).not.toBeAny();
+    expectTypeOf(out).not.toBeUnknown();
   });
 });
