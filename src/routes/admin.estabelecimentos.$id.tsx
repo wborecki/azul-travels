@@ -66,8 +66,8 @@ const formSchema = z.object({
     .min(2, "Slug obrigatório")
     .max(120)
     .regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífen"),
-  tipo: z.enum(TIPOS),
-  status: z.enum(["ativo", "pendente", "inativo"]),
+  tipo: z.enum(ESTAB_TIPOS),
+  status: z.enum(ESTAB_STATUS),
   descricao: z.string().max(2000).optional().nullable(),
   descricao_tea: z.string().max(2000).optional().nullable(),
   cidade: z.string().max(120).optional().nullable(),
@@ -173,7 +173,7 @@ function rowToForm(r: EstabRow): FormState {
     nome: r.nome ?? "",
     slug: r.slug ?? "",
     tipo: r.tipo,
-    status: (r.status ?? "ativo") as Status,
+    status: toEstabStatus(r.status, "ativo"),
     descricao: r.descricao ?? "",
     descricao_tea: r.descricao_tea ?? "",
     cidade: r.cidade ?? "",
@@ -397,28 +397,34 @@ function AdminEstabelecimentoForm() {
             />
           </Field>
           <Field label="Tipo" required>
-            <Select value={form.tipo} onValueChange={(v) => set("tipo", v as Tipo)}>
+            <Select
+              value={form.tipo}
+              onValueChange={(v) => set("tipo", v as Tipo)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TIPOS.map((t) => (
+                {ESTAB_TIPOS.map((t) => (
                   <SelectItem key={t} value={t}>
-                    {TIPO_LABEL[t] ?? t}
+                    {ESTAB_TIPO_LABEL[t]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Status" required>
-            <Select value={form.status} onValueChange={(v) => set("status", v as Status)}>
+            <Select
+              value={form.status}
+              onValueChange={(v) => set("status", toEstabStatus(v, "ativo"))}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTS.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
+                {ESTAB_STATUS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {ESTAB_STATUS_LABEL[s]}
                   </SelectItem>
                 ))}
               </SelectContent>
