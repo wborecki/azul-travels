@@ -14,6 +14,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import {
+  fetchAvaliacoesPublicasPorEstab,
+  type AvaliacaoComFamilia,
+} from "./avaliacoes";
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
@@ -266,6 +270,45 @@ export async function fetchEstabelecimentoPorSlug(
 
   if (error) throw error;
   return data ? normalizeEstabelecimento(data) : null;
+}
+
+/**
+ * Payload composto para a página de detalhe.
+ *
+ * Reúne, num único objeto fortemente tipado, tudo o que `/estabelecimento/:slug`
+ * precisa exibir: o estabelecimento normalizado + todas as avaliações públicas
+ * (já com `familia_profiles.nome_responsavel` embutido).
+ *
+ * Garantias:
+ *  - `estabelecimento`: `EstabelecimentoNormalized` (`fotos: string[]`, URLs
+ *    saneadas, `latitude`/`longitude` numéricos válidos ou `null`).
+ *  - `avaliacoes`: `AvaliacaoComFamilia[]` (sempre array — nunca `null`).
+ *  - Sem `any`/`unknown` — guards em `types.guard.ts` travam o build se algo
+ *    regredir.
+ */
+export interface EstabelecimentoDetalhe {
+  estabelecimento: EstabelecimentoNormalized;
+  avaliacoes: AvaliacaoComFamilia[];
+}
+
+/**
+ * Helper único de data fetching para a página de detalhe.
+ *
+ * Faz, em paralelo:
+ *  1. `estabelecimentos` por slug (com normalização do JSONB de fotos etc.).
+ *  2. `avaliacoes` públicas com join `familia_profiles(nome_responsavel)`.
+ *
+ * Retorna `null` quando o estabelecimento não existe (ou não está ativo).
+ * Erros do Supabase são propagados — o caller decide como exibir.
+ */
+export async function fetchEstabelecimentoDetalhe(
+  slug: string,
+): Promise<EstabelecimentoDetalhe | null> {
+  const estabelecimento = await fetchEstabelecimentoPorSlug(slug);
+  if (!estabelecimento) return null;
+
+  const avaliacoes = await fetchAvaliacoesPublicasPorEstab(estabelecimento.id);
+  return { estabelecimento, avaliacoes };
 }
 
 // ──────────────────────────────────────────────────────────────
