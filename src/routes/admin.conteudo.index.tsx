@@ -28,9 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { CATEGORIA_LABEL } from "@/lib/conteudo";
-
-import { CATEGORIA_LABEL } from "@/lib/conteudo";
+// CATEGORIA_LABEL e CONTEUDO_CATEGORIAS importados de `@/lib/enums` no topo.
 
 export const Route = createFileRoute("/admin/conteudo/")({
   component: AdminConteudo,
@@ -141,9 +139,9 @@ function AdminConteudo() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todas">Todas as categorias</SelectItem>
-            {CATEGORIAS.map((c) => (
+            {CONTEUDO_CATEGORIAS.map((c) => (
               <SelectItem key={c} value={c}>
-                {CATEGORIA_LABEL[c]}
+                {CONTEUDO_CATEGORIA_LABEL[c]}
               </SelectItem>
             ))}
           </SelectContent>
