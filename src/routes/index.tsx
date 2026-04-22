@@ -629,7 +629,7 @@ function DestinosDestaque({
 
         {destaques === null ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
                 className="aspect-[4/3] bg-muted animate-pulse rounded-2xl"
