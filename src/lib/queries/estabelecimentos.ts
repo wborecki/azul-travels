@@ -22,7 +22,7 @@ import { normalizeFotos, normalizeUrl, pickEstabMedia, type EstabMedia } from "@
 // client — mesmo shape, sem acoplar a um package que pode não estar
 // instalado. Exportado para reuso em testes de tipo.
 export type EstabPostgrestBuilder = ReturnType<
-  ReturnType<typeof supabase.from<"estabelecimentos", Tables<"estabelecimentos">>>["select"]
+  ReturnType<typeof supabase.from<"estabelecimentos">>["select"]
 >;
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
