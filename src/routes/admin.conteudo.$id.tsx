@@ -22,8 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Save, Upload, Eye } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Upload, Eye, Pencil, Columns2 } from "lucide-react";
 import { toast } from "sonner";
+import { MarkdownView } from "@/components/MarkdownView";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 // CATEGORIA_LABEL/CATEGORIAS importados de `@/lib/enums` no topo.
 
 export const Route = createFileRoute("/admin/conteudo/$id")({
@@ -310,19 +312,57 @@ function AdminConteudoForm() {
                 onChange={(e) => set("resumo", e.target.value)}
               />
             </Field>
-            <Field
-              label="Conteúdo"
-              error={errors.conteudo}
-              hint="Texto completo do artigo (Markdown ou HTML simples)"
-              className="mt-4"
-            >
-              <Textarea
-                rows={16}
-                value={form.conteudo}
-                onChange={(e) => set("conteudo", e.target.value)}
-                className="font-mono text-sm"
-              />
-            </Field>
+            <div className="mt-4 space-y-1.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <Label className="text-sm font-medium text-foreground/80">Conteúdo</Label>
+                <p className="text-xs text-muted-foreground">
+                  Markdown suportado: **negrito**, # títulos, - listas, [links](url), tabelas, etc.
+                </p>
+              </div>
+              <Tabs defaultValue="editar" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-grid">
+                  <TabsTrigger value="editar" className="gap-1.5">
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </TabsTrigger>
+                  <TabsTrigger value="preview" className="gap-1.5">
+                    <Eye className="h-3.5 w-3.5" /> Preview
+                  </TabsTrigger>
+                  <TabsTrigger value="split" className="gap-1.5">
+                    <Columns2 className="h-3.5 w-3.5" /> Lado a lado
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="editar" className="mt-3">
+                  <Textarea
+                    rows={20}
+                    value={form.conteudo}
+                    onChange={(e) => set("conteudo", e.target.value)}
+                    className="font-mono text-sm"
+                    placeholder="# Título do artigo&#10;&#10;Escreva aqui em Markdown..."
+                  />
+                </TabsContent>
+
+                <TabsContent value="preview" className="mt-3">
+                  <PreviewBox conteudo={form.conteudo} />
+                </TabsContent>
+
+                <TabsContent value="split" className="mt-3">
+                  <div className="grid lg:grid-cols-2 gap-3">
+                    <Textarea
+                      rows={20}
+                      value={form.conteudo}
+                      onChange={(e) => set("conteudo", e.target.value)}
+                      className="font-mono text-sm"
+                      placeholder="# Título do artigo&#10;&#10;Escreva aqui em Markdown..."
+                    />
+                    <PreviewBox conteudo={form.conteudo} />
+                  </div>
+                </TabsContent>
+              </Tabs>
+              {errors.conteudo && (
+                <p className="text-xs text-destructive">{errors.conteudo}</p>
+              )}
+            </div>
           </Section>
         </div>
 
