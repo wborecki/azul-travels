@@ -251,8 +251,12 @@ function Explorar() {
 
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
-      setLoading(true);
+      // Página 1 → reset visual (skeletons). Páginas seguintes → spinner
+      // discreto no fim da lista (loadingMore).
+      if (search.pagina === 1) setLoading(true);
+      else setLoadingMore(true);
 
       const filters: EstabelecimentosViewFilters = {
         busca: search.q || undefined,
@@ -267,21 +271,20 @@ function Explorar() {
       };
 
       const page = await fetchEstabelecimentosViewPaginated(filters);
+      if (cancelled) return;
 
       // ─────────────────────────────────────────────────────────────
       // Ordenação local determinística e composta.
       //
-      // A ordenação roda no cliente (só rearranja a página atual)
-      // porque envolve heurísticas que não são triviais de indexar:
-      // perfil sensorial, score de selos, etc.
+      // Roda no cliente sobre TODOS os itens acumulados (não só a
+      // página recém-chegada) para que o infinite scroll mantenha a
+      // ordem global correta — caso contrário, um item da página 2
+      // com score alto apareceria depois de itens piores da página 1.
       //
       // Camadas (sempre nesta ordem, primeira diferença vence):
       //   A. priorizarPerfil → score de compatibilidade (DESC)
       //   B. critério principal selecionado em `ordem`    (DESC/ASC)
       //   C. tiebreaker estável: id                       (ASC)
-      //
-      // Garantia: dados iguais sempre produzem a MESMA ordem visível
-      // entre re-renders e entre usuários (sem reshuffle aleatório).
       // ─────────────────────────────────────────────────────────────
 
       const compatScore = (e: EstabelecimentoView) =>
@@ -292,14 +295,6 @@ function Explorar() {
       const seloScore = (e: EstabelecimentoView) =>
         (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
 
-      const recenteKey = (e: EstabelecimentoView) =>
-        // `criado_em` não vem no payload de view; usamos id como
-        // proxy estável (uuid v4 — sem ordem temporal real, mas a
-        // chamada em si já vem `order("criado_em" desc)` quando
-        // suportado pela query). Mantém determinismo entre páginas.
-        e.id;
-
-      // Compara dois itens segundo o critério principal selecionado.
       const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
         switch (search.ordem) {
           case "certificados":
@@ -307,35 +302,47 @@ function Explorar() {
           case "alfabetica":
             return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
           case "recente":
-            // Mantém a ordem do servidor (já vem por criação desc no
-            // futuro); usa id como tiebreaker estável.
-            return recenteKey(b).localeCompare(recenteKey(a));
+            return b.id.localeCompare(a.id);
           case "recomendado":
           default:
-            // "Recomendado" sem perfil = só selos (proxy de qualidade).
             return seloScore(b) - seloScore(a);
         }
       };
 
-      const items = [...page.items].sort((a, b) => {
-        // (A) Compatibilidade com perfil — só se o toggle estiver ON
-        //     E houver pelo menos uma necessidade marcada.
-        if (search.priorizarPerfil) {
-          const diff = compatScore(b) - compatScore(a);
+      const sortItems = (arr: EstabelecimentoView[]) =>
+        [...arr].sort((a, b) => {
+          if (search.priorizarPerfil) {
+            const diff = compatScore(b) - compatScore(a);
+            if (diff !== 0) return diff;
+          }
+          const diff = compareCriterio(a, b);
           if (diff !== 0) return diff;
-        }
-        // (B) Critério principal.
-        const diff = compareCriterio(a, b);
-        if (diff !== 0) return diff;
-        // (C) Tiebreaker absoluto — garante ordem determinística.
-        return a.id.localeCompare(b.id);
-      });
+          return a.id.localeCompare(b.id);
+        });
 
-      setList(items);
+      setList((prev) => {
+        // Página 1 → substitui (filtros mudaram, ou load inicial).
+        // Página >1 → concatena, deduplicando por id (proteção contra
+        // race conditions e contra mesma página vir duas vezes).
+        const merged =
+          search.pagina === 1
+            ? page.items
+            : (() => {
+                const seen = new Set(prev.map((p) => p.id));
+                const novos = page.items.filter((it) => !seen.has(it.id));
+                return [...prev, ...novos];
+              })();
+        return sortItems(merged);
+      });
       setTotal(page.total);
       setTotalPaginas(page.totalPaginas);
       setLoading(false);
+      setLoadingMore(false);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     search.q,
     search.tipos,
@@ -350,6 +357,35 @@ function Explorar() {
     search.tamanhoPagina,
     perfilNecessidades,
   ]);
+
+  // ───────────────────────────────────────────────────────────────
+  // Infinite scroll — IntersectionObserver no sentinel pós-grid.
+  //
+  // Quando o sentinel entra na viewport (com 200px de antecedência),
+  // dispara `goToPage(pagina + 1)`. Guards:
+  //   - não está carregando uma página ainda
+  //   - existe próxima página (`pagina < totalPaginas`)
+  //   - lista não está vazia (evita loop em "nenhum resultado")
+  // ───────────────────────────────────────────────────────────────
+  const podeCarregarMais = !loading && !loadingMore && search.pagina < totalPaginas;
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !podeCarregarMais) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          goToPage(search.pagina + 1);
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [podeCarregarMais, search.pagina, totalPaginas]);
+
 
   const limpar = () => {
     setBusca("");
