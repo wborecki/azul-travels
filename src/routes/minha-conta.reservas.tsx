@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchReservasDaFamilia, type ReservaComContexto } from "@/lib/queries";
-import { formatDateBR } from "@/lib/brazil";
-import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
+import {
+  fetchReservasDaFamilia,
+  mapReservas,
+  type ReservaComContexto,
+  type ReservaVM,
+} from "@/lib/queries";
+import { type ReservaStatus } from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -20,14 +24,14 @@ const STATUS_COLOR: Record<ReservaStatus, string> = {
 
 function ReservasPage() {
   const { user } = useAuth();
-  const [list, setList] = useState<ReservaComContexto[]>([]);
+  const [rows, setRows] = useState<ReservaComContexto[]>([]);
 
   useEffect(() => {
     if (!user) return;
     void (async () => {
       try {
         const data = await fetchReservasDaFamilia(user.id);
-        setList(data);
+        setRows(data);
       } catch (err) {
         toast.error("Erro ao carregar reservas", {
           description: err instanceof Error ? err.message : undefined,
@@ -35,6 +39,10 @@ function ReservasPage() {
       }
     })();
   }, [user]);
+
+  // Row → ViewModel — fallback de status, datas formatadas, localidade
+  // já resolvidos uma única vez (não por render).
+  const list: ReservaVM[] = useMemo(() => mapReservas(rows), [rows]);
 
   return (
     <div className="space-y-5">
@@ -62,42 +70,40 @@ function ReservasPage() {
               </tr>
             </thead>
             <tbody>
-              {list.map((r) => {
-                const status: ReservaStatus = r.status ?? "pendente";
-                return (
-                  <tr key={r.id} className="border-t">
-                    <td className="p-3">
-                      <div className="font-semibold text-primary">{r.estabelecimentos?.nome}</div>
+              {list.map((r) => (
+                <tr key={r.id} className="border-t">
+                  <td className="p-3">
+                    <div className="font-semibold text-primary">
+                      {r.estabelecimento?.nome ?? "—"}
+                    </div>
+                    {r.estabelecimento?.localidade && (
                       <div className="text-xs text-muted-foreground">
-                        {r.estabelecimentos?.cidade}, {r.estabelecimentos?.estado}
+                        {r.estabelecimento.localidade}
                       </div>
-                    </td>
-                    <td className="p-3 text-xs">
-                      {r.data_checkin && formatDateBR(r.data_checkin)}{" "}
-                      {r.data_checkout && `→ ${formatDateBR(r.data_checkout)}`}
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_COLOR[status]}`}
-                      >
-                        {RESERVA_STATUS_LABEL[status]}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right">
-                      {r.estabelecimentos && (
-                        <Button size="sm" variant="ghost" asChild>
-                          <Link
-                            to="/estabelecimento/$slug"
-                            params={{ slug: r.estabelecimentos.slug }}
-                          >
-                            Ver
-                          </Link>
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+                    )}
+                  </td>
+                  <td className="p-3 text-xs">{r.periodoFormatado}</td>
+                  <td className="p-3">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_COLOR[r.status]}`}
+                    >
+                      {r.statusLabel}
+                    </span>
+                  </td>
+                  <td className="p-3 text-right">
+                    {r.estabelecimento && (
+                      <Button size="sm" variant="ghost" asChild>
+                        <Link
+                          to="/estabelecimento/$slug"
+                          params={{ slug: r.estabelecimento.slug }}
+                        >
+                          Ver
+                        </Link>
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
