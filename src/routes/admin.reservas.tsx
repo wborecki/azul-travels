@@ -328,6 +328,32 @@ function AdminReservas() {
     if (selected?.id === reserva.id) {
       setSelected({ ...reserva, status: next });
     }
+    // Invalida caches de auditoria para a reserva alterada (forçará refetch
+    // na próxima abertura do drawer/expansor) e atualiza última observação.
+    setLogsInline((m) => {
+      if (!m.has(reserva.id)) return m;
+      const n = new Map(m);
+      n.delete(reserva.id);
+      return n;
+    });
+    if (observacao.trim()) {
+      // Otimista: já atualiza o indicador da linha sem esperar o refetch.
+      setUltimasObs((m) => {
+        const n = new Map(m);
+        n.set(reserva.id, {
+          id: `optimistic-${Date.now()}`,
+          reserva_id: reserva.id,
+          ator_id: user.id,
+          ator_email: user.email ?? null,
+          acao: acaoLabel,
+          status_anterior: previous,
+          status_novo: next,
+          observacao: observacao.trim(),
+          criado_em: new Date().toISOString(),
+        });
+        return n;
+      });
+    }
     setConfirmAction(null);
     void refreshCounts();
   };
