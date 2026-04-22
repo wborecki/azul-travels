@@ -12,6 +12,7 @@ import {
   salvarFiltrosPadrao,
   limparFiltrosPadrao,
   temFiltrosSalvos,
+  obterOuCriarLinkCurto,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type FiltrosPadraoUI,
@@ -37,6 +38,7 @@ import {
   Camera,
   Gift,
   Link as LinkIcon,
+  Link2,
   Check as CheckIcon,
   Sparkles,
   Bookmark,
@@ -584,6 +586,8 @@ function Explorar() {
 
   const buscando = busca !== buscaDebounced;
   const [copiado, setCopiado] = useState(false);
+  const [copiadoCurto, setCopiadoCurto] = useState(false);
+  const [gerandoCurto, setGerandoCurto] = useState(false);
 
   async function copiarLink() {
     try {
@@ -593,6 +597,40 @@ function Explorar() {
       setTimeout(() => setCopiado(false), 2000);
     } catch {
       toast.error("Não foi possível copiar o link.");
+    }
+  }
+
+  /**
+   * Gera (ou recupera, via dedupe por hash do path) um link curto do
+   * tipo `/l/aB3xK9pQ` para a URL atual e copia para a área de
+   * transferência. Exige login — a tabela só aceita inserts de
+   * usuários autenticados via RLS.
+   *
+   * Importante: usamos `pathname + search` em vez da URL completa
+   * porque o hash do banco é calculado sobre o path, não o origin.
+   * Isso permite que o mesmo link funcione em preview e em produção.
+   */
+  async function copiarLinkCurto() {
+    if (!user) {
+      toast.info("Faça login para gerar um link curto compartilhável.");
+      return;
+    }
+    setGerandoCurto(true);
+    try {
+      const path = window.location.pathname + window.location.search;
+      const { slug } = await obterOuCriarLinkCurto(path, user.id);
+      const url = `${window.location.origin}/l/${slug}`;
+      await navigator.clipboard.writeText(url);
+      setCopiadoCurto(true);
+      toast.success("Link curto copiado!", {
+        description: url,
+      });
+      setTimeout(() => setCopiadoCurto(false), 2000);
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível gerar o link curto.");
+    } finally {
+      setGerandoCurto(false);
     }
   }
 
@@ -818,7 +856,7 @@ function Explorar() {
                 variant="outline"
                 size="sm"
                 onClick={copiarLink}
-                title="Copiar link com filtros"
+                title="Copiar URL completa com todos os filtros"
               >
                 {copiado ? (
                   <>
@@ -827,6 +865,28 @@ function Explorar() {
                 ) : (
                   <>
                     <LinkIcon className="h-4 w-4 mr-1" /> Compartilhar
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copiarLinkCurto}
+                disabled={gerandoCurto}
+                title={
+                  user
+                    ? "Gerar e copiar um link curto (ex.: /l/aB3xK9pQ)"
+                    : "Faça login para gerar links curtos"
+                }
+              >
+                {copiadoCurto ? (
+                  <>
+                    <CheckIcon className="h-4 w-4 mr-1" /> Copiado
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="h-4 w-4 mr-1" />
+                    {gerandoCurto ? "Gerando…" : "Link curto"}
                   </>
                 )}
               </Button>

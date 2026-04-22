@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as MinhaContaReservasRouteImport } from './routes/minha-conta.reservas'
 import { Route as MinhaContaPerfilSensorialRouteImport } from './routes/minha-conta.perfil-sensorial'
 import { Route as MinhaContaDadosRouteImport } from './routes/minha-conta.dados'
+import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
@@ -96,6 +97,11 @@ const MinhaContaDadosRoute = MinhaContaDadosRouteImport.update({
   path: '/dados',
   getParentRoute: () => MinhaContaRoute,
 } as any)
+const LSlugRoute = LSlugRouteImport.update({
+  id: '/l/$slug',
+  path: '/l/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EstabelecimentoSlugRoute = EstabelecimentoSlugRouteImport.update({
   id: '/estabelecimento/$slug',
   path: '/estabelecimento/$slug',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/l/$slug': typeof LSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/l/$slug': typeof LSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/l/$slug': typeof LSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
+    | '/l/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
+    | '/l/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
+    | '/l/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
   ConteudoSlugRoute: typeof ConteudoSlugRoute
   EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
+  LSlugRoute: typeof LSlugRoute
   ConteudoIndexRoute: typeof ConteudoIndexRoute
 }
 
@@ -370,6 +383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/minha-conta/dados'
       preLoaderRoute: typeof MinhaContaDadosRouteImport
       parentRoute: typeof MinhaContaRoute
+    }
+    '/l/$slug': {
+      id: '/l/$slug'
+      path: '/l/$slug'
+      fullPath: '/l/$slug'
+      preLoaderRoute: typeof LSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/estabelecimento/$slug': {
       id: '/estabelecimento/$slug'
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaContaRoute: MinhaContaRouteWithChildren,
   ConteudoSlugRoute: ConteudoSlugRoute,
   EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
+  LSlugRoute: LSlugRoute,
   ConteudoIndexRoute: ConteudoIndexRoute,
 }
 export const routeTree = rootRouteImport

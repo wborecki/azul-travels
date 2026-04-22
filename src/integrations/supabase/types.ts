@@ -254,6 +254,36 @@ export type Database = {
         }
         Relationships: []
       }
+      explorar_links_curtos: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          id: string
+          path: string
+          path_hash: string
+          slug: string
+          ultimo_acesso_em: string
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          path: string
+          path_hash: string
+          slug: string
+          ultimo_acesso_em?: string
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          path?: string
+          path_hash?: string
+          slug?: string
+          ultimo_acesso_em?: string
+        }
+        Relationships: []
+      }
       familia_profiles: {
         Row: {
           cidade: string | null
@@ -513,6 +543,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expurgar_links_curtos_inativos: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -520,6 +551,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"

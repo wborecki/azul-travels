@@ -135,3 +135,10 @@ export {
   type ExplorarFiltrosPadrao,
   type ExplorarFiltrosPadraoInsert,
 } from "./explorar-filtros";
+
+// Encurtador de URLs do /explorar.
+export {
+  obterOuCriarLinkCurto,
+  resolverLinkCurto,
+  type LinkCurto,
+} from "./links-curtos";
