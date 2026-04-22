@@ -741,8 +741,10 @@ function DestaqueCard({
   const tipoLower = vm.tipoLabel.toLowerCase();
   const IconeFallback: LucideIcon = tipoLower.includes("restaurante")
     ? UtensilsCrossed
-    : tipoLower.includes("parque") || tipoLower.includes("atra")
-      ? Trees
+    : tipoLower.includes("parque") ||
+        tipoLower.includes("atra") ||
+        tipoLower.includes("excurs")
+      ? Compass
       : tipoLower.includes("transporte")
         ? Plane
         : tipoLower.includes("agência") || tipoLower.includes("agencia")
