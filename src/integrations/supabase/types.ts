@@ -416,6 +416,50 @@ export type Database = {
           },
         ]
       }
+      reservas_auditoria: {
+        Row: {
+          acao: string
+          ator_email: string | null
+          ator_id: string
+          criado_em: string
+          id: string
+          observacao: string | null
+          reserva_id: string
+          status_anterior: Database["public"]["Enums"]["reserva_status"] | null
+          status_novo: Database["public"]["Enums"]["reserva_status"] | null
+        }
+        Insert: {
+          acao: string
+          ator_email?: string | null
+          ator_id: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          reserva_id: string
+          status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
+          status_novo?: Database["public"]["Enums"]["reserva_status"] | null
+        }
+        Update: {
+          acao?: string
+          ator_email?: string | null
+          ator_id?: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          reserva_id?: string
+          status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
+          status_novo?: Database["public"]["Enums"]["reserva_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_auditoria_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           criado_em: string
