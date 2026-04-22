@@ -39,7 +39,11 @@ import {
   Utensils,
   DoorOpen,
 } from "lucide-react";
-import heroImg from "@/assets/hero-familia-viagem.jpg";
+// Hero usa fundo de marca (gradiente + textura SVG) — sem foto.
+// Decisão deliberada após validar que as opções de banco de imagens
+// disponíveis não atendiam o briefing (família diversa + criança +
+// lazer + horizontal). Melhor um fundo de marca limpo que uma foto
+// que comunica o oposto da inclusão real.
 
 export const Route = createFileRoute("/")({
   head: () => ({
