@@ -273,6 +273,8 @@ export async function fetchConteudosAdminPaginated(
     totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
   };
 }
+
+export async function fetchConteudoAdminPorId(
   id: string,
 ): Promise<Tables<"conteudo_tea"> | null> {
   const { data, error } = await supabase
