@@ -1,42 +1,46 @@
 
 
-## Substituir emojis por ícones Lucide
+## Reagrupamento de categorias de estabelecimento
 
-Vou trocar todos os emojis decorativos por ícones da biblioteca Lucide (já em uso no projeto), que têm aparência profissional, consistente com o resto da UI e não remetem a interfaces geradas por IA.
+### Sugestão
 
-### Mapa de substituição
+Hoje existem 8 tipos no banco (`hotel`, `pousada`, `resort`, `restaurante`, `parque`, `atracoes`, `agencia`, `transporte`). Sugiro consolidar em **5 categorias mais legíveis para a família**, sem perder granularidade — o tipo original vira um subtipo informativo dentro do card.
 
-| Local | Hoje | Vai virar |
+| Nova categoria | Engloba | Por quê |
 |---|---|---|
-| Hotel / Pousada / Resort | 🏨 / 🌳 / 🌊 | `Hotel` (Lucide) |
-| Restaurante | 🍽️ | `UtensilsCrossed` |
-| Parque / Atração | 🎡 | `Trees` |
-| Transporte | ✈️ | `Plane` |
-| Agência | 🧳 | `Briefcase` |
+| **Hospedagem** | hotel, pousada, resort | A família busca "onde dormir", não a classificação hoteleira. Um único filtro com 3x mais resultados é mais útil. |
+| **Passeios e experiências** | parque, atracoes + nova subcategoria `excursao` | Resposta direta pra sua pergunta: passeios, excursões e atrações cabem todos aqui. É o "o que fazer no destino". |
+| **Onde comer** | restaurante | Mantém separado. Uso e momento de busca distintos de hospedagem/passeios. |
+| **Transporte** | transporte | Mantém separado. Decisão logística, não experiencial. |
+| **Planejamento** | agencia | Mantém separado. Quem busca agência tá numa fase diferente da jornada (ainda planejando). |
 
-### Mudanças por arquivo
+### Por que não criar categoria isolada para excursões
 
-**1. `src/components/EstabCard.tsx` — fallback de imagem**
-- Remover função `emojiPorTipoLabel` (string).
-- Criar `IconePorTipoLabel` que retorna o componente Lucide apropriado.
-- No bloco de fallback (quando não há `fotoCapa`), trocar `<span className="text-5xl opacity-30">{emojiFallback}</span>` por `<Icone className="h-16 w-16 text-primary/25" strokeWidth={1.5} />`.
-- Resultado: ícone de linha fina, monocromático na cor da marca, sobre o gradiente azul/teal já existente. Mantém a hierarquia visual sem o tom infantil do emoji.
+Excursão, passeio guiado e experiência local são variações do mesmo intent: "atividade pra fazer com a criança no destino". Separar em 3 categorias gera filtros vazios e fragmenta resultados. Um único guarda-chuva **Passeios e experiências** com subtipo no card resolve.
 
-**2. `src/routes/index.tsx` — chips de categoria no hero**
-- Trocar o array `{ label: "🏨 Hotéis", ... }` por `{ icon: Hotel, label: "Hotéis", ... }`.
-- Renderizar o ícone inline com o texto: `<Icon className="h-4 w-4" /> {label}` dentro do Link.
-- Spacing: `gap-1.5` entre ícone e texto, `strokeWidth={2}` para boa leitura sobre fundo translúcido.
+### Impacto no produto
 
-**3. `src/routes/index.tsx` — fallback duplicado no card destaque (linhas ~727-763)**
-- Aplicar a mesma substituição feita no `EstabCard` (helper de ícone + render Lucide).
-- Idealmente esse card destaque deveria reusar `EstabCard`, mas isso está fora do escopo desta mudança — apenas alinho o visual.
+**UI (home + /explorar):**
+- 5 chips de categoria em vez de 8. Visualmente mais limpo, decisão mais rápida.
+- Cada card continua mostrando o tipo específico ("Hotel", "Pousada", "Excursão guiada") como label fino abaixo do nome — não se perde informação.
+- Filtros de `/explorar` ganham um nível: categoria (agrupador) + tipo específico (refino opcional dentro da categoria selecionada).
 
-### Correção paralela (hidratação)
+**Banco:**
+- Adicionar valor `excursao` ao enum `estab_tipo` (migration aditiva, não destrutiva).
+- Criar enum novo `estab_categoria` com os 5 valores e uma função `categoria_de_tipo(estab_tipo)` que faz o mapeamento. Sem coluna nova — categoria é derivada do tipo.
+- Atualizar `src/lib/enums.ts` com `ESTAB_CATEGORIA_LABEL` e o mapa `TIPO_PARA_CATEGORIA`.
 
-Os erros de hydration nos logs vêm de SSR cacheado servindo o HTML antigo (`py-20`, `text-3xl`, `<svg lucide-quote>`) enquanto o cliente já tem o novo. Não é um bug no código atual — vai se resolver no próximo build. Não precisa de ação.
+**Onde aparece:**
+- Home: chips do hero passam de 5 tipos misturados ("Hotéis, Restaurantes, Parques, Resorts, Pousadas") para 5 categorias coerentes.
+- `/explorar`: filtro principal vira categoria; tipo específico aparece como sub-filtro só quando a categoria tem múltiplos tipos (Hospedagem, Passeios).
+- Card do estabelecimento: ícone derivado da categoria (mais consistente que do tipo), label do tipo específico abaixo do nome.
 
-### O que NÃO muda
-- Paleta, tipografia, layout, rotas, queries Supabase, copy.
-- Ícones funcionais já existentes no projeto (Star, MapPin, etc.).
-- O componente `Pill` dos badges (selo azul, tour 360, etc.) — esses já usam ícones Lucide.
+### Decisão pendente
+
+Antes de implementar, preciso confirmar dois pontos:
+
+1. **Nome do enum em PT-BR**: prefere "Passeios e experiências" (proposto) ou outro rótulo tipo "O que fazer", "Atrações", "Atividades"?
+2. **Onde adicionar excursões na UX**: só como novo tipo dentro de "Passeios e experiências", ou também quer que a equipe possa cadastrar produtos avulsos (ex: "Passeio de barco com guia TEA — meio dia") como item destacado em outro lugar (ex: seção própria na home)?
+
+Responda esses dois pontos e eu sigo com a implementação completa (migration + enum + UI da home + filtros de /explorar + card).
 
