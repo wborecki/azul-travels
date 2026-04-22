@@ -12,6 +12,7 @@ import {
   type ReservaFormInput,
 } from "@/lib/queries";
 import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
+import { useAvaliacoesPublicasPorEstab } from "@/hooks/useAvaliacoesPublicasPorEstab";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +107,10 @@ function EstabPage() {
     );
 
   const e: Estab = detalhe.estabelecimento;
-  const avals: Avaliacao[] = detalhe.avaliacoes;
+  // Avaliações vivem fora do payload composto (`detalhe.avaliacoes` continua
+  // sendo a fonte do SSR/loader). O hook permite refetch independente quando
+  // o usuário publica uma nova avaliação, sem recarregar o estabelecimento.
+  const { data: avals }: { data: Avaliacao[] } = useAvaliacoesPublicasPorEstab(e.id);
   const recursoKeys = [
     "tem_sala_sensorial",
     "tem_concierge_tea",
