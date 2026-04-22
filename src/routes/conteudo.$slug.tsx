@@ -27,6 +27,7 @@ function Artigo() {
   const [a, setA] = useState<ArtigoT | null>(null);
   const [rel, setRel] = useState<ArtigoT[]>([]);
   const [loading, setLoading] = useState(true);
+  const conteudoRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -38,6 +39,7 @@ function Artigo() {
         .or(filtroConteudoPublico())
         .maybeSingle();
       setA(data as ArtigoT | null);
+      if (data?.id) void registrarView(data.id);
       if (data?.categoria) {
         const { data: r } = await supabase
           .from("conteudo_tea")
@@ -51,6 +53,22 @@ function Artigo() {
       setLoading(false);
     })();
   }, [slug]);
+
+  // Captura cliques em links dentro do conteúdo do artigo (event delegation)
+  useEffect(() => {
+    const node = conteudoRef.current;
+    if (!node || !a?.id) return;
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      const link = target?.closest("a");
+      if (!link) return;
+      const href = link.getAttribute("href");
+      if (!href || href.startsWith("#")) return;
+      void registrarClick(a.id, href);
+    };
+    node.addEventListener("click", handler);
+    return () => node.removeEventListener("click", handler);
+  }, [a?.id, loading]);
 
   if (loading)
     return (
