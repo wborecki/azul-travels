@@ -107,17 +107,18 @@ function Explorar() {
   useEffect(() => {
     void (async () => {
       setLoading(true);
-      let query = supabase.from("estabelecimentos").select(ESTAB_VIEW_SELECT).eq("status", "ativo");
-      if (busca) query = query.or(`nome.ilike.%${busca}%,cidade.ilike.%${busca}%,tipo.ilike.%${busca}%`);
-      if (tipos.length > 0) query = query.in("tipo", tipos as ("hotel"|"pousada"|"resort"|"restaurante"|"parque"|"atracoes"|"agencia"|"transporte")[]);
-      if (estado !== "todos") query = query.eq("estado", estado);
-      if (beneficio) query = query.eq("tem_beneficio_tea", true);
-      if (tour360) query = query.not("tour_360_url", "is", null);
-      for (const s of selos) query = query.eq(s, true);
-      for (const r of recursos) query = query.eq(r, true);
 
-      const { data } = await query.returns<EstabelecimentoView[]>();
-      let res: EstabelecimentoView[] = data ?? [];
+      const filters: EstabelecimentosViewFilters = {
+        busca: busca || undefined,
+        tipos: tipos as EstabelecimentosViewFilters["tipos"],
+        selos: selos as ReadonlyArray<SeloFlag>,
+        recursos: recursos as ReadonlyArray<RecursoFlag>,
+        estado: estado !== "todos" ? estado : undefined,
+        apenasComBeneficio: beneficio,
+        apenasComTour360: tour360,
+      };
+
+      let res = await fetchEstabelecimentosView(filters);
 
       // Sort by perfil compatibility
       const compatScore = (e: EstabelecimentoView) =>
@@ -126,10 +127,10 @@ function Explorar() {
         ).length;
 
       if (ordem === "relevante") {
-        res = res.sort((a, b) => compatScore(b) - compatScore(a));
+        res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
       } else if (ordem === "certificados") {
         const score = (e: EstabelecimentoView) => (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
-        res = res.sort((a, b) => score(b) - score(a));
+        res = [...res].sort((a, b) => score(b) - score(a));
       }
       setList(res);
       setLoading(false);
