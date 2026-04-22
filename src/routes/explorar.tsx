@@ -567,15 +567,18 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) => patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })}
+                onValueChange={(v) =>
+                  patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })
+                }
               >
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-[200px] h-9" aria-label="Ordenar resultados">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="relevante">Mais relevante</SelectItem>
+                  <SelectItem value="recomendado">Recomendado</SelectItem>
                   <SelectItem value="certificados">Mais certificados</SelectItem>
                   <SelectItem value="recente">Mais recentes</SelectItem>
+                  <SelectItem value="alfabetica">A → Z</SelectItem>
                 </SelectContent>
               </Select>
             </div>
