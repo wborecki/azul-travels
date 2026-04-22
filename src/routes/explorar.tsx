@@ -657,14 +657,29 @@ function Explorar() {
               </Button>
               <Select
                 value={search.ordem}
-                onValueChange={(v) =>
-                  patchSearchResetPage({ ordem: v as (typeof ORDEM_VALORES)[number] })
-                }
+                onValueChange={(v) => {
+                  const ordem = v as (typeof ORDEM_VALORES)[number];
+                  // Coerência: ao escolher "compatibilidade" como critério
+                  // principal, ligamos `priorizarPerfil` automaticamente
+                  // (caso o usuário tenha desligado antes). O toggle no
+                  // painel continua disponível como override.
+                  patchSearchResetPage(
+                    ordem === "compatibilidade"
+                      ? { ordem, priorizarPerfil: true }
+                      : { ordem },
+                  );
+                }}
               >
-                <SelectTrigger className="w-[200px] h-9" aria-label="Ordenar resultados">
+                <SelectTrigger className="w-[260px] h-9" aria-label="Ordenar resultados">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="compatibilidade">
+                    <span className="inline-flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                      Mais compatíveis com minha família
+                    </span>
+                  </SelectItem>
                   <SelectItem value="recomendado">Recomendado</SelectItem>
                   <SelectItem value="certificados">Mais certificados</SelectItem>
                   <SelectItem value="recente">Mais recentes</SelectItem>
