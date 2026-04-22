@@ -127,21 +127,75 @@ type _CheckFotosShape = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Reserva — payload de insert deve casar com o id do estabelecimento
+// 3. Reserva — IDs precisam casar em todo o ciclo (Row, Insert, Form, Build)
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// Cobre TODA a cadeia onde `estabelecimento_id` e `familia_id` aparecem:
+//
+//   estabelecimentos.id                 ─┐
+//   familia_profiles.id                  │
+//   perfil_sensorial.id                  │   precisam ser exatamente
+//        ↓ (FK)                          │   o mesmo tipo em:
+//   reservas.Row[*_id]                   │
+//   reservas.Insert[*_id]                ├─ TablesInsert<"reservas">
+//   ReservaFormInput[*_id]               │   ReservaFormInput
+//   buildReservaPayload(...).*_id        │   ReturnType<buildReservaPayload>
+//   criarReserva(...).*_id (Row)        ─┘
+//
+// Qualquer divergência (coluna renomeada, FK removida, helper que muda
+// o shape) trava o build com mensagem clara.
 
 type ReservaInsert = TablesInsert<"reservas">;
+type ReservaRow = Tables<"reservas">;
+type EstabId = Estab["id"];
+type FamiliaId = Tables<"familia_profiles">["id"];
+type PerfilSensorialId = Tables<"perfil_sensorial">["id"];
 
+// 3.1 — Insert deve aceitar exatamente o id do estabelecimento/família.
 type _CheckReservaEstabId = AssertEqual<
   ReservaInsert["estabelecimento_id"],
-  Estab["id"],
-  "REGRESSION: reservas.estabelecimento_id e estabelecimentos.id divergiram"
+  EstabId,
+  "REGRESSION: reservas.Insert.estabelecimento_id divergiu de estabelecimentos.id"
 >;
 type _CheckReservaFamiliaId = AssertEqual<
   ReservaInsert["familia_id"],
-  Tables<"familia_profiles">["id"],
-  "REGRESSION: reservas.familia_id e familia_profiles.id divergiram"
+  FamiliaId,
+  "REGRESSION: reservas.Insert.familia_id divergiu de familia_profiles.id"
 >;
+
+// 3.2 — Row (select) deve devolver exatamente o mesmo tipo de id.
+// Sem isso, um `data.estabelecimento_id` voltaria como `string` genérico
+// e a comparação com `Estab["id"]` aceitaria qualquer valor.
+type _CheckReservaRowEstabId = AssertEqual<
+  ReservaRow["estabelecimento_id"],
+  EstabId,
+  "REGRESSION: reservas.Row.estabelecimento_id divergiu de estabelecimentos.id"
+>;
+type _CheckReservaRowFamiliaId = AssertEqual<
+  ReservaRow["familia_id"],
+  FamiliaId,
+  "REGRESSION: reservas.Row.familia_id divergiu de familia_profiles.id"
+>;
+type _CheckReservaRowPerfilId = AssertEqual<
+  ReservaRow["perfil_sensorial_id"],
+  PerfilSensorialId | null,
+  "REGRESSION: reservas.Row.perfil_sensorial_id divergiu de perfil_sensorial.id"
+>;
+
+// 3.3 — IDs obrigatórios não podem virar `null`/optional no Insert.
+// (família e estabelecimento são `NOT NULL` no banco; perfil sensorial
+// é opcional por design.)
+type _CheckReservaInsertFamiliaRequired = AssertEqual<
+  Extract<ReservaInsert["familia_id"], null | undefined>,
+  never,
+  "REGRESSION: reservas.Insert.familia_id virou opcional/nullable"
+>;
+type _CheckReservaInsertEstabRequired = AssertEqual<
+  Extract<ReservaInsert["estabelecimento_id"], null | undefined>,
+  never,
+  "REGRESSION: reservas.Insert.estabelecimento_id virou opcional/nullable"
+>;
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
@@ -352,21 +406,21 @@ type _CheckBuildReturnShape = AssertEqual<
   TablesInsert<"reservas">,
   "REGRESSION: buildReservaPayload deveria devolver TablesInsert<reservas>"
 >;
-// Campos críticos do form precisam casar exatamente com as colunas da tabela.
+// 7.1 — Form: ids precisam casar com as PKs reais (mesmas usadas em 3.x).
 type _CheckFormFamiliaId = AssertEqual<
   ReservaFormInput["familia_id"],
-  NonNullable<TablesInsert<"reservas">["familia_id"]>,
-  "REGRESSION: ReservaFormInput.familia_id divergiu da coluna"
+  FamiliaId,
+  "REGRESSION: ReservaFormInput.familia_id divergiu de familia_profiles.id"
 >;
 type _CheckFormEstabId = AssertEqual<
   ReservaFormInput["estabelecimento_id"],
-  NonNullable<TablesInsert<"reservas">["estabelecimento_id"]>,
-  "REGRESSION: ReservaFormInput.estabelecimento_id divergiu da coluna"
+  EstabId,
+  "REGRESSION: ReservaFormInput.estabelecimento_id divergiu de estabelecimentos.id"
 >;
 type _CheckFormPerfilId = AssertEqual<
   ReservaFormInput["perfil_sensorial_id"],
-  NonNullable<TablesInsert<"reservas">["perfil_sensorial_id"]>,
-  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu da coluna"
+  PerfilSensorialId,
+  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu de perfil_sensorial.id"
 >;
 type _CheckFormAdultos = AssertEqual<
   ReservaFormInput["num_adultos"],
@@ -377,6 +431,39 @@ type _CheckFormAutistas = AssertEqual<
   ReservaFormInput["num_autistas"],
   NonNullable<Tables<"reservas">["num_autistas"]>,
   "REGRESSION: ReservaFormInput.num_autistas divergiu da coluna"
+>;
+
+// 7.2 — buildReservaPayload: o objeto retornado precisa preservar
+// EXATAMENTE os ids de família/estabelecimento/perfil — ou seja, o que
+// sai do helper é o que entra no Supabase, sem coerção entre tipos.
+type _CheckBuildReturnFamiliaId = AssertEqual<
+  BuildReservaReturn["familia_id"],
+  ReservaInsert["familia_id"],
+  "REGRESSION: buildReservaPayload.familia_id divergiu de reservas.Insert.familia_id"
+>;
+type _CheckBuildReturnEstabId = AssertEqual<
+  BuildReservaReturn["estabelecimento_id"],
+  ReservaInsert["estabelecimento_id"],
+  "REGRESSION: buildReservaPayload.estabelecimento_id divergiu de reservas.Insert.estabelecimento_id"
+>;
+type _CheckBuildReturnPerfilId = AssertEqual<
+  BuildReservaReturn["perfil_sensorial_id"],
+  ReservaInsert["perfil_sensorial_id"],
+  "REGRESSION: buildReservaPayload.perfil_sensorial_id divergiu de reservas.Insert.perfil_sensorial_id"
+>;
+
+// 7.3 — criarReserva: o Row devolvido pelo Supabase após o insert
+// deve trazer os mesmos ids fortemente tipados (cadeia fecha aqui).
+type CriarReservaResult = Awaited<ReturnType<typeof criarReserva>>;
+type _CheckCriarReservaFamiliaId = AssertEqual<
+  CriarReservaResult["familia_id"],
+  FamiliaId,
+  "REGRESSION: criarReserva(...).familia_id divergiu de familia_profiles.id"
+>;
+type _CheckCriarReservaEstabId = AssertEqual<
+  CriarReservaResult["estabelecimento_id"],
+  EstabId,
+  "REGRESSION: criarReserva(...).estabelecimento_id divergiu de estabelecimentos.id"
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -594,4 +681,14 @@ export type __SupabaseTypeGuards = [
   _CheckNormalizedIsMediaRow,
   _CheckFullIsMediaRow,
   _CheckPickFromViewShape,
+  _CheckReservaRowEstabId,
+  _CheckReservaRowFamiliaId,
+  _CheckReservaRowPerfilId,
+  _CheckReservaInsertFamiliaRequired,
+  _CheckReservaInsertEstabRequired,
+  _CheckBuildReturnFamiliaId,
+  _CheckBuildReturnEstabId,
+  _CheckBuildReturnPerfilId,
+  _CheckCriarReservaFamiliaId,
+  _CheckCriarReservaEstabId,
 ];
