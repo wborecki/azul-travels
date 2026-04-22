@@ -278,19 +278,11 @@ function Explorar() {
 
   const limpar = () => {
     setBusca("");
+    // Volta a URL para `/explorar` puro — `stripSearchParams` cuida de
+    // remover qualquer chave que case com SEARCH_DEFAULTS. Mantém o
+    // tamanhoPagina escolhido pelo usuário (preferência da sessão).
     void navigate({
-      search: {
-        q: "",
-        tipos: [],
-        selos: [],
-        recursos: [],
-        estado: "todos",
-        beneficio: false,
-        tour360: false,
-        ordem: "relevante",
-        pagina: 1,
-        tamanhoPagina: search.tamanhoPagina,
-      },
+      search: { ...SEARCH_DEFAULTS, tamanhoPagina: search.tamanhoPagina },
       replace: true,
     });
   };
