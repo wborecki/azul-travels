@@ -31,7 +31,6 @@ import {
   MapPinned,
   HeartHandshake,
   Plane,
-  CheckCircle2,
   MapPin,
   BellRing,
   Utensils,
