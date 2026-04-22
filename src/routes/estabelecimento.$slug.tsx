@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import {
+  fetchEstabelecimentoPorSlug,
+  type EstabelecimentoNormalized,
+} from "@/lib/queries";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 
 interface PerfilOpt { id: string; nome_autista: string }
 
-type Estab = Tables<"estabelecimentos">;
+type Estab = EstabelecimentoNormalized;
 type Avaliacao = AvaliacaoComFamilia;
 
 function EstabPage() {
