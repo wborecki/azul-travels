@@ -384,23 +384,23 @@ function ComoFunciona() {
     {
       n: "01",
       Icon: UserPlus,
-      titulo: "Crie o perfil sensorial",
+      titulo: "Conte sobre o seu filho",
       texto:
-        "Conte-nos sobre as sensibilidades, necessidades e preferências do seu filho. Leva menos de 3 minutos.",
+        "Sensibilidades, preferências, o que funciona e o que não funciona. Leva 3 minutos — e muda completamente como você planeja viagens.",
     },
     {
       n: "02",
       Icon: MapPinned,
-      titulo: "Encontre destinos compatíveis",
+      titulo: "Veja destinos feitos para ele",
       texto:
-        "Nossa plataforma sugere automaticamente hotéis, restaurantes e parques alinhados com o perfil do seu autista.",
+        "Nada de ligar para dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares que estão prontos para receber o seu filho.",
     },
     {
       n: "03",
       Icon: HeartHandshake,
-      titulo: "Reserve com segurança",
+      titulo: "Chegue. Eles já sabem.",
       texto:
-        "O estabelecimento recebe o perfil sensorial antes da sua chegada e se compromete a cuidar da sua família.",
+        "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe. Você chega, eles já estão preparados.",
     },
   ];
 
@@ -409,13 +409,13 @@ function ComoFunciona() {
       <div className="container mx-auto px-4">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Simples e seguro
+            Como funciona
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Como o Turismo Azul funciona?
+            Simples assim. Prometemos.
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Três passos simples para a viagem que sua família merecia.
+            Três passos para a viagem que vocês tanto adiaram.
           </p>
         </Reveal>
 
