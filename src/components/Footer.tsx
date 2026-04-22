@@ -5,14 +5,14 @@ import { Instagram, Facebook, Youtube } from "lucide-react";
 export function Footer() {
   const ano = new Date().getFullYear();
   return (
-    <footer className="bg-[#111827] text-gray-300 mt-20">
+    <footer className="bg-footer text-footer-foreground mt-20">
       <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
         {/* Marca */}
         <div className="space-y-4">
           <div className="bg-white/5 inline-block rounded-lg px-2 py-1.5">
             <Logo light />
           </div>
-          <p className="text-sm leading-relaxed text-gray-400 max-w-sm">
+          <p className="text-sm leading-relaxed text-footer-muted max-w-sm">
             O primeiro marketplace brasileiro de turismo inclusivo para famílias com Transtorno do
             Espectro Autista.
           </p>
@@ -84,7 +84,10 @@ export function Footer() {
           <h4 className="font-display font-semibold mb-3 text-white">Para Estabelecimentos</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <a href="mailto:certificacao@turismoazul.com.br" className="hover:text-secondary transition">
+              <a
+                href="mailto:certificacao@turismoazul.com.br"
+                className="hover:text-secondary transition"
+              >
                 Seja certificado
               </a>
             </li>
@@ -94,7 +97,10 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <a href="mailto:cadastro@turismoazul.com.br" className="hover:text-secondary transition">
+              <a
+                href="mailto:cadastro@turismoazul.com.br"
+                className="hover:text-secondary transition"
+              >
                 Listar meu negócio
               </a>
             </li>
@@ -104,7 +110,10 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <a href="mailto:comercial@turismoazul.com.br" className="hover:text-secondary transition">
+              <a
+                href="mailto:comercial@turismoazul.com.br"
+                className="hover:text-secondary transition"
+              >
                 Contato comercial
               </a>
             </li>
@@ -136,7 +145,10 @@ export function Footer() {
               </a>
             </li>
             <li>
-              <a href="mailto:imprensa@turismoazul.com.br" className="hover:text-secondary transition">
+              <a
+                href="mailto:imprensa@turismoazul.com.br"
+                className="hover:text-secondary transition"
+              >
                 Imprensa / Parcerias
               </a>
             </li>
@@ -145,7 +157,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container mx-auto px-4 py-6 text-xs text-gray-500 leading-relaxed text-center md:text-left">
+        <div className="container mx-auto px-4 py-6 text-xs text-footer-muted leading-relaxed text-center md:text-left">
           © {ano} Turismo Azul · Plataforma desenvolvida pela Solutions in BI Consulting LTDA (CNPJ
           59.668.668/0001-54) em parceria com a Absoluto Educacional (CNPJ 18.536.766/0001-50).
         </div>
