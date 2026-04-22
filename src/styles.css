@@ -111,6 +111,11 @@
   --roxo-suave: oklch(0.85 0.06 295);
   --roxo-suave-foreground: oklch(0.35 0.1 295);
 
+  /* Footer escuro — gray-900 (#111827) */
+  --footer: oklch(0.21 0.03 260);
+  --footer-foreground: oklch(0.85 0.01 250); /* gray-300 */
+  --footer-muted: oklch(0.62 0.015 250); /* gray-500 */
+
   --chart-1: oklch(0.27 0.06 255);
   --chart-2: oklch(0.66 0.1 195);
   --chart-3: oklch(0.78 0.15 75);
