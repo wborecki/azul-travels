@@ -406,21 +406,21 @@ type _CheckBuildReturnShape = AssertEqual<
   TablesInsert<"reservas">,
   "REGRESSION: buildReservaPayload deveria devolver TablesInsert<reservas>"
 >;
-// Campos críticos do form precisam casar exatamente com as colunas da tabela.
+// 7.1 — Form: ids precisam casar com as PKs reais (mesmas usadas em 3.x).
 type _CheckFormFamiliaId = AssertEqual<
   ReservaFormInput["familia_id"],
-  NonNullable<TablesInsert<"reservas">["familia_id"]>,
-  "REGRESSION: ReservaFormInput.familia_id divergiu da coluna"
+  FamiliaId,
+  "REGRESSION: ReservaFormInput.familia_id divergiu de familia_profiles.id"
 >;
 type _CheckFormEstabId = AssertEqual<
   ReservaFormInput["estabelecimento_id"],
-  NonNullable<TablesInsert<"reservas">["estabelecimento_id"]>,
-  "REGRESSION: ReservaFormInput.estabelecimento_id divergiu da coluna"
+  EstabId,
+  "REGRESSION: ReservaFormInput.estabelecimento_id divergiu de estabelecimentos.id"
 >;
 type _CheckFormPerfilId = AssertEqual<
   ReservaFormInput["perfil_sensorial_id"],
-  NonNullable<TablesInsert<"reservas">["perfil_sensorial_id"]>,
-  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu da coluna"
+  PerfilSensorialId,
+  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu de perfil_sensorial.id"
 >;
 type _CheckFormAdultos = AssertEqual<
   ReservaFormInput["num_adultos"],
@@ -431,6 +431,39 @@ type _CheckFormAutistas = AssertEqual<
   ReservaFormInput["num_autistas"],
   NonNullable<Tables<"reservas">["num_autistas"]>,
   "REGRESSION: ReservaFormInput.num_autistas divergiu da coluna"
+>;
+
+// 7.2 — buildReservaPayload: o objeto retornado precisa preservar
+// EXATAMENTE os ids de família/estabelecimento/perfil — ou seja, o que
+// sai do helper é o que entra no Supabase, sem coerção entre tipos.
+type _CheckBuildReturnFamiliaId = AssertEqual<
+  BuildReservaReturn["familia_id"],
+  ReservaInsert["familia_id"],
+  "REGRESSION: buildReservaPayload.familia_id divergiu de reservas.Insert.familia_id"
+>;
+type _CheckBuildReturnEstabId = AssertEqual<
+  BuildReservaReturn["estabelecimento_id"],
+  ReservaInsert["estabelecimento_id"],
+  "REGRESSION: buildReservaPayload.estabelecimento_id divergiu de reservas.Insert.estabelecimento_id"
+>;
+type _CheckBuildReturnPerfilId = AssertEqual<
+  BuildReservaReturn["perfil_sensorial_id"],
+  ReservaInsert["perfil_sensorial_id"],
+  "REGRESSION: buildReservaPayload.perfil_sensorial_id divergiu de reservas.Insert.perfil_sensorial_id"
+>;
+
+// 7.3 — criarReserva: o Row devolvido pelo Supabase após o insert
+// deve trazer os mesmos ids fortemente tipados (cadeia fecha aqui).
+type CriarReservaResult = Awaited<ReturnType<typeof criarReserva>>;
+type _CheckCriarReservaFamiliaId = AssertEqual<
+  CriarReservaResult["familia_id"],
+  FamiliaId,
+  "REGRESSION: criarReserva(...).familia_id divergiu de familia_profiles.id"
+>;
+type _CheckCriarReservaEstabId = AssertEqual<
+  CriarReservaResult["estabelecimento_id"],
+  EstabId,
+  "REGRESSION: criarReserva(...).estabelecimento_id divergiu de estabelecimentos.id"
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
