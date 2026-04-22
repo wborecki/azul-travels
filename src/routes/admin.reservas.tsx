@@ -223,6 +223,7 @@ function AdminReservas() {
       setSelected({ ...reserva, status: next });
     }
     setConfirmAction(null);
+    void refreshCounts();
   };
 
   // ─── Seleção em lote ───────────────────────────────────────────────
@@ -347,6 +348,7 @@ function AdminReservas() {
     }
     setSelecionadas(new Set());
     setBulkAction(null);
+    void refreshCounts();
   };
 
   return (
@@ -355,7 +357,11 @@ function AdminReservas() {
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">Reservas</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {loading ? "Carregando..." : `${filtered.length} de ${rows.length} reserva(s)`}
+            {loading
+              ? "Carregando..."
+              : total === 0
+                ? "Nenhuma reserva encontrada"
+                : `${total} reserva(s)${filter !== "todas" || qDebounced ? " no filtro atual" : ""}`}
           </p>
         </div>
         <div className="relative w-full sm:w-80">
@@ -526,6 +532,16 @@ function AdminReservas() {
             </tbody>
           </table>
         </div>
+        <AdminPagination
+          pagina={pagina}
+          tamanhoPagina={tamanhoPagina}
+          totalPaginas={totalPaginas}
+          total={total}
+          onPaginaChange={setPagina}
+          onTamanhoChange={setTamanhoPagina}
+          loading={loading}
+          itemLabel="reserva(s)"
+        />
       </div>
 
       {/* Drawer de detalhes + auditoria */}
