@@ -35,6 +35,12 @@ import {
   BellRing,
   Utensils,
   DoorOpen,
+  Hotel,
+  UtensilsCrossed,
+  Trees,
+  Briefcase,
+  Camera,
+  type LucideIcon,
 } from "lucide-react";
 // Hero usa fundo de marca (gradiente + textura SVG) — sem foto.
 // Decisão deliberada após validar que as opções de banco de imagens
@@ -392,18 +398,19 @@ function Hero({
           {/* Chips — passam o tipo via array (filtro multi-tipo do /explorar) */}
           <div className="mt-5 flex flex-wrap gap-2 justify-center">
             {[
-              { label: "🏨 Hotéis", q: "hotel" as const },
-              { label: "🍽️ Restaurantes", q: "restaurante" as const },
-              { label: "🎡 Parques", q: "parque" as const },
-              { label: "🌊 Resorts", q: "resort" as const },
-              { label: "🌳 Pousadas", q: "pousada" as const },
+              { Icon: Hotel, label: "Hotéis", q: "hotel" as const },
+              { Icon: UtensilsCrossed, label: "Restaurantes", q: "restaurante" as const },
+              { Icon: Trees, label: "Parques", q: "parque" as const },
+              { Icon: Hotel, label: "Resorts", q: "resort" as const },
+              { Icon: Hotel, label: "Pousadas", q: "pousada" as const },
             ].map((c) => (
               <Link
                 key={c.q}
                 to="/explorar"
                 search={{ tipos: [c.q] }}
-                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center"
+                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center gap-1.5"
               >
+                <c.Icon className="h-4 w-4" strokeWidth={2} />
                 {c.label}
               </Link>
             ))}
@@ -726,17 +733,17 @@ function DestaqueCard({
     },
   ].filter((r) => r.cond);
 
-  // Emoji de fallback derivado do tipoLabel (sem precisar adicionar campo ao VM)
+  // Ícone Lucide de fallback derivado do tipoLabel (sem precisar adicionar campo ao VM)
   const tipoLower = vm.tipoLabel.toLowerCase();
-  const emojiFallback = tipoLower.includes("restaurante")
-    ? "🍽️"
+  const IconeFallback: LucideIcon = tipoLower.includes("restaurante")
+    ? UtensilsCrossed
     : tipoLower.includes("parque") || tipoLower.includes("atra")
-      ? "🎡"
+      ? Trees
       : tipoLower.includes("transporte")
-        ? "✈️"
+        ? Plane
         : tipoLower.includes("agência") || tipoLower.includes("agencia")
-          ? "🧳"
-          : "🏨";
+          ? Briefcase
+          : Hotel;
 
   return (
     <div
@@ -759,7 +766,7 @@ function DestaqueCard({
             aria-hidden="true"
             className="w-full h-full flex items-center justify-center bg-gradient-to-br from-azul-claro to-teal-claro"
           >
-            <span className="text-5xl opacity-30">{emojiFallback}</span>
+            <IconeFallback className="h-16 w-16 text-primary/25" strokeWidth={1.5} />
           </div>
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
@@ -770,7 +777,7 @@ function DestaqueCard({
           )}
           {vm.temTour360 && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amarelo text-amarelo-foreground text-[11px] font-semibold">
-              📸 Tour 360°
+              <Camera className="h-3 w-3" /> Tour 360°
             </span>
           )}
           {estab.tem_concierge_tea === true && (
