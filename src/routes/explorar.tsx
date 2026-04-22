@@ -102,8 +102,10 @@ export const Route = createFileRoute("/explorar")({
   component: Explorar,
 });
 
+type ExplorarSearch = z.infer<typeof searchSchema>;
+
 function Explorar() {
-  const search = Route.useSearch();
+  const search = Route.useSearch() as ExplorarSearch;
   const navigate = useNavigate({ from: "/explorar" });
   const { user } = useAuth();
 
@@ -115,7 +117,7 @@ function Explorar() {
   useEffect(() => {
     if (buscaDebounced !== search.q) {
       void navigate({
-        search: (prev) => ({ ...prev, q: buscaDebounced }),
+        search: (prev: ExplorarSearch) => ({ ...prev, q: buscaDebounced }),
         replace: true,
       });
     }
@@ -138,9 +140,9 @@ function Explorar() {
   >({});
 
   // Helper único para atualizar a query string preservando outros params.
-  function patchSearch(patch: Partial<z.infer<typeof searchSchema>>) {
+  function patchSearch(patch: Partial<ExplorarSearch>) {
     void navigate({
-      search: (prev) => ({ ...prev, ...patch }),
+      search: (prev: ExplorarSearch) => ({ ...prev, ...patch }),
       replace: true,
     });
   }
@@ -148,6 +150,7 @@ function Explorar() {
   function toggleInArray<T extends string>(arr: readonly T[], v: T): T[] {
     return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
   }
+
 
   // Carrega necessidades do primeiro perfil sensorial da família
   useEffect(() => {
