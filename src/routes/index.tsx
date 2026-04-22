@@ -174,7 +174,7 @@ function Landing() {
       const { data: a } = await supabase
         .from("conteudo_tea")
         .select("slug,titulo,resumo,foto_capa,categoria,criado_em")
-        .eq("publicado", true)
+        .or(filtroConteudoPublico())
         .order("criado_em", { ascending: false })
         .limit(3);
       setArtigos(a ?? []);

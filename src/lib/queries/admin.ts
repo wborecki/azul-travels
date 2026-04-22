@@ -739,14 +739,14 @@ const CONTEUDO_CARD_SELECT =
 import type { Database } from "@/integrations/supabase/types";
 type ConteudoCategoria = Database["public"]["Enums"]["conteudo_categoria"];
 
-/** Lista artigos publicados, opcionalmente filtrando por categoria. */
+/** Lista artigos publicados (inclui agendados cuja data já chegou). */
 export async function fetchConteudosPublicados(
   filters: { categoria?: ConteudoCategoria; limite?: number } = {},
 ): Promise<ConteudoCard[]> {
   let q = supabase
     .from("conteudo_tea")
     .select(CONTEUDO_CARD_SELECT)
-    .eq("publicado", true)
+    .or(filtroConteudoPublico())
     .order("criado_em", { ascending: false });
   if (filters.categoria) q = q.eq("categoria", filters.categoria);
   if (filters.limite) q = q.limit(filters.limite);
@@ -755,13 +755,13 @@ export async function fetchConteudosPublicados(
   return data ?? [];
 }
 
-/** Busca um artigo publicado por slug (ou null se não publicado). */
+/** Busca um artigo público por slug (publicado OU agendado vencido). */
 export async function fetchConteudoPorSlug(slug: string): Promise<ConteudoPublico | null> {
   const { data, error } = await supabase
     .from("conteudo_tea")
     .select("*")
     .eq("slug", slug)
-    .eq("publicado", true)
+    .or(filtroConteudoPublico())
     .maybeSingle();
   if (error) throw error;
   return data;
@@ -776,7 +776,7 @@ export async function fetchConteudosRelacionados(
   const { data, error } = await supabase
     .from("conteudo_tea")
     .select("*")
-    .eq("publicado", true)
+    .or(filtroConteudoPublico())
     .eq("categoria", categoria)
     .neq("slug", excluirSlug)
     .limit(limite);

@@ -91,7 +91,7 @@ function ConteudoLista() {
       let query = supabase
         .from("conteudo_tea")
         .select("slug,titulo,resumo,foto_capa,categoria,criado_em,autor", { count: "exact" })
-        .eq("publicado", true)
+        .or(filtroConteudoPublico())
         .order("criado_em", { ascending: false })
         .range(from, to);
 

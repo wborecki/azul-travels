@@ -32,14 +32,14 @@ function Artigo() {
         .from("conteudo_tea")
         .select("*")
         .eq("slug", slug)
-        .eq("publicado", true)
+        .or(filtroConteudoPublico())
         .maybeSingle();
       setA(data as ArtigoT | null);
       if (data?.categoria) {
         const { data: r } = await supabase
           .from("conteudo_tea")
           .select("*")
-          .eq("publicado", true)
+          .or(filtroConteudoPublico())
           .eq("categoria", data.categoria)
           .neq("slug", slug)
           .limit(3);
