@@ -1,7 +1,7 @@
 import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { EstabCard } from "@/components/EstabCard";
 import {
@@ -191,9 +191,15 @@ function Explorar() {
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  // `loading` = primeira página dos filtros atuais (mostra skeletons).
+  // `loadingMore` = páginas subsequentes (infinite scroll, mostra spinner).
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
+  // Sentinel observado pelo IntersectionObserver — quando entra na
+  // viewport, dispara o carregamento da próxima página.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   /**
    * Atualiza a query string preservando outros params e **reseta a
@@ -245,8 +251,12 @@ function Explorar() {
 
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
-      setLoading(true);
+      // Página 1 → reset visual (skeletons). Páginas seguintes → spinner
+      // discreto no fim da lista (loadingMore).
+      if (search.pagina === 1) setLoading(true);
+      else setLoadingMore(true);
 
       const filters: EstabelecimentosViewFilters = {
         busca: search.q || undefined,
@@ -261,21 +271,20 @@ function Explorar() {
       };
 
       const page = await fetchEstabelecimentosViewPaginated(filters);
+      if (cancelled) return;
 
       // ─────────────────────────────────────────────────────────────
       // Ordenação local determinística e composta.
       //
-      // A ordenação roda no cliente (só rearranja a página atual)
-      // porque envolve heurísticas que não são triviais de indexar:
-      // perfil sensorial, score de selos, etc.
+      // Roda no cliente sobre TODOS os itens acumulados (não só a
+      // página recém-chegada) para que o infinite scroll mantenha a
+      // ordem global correta — caso contrário, um item da página 2
+      // com score alto apareceria depois de itens piores da página 1.
       //
       // Camadas (sempre nesta ordem, primeira diferença vence):
       //   A. priorizarPerfil → score de compatibilidade (DESC)
       //   B. critério principal selecionado em `ordem`    (DESC/ASC)
       //   C. tiebreaker estável: id                       (ASC)
-      //
-      // Garantia: dados iguais sempre produzem a MESMA ordem visível
-      // entre re-renders e entre usuários (sem reshuffle aleatório).
       // ─────────────────────────────────────────────────────────────
 
       const compatScore = (e: EstabelecimentoView) =>
@@ -286,14 +295,6 @@ function Explorar() {
       const seloScore = (e: EstabelecimentoView) =>
         (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
 
-      const recenteKey = (e: EstabelecimentoView) =>
-        // `criado_em` não vem no payload de view; usamos id como
-        // proxy estável (uuid v4 — sem ordem temporal real, mas a
-        // chamada em si já vem `order("criado_em" desc)` quando
-        // suportado pela query). Mantém determinismo entre páginas.
-        e.id;
-
-      // Compara dois itens segundo o critério principal selecionado.
       const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
         switch (search.ordem) {
           case "certificados":
@@ -301,35 +302,47 @@ function Explorar() {
           case "alfabetica":
             return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
           case "recente":
-            // Mantém a ordem do servidor (já vem por criação desc no
-            // futuro); usa id como tiebreaker estável.
-            return recenteKey(b).localeCompare(recenteKey(a));
+            return b.id.localeCompare(a.id);
           case "recomendado":
           default:
-            // "Recomendado" sem perfil = só selos (proxy de qualidade).
             return seloScore(b) - seloScore(a);
         }
       };
 
-      const items = [...page.items].sort((a, b) => {
-        // (A) Compatibilidade com perfil — só se o toggle estiver ON
-        //     E houver pelo menos uma necessidade marcada.
-        if (search.priorizarPerfil) {
-          const diff = compatScore(b) - compatScore(a);
+      const sortItems = (arr: EstabelecimentoView[]) =>
+        [...arr].sort((a, b) => {
+          if (search.priorizarPerfil) {
+            const diff = compatScore(b) - compatScore(a);
+            if (diff !== 0) return diff;
+          }
+          const diff = compareCriterio(a, b);
           if (diff !== 0) return diff;
-        }
-        // (B) Critério principal.
-        const diff = compareCriterio(a, b);
-        if (diff !== 0) return diff;
-        // (C) Tiebreaker absoluto — garante ordem determinística.
-        return a.id.localeCompare(b.id);
-      });
+          return a.id.localeCompare(b.id);
+        });
 
-      setList(items);
+      setList((prev) => {
+        // Página 1 → substitui (filtros mudaram, ou load inicial).
+        // Página >1 → concatena, deduplicando por id (proteção contra
+        // race conditions e contra mesma página vir duas vezes).
+        const merged =
+          search.pagina === 1
+            ? page.items
+            : (() => {
+                const seen = new Set(prev.map((p) => p.id));
+                const novos = page.items.filter((it) => !seen.has(it.id));
+                return [...prev, ...novos];
+              })();
+        return sortItems(merged);
+      });
       setTotal(page.total);
       setTotalPaginas(page.totalPaginas);
       setLoading(false);
+      setLoadingMore(false);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     search.q,
     search.tipos,
@@ -344,6 +357,35 @@ function Explorar() {
     search.tamanhoPagina,
     perfilNecessidades,
   ]);
+
+  // ───────────────────────────────────────────────────────────────
+  // Infinite scroll — IntersectionObserver no sentinel pós-grid.
+  //
+  // Quando o sentinel entra na viewport (com 200px de antecedência),
+  // dispara `goToPage(pagina + 1)`. Guards:
+  //   - não está carregando uma página ainda
+  //   - existe próxima página (`pagina < totalPaginas`)
+  //   - lista não está vazia (evita loop em "nenhum resultado")
+  // ───────────────────────────────────────────────────────────────
+  const podeCarregarMais = !loading && !loadingMore && search.pagina < totalPaginas;
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !podeCarregarMais) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          goToPage(search.pagina + 1);
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [podeCarregarMais, search.pagina, totalPaginas]);
+
 
   const limpar = () => {
     setBusca("");
@@ -683,12 +725,8 @@ function Explorar() {
           ) : (
             <>
               <div className="mb-3 text-xs text-muted-foreground">
-                Mostrando{" "}
-                <strong className="text-foreground">
-                  {(search.pagina - 1) * search.tamanhoPagina + 1}–
-                  {Math.min(search.pagina * search.tamanhoPagina, total)}
-                </strong>{" "}
-                de <strong className="text-foreground">{total}</strong> resultado
+                Mostrando <strong className="text-foreground">{list.length}</strong> de{" "}
+                <strong className="text-foreground">{total}</strong> resultado
                 {total === 1 ? "" : "s"}
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -696,32 +734,46 @@ function Explorar() {
                   <EstabCard key={e.id} e={e} />
                 ))}
               </div>
-              {totalPaginas > 1 && (
-                <nav
-                  aria-label="Paginação dos resultados"
-                  className="mt-8 flex items-center justify-center gap-2"
+
+              {/* Spinner discreto enquanto a próxima página carrega */}
+              {loadingMore && (
+                <div
+                  className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
                 >
+                  <span className="h-3 w-3 rounded-full border-2 border-primary border-r-transparent animate-spin" />
+                  Carregando mais resultados...
+                </div>
+              )}
+
+              {/*
+                Sentinel + fallback acessível.
+                - O sentinel (div vazia) é observada pelo IntersectionObserver
+                  e dispara `goToPage` automaticamente ao entrar na viewport.
+                - O botão "Carregar mais" é um fallback para teclado, leitores
+                  de tela e navegadores sem IntersectionObserver — tem o mesmo
+                  efeito programático.
+              */}
+              {search.pagina < totalPaginas && (
+                <div className="mt-8 flex flex-col items-center gap-3">
+                  <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={search.pagina <= 1}
-                    onClick={() => goToPage(search.pagina - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-muted-foreground px-2">
-                    Página <strong className="text-foreground">{search.pagina}</strong> de{" "}
-                    <strong className="text-foreground">{totalPaginas}</strong>
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={search.pagina >= totalPaginas}
                     onClick={() => goToPage(search.pagina + 1)}
+                    disabled={loadingMore}
                   >
-                    Próxima
+                    {loadingMore ? "Carregando..." : "Carregar mais"}
                   </Button>
-                </nav>
+                </div>
+              )}
+
+              {/* Mensagem final quando tudo foi carregado */}
+              {search.pagina >= totalPaginas && totalPaginas > 1 && (
+                <p className="mt-8 text-center text-xs text-muted-foreground">
+                  Você chegou ao fim — {total} resultado{total === 1 ? "" : "s"}.
+                </p>
               )}
             </>
           )}
