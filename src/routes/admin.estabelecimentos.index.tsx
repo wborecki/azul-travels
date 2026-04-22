@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Pencil, Trash2, ChevronDown, Loader2, Star } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, Loader2, Star, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -240,6 +240,15 @@ function AdminEstabelecimentos() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        <Button asChild size="sm" variant="ghost" className="h-8 px-2">
+                          <Link
+                            to="/admin/estabelecimentos/$id/preview"
+                            params={{ id: r.id }}
+                            aria-label={`Pré-visualizar ${r.nome}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
                         <Button asChild size="sm" variant="ghost" className="h-8 px-2">
                           <Link
                             to="/admin/estabelecimentos/$id"

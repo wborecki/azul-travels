@@ -28,9 +28,13 @@ import {
   applyEstabelecimentosViewFilters,
   resolvePagination,
   ESTAB_PAGE_SIZE_DEFAULT,
+  normalizeEstabelecimento,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
+  type EstabelecimentoFull,
+  type EstabelecimentoDetalhe,
 } from "./estabelecimentos";
+import { fetchAvaliacoesPublicasPorEstab } from "./avaliacoes";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Estabelecimentos — listagem admin
@@ -185,6 +189,32 @@ export async function fetchEstabelecimentoAdminPorId(
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+/**
+ * Detalhe completo do estabelecimento para a tela de **pré-visualização** admin.
+ *
+ * Mesmo shape de `fetchEstabelecimentoDetalhe` (página pública), mas busca por
+ * `id` e **ignora** o filtro `status = 'ativo'` — admins precisam revisar
+ * estabelecimentos `pendente`/`inativo` exatamente como apareceriam para
+ * famílias com TEA antes de publicar.
+ *
+ * Reaproveita `normalizeEstabelecimento` e `fetchAvaliacoesPublicasPorEstab`
+ * para garantir paridade pixel-perfect com a rota pública.
+ */
+export async function fetchEstabelecimentoAdminDetalhe(
+  id: string,
+): Promise<EstabelecimentoDetalhe | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const estabelecimento = normalizeEstabelecimento(data as EstabelecimentoFull);
+  const avaliacoes = await fetchAvaliacoesPublicasPorEstab(estabelecimento.id);
+  return { estabelecimento, avaliacoes };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
