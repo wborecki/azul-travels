@@ -170,10 +170,7 @@ type _Av_CriadoEm = AssertEqual<
 // `unknown` e a UI volta a precisar de cast.
 
 type FamiliaEmbed = RawAvaliacaoRow["familia_profiles"];
-type _Av_EmbedNotAny = AssertNotAny<
-  FamiliaEmbed,
-  "REGRESSION: familia_profiles embed é `any`"
->;
+type _Av_EmbedNotAny = AssertNotAny<FamiliaEmbed, "REGRESSION: familia_profiles embed é `any`">;
 type _Av_EmbedNotUnknown = AssertNotUnknown<
   FamiliaEmbed,
   "REGRESSION: familia_profiles embed é `unknown` — FK avaliacoes→familia_profiles caiu"
@@ -297,10 +294,7 @@ type _Md_NormalizeUrlShape = AssertEqual<
 
 type Picked = ReturnType<typeof pickEstabMedia>;
 
-type _Md_PickedNotAny = AssertNotAny<
-  Picked,
-  "REGRESSION: pickEstabMedia retorna `any`"
->;
+type _Md_PickedNotAny = AssertNotAny<Picked, "REGRESSION: pickEstabMedia retorna `any`">;
 type _Md_PickedNotUnknown = AssertNotUnknown<
   Picked,
   "REGRESSION: pickEstabMedia retorna `unknown`"
