@@ -159,31 +159,40 @@ type _CheckFetchEmbed = AssertEqual<
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type {
-  Estabelecimento,
-  EstabelecimentoCard,
+  EstabelecimentoFull,
+  EstabelecimentoView,
   ReservaComContexto,
   PerfilOption,
 } from "@/lib/queries";
 import {
   fetchEstabelecimentoPorSlug,
-  fetchEstabelecimentosCards,
+  fetchEstabelecimentosView,
   fetchReservasDaFamilia,
   criarReserva,
   fetchPerfisDaFamilia,
 } from "@/lib/queries";
 
 type EstabReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoPorSlug>>>;
-type CardsReturn = Awaited<ReturnType<typeof fetchEstabelecimentosCards>>[number];
+type ViewReturn = Awaited<ReturnType<typeof fetchEstabelecimentosView>>[number];
 type ReservasReturn = Awaited<ReturnType<typeof fetchReservasDaFamilia>>[number];
 type CriarReservaReturn = Awaited<ReturnType<typeof criarReserva>>;
 type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisDaFamilia>>[number];
 
 // Cada função precisa retornar shape concreto, nunca any/unknown.
 type _CheckEstabNotAny = AssertNotAny<EstabReturn, "REGRESSION: fetchEstabelecimentoPorSlug -> any">;
-type _CheckEstabShape = AssertEqual<EstabReturn, Estabelecimento, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de Estabelecimento">;
+type _CheckEstabShape = AssertEqual<EstabReturn, EstabelecimentoFull, "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoFull">;
 
-type _CheckCardsNotAny = AssertNotAny<CardsReturn, "REGRESSION: fetchEstabelecimentosCards -> any">;
-type _CheckCardsShape = AssertEqual<CardsReturn, EstabelecimentoCard, "REGRESSION: fetchEstabelecimentosCards divergiu de EstabelecimentoCard">;
+// Payload View unificado — usado em listagem, cards, destaques, benefícios.
+type _CheckViewNotAny = AssertNotAny<ViewReturn, "REGRESSION: fetchEstabelecimentosView -> any">;
+type _CheckViewShape = AssertEqual<ViewReturn, EstabelecimentoView, "REGRESSION: fetchEstabelecimentosView divergiu de EstabelecimentoView">;
+
+// Garante que campos críticos da View existem com tipo certo.
+type _CheckViewTour360 = AssertEqual<ViewReturn["tour_360_url"], string | null, "REGRESSION: View.tour_360_url quebrou">;
+type _CheckViewSeloAzul = AssertEqual<ViewReturn["selo_azul"], boolean | null, "REGRESSION: View.selo_azul quebrou">;
+type _CheckViewBeneficio = AssertEqual<ViewReturn["beneficio_tea_descricao"], string | null, "REGRESSION: View.beneficio_tea_descricao quebrou">;
+type _CheckViewSlug = AssertEqual<ViewReturn["slug"], string, "REGRESSION: View.slug quebrou">;
+// View deve ser estritamente subset de Full — IDs precisam casar.
+type _CheckViewIdMatchesFull = AssertEqual<ViewReturn["id"], EstabelecimentoFull["id"], "REGRESSION: View.id e Full.id divergiram">;
 
 type _CheckReservasNotAny = AssertNotAny<ReservasReturn, "REGRESSION: fetchReservasDaFamilia -> any">;
 type _CheckReservasShape = AssertEqual<ReservasReturn, ReservaComContexto, "REGRESSION: fetchReservasDaFamilia divergiu de ReservaComContexto">;
