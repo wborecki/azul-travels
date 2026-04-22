@@ -564,10 +564,10 @@ function SelosImportantes() {
 
         <Reveal className="mt-10 text-center">
           <Link
-            to="/conteudo"
+            to="/sobre-os-selos"
             className="inline-flex items-center gap-1 text-secondary font-semibold hover:text-primary transition"
           >
-            Como obtemos nossas certificações? <ArrowRight className="h-4 w-4" />
+            Entenda como auditamos cada estabelecimento <ArrowRight className="h-4 w-4" />
           </Link>
         </Reveal>
       </div>
@@ -583,10 +583,12 @@ function DestinosDestaque({
   destaques,
   perfil,
   userLogado,
+  onCriarPerfil,
 }: {
   destaques: EstabelecimentoView[] | null;
   perfil: PerfilSensorial | null;
   userLogado: boolean;
+  onCriarPerfil: () => void;
 }) {
   return (
     <section className="py-20 bg-background">
@@ -641,10 +643,13 @@ function DestinosDestaque({
           <p className="text-lg text-foreground">
             Quer ver estabelecimentos compatíveis com o perfil do seu filho?
           </p>
-          <Button asChild size="lg" className="mt-4 bg-primary hover:bg-primary/90">
-            <Link to="/cadastro">
-              Criar perfil sensorial gratuito <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+          <Button
+            type="button"
+            size="lg"
+            className="mt-4 bg-primary hover:bg-primary/90 min-h-[44px]"
+            onClick={onCriarPerfil}
+          >
+            Criar perfil sensorial — é gratuito <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </Reveal>
       </div>
