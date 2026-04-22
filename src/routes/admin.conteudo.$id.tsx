@@ -79,6 +79,10 @@ interface FormState {
   conteudo: string;
   foto_capa: string;
   publicado: boolean;
+  /** Valor para `<input type="datetime-local">` em horário de Brasília. */
+  publicar_em_brt: string;
+  /** Estado escolhido pelo admin no seletor de Publicação. */
+  estado: PublicacaoEstado;
 }
 
 function emptyForm(): FormState {
@@ -91,10 +95,16 @@ function emptyForm(): FormState {
     conteudo: "",
     foto_capa: "",
     publicado: false,
+    publicar_em_brt: "",
+    estado: "rascunho",
   };
 }
 
 function rowToForm(r: ConteudoRow): FormState {
+  const estado = derivarEstado({
+    publicado: !!r.publicado,
+    publicar_em: r.publicar_em ?? null,
+  });
   return {
     titulo: r.titulo ?? "",
     slug: r.slug ?? "",
@@ -104,6 +114,8 @@ function rowToForm(r: ConteudoRow): FormState {
     conteudo: r.conteudo ?? "",
     foto_capa: r.foto_capa ?? "",
     publicado: !!r.publicado,
+    publicar_em_brt: isoToBrtInputValue(r.publicar_em),
+    estado,
   };
 }
 
