@@ -488,6 +488,33 @@ function AdminReservas() {
     if (selected && idSet.has(selected.id)) {
       setSelected({ ...selected, status: next });
     }
+    // Invalida caches de auditoria das reservas alteradas.
+    setLogsInline((m) => {
+      const n = new Map(m);
+      for (const id of ids) n.delete(id);
+      return n;
+    });
+    if (obs) {
+      // Otimista: atualiza o indicador da última observação para todas.
+      setUltimasObs((m) => {
+        const n = new Map(m);
+        const now = new Date().toISOString();
+        for (const id of ids) {
+          n.set(id, {
+            id: `optimistic-${id}-${Date.now()}`,
+            reserva_id: id,
+            ator_id: user.id,
+            ator_email: user.email ?? null,
+            acao: acaoLabel,
+            status_anterior: previousById.get(id) ?? null,
+            status_novo: next,
+            observacao: obs,
+            criado_em: now,
+          });
+        }
+        return n;
+      });
+    }
     setSelecionadas(new Set());
     setBulkAction(null);
     void refreshCounts();
