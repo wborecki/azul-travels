@@ -411,6 +411,82 @@ function AdminReservas() {
         })}
       </div>
 
+      {/* Filtros por intervalo de datas — check-in e criação */}
+      <div className="rounded-2xl border bg-card p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+            <Calendar className="h-4 w-4 text-primary" />
+            Filtrar por período
+          </div>
+          {(checkinDe || checkinAte || criadoDe || criadoAte) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setCheckinDe("");
+                setCheckinAte("");
+                setCriadoDe("");
+                setCriadoAte("");
+              }}
+              className="h-7 text-xs"
+            >
+              <X className="h-3 w-3 mr-1" /> Limpar datas
+            </Button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="checkin-de" className="text-xs text-muted-foreground">
+              Check-in de
+            </Label>
+            <Input
+              id="checkin-de"
+              type="date"
+              value={checkinDe}
+              max={checkinAte || undefined}
+              onChange={(e) => setCheckinDe(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="checkin-ate" className="text-xs text-muted-foreground">
+              Check-in até
+            </Label>
+            <Input
+              id="checkin-ate"
+              type="date"
+              value={checkinAte}
+              min={checkinDe || undefined}
+              onChange={(e) => setCheckinAte(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="criado-de" className="text-xs text-muted-foreground">
+              Criada de
+            </Label>
+            <Input
+              id="criado-de"
+              type="date"
+              value={criadoDe}
+              max={criadoAte || undefined}
+              onChange={(e) => setCriadoDe(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="criado-ate" className="text-xs text-muted-foreground">
+              Criada até
+            </Label>
+            <Input
+              id="criado-ate"
+              type="date"
+              value={criadoAte}
+              min={criadoDe || undefined}
+              onChange={(e) => setCriadoAte(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
       {selecionadas.size > 0 && (
         <div
           className="sticky top-16 z-10 bg-card border rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm"
