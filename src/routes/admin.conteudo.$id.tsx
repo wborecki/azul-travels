@@ -416,21 +416,55 @@ function AdminConteudoForm() {
         {/* Sidebar */}
         <div className="space-y-6">
           <Section title="Publicação">
-            <div className="flex items-center gap-3 rounded-xl border bg-muted/30 px-3 py-2.5">
-              <div className="flex-1">
-                <Label htmlFor="pub" className="cursor-pointer text-sm font-medium">
-                  Publicado
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {form.publicado ? "Visível no site público" : "Apenas no painel admin"}
-                </p>
-              </div>
-              <Switch
-                id="pub"
-                checked={form.publicado}
-                onCheckedChange={(v) => set("publicado", v)}
-              />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-foreground/80">Estado</Label>
+              <Select
+                value={form.estado}
+                onValueChange={(v) => set("estado", v as PublicacaoEstado)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rascunho">📝 Rascunho — apenas no admin</SelectItem>
+                  <SelectItem value="agendado">⏰ Agendar publicação</SelectItem>
+                  <SelectItem value="publicado">🌐 Publicar agora</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {form.estado === "publicado" && "Vai ficar visível no site público assim que salvar."}
+                {form.estado === "rascunho" && "Visível apenas no painel admin."}
+                {form.estado === "agendado" && "Será publicado automaticamente na data abaixo."}
+              </p>
             </div>
+
+            {form.estado === "agendado" && (
+              <div className="space-y-1.5 mt-4">
+                <Label
+                  htmlFor="publicar_em"
+                  className="text-sm font-medium text-foreground/80"
+                >
+                  Publicar em <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="publicar_em"
+                  type="datetime-local"
+                  value={form.publicar_em_brt}
+                  onChange={(e) => set("publicar_em_brt", e.target.value)}
+                  min={isoToBrtInputValue(new Date().toISOString())}
+                />
+                {errors.publicar_em ? (
+                  <p className="text-xs text-destructive">{errors.publicar_em}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Horário de Brasília (BRT).
+                    {form.publicar_em_brt &&
+                      brtInputValueToIso(form.publicar_em_brt) &&
+                      ` Publicará em ${formatBrtDateTime(brtInputValueToIso(form.publicar_em_brt))}.`}
+                  </p>
+                )}
+              </div>
+            )}
 
             <Field label="Categoria" className="mt-4">
               <Select
