@@ -1,11 +1,13 @@
-import type { Database } from "@/integrations/supabase/types";
-
-export type ConteudoCategoria = Database["public"]["Enums"]["conteudo_categoria"];
-
-export const CATEGORIA_LABEL: Record<ConteudoCategoria, string> = {
-  legislacao: "Legislação",
-  dicas_viagem: "Dicas de viagem",
-  boas_praticas: "Boas práticas",
-  novidades: "Novidades",
-  destinos: "Destinos",
-};
+/**
+ * @deprecated Mantido apenas para compatibilidade. Em código novo importe
+ * direto de `@/lib/enums`:
+ *
+ *   import {
+ *     CONTEUDO_CATEGORIA_LABEL,
+ *     type ConteudoCategoria,
+ *   } from "@/lib/enums";
+ */
+export {
+  CONTEUDO_CATEGORIA_LABEL as CATEGORIA_LABEL,
+  type ConteudoCategoria,
+} from "./enums";
