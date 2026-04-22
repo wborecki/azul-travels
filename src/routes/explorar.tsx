@@ -444,13 +444,36 @@ function Explorar() {
     );
   }
 
-  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
+  // Ressincroniza `paginaAtual` quando os FILTROS (não a página) mudam,
+  // ou quando o usuário navega para uma URL com `pagina` diferente
+  // (ex.: clicou num link compartilhado). Sem isso, mudar de filtro
+  // continuaria mostrando a página acumulada anterior.
+  useEffect(() => {
+    setPaginaAtual(search.pagina);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    search.q,
+    search.tipos,
+    search.selos,
+    search.recursos,
+    search.estado,
+    search.beneficio,
+    search.tour360,
+    search.ordem,
+    search.priorizarPerfil,
+    search.pagina,
+    search.tamanhoPagina,
+  ]);
+
+  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade
+  // para filtros; `paginaAtual` é o cursor local do scroll infinito).
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      // Página 1 → reset visual (skeletons). Páginas seguintes → spinner
-      // discreto no fim da lista (loadingMore).
-      if (search.pagina === 1) setLoading(true);
+      // Primeira página visível dos filtros atuais → skeletons.
+      // Páginas seguintes (acumuladas via scroll) → spinner discreto.
+      const ehPrimeiraVisivel = paginaAtual === search.pagina;
+      if (ehPrimeiraVisivel) setLoading(true);
       else setLoadingMore(true);
 
       const filters: EstabelecimentosViewFilters = {
@@ -461,7 +484,7 @@ function Explorar() {
         estado: search.estado !== "todos" ? search.estado : undefined,
         apenasComBeneficio: search.beneficio,
         apenasComTour360: search.tour360,
-        pagina: search.pagina,
+        pagina: paginaAtual,
         tamanhoPagina: search.tamanhoPagina,
       };
 
@@ -528,17 +551,16 @@ function Explorar() {
         });
 
       setList((prev) => {
-        // Página 1 → substitui (filtros mudaram, ou load inicial).
-        // Página >1 → concatena, deduplicando por id (proteção contra
-        // race conditions e contra mesma página vir duas vezes).
-        const merged =
-          search.pagina === 1
-            ? page.items
-            : (() => {
-                const seen = new Set(prev.map((p) => p.id));
-                const novos = page.items.filter((it) => !seen.has(it.id));
-                return [...prev, ...novos];
-              })();
+        // Primeira página visível → substitui (filtros mudaram, ou
+        // navegou direto para `pagina=N` via link compartilhado).
+        // Páginas seguintes → concatena, deduplicando por id.
+        const merged = ehPrimeiraVisivel
+          ? page.items
+          : (() => {
+              const seen = new Set(prev.map((p) => p.id));
+              const novos = page.items.filter((it) => !seen.has(it.id));
+              return [...prev, ...novos];
+            })();
         return sortItems(merged);
       });
       setTotal(page.total);
@@ -562,6 +584,7 @@ function Explorar() {
     search.priorizarPerfil,
     search.pagina,
     search.tamanhoPagina,
+    paginaAtual,
     perfilNecessidades,
   ]);
 
@@ -569,12 +592,16 @@ function Explorar() {
   // Infinite scroll — IntersectionObserver no sentinel pós-grid.
   //
   // Quando o sentinel entra na viewport (com 200px de antecedência),
-  // dispara `goToPage(pagina + 1)`. Guards:
+  // incrementa `paginaAtual` (estado local). A URL **não muda** —
+  // assim o link compartilhado fica estável no ponto de entrada
+  // escolhido pelo usuário (`search.pagina`).
+  //
+  // Guards:
   //   - não está carregando uma página ainda
-  //   - existe próxima página (`pagina < totalPaginas`)
+  //   - existe próxima página (`paginaAtual < totalPaginas`)
   //   - lista não está vazia (evita loop em "nenhum resultado")
   // ───────────────────────────────────────────────────────────────
-  const podeCarregarMais = !loading && !loadingMore && search.pagina < totalPaginas;
+  const podeCarregarMais = !loading && !loadingMore && paginaAtual < totalPaginas;
 
   useEffect(() => {
     const node = sentinelRef.current;
@@ -583,15 +610,14 @@ function Explorar() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          goToPage(search.pagina + 1);
+          setPaginaAtual((p) => p + 1);
         }
       },
       { rootMargin: "200px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [podeCarregarMais, search.pagina, totalPaginas]);
+  }, [podeCarregarMais]);
 
 
   const limpar = () => {
