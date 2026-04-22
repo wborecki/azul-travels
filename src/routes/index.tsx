@@ -1066,7 +1066,7 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
 // CTA FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CtaFinal() {
+function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
   return (
     <section className="py-24 gradient-cta-final text-white">
       <div className="container mx-auto px-4">
@@ -1079,13 +1079,12 @@ function CtaFinal() {
             Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos e muda tudo.
           </p>
           <Button
-            asChild
+            type="button"
             size="lg"
-            className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold"
+            onClick={onCriarPerfil}
+            className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold min-h-[44px]"
           >
-            <Link to="/cadastro">
-              Criar meu perfil sensorial <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+            Quero criar o perfil do meu filho <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
           <p className="mt-5 text-xs text-white/60">
             ✓ Gratuito · ✓ Sem compromisso · ✓ Dados protegidos pela LGPD
