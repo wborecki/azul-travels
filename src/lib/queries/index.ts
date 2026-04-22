@@ -66,3 +66,17 @@ export {
   type PerfilSensorialInsert,
   type PerfilOption,
 } from "./perfis";
+
+// Mapeadores Row → ViewModel — fonte única de derivações para a UI.
+export {
+  mapAvaliacao,
+  mapAvaliacoes,
+  mapEstabCard,
+  mapEstabCards,
+  mapReserva,
+  mapReservas,
+  type AvaliacaoVM,
+  type EstabCardVM,
+  type ReservaVM,
+  type RecursoKey,
+} from "./mappers";
