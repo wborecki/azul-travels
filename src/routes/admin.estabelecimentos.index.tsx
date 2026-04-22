@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Pencil, Trash2, ChevronDown, Loader2, Star } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, Loader2, Star, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
