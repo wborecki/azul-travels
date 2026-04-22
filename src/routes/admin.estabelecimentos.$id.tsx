@@ -99,6 +99,23 @@ function slugify(s: string) {
     .replace(/-+/g, "-");
 }
 
+/**
+ * Migra o estado legado (`foto_capa` em campo separado) para a galeria
+ * unificada onde **a primeira foto é sempre a capa**.
+ *
+ * - Se `foto_capa` já está presente em `fotos`, move para a posição 0.
+ * - Se não está, adiciona no início.
+ * - Se `foto_capa` é vazia, devolve `fotos` sem alterações.
+ *
+ * Resultado: array com 0+ URLs, capa em índice 0 quando houver imagens.
+ */
+function mergeCapaIntoFotos(capa: string | null | undefined, fotos: string[]): string[] {
+  const c = (capa ?? "").trim();
+  if (!c) return fotos;
+  const rest = fotos.filter((f) => f !== c);
+  return [c, ...rest];
+}
+
 interface FormState {
   nome: string;
   slug: string;
