@@ -382,6 +382,85 @@ type _Md_PickFromViewShape = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
+// PARTE 3 — MAPPERS (Row → ViewModel) consumidos pela UI
+// ═════════════════════════════════════════════════════════════════════════════
+//
+// Row da query → mapper → ViewModel renderizado pela página.
+// Se o shape do VM regredir (ex: `nomeExibicao` virar `string | null`),
+// a UI precisa lidar com `null` de novo — esse contrato é travado aqui.
+
+import {
+  mapAvaliacao,
+  mapEstabCard,
+  mapReserva,
+  type AvaliacaoVM,
+  type EstabCardVM,
+  type ReservaVM,
+  type RecursoKey,
+} from "@/lib/queries/mappers";
+
+type AvVM = ReturnType<typeof mapAvaliacao>;
+type CardVM = ReturnType<typeof mapEstabCard>;
+type ResVM = ReturnType<typeof mapReserva>;
+
+// ─── 3.1 Avaliação VM ────────────────────────────────────────────────────────
+type _Vm_AvNotAny = AssertNotAny<AvVM, "REGRESSION: mapAvaliacao retorna `any`">;
+type _Vm_AvShape = AssertEqual<AvVM, AvaliacaoVM, "REGRESSION: mapAvaliacao divergiu de AvaliacaoVM">;
+type _Vm_AvNomeNotNull = AssertEqual<
+  AvVM["nomeExibicao"],
+  string,
+  "REGRESSION: AvaliacaoVM.nomeExibicao deveria ser sempre string (com fallback 'Família')"
+>;
+type _Vm_AvNotaNotNull = AssertEqual<
+  AvVM["nota"],
+  number,
+  "REGRESSION: AvaliacaoVM.nota deveria ser number (com fallback 0)"
+>;
+type _Vm_AvDataNotNull = AssertEqual<
+  AvVM["dataFormatada"],
+  string,
+  "REGRESSION: AvaliacaoVM.dataFormatada deveria ser sempre string"
+>;
+
+// ─── 3.2 EstabCard VM ────────────────────────────────────────────────────────
+type _Vm_CardNotAny = AssertNotAny<CardVM, "REGRESSION: mapEstabCard retorna `any`">;
+type _Vm_CardShape = AssertEqual<CardVM, EstabCardVM, "REGRESSION: mapEstabCard divergiu de EstabCardVM">;
+type _Vm_CardSeloAzul = AssertEqual<
+  CardVM["temSeloAzul"],
+  boolean,
+  "REGRESSION: EstabCardVM.temSeloAzul deveria ser boolean puro (sem null)"
+>;
+type _Vm_CardTour = AssertEqual<
+  CardVM["temTour360"],
+  boolean,
+  "REGRESSION: EstabCardVM.temTour360 deveria ser boolean puro"
+>;
+type _Vm_CardRecursos = AssertEqual<
+  CardVM["recursosAtivos"],
+  ReadonlyArray<RecursoKey>,
+  "REGRESSION: EstabCardVM.recursosAtivos deveria ser ReadonlyArray<RecursoKey>"
+>;
+type _Vm_CardMedia = AssertEqual<
+  CardVM["media"],
+  EstabMedia,
+  "REGRESSION: EstabCardVM.media divergiu de EstabMedia"
+>;
+
+// ─── 3.3 Reserva VM ──────────────────────────────────────────────────────────
+type _Vm_ResNotAny = AssertNotAny<ResVM, "REGRESSION: mapReserva retorna `any`">;
+type _Vm_ResShape = AssertEqual<ResVM, ReservaVM, "REGRESSION: mapReserva divergiu de ReservaVM">;
+type _Vm_ResStatusNotNull = AssertEqual<
+  Extract<ResVM["status"], null | undefined>,
+  never,
+  "REGRESSION: ReservaVM.status virou nullable — fallback 'pendente' sumiu"
+>;
+type _Vm_ResPeriodo = AssertEqual<
+  ResVM["periodoFormatado"],
+  string,
+  "REGRESSION: ReservaVM.periodoFormatado deveria ser sempre string"
+>;
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Registry — agrega todos os checks num tipo "usado", impedindo que
 // um `noUnusedLocals` futuro silencie acidentalmente as asserções.
 // Se algum dos checks acima virar uma string de erro, este array
@@ -450,4 +529,20 @@ export type __CorePayloadGuards = readonly [
   _Md_NormalizedTour,
   // Mídia — pickMediaFromView
   _Md_PickFromViewShape,
+  // Mappers — Row → ViewModel
+  _Vm_AvNotAny,
+  _Vm_AvShape,
+  _Vm_AvNomeNotNull,
+  _Vm_AvNotaNotNull,
+  _Vm_AvDataNotNull,
+  _Vm_CardNotAny,
+  _Vm_CardShape,
+  _Vm_CardSeloAzul,
+  _Vm_CardTour,
+  _Vm_CardRecursos,
+  _Vm_CardMedia,
+  _Vm_ResNotAny,
+  _Vm_ResShape,
+  _Vm_ResStatusNotNull,
+  _Vm_ResPeriodo,
 ];
