@@ -26,6 +26,7 @@ import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
+import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 import { Route as AdminConteudoIndexRouteImport } from './routes/admin.conteudo.index'
 import { Route as AdminEstabelecimentosIdRouteImport } from './routes/admin.estabelecimentos.$id'
@@ -117,6 +118,11 @@ const AdminReservasRoute = AdminReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEstabelecimentosIndexRoute =
   AdminEstabelecimentosIndexRouteImport.update({
     id: '/estabelecimentos/',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/explorar'
     | '/login'
+    | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
@@ -412,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReservasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/auditoria': {
+      id: '/admin/auditoria'
+      path: '/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AdminAuditoriaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/estabelecimentos/': {
       id: '/admin/estabelecimentos/'
       path: '/estabelecimentos'
@@ -444,6 +463,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminReservasRoute: typeof AdminReservasRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminConteudoIdRoute: typeof AdminConteudoIdRoute
@@ -453,6 +473,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminReservasRoute: AdminReservasRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminConteudoIdRoute: AdminConteudoIdRoute,
