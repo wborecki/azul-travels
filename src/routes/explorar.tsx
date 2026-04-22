@@ -8,8 +8,13 @@ import {
   fetchEstabelecimentosViewPaginated,
   ESTAB_PAGE_SIZE_DEFAULT,
   ESTAB_PAGE_SIZE_MAX,
+  fetchFiltrosPadrao,
+  salvarFiltrosPadrao,
+  limparFiltrosPadrao,
+  temFiltrosSalvos,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
+  type FiltrosPadraoUI,
   type RecursoFlag,
   type SeloFlag,
 } from "@/lib/queries";
