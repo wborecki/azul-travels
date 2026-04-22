@@ -205,7 +205,7 @@ function EstabPage() {
               {e.selo_privado && (
                 <Pill {...SELO_BADGES.selo_privado} label={e.selo_privado_nome || "Selo Privado"} />
               )}
-              {e.tour_360_url && <Pill {...SELO_BADGES.tour_360} />}
+              {tour360Url && <Pill {...SELO_BADGES.tour_360} />}
               {e.tem_beneficio_tea && <Pill {...SELO_BADGES.beneficio_tea} />}
             </div>
           </div>
