@@ -27,8 +27,10 @@ export {
   fetchEstabelecimentosView,
   fetchEstabelecimentosCards, // deprecated alias
   applyEstabelecimentosViewFilters,
+  normalizeEstabelecimento,
   ESTAB_VIEW_SELECT,
   type EstabelecimentoFull,
+  type EstabelecimentoNormalized,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type SeloFlag,
