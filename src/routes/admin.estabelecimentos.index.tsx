@@ -166,7 +166,7 @@ function AdminEstabelecimentos() {
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground">Estabelecimentos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {loading ? "Carregando..." : `${filtered.length} de ${rows.length} registros`}
+            {loading ? "Carregando..." : `${total} registro(s)`}
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
