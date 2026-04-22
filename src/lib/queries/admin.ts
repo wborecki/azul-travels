@@ -480,6 +480,36 @@ export async function fetchAuditoriaPorReserva(reservaId: string): Promise<Audit
   return data ?? [];
 }
 
+/**
+ * Busca, em uma única query, o **último log com observação não-vazia**
+ * de cada reserva da lista. Usado pela tabela admin para mostrar um
+ * indicador truncado da observação mais recente sem fazer N+1 fetches.
+ *
+ * Retorna um Map(reserva_id → log) — ausência de chave significa que
+ * a reserva ainda não tem observação registrada.
+ */
+export async function fetchUltimaObservacaoPorReservas(
+  reservaIds: ReadonlyArray<string>,
+): Promise<Map<string, AuditoriaRow>> {
+  const out = new Map<string, AuditoriaRow>();
+  if (reservaIds.length === 0) return out;
+
+  const { data, error } = await supabase
+    .from("reservas_auditoria")
+    .select("*")
+    .in("reserva_id", [...reservaIds])
+    .not("observacao", "is", null)
+    .order("criado_em", { ascending: false })
+    .returns<AuditoriaRow[]>();
+
+  if (error) throw error;
+  // Como vem desc por data, o primeiro encontrado por reserva é o mais recente.
+  for (const log of data ?? []) {
+    if (!out.has(log.reserva_id)) out.set(log.reserva_id, log);
+  }
+  return out;
+}
+
 /** Filtros aceitos pela listagem paginada da auditoria de reservas. */
 export interface AuditoriaAdminFilters {
   /** Busca livre — case-insensitive em `ator_email`, `acao`, `observacao`. */
