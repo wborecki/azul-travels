@@ -1111,18 +1111,20 @@ function Explorar() {
               {/*
                 Sentinel + fallback acessível.
                 - O sentinel (div vazia) é observada pelo IntersectionObserver
-                  e dispara `goToPage` automaticamente ao entrar na viewport.
+                  e incrementa `paginaAtual` automaticamente ao entrar na viewport.
                 - O botão "Carregar mais" é um fallback para teclado, leitores
                   de tela e navegadores sem IntersectionObserver — tem o mesmo
                   efeito programático.
+                - Importante: estes controles **não** alteram a URL — o link
+                  compartilhado preserva o ponto de entrada (`search.pagina`).
               */}
-              {search.pagina < totalPaginas && (
+              {paginaAtual < totalPaginas && (
                 <div className="mt-8 flex flex-col items-center gap-3">
                   <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => goToPage(search.pagina + 1)}
+                    onClick={() => setPaginaAtual((p: number) => p + 1)}
                     disabled={loadingMore}
                   >
                     {loadingMore ? "Carregando..." : "Carregar mais"}
@@ -1131,7 +1133,7 @@ function Explorar() {
               )}
 
               {/* Mensagem final quando tudo foi carregado */}
-              {search.pagina >= totalPaginas && totalPaginas > 1 && (
+              {paginaAtual >= totalPaginas && totalPaginas > 1 && (
                 <p className="mt-8 text-center text-xs text-muted-foreground">
                   Você chegou ao fim — {total} resultado{total === 1 ? "" : "s"}.
                 </p>
