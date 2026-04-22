@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ParaEstabelecimentosRouteImport } from './routes/para-estabelecimentos'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
@@ -52,6 +53,11 @@ const SobreOsSelosRoute = SobreOsSelosRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/para-estabelecimentos'
     | '/privacidade'
+    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/para-estabelecimentos'
     | '/privacidade'
+    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/para-estabelecimentos'
     | '/privacidade'
+    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -384,6 +396,7 @@ export interface RootRouteChildren {
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
   ParaEstabelecimentosRoute: typeof ParaEstabelecimentosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SobreRoute: typeof SobreRoute
   SobreOsSelosRoute: typeof SobreOsSelosRoute
   TermosRoute: typeof TermosRoute
@@ -414,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -667,6 +687,7 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaContaRoute: MinhaContaRouteWithChildren,
   ParaEstabelecimentosRoute: ParaEstabelecimentosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
   SobreRoute: SobreRoute,
   SobreOsSelosRoute: SobreOsSelosRoute,
   TermosRoute: TermosRoute,
