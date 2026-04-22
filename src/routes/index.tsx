@@ -270,16 +270,16 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
         <div className="max-w-3xl mx-auto text-center text-white animate-fade-up">
           <span className="badge-shimmer inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur text-xs font-semibold border border-white/25">
             <Sparkles className="h-3.5 w-3.5 text-amarelo" />
-            Marketplace pioneiro de turismo inclusivo TEA
+            ✦ O 1º marketplace de turismo TEA do Brasil
           </span>
           <h1 className="mt-6 text-4xl md:text-6xl font-display font-extrabold leading-[1.05] text-shadow-soft">
-            Viajar com autismo.
+            Sua família também
             <br />
-            <span className="text-secondary">Com confiança, com conforto, com alegria.</span>
+            <span className="text-secondary">merece viajar.</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            O primeiro marketplace brasileiro que conecta famílias TEA a destinos realmente
-            preparados.
+            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho — antes
+            mesmo de vocês chegarem.
           </p>
 
           {/* Busca */}
@@ -295,7 +295,7 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
               <Input
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Destino, cidade ou tipo de estabelecimento..."
+                placeholder="Para onde sua família quer ir?"
                 className="border-0 shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
                 aria-label="Buscar destinos"
               />
@@ -305,7 +305,7 @@ function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => voi
               size="lg"
               className="rounded-xl bg-primary hover:bg-primary/90 px-6"
             >
-              Buscar
+              Buscar destinos
             </Button>
           </form>
 
