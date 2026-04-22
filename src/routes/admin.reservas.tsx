@@ -142,6 +142,10 @@ function AdminReservas() {
         tamanhoPagina,
         status: filter === "todas" ? undefined : filter,
         busca: qDebounced.trim() || undefined,
+        checkinDe: checkinDe || undefined,
+        checkinAte: checkinAte || undefined,
+        criadoDe: criadoDe || undefined,
+        criadoAte: criadoAte || undefined,
       });
       setRows(page.items);
       setTotal(page.total);
@@ -155,7 +159,7 @@ function AdminReservas() {
       });
     }
     setLoading(false);
-  }, [pagina, tamanhoPagina, filter, qDebounced]);
+  }, [pagina, tamanhoPagina, filter, qDebounced, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   useEffect(() => {
     void load();
