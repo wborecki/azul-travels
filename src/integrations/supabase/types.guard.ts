@@ -117,6 +117,14 @@ type _CheckFotosNotAny = AssertNotAny<
   Estab["fotos"],
   "REGRESSION: estabelecimentos.fotos virou `any`"
 >;
+// `fotos` precisa permanecer JSONB nullable — qualquer mudança aqui
+// deve fluir conscientemente até `EstabelecimentoNormalized.fotos`
+// (que normaliza para `string[]`).
+type _CheckFotosShape = AssertEqual<
+  Estab["fotos"],
+  import("./types").Json | null,
+  "REGRESSION: estabelecimentos.fotos deveria continuar Json | null"
+>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. Reserva — payload de insert deve casar com o id do estabelecimento
