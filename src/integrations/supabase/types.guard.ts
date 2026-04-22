@@ -127,21 +127,75 @@ type _CheckFotosShape = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Reserva — payload de insert deve casar com o id do estabelecimento
+// 3. Reserva — IDs precisam casar em todo o ciclo (Row, Insert, Form, Build)
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// Cobre TODA a cadeia onde `estabelecimento_id` e `familia_id` aparecem:
+//
+//   estabelecimentos.id                 ─┐
+//   familia_profiles.id                  │
+//   perfil_sensorial.id                  │   precisam ser exatamente
+//        ↓ (FK)                          │   o mesmo tipo em:
+//   reservas.Row[*_id]                   │
+//   reservas.Insert[*_id]                ├─ TablesInsert<"reservas">
+//   ReservaFormInput[*_id]               │   ReservaFormInput
+//   buildReservaPayload(...).*_id        │   ReturnType<buildReservaPayload>
+//   criarReserva(...).*_id (Row)        ─┘
+//
+// Qualquer divergência (coluna renomeada, FK removida, helper que muda
+// o shape) trava o build com mensagem clara.
 
 type ReservaInsert = TablesInsert<"reservas">;
+type ReservaRow = Tables<"reservas">;
+type EstabId = Estab["id"];
+type FamiliaId = Tables<"familia_profiles">["id"];
+type PerfilSensorialId = Tables<"perfil_sensorial">["id"];
 
+// 3.1 — Insert deve aceitar exatamente o id do estabelecimento/família.
 type _CheckReservaEstabId = AssertEqual<
   ReservaInsert["estabelecimento_id"],
-  Estab["id"],
-  "REGRESSION: reservas.estabelecimento_id e estabelecimentos.id divergiram"
+  EstabId,
+  "REGRESSION: reservas.Insert.estabelecimento_id divergiu de estabelecimentos.id"
 >;
 type _CheckReservaFamiliaId = AssertEqual<
   ReservaInsert["familia_id"],
-  Tables<"familia_profiles">["id"],
-  "REGRESSION: reservas.familia_id e familia_profiles.id divergiram"
+  FamiliaId,
+  "REGRESSION: reservas.Insert.familia_id divergiu de familia_profiles.id"
 >;
+
+// 3.2 — Row (select) deve devolver exatamente o mesmo tipo de id.
+// Sem isso, um `data.estabelecimento_id` voltaria como `string` genérico
+// e a comparação com `Estab["id"]` aceitaria qualquer valor.
+type _CheckReservaRowEstabId = AssertEqual<
+  ReservaRow["estabelecimento_id"],
+  EstabId,
+  "REGRESSION: reservas.Row.estabelecimento_id divergiu de estabelecimentos.id"
+>;
+type _CheckReservaRowFamiliaId = AssertEqual<
+  ReservaRow["familia_id"],
+  FamiliaId,
+  "REGRESSION: reservas.Row.familia_id divergiu de familia_profiles.id"
+>;
+type _CheckReservaRowPerfilId = AssertEqual<
+  ReservaRow["perfil_sensorial_id"],
+  PerfilSensorialId | null,
+  "REGRESSION: reservas.Row.perfil_sensorial_id divergiu de perfil_sensorial.id"
+>;
+
+// 3.3 — IDs obrigatórios não podem virar `null`/optional no Insert.
+// (família e estabelecimento são `NOT NULL` no banco; perfil sensorial
+// é opcional por design.)
+type _CheckReservaInsertFamiliaRequired = AssertEqual<
+  Extract<ReservaInsert["familia_id"], null | undefined>,
+  never,
+  "REGRESSION: reservas.Insert.familia_id virou opcional/nullable"
+>;
+type _CheckReservaInsertEstabRequired = AssertEqual<
+  Extract<ReservaInsert["estabelecimento_id"], null | undefined>,
+  never,
+  "REGRESSION: reservas.Insert.estabelecimento_id virou opcional/nullable"
+>;
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
