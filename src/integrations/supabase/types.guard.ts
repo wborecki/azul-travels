@@ -368,4 +368,10 @@ export type __SupabaseTypeGuards = [
   _CheckDetalheShape,
   _CheckDetalheEstab,
   _CheckDetalheAvaliacoesEmbed,
+  _CheckMediaNotAny,
+  _CheckMediaShape,
+  _CheckMediaFotos,
+  _CheckMediaCapa,
+  _CheckMediaTour,
+  _CheckNormalizedFeedsMedia,
 ];
