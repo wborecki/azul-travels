@@ -319,7 +319,15 @@ function Landing() {
 // HERO
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Hero({ busca, setBusca }: { busca: string; setBusca: (v: string) => void }) {
+function Hero({
+  busca,
+  setBusca,
+  stats,
+}: {
+  busca: string;
+  setBusca: (v: string) => void;
+  stats: { destinos: number; estados: number; media: number };
+}) {
   const navigate = useNavigate();
   return (
     <section id="hero" className="relative overflow-hidden">
