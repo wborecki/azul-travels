@@ -174,6 +174,7 @@ import type {
   EstabelecimentoView,
   EstabelecimentoDetalhe,
   ReservaComContexto,
+  ReservaFormInput,
   PerfilOption,
 } from "@/lib/queries";
 import {
@@ -182,6 +183,7 @@ import {
   fetchEstabelecimentosView,
   fetchReservasDaFamilia,
   criarReserva,
+  buildReservaPayload,
   fetchPerfisDaFamilia,
 } from "@/lib/queries";
 
