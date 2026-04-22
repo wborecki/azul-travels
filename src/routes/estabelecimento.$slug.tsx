@@ -125,8 +125,8 @@ function EstabPage() {
     navigate({ to: "/minha-conta/reservas" });
   };
 
-  const fotos: string[] = Array.isArray(e.fotos) ? (e.fotos as string[]) : [];
-  const fotoCapa = e.foto_capa ?? "";
+  // `e.fotos` e `e.foto_capa` já chegam normalizados (string[] / string|null).
+  const { fotos, foto_capa: fotoCapa } = e;
 
   return (
     <div className="container mx-auto px-4 py-8">
