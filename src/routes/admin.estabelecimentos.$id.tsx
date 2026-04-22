@@ -366,7 +366,11 @@ function AdminEstabelecimentoForm() {
         .single();
       setSaving(false);
       if (error) {
-        toast.error("Erro ao criar", { description: error.message });
+        const msg =
+          error.code === "23505"
+            ? "Já existe um estabelecimento com este slug. Ajuste o nome e tente novamente."
+            : error.message;
+        toast.error("Erro ao criar", { description: msg });
         return;
       }
       toast.success("Estabelecimento criado");
@@ -375,7 +379,11 @@ function AdminEstabelecimentoForm() {
       const { error } = await supabase.from("estabelecimentos").update(payload).eq("id", id);
       setSaving(false);
       if (error) {
-        toast.error("Erro ao salvar", { description: error.message });
+        const msg =
+          error.code === "23505"
+            ? "Já existe um estabelecimento com este slug. Ajuste o nome e tente novamente."
+            : error.message;
+        toast.error("Erro ao salvar", { description: msg });
         return;
       }
       toast.success("Alterações salvas");
