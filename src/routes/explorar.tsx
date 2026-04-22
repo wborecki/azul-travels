@@ -178,11 +178,26 @@ const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
 
 export const Route = createFileRoute("/explorar")({
   validateSearch: zodValidator(searchSchema),
-  // Mantém a URL limpa: params iguais ao default não aparecem na barra
-  // de endereços. Compartilhar `/explorar?estado=SP` é equivalente a
-  // visitar `/explorar?q=&tipos=[]&estado=SP&pagina=1&...`.
+  // Mantém a URL limpa, MAS preserva `pagina` e `tamanhoPagina` quando
+  // diferentes do default — eles são essenciais para que um link
+  // compartilhado abra exatamente na mesma seção/densidade de lista
+  // que o remetente estava vendo. Os demais filtros continuam strippados
+  // quando iguais ao default (links curtos e legíveis).
   search: {
-    middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+    middlewares: [
+      stripSearchParams({
+        q: SEARCH_DEFAULTS.q,
+        tipos: SEARCH_DEFAULTS.tipos,
+        selos: SEARCH_DEFAULTS.selos,
+        recursos: SEARCH_DEFAULTS.recursos,
+        estado: SEARCH_DEFAULTS.estado,
+        beneficio: SEARCH_DEFAULTS.beneficio,
+        tour360: SEARCH_DEFAULTS.tour360,
+        ordem: SEARCH_DEFAULTS.ordem,
+        priorizarPerfil: SEARCH_DEFAULTS.priorizarPerfil,
+        // pagina e tamanhoPagina ficam de fora — viajam no link quando ≠ default.
+      }),
+    ],
   },
   head: () => ({
     meta: [
