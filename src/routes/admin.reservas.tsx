@@ -15,6 +15,8 @@ import {
   RESERVA_STATUS,
   RESERVA_STATUS_LABEL,
   toReservaStatus,
+  podeTransicionarReserva,
+  mensagemTransicaoInvalida,
   type ReservaStatus,
 } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
