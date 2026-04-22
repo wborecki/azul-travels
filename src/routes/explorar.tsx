@@ -306,6 +306,15 @@ function Explorar() {
 
       const compareCriterio = (a: EstabelecimentoView, b: EstabelecimentoView): number => {
         switch (search.ordem) {
+          case "compatibilidade": {
+            // Critério principal = score de compatibilidade. Em empate
+            // (ou quando o usuário ainda não tem perfil → score 0 para
+            // todos), cai para o ranking por selos para não devolver
+            // ordem aleatória.
+            const diff = compatScore(b) - compatScore(a);
+            if (diff !== 0) return diff;
+            return seloScore(b) - seloScore(a);
+          }
           case "certificados":
             return seloScore(b) - seloScore(a);
           case "alfabetica":
@@ -320,7 +329,10 @@ function Explorar() {
 
       const sortItems = (arr: EstabelecimentoView[]) =>
         [...arr].sort((a, b) => {
-          if (search.priorizarPerfil) {
+          // O toggle `priorizarPerfil` adiciona o score como pré-camada
+          // — exceto quando o critério principal já É a compatibilidade
+          // (evita aplicar a mesma comparação duas vezes).
+          if (search.priorizarPerfil && search.ordem !== "compatibilidade") {
             const diff = compatScore(b) - compatScore(a);
             if (diff !== 0) return diff;
           }
