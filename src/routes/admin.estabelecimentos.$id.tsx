@@ -930,6 +930,8 @@ function GeocodeButton({
   );
 }
 
+const BUCKET = "estabelecimentos-fotos";
+
 async function uploadToBucket(file: File): Promise<string> {
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const path = `${crypto.randomUUID()}.${ext}`;
