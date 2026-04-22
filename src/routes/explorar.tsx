@@ -65,7 +65,20 @@ const RECURSOS_VALORES = [
   "tem_cardapio_visual",
   "tem_caa",
 ] as const;
-const ORDEM_VALORES = ["relevante", "recente", "certificados"] as const;
+/**
+ * Critério principal de ordenação. **Não** inclui "perfil sensorial" —
+ * isso virou um toggle independente (`priorizarPerfil`) que **se combina**
+ * com qualquer um destes critérios em camadas:
+ *
+ *   1. (opcional) score de compatibilidade com o perfil sensorial — DESC
+ *   2. critério principal selecionado abaixo                       — DESC
+ *   3. tiebreaker estável: `id`                                     — ASC
+ *
+ * Sem o toggle, a ordenação respeita só (2) + (3). Com o toggle ligado
+ * mas sem perfil cadastrado, o score é 0 para todos e a ordem cai
+ * naturalmente para (2) + (3).
+ */
+const ORDEM_VALORES = ["recomendado", "certificados", "recente", "alfabetica"] as const;
 
 /**
  * Defaults dos filtros — fonte única usada por:
@@ -83,7 +96,11 @@ const SEARCH_DEFAULTS = {
   estado: "todos",
   beneficio: false,
   tour360: false,
-  ordem: "relevante" as (typeof ORDEM_VALORES)[number],
+  ordem: "recomendado" as (typeof ORDEM_VALORES)[number],
+  // Quando true E o usuário tem perfil sensorial, soma o score de
+  // compatibilidade na frente da ordenação. Default: true (a página
+  // só é útil se priorizar quem precisa).
+  priorizarPerfil: true,
   pagina: 1,
   tamanhoPagina: ESTAB_PAGE_SIZE_DEFAULT,
 } as const;
@@ -97,6 +114,9 @@ const searchSchema = z.object({
   beneficio: fallback(z.boolean(), SEARCH_DEFAULTS.beneficio).default(SEARCH_DEFAULTS.beneficio),
   tour360: fallback(z.boolean(), SEARCH_DEFAULTS.tour360).default(SEARCH_DEFAULTS.tour360),
   ordem: fallback(z.enum(ORDEM_VALORES), SEARCH_DEFAULTS.ordem).default(SEARCH_DEFAULTS.ordem),
+  priorizarPerfil: fallback(z.boolean(), SEARCH_DEFAULTS.priorizarPerfil).default(
+    SEARCH_DEFAULTS.priorizarPerfil,
+  ),
   // Paginação tipada — clampada na fetcher (resolvePagination).
   pagina: fallback(z.number().int().min(1), SEARCH_DEFAULTS.pagina).default(SEARCH_DEFAULTS.pagina),
   tamanhoPagina: fallback(
