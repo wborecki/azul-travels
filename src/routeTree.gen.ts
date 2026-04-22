@@ -14,14 +14,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MinhaContaIndexRouteImport } from './routes/minha-conta.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as MinhaContaReservasRouteImport } from './routes/minha-conta.reservas'
 import { Route as MinhaContaPerfilSensorialRouteImport } from './routes/minha-conta.perfil-sensorial'
 import { Route as MinhaContaDadosRouteImport } from './routes/minha-conta.dados'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
+import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
+import { Route as AdminEstabelecimentosRouteImport } from './routes/admin.estabelecimentos'
+import { Route as AdminConteudoRouteImport } from './routes/admin.conteudo'
 
 const MinhaContaRoute = MinhaContaRouteImport.update({
   id: '/minha-conta',
@@ -48,6 +53,11 @@ const BeneficiosTeaRoute = BeneficiosTeaRouteImport.update({
   path: '/beneficios-tea',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -62,6 +72,11 @@ const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
   path: '/conteudo/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const MinhaContaReservasRoute = MinhaContaReservasRouteImport.update({
   id: '/reservas',
@@ -89,19 +104,39 @@ const ConteudoSlugRoute = ConteudoSlugRouteImport.update({
   path: '/conteudo/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminReservasRoute = AdminReservasRouteImport.update({
+  id: '/reservas',
+  path: '/reservas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEstabelecimentosRoute = AdminEstabelecimentosRouteImport.update({
+  id: '/estabelecimentos',
+  path: '/estabelecimentos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConteudoRoute = AdminConteudoRouteImport.update({
+  id: '/conteudo',
+  path: '/conteudo',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/admin/conteudo': typeof AdminConteudoRoute
+  '/admin/estabelecimentos': typeof AdminEstabelecimentosRoute
+  '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
 }
@@ -111,27 +146,36 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
+  '/admin/conteudo': typeof AdminConteudoRoute
+  '/admin/estabelecimentos': typeof AdminEstabelecimentosRoute
+  '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
   '/minha-conta': typeof MinhaContaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/admin/conteudo': typeof AdminConteudoRoute
+  '/admin/estabelecimentos': typeof AdminEstabelecimentosRoute
+  '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/minha-conta/dados': typeof MinhaContaDadosRoute
   '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
   '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
 }
@@ -139,16 +183,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/admin/conteudo'
+    | '/admin/estabelecimentos'
+    | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
+    | '/admin/'
     | '/conteudo/'
     | '/minha-conta/'
   fileRoutesByTo: FileRoutesByTo
@@ -158,32 +207,42 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/explorar'
     | '/login'
+    | '/admin/conteudo'
+    | '/admin/estabelecimentos'
+    | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
+    | '/admin'
     | '/conteudo'
     | '/minha-conta'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
     | '/explorar'
     | '/login'
     | '/minha-conta'
+    | '/admin/conteudo'
+    | '/admin/estabelecimentos'
+    | '/admin/reservas'
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/minha-conta/dados'
     | '/minha-conta/perfil-sensorial'
     | '/minha-conta/reservas'
+    | '/admin/'
     | '/conteudo/'
     | '/minha-conta/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
   ExplorarRoute: typeof ExplorarRoute
@@ -231,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiosTeaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -251,6 +317,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/conteudo/'
       preLoaderRoute: typeof ConteudoIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/minha-conta/reservas': {
       id: '/minha-conta/reservas'
@@ -287,8 +360,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConteudoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/reservas': {
+      id: '/admin/reservas'
+      path: '/reservas'
+      fullPath: '/admin/reservas'
+      preLoaderRoute: typeof AdminReservasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/estabelecimentos': {
+      id: '/admin/estabelecimentos'
+      path: '/estabelecimentos'
+      fullPath: '/admin/estabelecimentos'
+      preLoaderRoute: typeof AdminEstabelecimentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/conteudo': {
+      id: '/admin/conteudo'
+      path: '/conteudo'
+      fullPath: '/admin/conteudo'
+      preLoaderRoute: typeof AdminConteudoRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminConteudoRoute: typeof AdminConteudoRoute
+  AdminEstabelecimentosRoute: typeof AdminEstabelecimentosRoute
+  AdminReservasRoute: typeof AdminReservasRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminConteudoRoute: AdminConteudoRoute,
+  AdminEstabelecimentosRoute: AdminEstabelecimentosRoute,
+  AdminReservasRoute: AdminReservasRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface MinhaContaRouteChildren {
   MinhaContaDadosRoute: typeof MinhaContaDadosRoute
@@ -310,6 +420,7 @@ const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
   ExplorarRoute: ExplorarRoute,
