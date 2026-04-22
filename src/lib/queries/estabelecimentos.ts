@@ -13,9 +13,17 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 import { normalizeFotos, normalizeUrl, pickEstabMedia, type EstabMedia } from "@/lib/media";
+
+// O subpath `@supabase/postgrest-js` não está exposto na resolução do
+// projeto (vem como dep transitiva de `supabase-js`). Em vez de
+// importá-lo direto, derivamos o tipo do builder a partir do próprio
+// client — mesmo shape, sem acoplar a um package que pode não estar
+// instalado. Exportado para reuso em testes de tipo.
+export type EstabPostgrestBuilder = ReturnType<
+  ReturnType<typeof supabase.from<"estabelecimentos", Tables<"estabelecimentos">>>["select"]
+>;
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
