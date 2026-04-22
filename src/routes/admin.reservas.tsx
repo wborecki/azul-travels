@@ -169,10 +169,10 @@ function AdminReservas() {
     void refreshCounts();
   }, [refreshCounts]);
 
-  // Reseta para página 1 quando filtro/busca/tamanho mudam.
+  // Reseta para página 1 quando qualquer filtro muda.
   useEffect(() => {
     setPagina(1);
-  }, [filter, qDebounced, tamanhoPagina]);
+  }, [filter, qDebounced, tamanhoPagina, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   // Filtro/busca já vêm aplicados do servidor → a página atual é a "view".
   const filtered = rows;
