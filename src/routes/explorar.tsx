@@ -725,12 +725,8 @@ function Explorar() {
           ) : (
             <>
               <div className="mb-3 text-xs text-muted-foreground">
-                Mostrando{" "}
-                <strong className="text-foreground">
-                  {(search.pagina - 1) * search.tamanhoPagina + 1}–
-                  {Math.min(search.pagina * search.tamanhoPagina, total)}
-                </strong>{" "}
-                de <strong className="text-foreground">{total}</strong> resultado
+                Mostrando <strong className="text-foreground">{list.length}</strong> de{" "}
+                <strong className="text-foreground">{total}</strong> resultado
                 {total === 1 ? "" : "s"}
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -738,32 +734,46 @@ function Explorar() {
                   <EstabCard key={e.id} e={e} />
                 ))}
               </div>
-              {totalPaginas > 1 && (
-                <nav
-                  aria-label="Paginação dos resultados"
-                  className="mt-8 flex items-center justify-center gap-2"
+
+              {/* Spinner discreto enquanto a próxima página carrega */}
+              {loadingMore && (
+                <div
+                  className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
                 >
+                  <span className="h-3 w-3 rounded-full border-2 border-primary border-r-transparent animate-spin" />
+                  Carregando mais resultados...
+                </div>
+              )}
+
+              {/*
+                Sentinel + fallback acessível.
+                - O sentinel (div vazia) é observada pelo IntersectionObserver
+                  e dispara `goToPage` automaticamente ao entrar na viewport.
+                - O botão "Carregar mais" é um fallback para teclado, leitores
+                  de tela e navegadores sem IntersectionObserver — tem o mesmo
+                  efeito programático.
+              */}
+              {search.pagina < totalPaginas && (
+                <div className="mt-8 flex flex-col items-center gap-3">
+                  <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={search.pagina <= 1}
-                    onClick={() => goToPage(search.pagina - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-muted-foreground px-2">
-                    Página <strong className="text-foreground">{search.pagina}</strong> de{" "}
-                    <strong className="text-foreground">{totalPaginas}</strong>
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={search.pagina >= totalPaginas}
                     onClick={() => goToPage(search.pagina + 1)}
+                    disabled={loadingMore}
                   >
-                    Próxima
+                    {loadingMore ? "Carregando..." : "Carregar mais"}
                   </Button>
-                </nav>
+                </div>
+              )}
+
+              {/* Mensagem final quando tudo foi carregado */}
+              {search.pagina >= totalPaginas && totalPaginas > 1 && (
+                <p className="mt-8 text-center text-xs text-muted-foreground">
+                  Você chegou ao fim — {total} resultado{total === 1 ? "" : "s"}.
+                </p>
               )}
             </>
           )}
