@@ -48,13 +48,8 @@ function EstabPage() {
       const { data } = await supabase.from("estabelecimentos").select("*").eq("slug", slug).maybeSingle();
       setEstab(data ?? null);
       if (data) {
-        const { data: a } = await supabase
-          .from("avaliacoes")
-          .select("*, familia_profiles(nome_responsavel)")
-          .eq("estabelecimento_id", data.id)
-          .eq("publica", true)
-          .order("criado_em", { ascending: false });
-        setAvals(a ?? []);
+        const a = await fetchAvaliacoesPublicasPorEstab(data.id);
+        setAvals(a);
       }
       setLoading(false);
     })();
