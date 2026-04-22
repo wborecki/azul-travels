@@ -1,17 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   criarReserva,
   type EstabelecimentoNormalized,
+  type EstabelecimentoDetalhe,
   type PerfilOption,
   type ReservaInsert,
 } from "@/lib/queries";
-import {
-  fetchAvaliacoesPublicasPorEstab,
-  type AvaliacaoComFamilia,
-} from "@/lib/queries/avaliacoes";
+import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +40,7 @@ function EstabPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [estab, setEstab] = useState<Estab | null>(null);
+  const [detalhe, setDetalhe] = useState<EstabelecimentoDetalhe | null>(null);
   const [loading, setLoading] = useState(true);
   const [perfis, setPerfis] = useState<PerfilOption[]>([]);
   const [perfilSel, setPerfilSel] = useState<string>("");
@@ -53,23 +51,18 @@ function EstabPage() {
   const [mensagem, setMensagem] = useState("");
   const [autoriza, setAutoriza] = useState(true);
   const [enviando, setEnviando] = useState(false);
-  const [avals, setAvals] = useState<Avaliacao[]>([]);
 
   useEffect(() => {
     void (async () => {
       setLoading(true);
       try {
-        const data = await fetchEstabelecimentoPorSlug(slug);
-        setEstab(data);
-        if (data) {
-          const a = await fetchAvaliacoesPublicasPorEstab(data.id);
-          setAvals(a);
-        }
+        const data = await fetchEstabelecimentoDetalhe(slug);
+        setDetalhe(data);
       } catch (err) {
         toast.error("Erro ao carregar estabelecimento", {
           description: err instanceof Error ? err.message : undefined,
         });
-        setEstab(null);
+        setDetalhe(null);
       } finally {
         setLoading(false);
       }
@@ -98,7 +91,7 @@ function EstabPage() {
       </div>
     );
 
-  if (!estab)
+  if (!detalhe)
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-display font-bold text-primary">
@@ -110,7 +103,8 @@ function EstabPage() {
       </div>
     );
 
-  const e = estab;
+  const e: Estab = detalhe.estabelecimento;
+  const avals: Avaliacao[] = detalhe.avaliacoes;
   const recursoKeys = [
     "tem_sala_sensorial",
     "tem_concierge_tea",

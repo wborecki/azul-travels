@@ -172,11 +172,13 @@ import type {
   EstabelecimentoFull,
   EstabelecimentoNormalized,
   EstabelecimentoView,
+  EstabelecimentoDetalhe,
   ReservaComContexto,
   PerfilOption,
 } from "@/lib/queries";
 import {
   fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentoDetalhe,
   fetchEstabelecimentosView,
   fetchReservasDaFamilia,
   criarReserva,
@@ -184,6 +186,7 @@ import {
 } from "@/lib/queries";
 
 type EstabReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoPorSlug>>>;
+type DetalheReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoDetalhe>>>;
 type ViewReturn = Awaited<ReturnType<typeof fetchEstabelecimentosView>>[number];
 type ReservasReturn = Awaited<ReturnType<typeof fetchReservasDaFamilia>>[number];
 type CriarReservaReturn = Awaited<ReturnType<typeof criarReserva>>;
@@ -298,6 +301,30 @@ type _CheckPerfisShape = AssertEqual<
   "REGRESSION: fetchPerfisDaFamilia divergiu de PerfilOption"
 >;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. fetchEstabelecimentoDetalhe — payload composto da página de detalhe
+// ─────────────────────────────────────────────────────────────────────────────
+
+type _CheckDetalheNotAny = AssertNotAny<
+  DetalheReturn,
+  "REGRESSION: fetchEstabelecimentoDetalhe -> any"
+>;
+type _CheckDetalheShape = AssertEqual<
+  DetalheReturn,
+  EstabelecimentoDetalhe,
+  "REGRESSION: fetchEstabelecimentoDetalhe divergiu de EstabelecimentoDetalhe"
+>;
+type _CheckDetalheEstab = AssertEqual<
+  DetalheReturn["estabelecimento"],
+  EstabelecimentoNormalized,
+  "REGRESSION: detalhe.estabelecimento deveria ser EstabelecimentoNormalized"
+>;
+type _CheckDetalheAvaliacoesEmbed = AssertEqual<
+  NonNullable<DetalheReturn["avaliacoes"][number]["familia_profiles"]>["nome_responsavel"],
+  string | null,
+  "REGRESSION: detalhe.avaliacoes[].familia_profiles.nome_responsavel quebrou"
+>;
+
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.
 export type __SupabaseTypeGuards = [
   _CheckRowNotAny,
@@ -337,4 +364,8 @@ export type __SupabaseTypeGuards = [
   _CheckCriarReservaShape,
   _CheckPerfisNotAny,
   _CheckPerfisShape,
+  _CheckDetalheNotAny,
+  _CheckDetalheShape,
+  _CheckDetalheEstab,
+  _CheckDetalheAvaliacoesEmbed,
 ];
