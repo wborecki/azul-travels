@@ -4,11 +4,12 @@ import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   criarReserva,
+  buildReservaPayload,
   pickEstabMedia,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
-  type ReservaInsert,
+  type ReservaFormInput,
 } from "@/lib/queries";
 import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
@@ -129,7 +130,7 @@ function EstabPage() {
       toast.error("Selecione as datas de check-in e check-out.");
       return;
     }
-    const payload: ReservaInsert = {
+    const formInput: ReservaFormInput = {
       familia_id: user.id,
       estabelecimento_id: e.id,
       perfil_sensorial_id: perfilSel,
@@ -137,13 +138,12 @@ function EstabPage() {
       data_checkout: checkout,
       num_adultos: adultos,
       num_autistas: autistas,
-      mensagem: mensagem.trim() || null,
-      status: "pendente",
+      mensagem: mensagem,
       perfil_enviado_ao_estabelecimento: autoriza,
     };
     setEnviando(true);
     try {
-      await criarReserva(payload);
+      await criarReserva(buildReservaPayload(formInput));
       toast.success("Reserva solicitada! O estabelecimento entrará em contato.");
       navigate({ to: "/minha-conta/reservas" });
     } catch (err) {
