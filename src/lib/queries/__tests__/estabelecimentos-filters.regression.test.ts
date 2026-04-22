@@ -177,7 +177,8 @@ describe("EstabelecimentosViewFilters — contratos de tipo (regressão)", () =>
     const out = applyEstabelecimentosViewFilters(branded, { selos: ["selo_azul"] });
     expectTypeOf(out).toEqualTypeOf<BrandedBuilder>();
     // Garantia explícita: o retorno NÃO foi alargado para any/unknown.
-    expectTypeOf(out).not.toBeAny();
-    expectTypeOf(out).not.toBeUnknown();
+    // (No vitest 4 essas asserções são getters — sem parênteses.)
+    expectTypeOf(out).not.toBeAny;
+    expectTypeOf(out).not.toBeUnknown;
   });
 });
