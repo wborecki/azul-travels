@@ -54,43 +54,57 @@ type Row = ConteudoAdminRow;
 
 function AdminConteudo() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("todas");
   const [pub, setPub] = useState<string>("todos");
+  const [pagina, setPagina] = useState(1);
+  const [tamanhoPagina, setTamanhoPagina] = useState(20);
+  const debouncedQ = useDebouncedValue(q, 350);
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchConteudosAdmin();
-      setRows(data);
-    } catch (err) {
-      toast.error("Erro ao carregar", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    }
-    setLoading(false);
-  };
+  // Reset para página 1 quando filtros/busca mudarem.
+  useEffect(() => {
+    setPagina(1);
+  }, [debouncedQ, cat, pub, tamanhoPagina]);
 
   useEffect(() => {
-    void load();
-  }, []);
-
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return rows.filter((r) => {
-      if (cat !== "todas" && r.categoria !== cat) return false;
-      if (pub === "publicados" && !r.publicado) return false;
-      if (pub === "rascunhos" && r.publicado) return false;
-      if (term) {
-        const hay = [r.titulo, r.slug, r.autor].filter(Boolean).join(" ").toLowerCase();
-        if (!hay.includes(term)) return false;
+    let cancelled = false;
+    setLoading(true);
+    void (async () => {
+      try {
+        const page = await fetchConteudosAdminPaginated({
+          busca: debouncedQ.trim() || undefined,
+          categoria:
+            cat !== "todas" && CONTEUDO_CATEGORIAS.includes(cat as (typeof CONTEUDO_CATEGORIAS)[number])
+              ? (cat as (typeof CONTEUDO_CATEGORIAS)[number])
+              : undefined,
+          publicado: pub === "publicados" ? true : pub === "rascunhos" ? false : undefined,
+          pagina,
+          tamanhoPagina,
+        });
+        if (cancelled) return;
+        setRows(page.items);
+        setTotal(page.total);
+        setTotalPaginas(page.totalPaginas);
+      } catch (err) {
+        if (cancelled) return;
+        toast.error("Erro ao carregar", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      return true;
-    });
-  }, [rows, q, cat, pub]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQ, cat, pub, pagina, tamanhoPagina]);
+
+  const filtered = useMemo(() => rows, [rows]);
 
   const togglePublicado = async (r: Row) => {
     const next = !r.publicado;
@@ -118,7 +132,9 @@ function AdminConteudo() {
     }
     toast.success(`"${toDelete.titulo}" excluído`);
     setToDelete(null);
-    void load();
+    setRows((rs) => rs.filter((r) => r.id !== toDelete.id));
+    setTotal((t) => Math.max(0, t - 1));
+    if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
   return (
