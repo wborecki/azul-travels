@@ -140,6 +140,8 @@ function Explorar() {
   }, [search.q]);
 
   const [list, setList] = useState<EstabelecimentoView[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
@@ -148,6 +150,18 @@ function Explorar() {
   function patchSearch(patch: Partial<ExplorarSearch>) {
     void navigate({
       search: (prev: ExplorarSearch) => ({ ...prev, ...patch }),
+      replace: true,
+    });
+  }
+
+  /**
+   * Patch que **reseta a paginação para 1**. Use sempre que um filtro
+   * mudar — caso contrário, o usuário pode ficar numa página vazia
+   * (ex.: estava na pág. 7 e aplicou um filtro que só tem 2 páginas).
+   */
+  function patchSearchResetPage(patch: Partial<ExplorarSearch>) {
+    void navigate({
+      search: (prev: ExplorarSearch) => ({ ...prev, ...patch, pagina: 1 }),
       replace: true,
     });
   }
@@ -180,7 +194,7 @@ function Explorar() {
     })();
   }, [user]);
 
-  // Refetch a cada mudança de filtro (URL é a fonte da verdade)
+  // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
     void (async () => {
       setLoading(true);
@@ -193,23 +207,31 @@ function Explorar() {
         estado: search.estado !== "todos" ? search.estado : undefined,
         apenasComBeneficio: search.beneficio,
         apenasComTour360: search.tour360,
+        pagina: search.pagina,
+        tamanhoPagina: search.tamanhoPagina,
       };
 
-      let res = await fetchEstabelecimentosView(filters);
+      const page = await fetchEstabelecimentosViewPaginated(filters);
+      let items = page.items;
 
       const compatScore = (e: EstabelecimentoView) =>
         Object.entries(perfilNecessidades).filter(
           ([k, v]) => v && (e[k as keyof EstabelecimentoView] as unknown as boolean),
         ).length;
 
+      // Ordenação local — só rearranja a página atual (paginação é
+      // server-side; a re-ordenação fina por perfil/certificados fica
+      // no cliente para não complicar os índices do Postgres).
       if (search.ordem === "relevante") {
-        res = [...res].sort((a, b) => compatScore(b) - compatScore(a));
+        items = [...items].sort((a, b) => compatScore(b) - compatScore(a));
       } else if (search.ordem === "certificados") {
         const score = (e: EstabelecimentoView) =>
           (e.selo_azul ? 3 : 0) + (e.selo_governamental ? 2 : 0) + (e.selo_privado ? 1 : 0);
-        res = [...res].sort((a, b) => score(b) - score(a));
+        items = [...items].sort((a, b) => score(b) - score(a));
       }
-      setList(res);
+      setList(items);
+      setTotal(page.total);
+      setTotalPaginas(page.totalPaginas);
       setLoading(false);
     })();
   }, [
@@ -221,6 +243,8 @@ function Explorar() {
     search.beneficio,
     search.tour360,
     search.ordem,
+    search.pagina,
+    search.tamanhoPagina,
     perfilNecessidades,
   ]);
 
@@ -236,6 +260,8 @@ function Explorar() {
         beneficio: false,
         tour360: false,
         ordem: "relevante",
+        pagina: 1,
+        tamanhoPagina: search.tamanhoPagina,
       },
       replace: true,
     });
