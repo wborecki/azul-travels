@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchConteudosAdminPaginated, type ConteudoAdminRow } from "@/lib/queries";
@@ -43,6 +43,7 @@ import {
   EyeOff,
   Loader2,
   Zap,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,6 +66,8 @@ function AdminConteudo() {
   const debouncedQ = useDebouncedValue(q, 350);
   const [toDelete, setToDelete] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Reset para página 1 quando filtros/busca mudarem.
   useEffect(() => {
