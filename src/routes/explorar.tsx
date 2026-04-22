@@ -245,8 +245,8 @@ function Explorar() {
   const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
-  // `loading` = primeira página dos filtros atuais (mostra skeletons).
-  // `loadingMore` = páginas subsequentes (infinite scroll, mostra spinner).
+  // `loading` = primeira página visível dos filtros atuais (skeletons).
+  // `loadingMore` = páginas seguintes via scroll/Carregar mais (spinner).
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -264,6 +264,22 @@ function Explorar() {
   // viewport, dispara o carregamento da próxima página.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // ───────────────────────────────────────────────────────────────
+  // Desacoplamento URL ⇄ scroll infinito.
+  //
+  // `search.pagina` (URL) = "página inicial visível" — ponto de entrada
+  // estável para links compartilhados. Abrir `/explorar?pagina=3` mostra
+  // a partir da página 3 (sem carregar 1 e 2 — escolha do PO).
+  //
+  // `paginaAtual` (estado local) = última página acumulada via scroll.
+  // Cresce com o IntersectionObserver / "Carregar mais", **sem mexer
+  // na URL**, mantendo o link compartilhado estável.
+  //
+  // Quando filtros (não a página) mudam, resetamos `paginaAtual` para
+  // `search.pagina` — começamos de novo do ponto de entrada da URL.
+  // ───────────────────────────────────────────────────────────────
+  const [paginaAtual, setPaginaAtual] = useState(search.pagina);
+
   /**
    * Atualiza a query string preservando outros params e **reseta a
    * paginação para 1** — todos os controles de filtro/ordem chamam
@@ -276,7 +292,7 @@ function Explorar() {
     });
   }
 
-  /** Navega para uma página específica (usado pelo paginador). */
+  /** Navega para uma página específica (usado pelo paginador / link compartilhado). */
   function goToPage(pagina: number) {
     void navigate({
       search: (prev: ExplorarSearch) => ({ ...prev, pagina }),
