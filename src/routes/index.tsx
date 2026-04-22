@@ -25,15 +25,12 @@ import {
   Gift,
   Star,
   ArrowRight,
-  Sparkles,
   Calendar,
   ChevronDown,
   UserPlus,
   MapPinned,
   HeartHandshake,
   Plane,
-  Quote,
-  CheckCircle2,
   MapPin,
   BellRing,
   Utensils,
@@ -108,7 +105,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 7,
     papel: "Mãe",
     texto:
-      "Nunca achei que conseguiríamos viajar de verdade. No hotel que encontramos aqui, o pessoal já sabia do perfil do Enzo antes de chegar. Foi a primeira vez que ele dormiu tranquilo fora de casa.",
+      "A gente nunca achou que ia conseguir viajar. No hotel que encontramos aqui, o pessoal já sabia do perfil do Enzo antes da gente chegar. Foi a primeira vez que ele dormiu tranquilo fora de casa.",
   },
   {
     nome: "Carlos e Renata",
@@ -117,7 +114,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 9,
     papel: "Mãe e Pai",
     texto:
-      "A sala sensorial do resort salvou nossa viagem. Quando ficou muito barulhento na piscina, a Sofia teve um lugar seguro para se reequilibrar. Voltamos mês que vem.",
+      "A sala sensorial do resort salvou nossa viagem. Quando ficou muito barulhento na piscina, a Sofia teve um lugar seguro pra se reequilibrar. Voltamos mês que vem.",
   },
   {
     nome: "Patrícia",
@@ -126,7 +123,7 @@ const DEPOIMENTOS_SEED: Depoimento[] = [
     filhoIdade: 11,
     papel: "Mãe",
     texto:
-      "Não precisamos mais ligar para 40 hotéis explicando o autismo do João. A plataforma já filtra. Simplesmente funciona.",
+      "A gente não precisa mais ligar pra vários hotéis explicando sobre o João. A plataforma já filtra. Funciona.",
   },
 ];
 
@@ -350,19 +347,15 @@ function Hero({
       />
 
       <div className="relative container mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32">
-        <div className="max-w-3xl mx-auto text-center text-white animate-fade-up">
-          <span className="badge-shimmer inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur text-xs font-semibold border border-white/25">
-            <Sparkles className="h-3.5 w-3.5 text-amarelo" />
-            ✦ O 1º marketplace de turismo TEA do Brasil
-          </span>
-          <h1 className="mt-6 text-4xl md:text-6xl font-display font-extrabold leading-[1.05] text-shadow-soft">
+        <div className="max-w-3xl mx-auto text-center text-white animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
             Sua família também
             <br />
             <span className="text-secondary">merece viajar.</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho — antes
-            mesmo de vocês chegarem.
+            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho antes de
+            vocês chegarem.
           </p>
 
           {/* Busca */}
@@ -480,73 +473,57 @@ function Counter({
 function ComoFunciona() {
   const steps = [
     {
-      n: "01",
+      n: "1",
       Icon: UserPlus,
-      titulo: "Conte sobre o seu filho",
+      titulo: "Fale sobre o seu filho",
       texto:
-        "Sensibilidades, preferências, o que funciona e o que não funciona. Leva 3 minutos — e muda completamente como você planeja viagens.",
+        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos e muda completamente como você planeja viagens.",
     },
     {
-      n: "02",
+      n: "2",
       Icon: MapPinned,
-      titulo: "Veja destinos feitos para ele",
+      titulo: "Encontre lugares prontos pra ele",
       texto:
-        "Nada de ligar para dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares que estão prontos para receber o seu filho.",
+        "Nada de ligar pra dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares prontos pra receber o seu filho.",
     },
     {
-      n: "03",
+      n: "3",
       Icon: HeartHandshake,
-      titulo: "Chegue. Eles já sabem.",
+      titulo: "Chegue. A equipe já foi avisada.",
       texto:
         "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe. Você chega, eles já estão preparados.",
     },
   ];
 
   return (
-    <section id="como-funciona" className="py-20 bg-background">
+    <section id="como-funciona" className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Como funciona
-          </p>
-          <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Simples assim. Prometemos.
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            É assim que funciona.
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            Três passos para a viagem que vocês tanto adiaram.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Três passos e sua família está pronta pra viajar.
           </p>
         </Reveal>
 
-        <div className="relative">
-          {/* Linha conectora desktop */}
-          <div
-            aria-hidden
-            className="hidden md:block absolute top-16 left-[16.6%] right-[16.6%] h-0.5 step-connector"
-          />
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative">
-            {steps.map((s, i) => (
-              <Reveal key={s.n} delay={i * 100}>
-                <div className="relative bg-card rounded-2xl p-7 shadow-soft hover:shadow-elegant transition border h-full">
-                  <span
-                    aria-hidden
-                    className="absolute top-3 right-5 font-display font-extrabold text-secondary/15 text-[72px] leading-none select-none"
-                  >
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          {steps.map((s, i) => (
+            <Reveal key={s.n} delay={i * 80}>
+              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                     {s.n}
                   </span>
-                  <div className="relative w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center">
-                    <s.Icon className="h-7 w-7" />
+                  <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+                    <s.Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="relative mt-5 font-display font-bold text-primary text-xl">
-                    {s.titulo}
-                  </h3>
-                  <p className="relative mt-2 text-sm text-muted-foreground leading-relaxed">
-                    {s.texto}
-                  </p>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                <h3 className="mt-5 font-display font-bold text-primary text-lg">{s.titulo}</h3>
+                <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{s.texto}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -590,35 +567,32 @@ function SelosImportantes() {
   ];
 
   return (
-    <section className="py-20 bg-azul-claro">
+    <section className="py-16 bg-azul-claro">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Transparência total
-          </p>
-          <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Cada selo que você vê foi ganho de verdade
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            O que está por trás de cada certificação
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            Qualquer hotel pode dizer que é inclusivo. Aqui, precisa provar.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Qualquer hotel pode se dizer inclusivo. A gente exige prova.
           </p>
         </Reveal>
 
         <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
           {selos.map((s, i) => (
-            <Reveal key={s.nome} delay={i * 100}>
-              <div className="relative bg-card rounded-2xl p-7 shadow-soft hover:shadow-elegant transition border text-center h-full">
-                <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[11px] font-semibold text-success">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Verificado
-                </span>
-                <div
-                  className={`mx-auto w-16 h-16 rounded-2xl ${s.cor} flex items-center justify-center`}
-                >
-                  <s.Icon className="h-8 w-8" />
+            <Reveal key={s.nome} delay={i * 80}>
+              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-lg ${s.cor} flex items-center justify-center shrink-0`}
+                  >
+                    <s.Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display font-bold text-primary text-lg">{s.nome}</h3>
                 </div>
-                <h3 className="mt-4 font-display font-bold text-primary text-lg">{s.nome}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.descricao}</p>
+                <p className="mt-3 text-[15px] text-muted-foreground leading-relaxed">
+                  {s.descricao}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -653,15 +627,12 @@ function DestinosDestaque({
   onCriarPerfil: () => void;
 }) {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <Reveal>
           <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-                Recomendados
-              </p>
-              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary max-w-xl">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary max-w-xl">
                 Estabelecimentos mais escolhidos pelas famílias
               </h2>
             </div>
@@ -689,7 +660,7 @@ function DestinosDestaque({
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {destaques.map((e, i) => (
-              <Reveal key={e.id} delay={i * 80}>
+              <Reveal key={e.id} delay={i * 60}>
                 <DestaqueCard
                   estab={e}
                   perfil={perfil}
@@ -702,7 +673,7 @@ function DestinosDestaque({
         )}
 
         <Reveal className="mt-14 text-center max-w-2xl mx-auto">
-          <p className="text-lg text-foreground">
+          <p className="text-[15px] text-foreground">
             Quer ver estabelecimentos compatíveis com o perfil do seu filho?
           </p>
           <Button
@@ -711,7 +682,7 @@ function DestinosDestaque({
             className="mt-4 bg-primary hover:bg-primary/90 min-h-[44px]"
             onClick={onCriarPerfil}
           >
-            Criar perfil sensorial — é gratuito <ArrowRight className="ml-1 h-4 w-4" />
+            Criar perfil sensorial, é gratuito
           </Button>
         </Reveal>
       </div>
@@ -768,7 +739,11 @@ function DestaqueCard({
           : "🏨";
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border h-full flex flex-col">
+    <div
+      className={`bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full flex flex-col ${
+        isMaisEscolhido ? "border-l-4 border-l-secondary" : ""
+      }`}
+    >
       {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
       <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
         {vm.media.fotoCapa ? (
@@ -804,11 +779,6 @@ function DestaqueCard({
             </span>
           )}
         </div>
-        {isMaisEscolhido && (
-          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-amarelo text-amarelo-foreground text-[11px] font-bold uppercase tracking-wide shadow-soft">
-            Mais escolhido
-          </span>
-        )}
       </div>
 
       <div className="p-5 flex-1 flex flex-col gap-3">
@@ -909,27 +879,23 @@ function Depoimentos({ depoimentos }: { depoimentos: Depoimento[] }) {
       : `${d.cidade}`;
 
   return (
-    <section className="py-24 bg-primary text-primary-foreground">
+    <section className="py-16 bg-primary text-primary-foreground">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+        <Reveal className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
             Famílias que voltaram a viajar
           </h2>
-          <p className="mt-3 text-secondary italic text-lg">
+          <p className="mt-3 text-[15px] leading-relaxed text-white/75">
             Histórias reais de quem encontrou o lugar certo.
           </p>
         </Reveal>
 
         <Reveal className="relative max-w-3xl mx-auto">
-          <Quote
-            aria-hidden
-            className="absolute -top-6 -left-2 md:-left-8 h-28 w-28 md:h-32 md:w-32 text-secondary opacity-20"
-          />
           <div
             key={idx}
-            className="relative bg-white/5 backdrop-blur rounded-2xl p-8 md:p-10 border-l-4 border-secondary animate-fade-up"
+            className="relative bg-white/5 backdrop-blur rounded-2xl p-8 md:p-10 border-l-4 border-secondary animate-fade-in"
           >
-            <p className="text-lg md:text-xl text-white leading-relaxed italic">“{d.texto}”</p>
+            <p className="text-lg md:text-xl text-white leading-relaxed">{d.texto}</p>
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-display font-bold text-lg">
@@ -986,19 +952,16 @@ function Depoimentos({ depoimentos }: { depoimentos: Depoimento[] }) {
 
 function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | null }) {
   return (
-    <section className="py-20 bg-teal-claro">
+    <section className="py-16 bg-teal-claro">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <Reveal>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-secondary text-xs font-semibold border border-secondary/20">
-              <Gift className="h-3.5 w-3.5" /> Exclusivo para famílias TEA
-            </span>
-            <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold text-primary">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
               Benefícios que você não encontra em lugar nenhum
             </h2>
-            <p className="mt-4 text-foreground/80 leading-relaxed">
-              Parques, hotéis e restaurantes que oferecem entrada gratuita, filas prioritárias e
-              descontos exclusivos para pessoas autistas e seus acompanhantes.
+            <p className="mt-4 text-[15px] text-foreground/80 leading-relaxed">
+              Alguns estabelecimentos da plataforma oferecem entrada gratuita, meia-entrada e fila
+              prioritária para pessoas autistas. Tudo verificado pela nossa equipe.
             </p>
             <Button
               asChild
@@ -1028,7 +991,7 @@ function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | nul
                       <Link
                         to="/estabelecimento/$slug"
                         params={{ slug: b.slug }}
-                        className="block bg-card rounded-xl p-5 shadow-soft hover:shadow-elegant transition border"
+                        className="block bg-card rounded-xl p-5 shadow-sm hover:shadow-md transition border"
                       >
                         <h3 className="font-display font-bold text-primary">{b.nome}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -1059,15 +1022,12 @@ function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | nul
 
 function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <Reveal>
           <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-                Aprenda mais
-              </p>
-              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
                 Conteúdo atualizado sobre turismo TEA
               </h2>
             </div>
@@ -1096,7 +1056,7 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
                   <Link
                     to="/conteudo/$slug"
                     params={{ slug: a.slug }}
-                    className="group block bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border h-full"
+                    className="group block bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full"
                   >
                     <div className="aspect-video bg-muted overflow-hidden">
                       {a.foto_capa && (
@@ -1151,15 +1111,15 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
 
 function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
   return (
-    <section className="py-24 gradient-cta-final text-white">
+    <section className="py-16 text-white" style={{ backgroundColor: "#1B2E4B" }}>
       <div className="container mx-auto px-4">
         <Reveal className="max-w-2xl mx-auto text-center">
-          <Plane className="h-16 w-16 mx-auto text-white/90" aria-hidden />
-          <h2 className="mt-6 text-4xl md:text-5xl font-display font-extrabold leading-tight">
-            Sua família merece viajar.
+          <Plane className="h-14 w-14 mx-auto text-white/90" aria-hidden />
+          <h2 className="mt-6 text-3xl md:text-4xl font-display font-bold leading-tight">
+            Pronto para a próxima viagem?
           </h2>
-          <p className="mt-4 text-lg text-white/85">
-            Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos e muda tudo.
+          <p className="mt-4 text-[15px] leading-relaxed text-white/85">
+            Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos.
           </p>
           <Button
             type="button"
@@ -1167,10 +1127,10 @@ function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
             onClick={onCriarPerfil}
             className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold min-h-[44px]"
           >
-            Quero criar o perfil do meu filho <ArrowRight className="ml-1 h-4 w-4" />
+            Criar perfil do meu filho
           </Button>
           <p className="mt-5 text-xs text-white/60">
-            ✓ Gratuito · ✓ Sem compromisso · ✓ Dados protegidos pela LGPD
+            Gratuito, sem cartão, seus dados protegidos pela LGPD.
           </p>
         </Reveal>
       </div>
