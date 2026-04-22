@@ -210,7 +210,69 @@ export async function fetchConteudosAdmin(limit = 300): Promise<ConteudoAdminRow
   return data ?? [];
 }
 
-export async function fetchConteudoAdminPorId(
+/** Filtros aceitos pela listagem paginada de conteúdo admin. */
+export interface ConteudosAdminFilters {
+  /** Texto livre — busca em titulo, slug e autor (ilike). */
+  busca?: string;
+  /** Filtra por categoria do enum (omita para todas). */
+  categoria?: Database["public"]["Enums"]["conteudo_categoria"];
+  /** Filtra por status de publicação (omita para todos). */
+  publicado?: boolean;
+  pagina?: number;
+  tamanhoPagina?: number;
+}
+
+export interface ConteudosAdminPage {
+  items: ConteudoAdminRow[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/** Default de página para listagens admin (sem perfil específico de tela). */
+const ADMIN_PAGE_SIZE_DEFAULT = 20;
+const ADMIN_PAGE_SIZE_MAX = 100;
+
+function clampPagina(pagina = 1, tamanhoPagina = ADMIN_PAGE_SIZE_DEFAULT) {
+  const tp = Math.min(ADMIN_PAGE_SIZE_MAX, Math.max(1, Math.floor(tamanhoPagina)));
+  const p = Math.max(1, Math.floor(pagina));
+  return { pagina: p, tamanhoPagina: tp, from: (p - 1) * tp, to: p * tp - 1 };
+}
+
+/**
+ * Versão paginada e com busca server-side da listagem admin de conteúdo.
+ * Faz uma única ida ao banco com `count: "exact"`.
+ */
+export async function fetchConteudosAdminPaginated(
+  filters: ConteudosAdminFilters = {},
+): Promise<ConteudosAdminPage> {
+  const pag = clampPagina(filters.pagina, filters.tamanhoPagina);
+
+  let q = supabase
+    .from("conteudo_tea")
+    .select(CONTEUDO_ADMIN_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false })
+    .range(pag.from, pag.to);
+
+  if (filters.busca && filters.busca.trim()) {
+    const term = filters.busca.trim().replace(/[,()]/g, " ");
+    q = q.or(`titulo.ilike.%${term}%,slug.ilike.%${term}%,autor.ilike.%${term}%`);
+  }
+  if (filters.categoria) q = q.eq("categoria", filters.categoria);
+  if (filters.publicado !== undefined) q = q.eq("publicado", filters.publicado);
+
+  const { data, error, count } = await q.returns<ConteudoAdminRow[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
   id: string,
 ): Promise<Tables<"conteudo_tea"> | null> {
   const { data, error } = await supabase
