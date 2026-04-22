@@ -12,6 +12,7 @@ import {
   salvarFiltrosPadrao,
   limparFiltrosPadrao,
   temFiltrosSalvos,
+  obterOuCriarLinkCurto,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type FiltrosPadraoUI,
