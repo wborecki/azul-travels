@@ -9,38 +9,228 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MinhaContaRouteImport } from './routes/minha-conta'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ExplorarRouteImport } from './routes/explorar'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MinhaContaIndexRouteImport } from './routes/minha-conta.index'
+import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
+import { Route as MinhaContaReservasRouteImport } from './routes/minha-conta.reservas'
+import { Route as MinhaContaPerfilSensorialRouteImport } from './routes/minha-conta.perfil-sensorial'
+import { Route as MinhaContaDadosRouteImport } from './routes/minha-conta.dados'
+import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
+import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 
+const MinhaContaRoute = MinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplorarRoute = ExplorarRouteImport.update({
+  id: '/explorar',
+  path: '/explorar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeneficiosTeaRoute = BeneficiosTeaRouteImport.update({
+  id: '/beneficios-tea',
+  path: '/beneficios-tea',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MinhaContaIndexRoute = MinhaContaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
+  id: '/conteudo/',
+  path: '/conteudo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaContaReservasRoute = MinhaContaReservasRouteImport.update({
+  id: '/reservas',
+  path: '/reservas',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const MinhaContaPerfilSensorialRoute =
+  MinhaContaPerfilSensorialRouteImport.update({
+    id: '/perfil-sensorial',
+    path: '/perfil-sensorial',
+    getParentRoute: () => MinhaContaRoute,
+  } as any)
+const MinhaContaDadosRoute = MinhaContaDadosRouteImport.update({
+  id: '/dados',
+  path: '/dados',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const EstabelecimentoSlugRoute = EstabelecimentoSlugRouteImport.update({
+  id: '/estabelecimento/$slug',
+  path: '/estabelecimento/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConteudoSlugRoute = ConteudoSlugRouteImport.update({
+  id: '/conteudo/$slug',
+  path: '/conteudo/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/beneficios-tea': typeof BeneficiosTeaRoute
+  '/cadastro': typeof CadastroRoute
+  '/explorar': typeof ExplorarRoute
+  '/login': typeof LoginRoute
+  '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/minha-conta/dados': typeof MinhaContaDadosRoute
+  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
+  '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/conteudo/': typeof ConteudoIndexRoute
+  '/minha-conta/': typeof MinhaContaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beneficios-tea': typeof BeneficiosTeaRoute
+  '/cadastro': typeof CadastroRoute
+  '/explorar': typeof ExplorarRoute
+  '/login': typeof LoginRoute
+  '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/minha-conta/dados': typeof MinhaContaDadosRoute
+  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
+  '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/conteudo': typeof ConteudoIndexRoute
+  '/minha-conta': typeof MinhaContaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/beneficios-tea': typeof BeneficiosTeaRoute
+  '/cadastro': typeof CadastroRoute
+  '/explorar': typeof ExplorarRoute
+  '/login': typeof LoginRoute
+  '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
+  '/minha-conta/dados': typeof MinhaContaDadosRoute
+  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
+  '/minha-conta/reservas': typeof MinhaContaReservasRoute
+  '/conteudo/': typeof ConteudoIndexRoute
+  '/minha-conta/': typeof MinhaContaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/beneficios-tea'
+    | '/cadastro'
+    | '/explorar'
+    | '/login'
+    | '/minha-conta'
+    | '/conteudo/$slug'
+    | '/estabelecimento/$slug'
+    | '/minha-conta/dados'
+    | '/minha-conta/perfil-sensorial'
+    | '/minha-conta/reservas'
+    | '/conteudo/'
+    | '/minha-conta/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/beneficios-tea'
+    | '/cadastro'
+    | '/explorar'
+    | '/login'
+    | '/conteudo/$slug'
+    | '/estabelecimento/$slug'
+    | '/minha-conta/dados'
+    | '/minha-conta/perfil-sensorial'
+    | '/minha-conta/reservas'
+    | '/conteudo'
+    | '/minha-conta'
+  id:
+    | '__root__'
+    | '/'
+    | '/beneficios-tea'
+    | '/cadastro'
+    | '/explorar'
+    | '/login'
+    | '/minha-conta'
+    | '/conteudo/$slug'
+    | '/estabelecimento/$slug'
+    | '/minha-conta/dados'
+    | '/minha-conta/perfil-sensorial'
+    | '/minha-conta/reservas'
+    | '/conteudo/'
+    | '/minha-conta/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BeneficiosTeaRoute: typeof BeneficiosTeaRoute
+  CadastroRoute: typeof CadastroRoute
+  ExplorarRoute: typeof ExplorarRoute
+  LoginRoute: typeof LoginRoute
+  MinhaContaRoute: typeof MinhaContaRouteWithChildren
+  ConteudoSlugRoute: typeof ConteudoSlugRoute
+  EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
+  ConteudoIndexRoute: typeof ConteudoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/minha-conta': {
+      id: '/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof MinhaContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explorar': {
+      id: '/explorar'
+      path: '/explorar'
+      fullPath: '/explorar'
+      preLoaderRoute: typeof ExplorarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beneficios-tea': {
+      id: '/beneficios-tea'
+      path: '/beneficios-tea'
+      fullPath: '/beneficios-tea'
+      preLoaderRoute: typeof BeneficiosTeaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +238,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/minha-conta/': {
+      id: '/minha-conta/'
+      path: '/'
+      fullPath: '/minha-conta/'
+      preLoaderRoute: typeof MinhaContaIndexRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/conteudo/': {
+      id: '/conteudo/'
+      path: '/conteudo'
+      fullPath: '/conteudo/'
+      preLoaderRoute: typeof ConteudoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-conta/reservas': {
+      id: '/minha-conta/reservas'
+      path: '/reservas'
+      fullPath: '/minha-conta/reservas'
+      preLoaderRoute: typeof MinhaContaReservasRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/perfil-sensorial': {
+      id: '/minha-conta/perfil-sensorial'
+      path: '/perfil-sensorial'
+      fullPath: '/minha-conta/perfil-sensorial'
+      preLoaderRoute: typeof MinhaContaPerfilSensorialRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/dados': {
+      id: '/minha-conta/dados'
+      path: '/dados'
+      fullPath: '/minha-conta/dados'
+      preLoaderRoute: typeof MinhaContaDadosRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/estabelecimento/$slug': {
+      id: '/estabelecimento/$slug'
+      path: '/estabelecimento/$slug'
+      fullPath: '/estabelecimento/$slug'
+      preLoaderRoute: typeof EstabelecimentoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conteudo/$slug': {
+      id: '/conteudo/$slug'
+      path: '/conteudo/$slug'
+      fullPath: '/conteudo/$slug'
+      preLoaderRoute: typeof ConteudoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface MinhaContaRouteChildren {
+  MinhaContaDadosRoute: typeof MinhaContaDadosRoute
+  MinhaContaPerfilSensorialRoute: typeof MinhaContaPerfilSensorialRoute
+  MinhaContaReservasRoute: typeof MinhaContaReservasRoute
+  MinhaContaIndexRoute: typeof MinhaContaIndexRoute
+}
+
+const MinhaContaRouteChildren: MinhaContaRouteChildren = {
+  MinhaContaDadosRoute: MinhaContaDadosRoute,
+  MinhaContaPerfilSensorialRoute: MinhaContaPerfilSensorialRoute,
+  MinhaContaReservasRoute: MinhaContaReservasRoute,
+  MinhaContaIndexRoute: MinhaContaIndexRoute,
+}
+
+const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
+  MinhaContaRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BeneficiosTeaRoute: BeneficiosTeaRoute,
+  CadastroRoute: CadastroRoute,
+  ExplorarRoute: ExplorarRoute,
+  LoginRoute: LoginRoute,
+  MinhaContaRoute: MinhaContaRouteWithChildren,
+  ConteudoSlugRoute: ConteudoSlugRoute,
+  EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
+  ConteudoIndexRoute: ConteudoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
