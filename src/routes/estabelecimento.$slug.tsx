@@ -4,11 +4,12 @@ import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   criarReserva,
+  buildReservaPayload,
   pickEstabMedia,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
-  type ReservaInsert,
+  type ReservaFormInput,
 } from "@/lib/queries";
 import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";

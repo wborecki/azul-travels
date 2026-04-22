@@ -52,9 +52,11 @@ export {
 export {
   fetchReservasDaFamilia,
   criarReserva,
+  buildReservaPayload,
   type Reserva,
   type ReservaInsert,
   type ReservaComContexto,
+  type ReservaFormInput,
 } from "./reservas";
 
 export {
