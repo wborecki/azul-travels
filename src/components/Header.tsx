@@ -38,7 +38,7 @@ export function Header() {
             className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-md"
             activeProps={{ className: "text-primary font-semibold" }}
           >
-            Explorar
+            Explorar destinos
           </Link>
           <Link
             to="/beneficios-tea"
