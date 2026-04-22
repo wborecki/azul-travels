@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Estab } from "@/components/EstabCard";
+import { fetchEstabelecimentosView, type EstabelecimentoView } from "@/lib/queries";
 import { Gift, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TIPO_LABEL } from "@/lib/brazil";
@@ -17,17 +16,13 @@ export const Route = createFileRoute("/beneficios-tea")({
 });
 
 function Beneficios() {
-  const [list, setList] = useState<(Estab & { beneficio_tea_descricao: string | null })[]>([]);
+  const [list, setList] = useState<EstabelecimentoView[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase
-        .from("estabelecimentos")
-        .select("*")
-        .eq("status", "ativo")
-        .eq("tem_beneficio_tea", true);
-      setList((data as (Estab & { beneficio_tea_descricao: string | null })[]) ?? []);
+      const data = await fetchEstabelecimentosView({ apenasComBeneficio: true });
+      setList(data);
       setLoading(false);
     })();
   }, []);
