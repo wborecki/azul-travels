@@ -710,16 +710,37 @@ function DestaqueCard({
     },
   ].filter((r) => r.cond);
 
+  // Emoji de fallback derivado do tipoLabel (sem precisar adicionar campo ao VM)
+  const tipoLower = vm.tipoLabel.toLowerCase();
+  const emojiFallback = tipoLower.includes("restaurante")
+    ? "🍽️"
+    : tipoLower.includes("parque") || tipoLower.includes("atra")
+      ? "🎡"
+      : tipoLower.includes("transporte")
+        ? "✈️"
+        : tipoLower.includes("agência") || tipoLower.includes("agencia")
+          ? "🧳"
+          : "🏨";
+
   return (
     <div className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border h-full flex flex-col">
-      <div className="relative aspect-video bg-muted">
-        {vm.media.fotoCapa && (
+      {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
+      <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
+        {vm.media.fotoCapa ? (
           <img
             src={vm.media.fotoCapa}
             alt={vm.nome}
             loading="lazy"
             className="w-full h-full object-cover"
+            style={{ objectPosition: "center 30%" }}
           />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-azul-claro to-teal-claro"
+          >
+            <span className="text-5xl opacity-30">{emojiFallback}</span>
+          </div>
         )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
           {vm.temSeloAzul && (
