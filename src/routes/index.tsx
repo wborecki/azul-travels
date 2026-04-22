@@ -476,73 +476,57 @@ function Counter({
 function ComoFunciona() {
   const steps = [
     {
-      n: "01",
+      n: "1",
       Icon: UserPlus,
-      titulo: "Conte sobre o seu filho",
+      titulo: "Fale sobre o seu filho",
       texto:
-        "Sensibilidades, preferências, o que funciona e o que não funciona. Leva 3 minutos — e muda completamente como você planeja viagens.",
+        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos e muda completamente como você planeja viagens.",
     },
     {
-      n: "02",
+      n: "2",
       Icon: MapPinned,
-      titulo: "Veja destinos feitos para ele",
+      titulo: "Encontre lugares prontos pra ele",
       texto:
-        "Nada de ligar para dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares que estão prontos para receber o seu filho.",
+        "Nada de ligar pra dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares prontos pra receber o seu filho.",
     },
     {
-      n: "03",
+      n: "3",
       Icon: HeartHandshake,
-      titulo: "Chegue. Eles já sabem.",
+      titulo: "Chegue. A equipe já foi avisada.",
       texto:
         "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe. Você chega, eles já estão preparados.",
     },
   ];
 
   return (
-    <section id="como-funciona" className="py-20 bg-background">
+    <section id="como-funciona" className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Como funciona
-          </p>
-          <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Simples assim. Prometemos.
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            É assim que funciona.
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            Três passos para a viagem que vocês tanto adiaram.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Três passos e sua família está pronta pra viajar.
           </p>
         </Reveal>
 
-        <div className="relative">
-          {/* Linha conectora desktop */}
-          <div
-            aria-hidden
-            className="hidden md:block absolute top-16 left-[16.6%] right-[16.6%] h-0.5 step-connector"
-          />
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative">
-            {steps.map((s, i) => (
-              <Reveal key={s.n} delay={i * 100}>
-                <div className="relative bg-card rounded-2xl p-7 shadow-soft hover:shadow-elegant transition border h-full">
-                  <span
-                    aria-hidden
-                    className="absolute top-3 right-5 font-display font-extrabold text-secondary/15 text-[72px] leading-none select-none"
-                  >
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          {steps.map((s, i) => (
+            <Reveal key={s.n} delay={i * 80}>
+              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                     {s.n}
                   </span>
-                  <div className="relative w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center">
-                    <s.Icon className="h-7 w-7" />
+                  <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+                    <s.Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="relative mt-5 font-display font-bold text-primary text-xl">
-                    {s.titulo}
-                  </h3>
-                  <p className="relative mt-2 text-sm text-muted-foreground leading-relaxed">
-                    {s.texto}
-                  </p>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                <h3 className="mt-5 font-display font-bold text-primary text-lg">{s.titulo}</h3>
+                <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{s.texto}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -586,35 +570,32 @@ function SelosImportantes() {
   ];
 
   return (
-    <section className="py-20 bg-azul-claro">
+    <section className="py-16 bg-azul-claro">
       <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-            Transparência total
-          </p>
-          <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
-            Cada selo que você vê foi ganho de verdade
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            O que está por trás de cada certificação
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            Qualquer hotel pode dizer que é inclusivo. Aqui, precisa provar.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Qualquer hotel pode se dizer inclusivo. A gente exige prova.
           </p>
         </Reveal>
 
         <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
           {selos.map((s, i) => (
-            <Reveal key={s.nome} delay={i * 100}>
-              <div className="relative bg-card rounded-2xl p-7 shadow-soft hover:shadow-elegant transition border text-center h-full">
-                <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[11px] font-semibold text-success">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Verificado
-                </span>
-                <div
-                  className={`mx-auto w-16 h-16 rounded-2xl ${s.cor} flex items-center justify-center`}
-                >
-                  <s.Icon className="h-8 w-8" />
+            <Reveal key={s.nome} delay={i * 80}>
+              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-lg ${s.cor} flex items-center justify-center shrink-0`}
+                  >
+                    <s.Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display font-bold text-primary text-lg">{s.nome}</h3>
                 </div>
-                <h3 className="mt-4 font-display font-bold text-primary text-lg">{s.nome}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.descricao}</p>
+                <p className="mt-3 text-[15px] text-muted-foreground leading-relaxed">
+                  {s.descricao}
+                </p>
               </div>
             </Reveal>
           ))}
