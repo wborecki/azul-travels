@@ -85,6 +85,11 @@ function AdminReservas() {
   const [filter, setFilter] = useState<FilterKey>("todas");
   const [q, setQ] = useState("");
   const qDebounced = useDebouncedValue(q, 300);
+  // Filtros por intervalo de datas (YYYY-MM-DD). String vazia = sem limite.
+  const [checkinDe, setCheckinDe] = useState("");
+  const [checkinAte, setCheckinAte] = useState("");
+  const [criadoDe, setCriadoDe] = useState("");
+  const [criadoAte, setCriadoAte] = useState("");
   const [pagina, setPagina] = useState(1);
   const [tamanhoPagina, setTamanhoPagina] = useState<number>(TAMANHO_PAGINA_INICIAL);
   const [total, setTotal] = useState(0);
@@ -137,6 +142,10 @@ function AdminReservas() {
         tamanhoPagina,
         status: filter === "todas" ? undefined : filter,
         busca: qDebounced.trim() || undefined,
+        checkinDe: checkinDe || undefined,
+        checkinAte: checkinAte || undefined,
+        criadoDe: criadoDe || undefined,
+        criadoAte: criadoAte || undefined,
       });
       setRows(page.items);
       setTotal(page.total);
@@ -150,7 +159,7 @@ function AdminReservas() {
       });
     }
     setLoading(false);
-  }, [pagina, tamanhoPagina, filter, qDebounced]);
+  }, [pagina, tamanhoPagina, filter, qDebounced, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   useEffect(() => {
     void load();
@@ -160,10 +169,10 @@ function AdminReservas() {
     void refreshCounts();
   }, [refreshCounts]);
 
-  // Reseta para página 1 quando filtro/busca/tamanho mudam.
+  // Reseta para página 1 quando qualquer filtro muda.
   useEffect(() => {
     setPagina(1);
-  }, [filter, qDebounced, tamanhoPagina]);
+  }, [filter, qDebounced, tamanhoPagina, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   // Filtro/busca já vêm aplicados do servidor → a página atual é a "view".
   const filtered = rows;
@@ -400,6 +409,82 @@ function AdminReservas() {
             </button>
           );
         })}
+      </div>
+
+      {/* Filtros por intervalo de datas — check-in e criação */}
+      <div className="rounded-2xl border bg-card p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+            <Calendar className="h-4 w-4 text-primary" />
+            Filtrar por período
+          </div>
+          {(checkinDe || checkinAte || criadoDe || criadoAte) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setCheckinDe("");
+                setCheckinAte("");
+                setCriadoDe("");
+                setCriadoAte("");
+              }}
+              className="h-7 text-xs"
+            >
+              <X className="h-3 w-3 mr-1" /> Limpar datas
+            </Button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="checkin-de" className="text-xs text-muted-foreground">
+              Check-in de
+            </Label>
+            <Input
+              id="checkin-de"
+              type="date"
+              value={checkinDe}
+              max={checkinAte || undefined}
+              onChange={(e) => setCheckinDe(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="checkin-ate" className="text-xs text-muted-foreground">
+              Check-in até
+            </Label>
+            <Input
+              id="checkin-ate"
+              type="date"
+              value={checkinAte}
+              min={checkinDe || undefined}
+              onChange={(e) => setCheckinAte(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="criado-de" className="text-xs text-muted-foreground">
+              Criada de
+            </Label>
+            <Input
+              id="criado-de"
+              type="date"
+              value={criadoDe}
+              max={criadoAte || undefined}
+              onChange={(e) => setCriadoDe(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="criado-ate" className="text-xs text-muted-foreground">
+              Criada até
+            </Label>
+            <Input
+              id="criado-ate"
+              type="date"
+              value={criadoAte}
+              min={criadoDe || undefined}
+              onChange={(e) => setCriadoAte(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       {selecionadas.size > 0 && (

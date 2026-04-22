@@ -359,6 +359,14 @@ export interface ReservasAdminFilters {
   busca?: string;
   /** Filtra por status (omita para todos). */
   status?: Database["public"]["Enums"]["reserva_status"];
+  /** Data mínima de check-in (YYYY-MM-DD, inclusivo). */
+  checkinDe?: string;
+  /** Data máxima de check-in (YYYY-MM-DD, inclusivo). */
+  checkinAte?: string;
+  /** Data mínima de criação (YYYY-MM-DD, inclusivo, hora 00:00). */
+  criadoDe?: string;
+  /** Data máxima de criação (YYYY-MM-DD, inclusivo até 23:59:59). */
+  criadoAte?: string;
   pagina?: number;
   tamanhoPagina?: number;
 }
@@ -373,9 +381,11 @@ export interface ReservasAdminPage {
 
 /**
  * Versão paginada da listagem admin de reservas. Faz busca server-side
- * por `mensagem` (ilike) e por `status` (eq); filtros adicionais por
- * dados embutidos (`estabelecimentos.nome`, `familia_profiles.*`)
- * permanecem opcionais no caller, sobre a página retornada.
+ * por `mensagem` (ilike), `status` (eq) e intervalos de data — tanto
+ * `data_checkin` (date) quanto `criado_em` (timestamptz, com clamp para
+ * fim do dia em `criadoAte`). Filtros adicionais por dados embutidos
+ * (`estabelecimentos.nome`, `familia_profiles.*`) permanecem opcionais
+ * no caller, sobre a página retornada.
  */
 export async function fetchReservasAdminPaginated(
   filters: ReservasAdminFilters = {},
@@ -392,6 +402,15 @@ export async function fetchReservasAdminPaginated(
   if (filters.busca && filters.busca.trim()) {
     const term = filters.busca.trim().replace(/[,()]/g, " ");
     q = q.ilike("mensagem", `%${term}%`);
+  }
+  if (filters.checkinDe) q = q.gte("data_checkin", filters.checkinDe);
+  if (filters.checkinAte) q = q.lte("data_checkin", filters.checkinAte);
+  if (filters.criadoDe) {
+    q = q.gte("criado_em", `${filters.criadoDe}T00:00:00`);
+  }
+  if (filters.criadoAte) {
+    // inclusivo até o fim do dia
+    q = q.lte("criado_em", `${filters.criadoAte}T23:59:59.999`);
   }
 
   const { data, error, count } = await q.returns<ReservaAdminRow[]>();
