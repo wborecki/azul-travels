@@ -155,6 +155,7 @@ function calcularCompatibilidade(
 
 function Landing() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
 
   const [destaques, setDestaques] = useState<EstabelecimentoView[] | null>(null);
@@ -230,16 +231,39 @@ function Landing() {
     })();
   }, [user]);
 
+  /**
+   * Roteamento contextual do CTA "criar perfil sensorial":
+   *   - sem login → /cadastro
+   *   - logado, sem perfil → /minha-conta/perfil-sensorial
+   *   - logado, com perfil → /explorar (já pode usar a plataforma)
+   */
+  const goCriarPerfil = useCallback(() => {
+    if (!user) {
+      void navigate({ to: "/cadastro" });
+      return;
+    }
+    if (!perfilPrincipal) {
+      void navigate({ to: "/minha-conta/perfil-sensorial" });
+      return;
+    }
+    void navigate({ to: "/explorar" });
+  }, [user, perfilPrincipal, navigate]);
+
   return (
     <div>
       <Hero busca={busca} setBusca={setBusca} />
       <ComoFunciona />
       <SelosImportantes />
-      <DestinosDestaque destaques={destaques} perfil={perfilPrincipal} userLogado={!!user} />
+      <DestinosDestaque
+        destaques={destaques}
+        perfil={perfilPrincipal}
+        userLogado={!!user}
+        onCriarPerfil={goCriarPerfil}
+      />
       <Depoimentos depoimentos={depoimentos} />
       <BeneficiosTea beneficios={beneficios} />
       <BlogTeaser artigos={artigos} />
-      <CtaFinal />
+      <CtaFinal onCriarPerfil={goCriarPerfil} />
     </div>
   );
 }
