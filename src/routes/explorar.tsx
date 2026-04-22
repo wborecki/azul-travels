@@ -451,12 +451,23 @@ function Explorar() {
         <p className="text-muted-foreground mt-1">
           Encontre estabelecimentos preparados para sua família.
         </p>
-        {user &&
-          search.priorizarPerfil &&
+        {(search.ordem === "compatibilidade" || search.priorizarPerfil) &&
+          user &&
           Object.values(perfilNecessidades).some(Boolean) && (
             <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-teal-claro text-secondary font-medium">
-              <Sparkles className="h-3.5 w-3.5" /> Resultados priorizados pelo perfil sensorial da
-              sua família
+              <Sparkles className="h-3.5 w-3.5" />
+              {search.ordem === "compatibilidade"
+                ? "Ordenado pelos destinos mais compatíveis com sua família"
+                : "Resultados priorizados pelo perfil sensorial da sua família"}
+            </div>
+          )}
+        {search.ordem === "compatibilidade" &&
+          (!user || !Object.values(perfilNecessidades).some(Boolean)) && (
+            <div className="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-muted text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5" />
+              {!user
+                ? "Faça login e cadastre um perfil sensorial para ver as recomendações personalizadas."
+                : "Cadastre necessidades no perfil sensorial para ativar as recomendações personalizadas."}
             </div>
           )}
       </div>
