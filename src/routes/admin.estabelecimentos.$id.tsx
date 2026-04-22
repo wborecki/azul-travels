@@ -36,6 +36,7 @@ import {
   Loader2,
   MapPin,
   Save,
+  Search,
   Star as StarIcon,
   Upload,
   X,
