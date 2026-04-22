@@ -232,10 +232,20 @@ export function resolvePagination(
  */
 // Tipo aberto do builder do Postgrest — preserva o encadeamento tipado
 // no caller, ao mesmo tempo em que evita acoplar o helper a um shape
-// específico de Database/Schema (que mudaria o tipo dos parâmetros de
-// `eq`/`in` para union literal e quebraria o uso compartilhado).
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyEstabBuilder = EstabPostgrestBuilder & Record<string, any>;
+// específico de Database/Schema. Definido como interface mínima
+// estrutural (apenas os métodos realmente usados aqui), o que permite
+// receber qualquer subtipo de PostgrestFilterBuilder sem importar o
+// subpath `@supabase/postgrest-js` (não resolvido neste workspace).
+/* eslint-disable @typescript-eslint/no-explicit-any */
+interface AnyEstabBuilder {
+  or(...args: any[]): any;
+  eq(...args: any[]): any;
+  in(...args: any[]): any;
+  not(...args: any[]): any;
+  limit(...args: any[]): any;
+  range(...args: any[]): any;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
   query: Q,
