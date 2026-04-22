@@ -994,7 +994,7 @@ function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | nul
                       <Link
                         to="/estabelecimento/$slug"
                         params={{ slug: b.slug }}
-                        className="block bg-card rounded-xl p-5 shadow-soft hover:shadow-elegant transition border"
+                        className="block bg-card rounded-xl p-5 shadow-sm hover:shadow-md transition border"
                       >
                         <h3 className="font-display font-bold text-primary">{b.nome}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -1025,15 +1025,12 @@ function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | nul
 
 function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <Reveal>
           <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
             <div>
-              <p className="text-secondary font-semibold uppercase tracking-wide text-sm">
-                Aprenda mais
-              </p>
-              <h2 className="mt-2 text-3xl md:text-4xl font-display font-bold text-primary">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
                 Conteúdo atualizado sobre turismo TEA
               </h2>
             </div>
@@ -1062,7 +1059,7 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
                   <Link
                     to="/conteudo/$slug"
                     params={{ slug: a.slug }}
-                    className="group block bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border h-full"
+                    className="group block bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full"
                   >
                     <div className="aspect-video bg-muted overflow-hidden">
                       {a.foto_capa && (
@@ -1117,15 +1114,15 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
 
 function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
   return (
-    <section className="py-24 gradient-cta-final text-white">
+    <section className="py-16 text-white" style={{ backgroundColor: "#1B2E4B" }}>
       <div className="container mx-auto px-4">
         <Reveal className="max-w-2xl mx-auto text-center">
-          <Plane className="h-16 w-16 mx-auto text-white/90" aria-hidden />
-          <h2 className="mt-6 text-4xl md:text-5xl font-display font-extrabold leading-tight">
-            Sua família merece viajar.
+          <Plane className="h-14 w-14 mx-auto text-white/90" aria-hidden />
+          <h2 className="mt-6 text-3xl md:text-4xl font-display font-bold leading-tight">
+            Pronto para a próxima viagem?
           </h2>
-          <p className="mt-4 text-lg text-white/85">
-            Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos e muda tudo.
+          <p className="mt-4 text-[15px] leading-relaxed text-white/85">
+            Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos.
           </p>
           <Button
             type="button"
@@ -1133,10 +1130,10 @@ function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
             onClick={onCriarPerfil}
             className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold min-h-[44px]"
           >
-            Quero criar o perfil do meu filho <ArrowRight className="ml-1 h-4 w-4" />
+            Criar perfil do meu filho
           </Button>
           <p className="mt-5 text-xs text-white/60">
-            ✓ Gratuito · ✓ Sem compromisso · ✓ Dados protegidos pela LGPD
+            Gratuito, sem cartão, seus dados protegidos pela LGPD.
           </p>
         </Reveal>
       </div>
