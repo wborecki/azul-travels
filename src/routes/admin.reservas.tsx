@@ -121,6 +121,9 @@ function AdminReservas() {
   const [bulkObservacao, setBulkObservacao] = useState("");
   const [savingBulk, setSavingBulk] = useState(false);
 
+  // Exportação CSV
+  const [exporting, setExporting] = useState(false);
+
   /** Recarrega contadores globais por status (independentes da página). */
   const refreshCounts = useCallback(async () => {
     try {
