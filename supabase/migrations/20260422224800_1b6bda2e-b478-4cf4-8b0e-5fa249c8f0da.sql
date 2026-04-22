@@ -1,0 +1,1 @@
+ALTER TYPE public.estab_tipo ADD VALUE IF NOT EXISTS 'excursao';

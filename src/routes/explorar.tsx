@@ -65,6 +65,7 @@ const TIPOS_VALORES = [
   "atracoes",
   "agencia",
   "transporte",
+  "excursao",
 ] as const;
 type EstabTipo = (typeof TIPOS_VALORES)[number];
 
@@ -172,8 +173,29 @@ const TIPOS: ReadonlyArray<{ v: EstabTipo; l: string }> = [
   { v: "restaurante", l: "Restaurante" },
   { v: "parque", l: "Parque" },
   { v: "atracoes", l: "Atrações" },
+  { v: "excursao", l: "Excursão guiada" },
   { v: "agencia", l: "Agência" },
   { v: "transporte", l: "Transporte" },
+];
+
+/**
+ * Categorias de produto — agrupadores que aparecem como chips acima dos
+ * tipos. Cada chip ativa/desativa em bloco todos os tipos da categoria.
+ *
+ * Espelha `TIPO_PARA_CATEGORIA` em `@/lib/enums`, mas mantemos uma cópia
+ * local tipada com o `EstabTipo` da rota (que já inclui `excursao`)
+ * para evitar import circular com o schema da search.
+ */
+const CATEGORIAS: ReadonlyArray<{
+  v: "hospedagem" | "passeios" | "gastronomia" | "transporte" | "planejamento";
+  l: string;
+  tipos: ReadonlyArray<EstabTipo>;
+}> = [
+  { v: "hospedagem", l: "Hospedagem", tipos: ["hotel", "pousada", "resort"] },
+  { v: "passeios", l: "Passeios e experiências", tipos: ["parque", "atracoes", "excursao"] },
+  { v: "gastronomia", l: "Onde comer", tipos: ["restaurante"] },
+  { v: "transporte", l: "Transporte", tipos: ["transporte"] },
+  { v: "planejamento", l: "Planejamento", tipos: ["agencia"] },
 ];
 
 export const Route = createFileRoute("/explorar")({
@@ -880,8 +902,40 @@ function Explorar() {
               </div>
             </div>
 
-            {/* Tipos como chips */}
-            <FilterGroup label="Tipo de estabelecimento">
+            {/* Categorias — chip ativa/desativa em bloco os tipos do grupo.
+                Mais legível que filtrar por 9 tipos individuais. */}
+            <FilterGroup label="Categoria">
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIAS.map((c) => {
+                  const tiposSet = new Set<EstabTipo>(c.tipos);
+                  const ativos = c.tipos.filter((t) => search.tipos.includes(t));
+                  const todosAtivos = ativos.length === c.tipos.length;
+                  const algumAtivo = ativos.length > 0;
+                  return (
+                    <Chip
+                      key={c.v}
+                      active={todosAtivos}
+                      onClick={() => {
+                        // Se tudo ativo, desliga toda a categoria; senão, liga tudo.
+                        const semCategoria = search.tipos.filter((t: EstabTipo) => !tiposSet.has(t));
+                        const proximos = todosAtivos
+                          ? semCategoria
+                          : [...semCategoria, ...c.tipos];
+                        patchSearchResetPage({ tipos: proximos });
+                      }}
+                      label={
+                        algumAtivo && !todosAtivos
+                          ? `${c.l} (${ativos.length}/${c.tipos.length})`
+                          : c.l
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </FilterGroup>
+
+            {/* Tipos específicos como chips — refino dentro da categoria */}
+            <FilterGroup label="Tipo específico">
               <div className="flex flex-wrap gap-2">
                 {TIPOS.map((t) => (
                   <Chip

@@ -4,43 +4,53 @@ import {
   Star,
   Hotel,
   UtensilsCrossed,
-  Trees,
+  Compass,
   Plane,
   Briefcase,
   type LucideIcon,
 } from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
 import { mapEstabCard, type EstabelecimentoView, type EstabCardProps } from "@/lib/queries";
+import { categoriaDoTipo, type EstabCategoria, type EstabTipo } from "@/lib/enums";
 
 /** @deprecated use `EstabelecimentoView` de `@/lib/queries`. Mantido como alias. */
 export type Estab = EstabelecimentoView;
 
 /**
  * Props do EstabCard. Aceita:
- *  - `vm: EstabCardVM` (preferido — tipagem forte via `EstabCardProps`)
- *  - `e: EstabelecimentoView` (legado — mapeia internamente)
+ *  - `vm: EstabCardVM` + `tipo` (preferido — tipagem forte via `EstabCardProps`)
+ *  - `e: EstabelecimentoView` (legado — mapeia internamente, tipo vem da row)
  */
-type EstabCardComponentProps = EstabCardProps | { e: EstabelecimentoView; maxRecursos?: number };
+type EstabCardComponentProps =
+  | (EstabCardProps & { tipo?: EstabTipo })
+  | { e: EstabelecimentoView; maxRecursos?: number };
 
 /**
- * Ícone Lucide de fallback quando o estabelecimento não tem `foto_capa`.
- * Derivado de `tipoLabel` (já presente no VM) — evita adicionar campo
- * novo ao VM e quebrar os guards em core-payloads.guard.ts.
+ * Ícone Lucide derivado da categoria do estabelecimento. Usar a
+ * categoria (e não o tipo bruto) garante consistência visual: hotel,
+ * pousada e resort compartilham o mesmo ícone de "hospedagem".
  */
-function iconePorTipoLabel(tipoLabel: string): LucideIcon {
-  const t = tipoLabel.toLowerCase();
-  if (t.includes("restaurante")) return UtensilsCrossed;
-  if (t.includes("parque") || t.includes("atra")) return Trees;
-  if (t.includes("transporte")) return Plane;
-  if (t.includes("agência") || t.includes("agencia")) return Briefcase;
-  // hotel, pousada, resort, default
-  return Hotel;
+const ICONE_POR_CATEGORIA: Record<EstabCategoria, LucideIcon> = {
+  hospedagem: Hotel,
+  gastronomia: UtensilsCrossed,
+  passeios: Compass,
+  transporte: Plane,
+  planejamento: Briefcase,
+};
+
+function iconeFallback(tipo: EstabTipo | undefined): LucideIcon {
+  if (!tipo) return Hotel;
+  return ICONE_POR_CATEGORIA[categoriaDoTipo(tipo)];
 }
 
 export function EstabCard(props: EstabCardComponentProps) {
   const vm = "vm" in props ? props.vm : mapEstabCard(props.e);
   const maxRecursos = props.maxRecursos ?? 3;
-  const IconeFallback = iconePorTipoLabel(vm.tipoLabel);
+  // Tipo bruto: row direta quando temos `e`; prop opcional `tipo` no caso `vm`.
+  // Sem tipo, ícone genérico (Hotel).
+  const tipoBruto: EstabTipo | undefined =
+    "e" in props ? props.e.tipo : "tipo" in props ? props.tipo : undefined;
+  const IconeFallback = iconeFallback(tipoBruto);
 
   return (
     <Link

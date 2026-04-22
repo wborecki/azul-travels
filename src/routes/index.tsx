@@ -37,7 +37,7 @@ import {
   DoorOpen,
   Hotel,
   UtensilsCrossed,
-  Trees,
+  Compass,
   Briefcase,
   Camera,
   type LucideIcon,
@@ -395,19 +395,23 @@ function Hero({
             </Button>
           </form>
 
-          {/* Chips — passam o tipo via array (filtro multi-tipo do /explorar) */}
+          {/* Chips de categoria — cada chip filtra por todos os tipos da categoria */}
           <div className="mt-5 flex flex-wrap gap-2 justify-center">
             {[
-              { Icon: Hotel, label: "Hotéis", q: "hotel" as const },
-              { Icon: UtensilsCrossed, label: "Restaurantes", q: "restaurante" as const },
-              { Icon: Trees, label: "Parques", q: "parque" as const },
-              { Icon: Hotel, label: "Resorts", q: "resort" as const },
-              { Icon: Hotel, label: "Pousadas", q: "pousada" as const },
+              { Icon: Hotel, label: "Hospedagem", tipos: ["hotel", "pousada", "resort"] as const },
+              {
+                Icon: Compass,
+                label: "Passeios e experiências",
+                tipos: ["parque", "atracoes", "excursao"] as const,
+              },
+              { Icon: UtensilsCrossed, label: "Onde comer", tipos: ["restaurante"] as const },
+              { Icon: Plane, label: "Transporte", tipos: ["transporte"] as const },
+              { Icon: Briefcase, label: "Planejamento", tipos: ["agencia"] as const },
             ].map((c) => (
               <Link
-                key={c.q}
+                key={c.label}
                 to="/explorar"
-                search={{ tipos: [c.q] }}
+                search={{ tipos: [...c.tipos] }}
                 className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center gap-1.5"
               >
                 <c.Icon className="h-4 w-4" strokeWidth={2} />
@@ -737,8 +741,10 @@ function DestaqueCard({
   const tipoLower = vm.tipoLabel.toLowerCase();
   const IconeFallback: LucideIcon = tipoLower.includes("restaurante")
     ? UtensilsCrossed
-    : tipoLower.includes("parque") || tipoLower.includes("atra")
-      ? Trees
+    : tipoLower.includes("parque") ||
+        tipoLower.includes("atra") ||
+        tipoLower.includes("excurs")
+      ? Compass
       : tipoLower.includes("transporte")
         ? Plane
         : tipoLower.includes("agência") || tipoLower.includes("agencia")
