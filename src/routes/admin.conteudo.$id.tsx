@@ -527,3 +527,18 @@ function Field({
     </div>
   );
 }
+
+function PreviewBox({ conteudo }: { conteudo: string }) {
+  const trimmed = conteudo.trim();
+  return (
+    <div className="rounded-xl border bg-background min-h-[420px] p-5 sm:p-6 overflow-auto">
+      {trimmed ? (
+        <MarkdownView source={conteudo} />
+      ) : (
+        <p className="text-sm text-muted-foreground italic">
+          Comece a escrever na aba <strong>Editar</strong> para ver o preview aqui.
+        </p>
+      )}
+    </div>
+  );
+}
