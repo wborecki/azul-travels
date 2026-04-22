@@ -227,6 +227,33 @@ export type Database = {
         }
         Relationships: []
       }
+      explorar_filtros_padrao: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          recursos: string[]
+          selos: string[]
+          tipos: Database["public"]["Enums"]["estab_tipo"][]
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          recursos?: string[]
+          selos?: string[]
+          tipos?: Database["public"]["Enums"]["estab_tipo"][]
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          recursos?: string[]
+          selos?: string[]
+          tipos?: Database["public"]["Enums"]["estab_tipo"][]
+          user_id?: string
+        }
+        Relationships: []
+      }
       familia_profiles: {
         Row: {
           cidade: string | null

@@ -8,8 +8,13 @@ import {
   fetchEstabelecimentosViewPaginated,
   ESTAB_PAGE_SIZE_DEFAULT,
   ESTAB_PAGE_SIZE_MAX,
+  fetchFiltrosPadrao,
+  salvarFiltrosPadrao,
+  limparFiltrosPadrao,
+  temFiltrosSalvos,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
+  type FiltrosPadraoUI,
   type RecursoFlag,
   type SeloFlag,
 } from "@/lib/queries";
@@ -34,6 +39,8 @@ import {
   Link as LinkIcon,
   Check as CheckIcon,
   Sparkles,
+  Bookmark,
+  BookmarkX,
 } from "lucide-react";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { useAuth } from "@/hooks/useAuth";
@@ -206,6 +213,15 @@ function Explorar() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [perfilNecessidades, setPerfilNecessidades] = useState<Record<string, boolean>>({});
+  // Filtro padrão salvo do usuário (1:1) — `null` = ainda não carregou /
+  // não tem registro. Usado para (a) auto-aplicar ao entrar limpo e
+  // (b) decidir se o botão da toolbar diz "Salvar" ou "Limpar padrão".
+  const [filtroPadrao, setFiltroPadrao] = useState<FiltrosPadraoUI | null>(null);
+  const [salvandoPadrao, setSalvandoPadrao] = useState(false);
+  // Garante que a auto-aplicação roda no máximo uma vez por sessão da
+  // rota — sem isso, voltar para `/explorar` "limpo" via Link reaplicaria
+  // os defaults a cada render do efeito.
+  const autoAplicadoRef = useRef(false);
   // Sentinel observado pelo IntersectionObserver — quando entra na
   // viewport, dispara o carregamento da próxima página.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -257,6 +273,80 @@ function Explorar() {
       }
     })();
   }, [user]);
+
+  // ───────────────────────────────────────────────────────────────
+  // Filtro padrão do usuário — carrega ao logar; auto-aplica quando
+  // o usuário entra em /explorar "limpo" (sem filtros relevantes na
+  // URL). Links compartilhados continuam vencendo: se há `tipos`,
+  // `selos` ou `recursos` na query, o padrão é ignorado.
+  // ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) {
+      setFiltroPadrao(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const f = await fetchFiltrosPadrao(user.id);
+        setFiltroPadrao(f);
+
+        const urlVazia =
+          search.tipos.length === 0 &&
+          search.selos.length === 0 &&
+          search.recursos.length === 0;
+
+        if (!autoAplicadoRef.current && urlVazia && temFiltrosSalvos(f)) {
+          autoAplicadoRef.current = true;
+          patchSearchResetPage({
+            tipos: [...f.tipos] as EstabTipo[],
+            selos: [...f.selos] as (typeof SELOS_VALORES)[number][],
+            recursos: [...f.recursos] as (typeof RECURSOS_VALORES)[number][],
+          });
+        }
+      } catch (e) {
+        console.error("Falha ao carregar filtros padrão", e);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function salvarComoPadrao() {
+    if (!user) {
+      toast.info("Faça login para salvar seus filtros favoritos.");
+      return;
+    }
+    setSalvandoPadrao(true);
+    try {
+      const novo: FiltrosPadraoUI = {
+        tipos: search.tipos,
+        selos: search.selos,
+        recursos: search.recursos,
+      };
+      await salvarFiltrosPadrao(user.id, novo);
+      setFiltroPadrao(novo);
+      toast.success("Filtros salvos como seu padrão.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível salvar os filtros.");
+    } finally {
+      setSalvandoPadrao(false);
+    }
+  }
+
+  async function removerPadrao() {
+    if (!user) return;
+    setSalvandoPadrao(true);
+    try {
+      await limparFiltrosPadrao(user.id);
+      setFiltroPadrao(null);
+      toast.success("Filtros padrão removidos.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível remover os filtros padrão.");
+    } finally {
+      setSalvandoPadrao(false);
+    }
+  }
 
   // Refetch a cada mudança de filtro/página (URL é a fonte da verdade)
   useEffect(() => {
