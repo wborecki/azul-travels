@@ -110,6 +110,7 @@ export {
   fetchEstabelecimentosAdminView,
   fetchEstabelecimentosAdminViewPaginated,
   fetchEstabelecimentoAdminPorId,
+  fetchEstabelecimentoAdminDetalhe,
   fetchConteudosAdmin,
   fetchConteudosAdminPaginated,
   fetchConteudoAdminPorId,
