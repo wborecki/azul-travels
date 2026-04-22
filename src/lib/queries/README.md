@@ -77,23 +77,27 @@ type EstabelecimentoView = Pick<
 ```ts
 import {
   fetchEstabelecimentosView,
-  applyEstabelecimentosViewFilters,
-  type EstabelecimentosViewFilters,
+  fetchEstabelecimentosViewPaginated,
+  ESTAB_PAGE_SIZE_DEFAULT,
+  type EstabelecimentosViewPage,
 } from "@/lib/queries";
 
+// Sem paginação visual — passar pagina/tamanhoPagina ainda funciona
+// (mais explícito do que o antigo `limite`).
 const destaques = await fetchEstabelecimentosView({
   apenasDestaque: true,
-  limite: 6,
+  pagina: 1,
+  tamanhoPagina: 6,
 });
 
-// Filtros compondo:
-const filtros: EstabelecimentosViewFilters = {
+// Com paginação tipada (offset/limit) + total — usado em /explorar.
+const page: EstabelecimentosViewPage = await fetchEstabelecimentosViewPaginated({
   busca: "florianopolis",
   tipos: ["hotel", "pousada"],
-  selos: ["selo_azul"],
-  recursos: ["tem_sala_sensorial", "tem_concierge_tea"],
-  apenasComTour360: true,
-};
+  pagina: 2,
+  tamanhoPagina: ESTAB_PAGE_SIZE_DEFAULT, // 24, clampado em [1, 100]
+});
+// page.items, page.total, page.pagina, page.tamanhoPagina, page.totalPaginas
 ```
 
 ---
