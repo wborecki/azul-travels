@@ -246,7 +246,7 @@ export function resolvePagination(
 // específico de Database/Schema (que mudaria o tipo dos parâmetros de
 // `eq`/`in` para union literal e quebraria o uso compartilhado).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyEstabBuilder = PostgrestFilterBuilder<any, any, any, any, any>;
+type AnyEstabBuilder = EstabPostgrestBuilder & Record<string, any>;
 
 export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
   query: Q,
