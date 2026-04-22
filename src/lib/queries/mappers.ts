@@ -25,10 +25,7 @@
 
 import { formatDateBR, TIPO_LABEL } from "@/lib/brazil";
 import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
-import {
-  pickEstabMedia,
-  type EstabMedia,
-} from "@/lib/media";
+import { pickEstabMedia, type EstabMedia } from "@/lib/media";
 import type { AvaliacaoComFamilia } from "./avaliacoes";
 import type { EstabelecimentoView } from "./estabelecimentos";
 import type { ReservaComContexto } from "./reservas";
@@ -112,11 +109,7 @@ export interface EstabCardVM {
 export function mapEstabCard(row: EstabelecimentoView): EstabCardVM {
   const media = pickEstabMedia(row);
   const recursosAtivos = RECURSO_KEYS.filter((k) => row[k] === true);
-  const localidade = row.cidade
-    ? row.estado
-      ? `${row.cidade}, ${row.estado}`
-      : row.cidade
-    : null;
+  const localidade = row.cidade ? (row.estado ? `${row.cidade}, ${row.estado}` : row.cidade) : null;
 
   return {
     id: row.id,

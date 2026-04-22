@@ -405,7 +405,11 @@ type ResVM = ReturnType<typeof mapReserva>;
 
 // ─── 3.1 Avaliação VM ────────────────────────────────────────────────────────
 type _Vm_AvNotAny = AssertNotAny<AvVM, "REGRESSION: mapAvaliacao retorna `any`">;
-type _Vm_AvShape = AssertEqual<AvVM, AvaliacaoVM, "REGRESSION: mapAvaliacao divergiu de AvaliacaoVM">;
+type _Vm_AvShape = AssertEqual<
+  AvVM,
+  AvaliacaoVM,
+  "REGRESSION: mapAvaliacao divergiu de AvaliacaoVM"
+>;
 type _Vm_AvNomeNotNull = AssertEqual<
   AvVM["nomeExibicao"],
   string,
@@ -424,7 +428,11 @@ type _Vm_AvDataNotNull = AssertEqual<
 
 // ─── 3.2 EstabCard VM ────────────────────────────────────────────────────────
 type _Vm_CardNotAny = AssertNotAny<CardVM, "REGRESSION: mapEstabCard retorna `any`">;
-type _Vm_CardShape = AssertEqual<CardVM, EstabCardVM, "REGRESSION: mapEstabCard divergiu de EstabCardVM">;
+type _Vm_CardShape = AssertEqual<
+  CardVM,
+  EstabCardVM,
+  "REGRESSION: mapEstabCard divergiu de EstabCardVM"
+>;
 type _Vm_CardSeloAzul = AssertEqual<
   CardVM["temSeloAzul"],
   boolean,

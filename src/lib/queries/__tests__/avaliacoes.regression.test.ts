@@ -53,9 +53,7 @@ afterEach(() => {
 });
 
 // Helper para montar uma row válida — só os campos que importam ao teste.
-function makeRow(
-  familia: AvaliacaoComFamilia["familia_profiles"],
-): AvaliacaoComFamilia {
+function makeRow(familia: AvaliacaoComFamilia["familia_profiles"]): AvaliacaoComFamilia {
   return {
     id: "av-1",
     estabelecimento_id: "est-1",

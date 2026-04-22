@@ -93,10 +93,7 @@ function ReservasPage() {
                   <td className="p-3 text-right">
                     {r.estabelecimento && (
                       <Button size="sm" variant="ghost" asChild>
-                        <Link
-                          to="/estabelecimento/$slug"
-                          params={{ slug: r.estabelecimento.slug }}
-                        >
+                        <Link to="/estabelecimento/$slug" params={{ slug: r.estabelecimento.slug }}>
                           Ver
                         </Link>
                       </Button>
