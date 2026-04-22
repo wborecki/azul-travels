@@ -2,29 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Star } from "lucide-react";
 import { Pill, SELO_BADGES, RECURSO_BADGES } from "./Badges";
 import { TIPO_LABEL } from "@/lib/brazil";
+import type { EstabelecimentoView } from "@/lib/queries";
 
-export interface Estab {
-  id: string;
-  slug: string;
-  nome: string;
-  tipo: string;
-  cidade: string | null;
-  estado: string | null;
-  foto_capa: string | null;
-  selo_azul: boolean | null;
-  selo_governamental: boolean | null;
-  selo_privado: boolean | null;
-  tour_360_url: string | null;
-  tem_beneficio_tea: boolean | null;
-  tem_sala_sensorial: boolean | null;
-  tem_concierge_tea: boolean | null;
-  tem_checkin_antecipado: boolean | null;
-  tem_fila_prioritaria: boolean | null;
-  tem_cardapio_visual: boolean | null;
-  tem_caa: boolean | null;
-}
+/** @deprecated use `EstabelecimentoView` de `@/lib/queries`. Mantido como alias. */
+export type Estab = EstabelecimentoView;
 
-export function EstabCard({ e }: { e: Estab }) {
+export function EstabCard({ e }: { e: EstabelecimentoView }) {
   const recursos = (
     [
       "tem_sala_sensorial",

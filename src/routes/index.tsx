@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EstabCard, type Estab } from "@/components/EstabCard";
+import { EstabCard } from "@/components/EstabCard";
+import { fetchEstabelecimentosView, type EstabelecimentoView } from "@/lib/queries";
 import { Search, MapPin, ShieldCheck, Award, Camera, Heart, Gift, Star, ArrowRight, Sparkles, Calendar } from "lucide-react";
 import heroImg from "@/assets/hero-familia.jpg";
 
@@ -24,28 +25,19 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const [destaques, setDestaques] = useState<Estab[]>([]);
-  const [beneficios, setBeneficios] = useState<Estab[]>([]);
+  const [destaques, setDestaques] = useState<EstabelecimentoView[]>([]);
+  const [beneficios, setBeneficios] = useState<EstabelecimentoView[]>([]);
   const [artigos, setArtigos] = useState<{ slug: string; titulo: string; resumo: string | null; foto_capa: string | null; categoria: string | null; criado_em: string }[]>([]);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
     void (async () => {
-      const { data: d } = await supabase
-        .from("estabelecimentos")
-        .select("*")
-        .eq("status", "ativo")
-        .eq("destaque", true)
-        .limit(6);
-      setDestaques((d as Estab[]) ?? []);
-
-      const { data: b } = await supabase
-        .from("estabelecimentos")
-        .select("*")
-        .eq("status", "ativo")
-        .eq("tem_beneficio_tea", true)
-        .limit(3);
-      setBeneficios((b as Estab[]) ?? []);
+      const [d, b] = await Promise.all([
+        fetchEstabelecimentosView({ apenasDestaque: true, limite: 6 }),
+        fetchEstabelecimentosView({ apenasComBeneficio: true, limite: 3 }),
+      ]);
+      setDestaques(d);
+      setBeneficios(b);
 
       const { data: a } = await supabase
         .from("conteudo_tea")
