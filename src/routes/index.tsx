@@ -742,7 +742,11 @@ function DestaqueCard({
           : "🏨";
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition border h-full flex flex-col">
+    <div
+      className={`bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full flex flex-col ${
+        isMaisEscolhido ? "border-l-4 border-l-secondary" : ""
+      }`}
+    >
       {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
       <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
         {vm.media.fotoCapa ? (
@@ -778,11 +782,6 @@ function DestaqueCard({
             </span>
           )}
         </div>
-        {isMaisEscolhido && (
-          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-amarelo text-amarelo-foreground text-[11px] font-bold uppercase tracking-wide shadow-soft">
-            Mais escolhido
-          </span>
-        )}
       </div>
 
       <div className="p-5 flex-1 flex flex-col gap-3">
