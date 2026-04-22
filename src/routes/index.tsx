@@ -643,6 +643,7 @@ function DestinosDestaque({
           </p>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            {destaques.map((e, i) => (
               <Reveal key={e.id} delay={i * 80}>
                 <DestaqueCard
                   estab={e}
