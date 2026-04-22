@@ -118,6 +118,7 @@ export {
   fetchReservasAdminPaginated,
   fetchReservasAdminStatusCounts,
   fetchAuditoriaPorReserva,
+  fetchUltimaObservacaoPorReservas,
   fetchAuditoriaAdminPaginated,
   fetchAuditoriaPorEstabelecimento,
   fetchEstabAuditoriaAdminPaginated,

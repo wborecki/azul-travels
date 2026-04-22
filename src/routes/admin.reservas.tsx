@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -8,6 +8,7 @@ import {
   fetchReservasAdminPaginated,
   fetchReservasAdminStatusCounts,
   fetchAuditoriaPorReserva,
+  fetchUltimaObservacaoPorReservas,
   type ReservaAdminRow,
   type AuditoriaRow,
 } from "@/lib/queries";
@@ -56,6 +57,9 @@ import {
   Calendar,
   Users,
   Download,
+  ChevronDown,
+  ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -124,6 +128,14 @@ function AdminReservas() {
   // Exportação CSV
   const [exporting, setExporting] = useState(false);
 
+  // Última observação por reserva (para indicador truncado na linha)
+  const [ultimasObs, setUltimasObs] = useState<Map<string, AuditoriaRow>>(new Map());
+
+  // Linhas expandidas inline (id → histórico carregado)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [logsInline, setLogsInline] = useState<Map<string, AuditoriaRow[]>>(new Map());
+  const [loadingInline, setLoadingInline] = useState<Set<string>>(new Set());
+
   /** Recarrega contadores globais por status (independentes da página). */
   const refreshCounts = useCallback(async () => {
     try {
@@ -175,13 +187,75 @@ function AdminReservas() {
     void refreshCounts();
   }, [refreshCounts]);
 
+  // Sempre que a página de reservas mudar, busca em batch a última
+  // observação de cada uma para mostrar o indicador truncado na linha.
+  useEffect(() => {
+    if (rows.length === 0) {
+      setUltimasObs(new Map());
+      return;
+    }
+    let cancel = false;
+    void (async () => {
+      try {
+        const map = await fetchUltimaObservacaoPorReservas(rows.map((r) => r.id));
+        if (!cancel) setUltimasObs(map);
+      } catch {
+        // best-effort; não bloqueia a tela
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [rows]);
+
   // Reseta para página 1 quando qualquer filtro muda.
   useEffect(() => {
     setPagina(1);
+    setExpanded(new Set());
   }, [filter, qDebounced, tamanhoPagina, checkinDe, checkinAte, criadoDe, criadoAte]);
 
   // Filtro/busca já vêm aplicados do servidor → a página atual é a "view".
   const filtered = rows;
+
+  /**
+   * Expande/recolhe o histórico inline de uma reserva. Lazy-loads o
+   * log na primeira expansão e mantém em cache enquanto a página
+   * não muda.
+   */
+  const toggleExpand = useCallback(
+    (reservaId: string) => {
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        if (next.has(reservaId)) {
+          next.delete(reservaId);
+        } else {
+          next.add(reservaId);
+          // Lazy-fetch só na primeira abertura
+          if (!logsInline.has(reservaId)) {
+            setLoadingInline((s) => new Set(s).add(reservaId));
+            void (async () => {
+              try {
+                const logs = await fetchAuditoriaPorReserva(reservaId);
+                setLogsInline((m) => new Map(m).set(reservaId, logs));
+              } catch (err) {
+                toast.error("Erro ao carregar histórico", {
+                  description: err instanceof Error ? err.message : undefined,
+                });
+              } finally {
+                setLoadingInline((s) => {
+                  const ns = new Set(s);
+                  ns.delete(reservaId);
+                  return ns;
+                });
+              }
+            })();
+          }
+        }
+        return next;
+      });
+    },
+    [logsInline],
+  );
 
   const askAction = (reserva: ReservaAdmin, next: ReservaStatus) => {
     setObservacao("");
@@ -253,6 +327,32 @@ function AdminReservas() {
     setRows((rs) => rs.map((r) => (r.id === reserva.id ? { ...r, status: next } : r)));
     if (selected?.id === reserva.id) {
       setSelected({ ...reserva, status: next });
+    }
+    // Invalida caches de auditoria para a reserva alterada (forçará refetch
+    // na próxima abertura do drawer/expansor) e atualiza última observação.
+    setLogsInline((m) => {
+      if (!m.has(reserva.id)) return m;
+      const n = new Map(m);
+      n.delete(reserva.id);
+      return n;
+    });
+    if (observacao.trim()) {
+      // Otimista: já atualiza o indicador da linha sem esperar o refetch.
+      setUltimasObs((m) => {
+        const n = new Map(m);
+        n.set(reserva.id, {
+          id: `optimistic-${Date.now()}`,
+          reserva_id: reserva.id,
+          ator_id: user.id,
+          ator_email: user.email ?? null,
+          acao: acaoLabel,
+          status_anterior: previous,
+          status_novo: next,
+          observacao: observacao.trim(),
+          criado_em: new Date().toISOString(),
+        });
+        return n;
+      });
     }
     setConfirmAction(null);
     void refreshCounts();
@@ -387,6 +487,33 @@ function AdminReservas() {
     setRows((rs) => rs.map((r) => (idSet.has(r.id) ? { ...r, status: next } : r)));
     if (selected && idSet.has(selected.id)) {
       setSelected({ ...selected, status: next });
+    }
+    // Invalida caches de auditoria das reservas alteradas.
+    setLogsInline((m) => {
+      const n = new Map(m);
+      for (const id of ids) n.delete(id);
+      return n;
+    });
+    if (obs) {
+      // Otimista: atualiza o indicador da última observação para todas.
+      setUltimasObs((m) => {
+        const n = new Map(m);
+        const now = new Date().toISOString();
+        for (const id of ids) {
+          n.set(id, {
+            id: `optimistic-${id}-${Date.now()}`,
+            reserva_id: id,
+            ator_id: user.id,
+            ator_email: user.email ?? null,
+            acao: acaoLabel,
+            status_anterior: previousById.get(id) ?? null,
+            status_novo: next,
+            observacao: obs,
+            criado_em: now,
+          });
+        }
+        return n;
+      });
     }
     setSelecionadas(new Set());
     setBulkAction(null);
@@ -722,6 +849,7 @@ function AdminReservas() {
                     disabled={loading || filteredIds.length === 0}
                   />
                 </th>
+                <th className="px-2 py-3 w-8" aria-label="Expandir histórico" />
                 <th className="px-4 py-3">Estabelecimento</th>
                 <th className="px-4 py-3">Família</th>
                 <th className="px-4 py-3">Check-in</th>
@@ -733,68 +861,119 @@ function AdminReservas() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin inline mr-2" /> Carregando reservas...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhuma reserva encontrada para este filtro.
                   </td>
                 </tr>
               ) : (
                 filtered.map((r) => {
                   const checked = selecionadas.has(r.id);
+                  const isExpanded = expanded.has(r.id);
+                  const ultObs = ultimasObs.get(r.id);
+                  const inlineLogs = logsInline.get(r.id);
+                  const inlineLoading = loadingInline.has(r.id);
                   return (
-                    <tr
-                      key={r.id}
-                      data-state={checked ? "selected" : undefined}
-                      className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
-                      onClick={() => setSelected(r)}
-                    >
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          aria-label={`Selecionar reserva de ${
-                            r.familia_profiles?.nome_responsavel ?? "família"
-                          }`}
-                          checked={checked}
-                          onCheckedChange={(v) => toggleLinha(r.id, v === true)}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {r.estabelecimentos?.nome ?? "—"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
-                            .filter(Boolean)
-                            .join(" / ") || "—"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {r.familia_profiles?.nome_responsavel ?? "—"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {r.familia_profiles?.email ?? ""}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-foreground/80">
-                        {r.data_checkin
-                          ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
-                        {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
-                      </td>
-                      <td className="px-4 py-3">
-                        <ReservaStatusBadge status={r.status} />
-                      </td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <RowActions reserva={r} onAction={askAction} />
-                      </td>
-                    </tr>
+                    <Fragment key={r.id}>
+                      <tr
+                        data-state={checked ? "selected" : undefined}
+                        className="hover:bg-muted/30 cursor-pointer data-[state=selected]:bg-primary/5"
+                        onClick={() => setSelected(r)}
+                      >
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            aria-label={`Selecionar reserva de ${
+                              r.familia_profiles?.nome_responsavel ?? "família"
+                            }`}
+                            checked={checked}
+                            onCheckedChange={(v) => toggleLinha(r.id, v === true)}
+                          />
+                        </td>
+                        <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => toggleExpand(r.id)}
+                            aria-expanded={isExpanded}
+                            aria-label={
+                              isExpanded ? "Recolher histórico" : "Expandir histórico"
+                            }
+                            title={isExpanded ? "Recolher histórico" : "Ver histórico inline"}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">
+                            {r.estabelecimentos?.nome ?? "—"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
+                              .filter(Boolean)
+                              .join(" / ") || "—"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">
+                            {r.familia_profiles?.nome_responsavel ?? "—"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {r.familia_profiles?.email ?? ""}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-foreground/80">
+                          {r.data_checkin
+                            ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
+                            : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
+                          {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <ReservaStatusBadge status={r.status} />
+                          {ultObs?.observacao && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpand(r.id);
+                              }}
+                              className="mt-1.5 flex items-start gap-1 text-xs text-muted-foreground hover:text-foreground transition max-w-[180px] text-left"
+                              title={ultObs.observacao}
+                            >
+                              <MessageSquare className="h-3 w-3 mt-0.5 shrink-0 text-primary/70" />
+                              <span className="truncate italic">
+                                {ultObs.observacao}
+                              </span>
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <RowActions reserva={r} onAction={askAction} />
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="bg-muted/20">
+                          <td colSpan={8} className="px-4 py-4">
+                            <InlineAuditoria
+                              logs={inlineLogs}
+                              loading={inlineLoading}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })
               )}
@@ -1228,6 +1407,70 @@ function InfoLine({
       <span className="text-muted-foreground mt-0.5">{icon}</span>
       <span className="text-muted-foreground w-20 shrink-0">{label}</span>
       <span className="text-foreground/90 flex-1 break-words">{children}</span>
+    </div>
+  );
+}
+
+/**
+ * Histórico de auditoria renderizado **inline** na linha expansível
+ * da tabela. Compacto, sem cabeçalhos — pensado para complementar a
+ * visualização rápida sem exigir abrir o drawer de detalhes.
+ */
+function InlineAuditoria({
+  logs,
+  loading,
+}: {
+  logs: Auditoria[] | undefined;
+  loading: boolean;
+}) {
+  if (loading || logs === undefined) {
+    return (
+      <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" /> Carregando histórico...
+      </p>
+    );
+  }
+  if (logs.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground italic">
+        Nenhuma alteração registrada ainda para esta reserva.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1.5">
+        <History className="h-3.5 w-3.5" /> Histórico ({logs.length})
+      </div>
+      <ol className="space-y-2">
+        {logs.map((log) => (
+          <li
+            key={log.id}
+            className="rounded-lg border bg-card px-3 py-2 text-sm"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground capitalize">{log.acao}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(log.status_anterior ?? "—") + " → " + (log.status_novo ?? "—")}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {new Date(log.criado_em).toLocaleString("pt-BR", {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                })}
+                {log.ator_email ? ` · ${log.ator_email}` : ""}
+              </span>
+            </div>
+            {log.observacao && (
+              <p className="text-sm text-foreground/80 mt-1.5 rounded bg-muted/40 px-2 py-1.5 whitespace-pre-wrap">
+                {log.observacao}
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
