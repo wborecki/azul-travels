@@ -127,7 +127,54 @@ export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdmi
   }));
 }
 
-/** Busca uma row completa para o form de edição. */
+/**
+ * Página tipada do payload admin — items + metadados de paginação.
+ * Análoga a `EstabelecimentosViewPage` mas para o payload com `status`/`criado_em`.
+ */
+export interface EstabelecimentosAdminPage {
+  items: EstabelecimentoAdminView[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
+/**
+ * Versão paginada de `fetchEstabelecimentosAdminView` — uma única ida
+ * ao banco com `count: "exact"`. **Não** força `status='ativo'`, então
+ * traz pendentes/inativos para o painel.
+ */
+export async function fetchEstabelecimentosAdminViewPaginated(
+  filters: EstabelecimentosViewFilters = {},
+): Promise<EstabelecimentosAdminPage> {
+  const pag = resolvePagination({
+    pagina: filters.pagina ?? 1,
+    tamanhoPagina: filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT,
+  })!;
+
+  const base = supabase
+    .from("estabelecimentos")
+    .select(ESTAB_ADMIN_VIEW_SELECT, { count: "exact" })
+    .order("criado_em", { ascending: false });
+
+  const q = applyEstabelecimentosViewFilters(base, {
+    ...filters,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    limite: undefined,
+  });
+
+  const { data, error, count } = await q.returns<EstabelecimentoAdminView[]>();
+  if (error) throw error;
+  const total = count ?? 0;
+  return {
+    items: data ?? [],
+    total,
+    pagina: pag.pagina,
+    tamanhoPagina: pag.tamanhoPagina,
+    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
+  };
+}
 export async function fetchEstabelecimentoAdminPorId(
   id: string,
 ): Promise<Tables<"estabelecimentos"> | null> {
