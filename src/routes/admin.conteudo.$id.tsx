@@ -220,6 +220,33 @@ function AdminConteudoForm() {
     }
 
     const v = parsed.data;
+
+    // Resolve estado → (publicado, publicar_em)
+    let publicado = false;
+    let publicarEmIso: string | null = null;
+    if (form.estado === "publicado") {
+      publicado = true;
+      publicarEmIso = null;
+    } else if (form.estado === "agendado") {
+      const iso = brtInputValueToIso(form.publicar_em_brt);
+      if (!iso) {
+        setErrors({ publicar_em: "Escolha data e hora para o agendamento" });
+        toast.error("Defina a data/hora do agendamento");
+        return;
+      }
+      if (new Date(iso).getTime() <= Date.now()) {
+        setErrors({ publicar_em: "A data deve estar no futuro" });
+        toast.error("Escolha uma data/hora futura");
+        return;
+      }
+      publicado = false;
+      publicarEmIso = iso;
+    } else {
+      // rascunho
+      publicado = false;
+      publicarEmIso = null;
+    }
+
     const payload: ConteudoInsert = {
       titulo: v.titulo,
       slug: v.slug,
@@ -228,7 +255,8 @@ function AdminConteudoForm() {
       resumo: v.resumo,
       conteudo: v.conteudo,
       foto_capa: v.foto_capa || null,
-      publicado: form.publicado,
+      publicado,
+      publicar_em: publicarEmIso,
     };
 
     setSaving(true);
