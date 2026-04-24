@@ -15,6 +15,9 @@ on:
     tags: ['**']
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: mirror-${{ github.ref }}
   cancel-in-progress: false
@@ -43,9 +46,22 @@ jobs:
             exit 1
           fi
 
-          git remote add mirror "https://x-access-token:${MIRROR_TOKEN}@github.com/wborecki/azul-travels.git"
+          # Evita embutir o token na URL do remote (que poderia vazar
+          # em mensagens de erro). O header Authorization é lido de um
+          # arquivo local com permissões restritas, através de
+          # `http.extraheader`.
+          git remote add mirror "https://github.com/wborecki/azul-travels.git"
+
+          auth_header_file="$(mktemp)"
+          chmod 600 "${auth_header_file}"
+          printf 'AUTHORIZATION: basic %s\n' \
+            "$(printf 'x-access-token:%s' "${MIRROR_TOKEN}" | base64 -w0)" \
+            > "${auth_header_file}"
+          trap 'rm -f "${auth_header_file}"' EXIT
 
           # Empurra branches e tags preservando histórico. Não usamos
           # `--mirror` para evitar apagar refs que só existam no destino.
-          git push mirror --follow-tags --prune "refs/heads/*:refs/heads/*"
-          git push mirror "refs/tags/*:refs/tags/*"
+          git -c "http.https://github.com/wborecki/azul-travels.git.extraheader=$(cat "${auth_header_file}")" \
+            push mirror --prune "refs/heads/*:refs/heads/*"
+          git -c "http.https://github.com/wborecki/azul-travels.git.extraheader=$(cat "${auth_header_file}")" \
+            push mirror "refs/tags/*:refs/tags/*"
