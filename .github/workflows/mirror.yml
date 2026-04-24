@@ -31,9 +31,16 @@ jobs:
 
     steps:
       - name: Checkout (mirror clone)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          # Evita que o checkout persista um `http.https://github.com/.extraheader`
+          # com o GITHUB_TOKEN. Esse header casa por prefixo com a URL do remote
+          # `mirror` (https://github.com/wborecki/azul-travels.git) e, somado ao
+          # nosso próprio extraheader de push, faz o git enviar dois headers
+          # `Authorization` — o GitHub rejeita com HTTP 400
+          # ("remote: Duplicate header: \"Authorization\"").
+          persist-credentials: false
 
       - name: Push to wborecki/azul-travels
         env:
