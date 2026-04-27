@@ -18,19 +18,24 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as EstabelecimentosRouteImport } from './routes/estabelecimentos'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
+import { Route as DemoMinhaContaRouteImport } from './routes/demo.minha-conta'
+import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 import { Route as AdminConteudoIndexRouteImport } from './routes/admin.conteudo.index'
+import { Route as DemoEstabelecimentoSlugRouteImport } from './routes/demo.estabelecimento.$slug'
 import { Route as AdminEstabelecimentosIdRouteImport } from './routes/admin.estabelecimentos.$id'
 import { Route as AdminConteudoAnalyticsRouteImport } from './routes/admin.conteudo.analytics'
 import { Route as AdminConteudoIdRouteImport } from './routes/admin.conteudo.$id'
@@ -81,6 +86,11 @@ const EstabelecimentosRoute = EstabelecimentosRouteImport.update({
   path: '/estabelecimentos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CadastroRoute = CadastroRouteImport.update({
   id: '/cadastro',
   path: '/cadastro',
@@ -101,6 +111,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoIndexRoute = DemoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DemoRoute,
+} as any)
 const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
   path: '/conteudo/',
@@ -120,6 +135,16 @@ const EstabelecimentoSlugRoute = EstabelecimentoSlugRouteImport.update({
   id: '/estabelecimento/$slug',
   path: '/estabelecimento/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DemoMinhaContaRoute = DemoMinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
+  getParentRoute: () => DemoRoute,
+} as any)
+const DemoExplorarRoute = DemoExplorarRouteImport.update({
+  id: '/explorar',
+  path: '/explorar',
+  getParentRoute: () => DemoRoute,
 } as any)
 const ConteudoSlugRoute = ConteudoSlugRouteImport.update({
   id: '/conteudo/$slug',
@@ -146,6 +171,11 @@ const AdminConteudoIndexRoute = AdminConteudoIndexRouteImport.update({
   id: '/conteudo/',
   path: '/conteudo/',
   getParentRoute: () => AdminRoute,
+} as any)
+const DemoEstabelecimentoSlugRoute = DemoEstabelecimentoSlugRouteImport.update({
+  id: '/estabelecimento/$slug',
+  path: '/estabelecimento/$slug',
+  getParentRoute: () => DemoRoute,
 } as any)
 const AdminEstabelecimentosIdRoute = AdminEstabelecimentosIdRouteImport.update({
   id: '/estabelecimentos/$id',
@@ -174,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -186,13 +217,17 @@ export interface FileRoutesByFullPath {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/demo/explorar': typeof DemoExplorarRoute
+  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
+  '/demo/': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
+  '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
@@ -213,13 +248,17 @@ export interface FileRoutesByTo {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/demo/explorar': typeof DemoExplorarRoute
+  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
+  '/demo': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
+  '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
   '/admin/conteudo': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos': typeof AdminEstabelecimentosIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
@@ -230,6 +269,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -242,13 +282,17 @@ export interface FileRoutesById {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
+  '/demo/explorar': typeof DemoExplorarRoute
+  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
+  '/demo/': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
+  '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
@@ -260,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -272,13 +317,17 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
+    | '/demo/explorar'
+    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin/'
     | '/conteudo/'
+    | '/demo/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
+    | '/demo/estabelecimento/$slug'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
     | '/admin/estabelecimentos/$id/preview'
@@ -299,13 +348,17 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
+    | '/demo/explorar'
+    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin'
     | '/conteudo'
+    | '/demo'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
+    | '/demo/estabelecimento/$slug'
     | '/admin/conteudo'
     | '/admin/estabelecimentos'
     | '/admin/estabelecimentos/$id/preview'
@@ -315,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -327,13 +381,17 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/reservas'
     | '/conteudo/$slug'
+    | '/demo/explorar'
+    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin/'
     | '/conteudo/'
+    | '/demo/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
+    | '/demo/estabelecimento/$slug'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
     | '/admin/estabelecimentos/$id/preview'
@@ -344,6 +402,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
+  DemoRoute: typeof DemoRouteWithChildren
   EstabelecimentosRoute: typeof EstabelecimentosRoute
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
@@ -424,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstabelecimentosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cadastro': {
       id: '/cadastro'
       path: '/cadastro'
@@ -452,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/': {
+      id: '/demo/'
+      path: '/'
+      fullPath: '/demo/'
+      preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof DemoRoute
+    }
     '/conteudo/': {
       id: '/conteudo/'
       path: '/conteudo'
@@ -479,6 +552,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/estabelecimento/$slug'
       preLoaderRoute: typeof EstabelecimentoSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/demo/minha-conta': {
+      id: '/demo/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/demo/minha-conta'
+      preLoaderRoute: typeof DemoMinhaContaRouteImport
+      parentRoute: typeof DemoRoute
+    }
+    '/demo/explorar': {
+      id: '/demo/explorar'
+      path: '/explorar'
+      fullPath: '/demo/explorar'
+      preLoaderRoute: typeof DemoExplorarRouteImport
+      parentRoute: typeof DemoRoute
     }
     '/conteudo/$slug': {
       id: '/conteudo/$slug'
@@ -514,6 +601,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/conteudo/'
       preLoaderRoute: typeof AdminConteudoIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/demo/estabelecimento/$slug': {
+      id: '/demo/estabelecimento/$slug'
+      path: '/estabelecimento/$slug'
+      fullPath: '/demo/estabelecimento/$slug'
+      preLoaderRoute: typeof DemoEstabelecimentoSlugRouteImport
+      parentRoute: typeof DemoRoute
     }
     '/admin/estabelecimentos/$id': {
       id: '/admin/estabelecimentos/$id'
@@ -584,11 +678,28 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface DemoRouteChildren {
+  DemoExplorarRoute: typeof DemoExplorarRoute
+  DemoMinhaContaRoute: typeof DemoMinhaContaRoute
+  DemoIndexRoute: typeof DemoIndexRoute
+  DemoEstabelecimentoSlugRoute: typeof DemoEstabelecimentoSlugRoute
+}
+
+const DemoRouteChildren: DemoRouteChildren = {
+  DemoExplorarRoute: DemoExplorarRoute,
+  DemoMinhaContaRoute: DemoMinhaContaRoute,
+  DemoIndexRoute: DemoIndexRoute,
+  DemoEstabelecimentoSlugRoute: DemoEstabelecimentoSlugRoute,
+}
+
+const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
+  DemoRoute: DemoRouteWithChildren,
   EstabelecimentosRoute: EstabelecimentosRoute,
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,

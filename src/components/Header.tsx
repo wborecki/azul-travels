@@ -8,6 +8,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDemo = pathname === "/demo" || pathname.startsWith("/demo/");
 
   const navLinkClass =
     "px-3 py-2 text-sm font-medium text-[#1B2E4B] hover:text-[#2CA8A0] transition-colors duration-150 rounded-md";
@@ -22,7 +23,10 @@ export function Header() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white shadow-sm h-16">
+    <header
+      className="fixed left-0 right-0 z-50 w-full bg-white shadow-sm h-16"
+      style={{ top: isDemo ? 36 : 0 }}
+    >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
         <Logo />
 
