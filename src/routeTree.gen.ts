@@ -15,7 +15,9 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ParaEstabelecimentosRouteImport } from './routes/para-estabelecimentos'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
+import { Route as EstabelecimentosRouteImport } from './routes/estabelecimentos'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -64,9 +66,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FamiliasRoute = FamiliasRouteImport.update({
+  id: '/familias',
+  path: '/familias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExplorarRoute = ExplorarRouteImport.update({
   id: '/explorar',
   path: '/explorar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstabelecimentosRoute = EstabelecimentosRouteImport.update({
+  id: '/estabelecimentos',
+  path: '/estabelecimentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -162,7 +174,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
+  '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -187,7 +201,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
+  '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -214,7 +230,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
+  '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -242,7 +260,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/estabelecimentos'
     | '/explorar'
+    | '/familias'
     | '/login'
     | '/para-estabelecimentos'
     | '/privacidade'
@@ -267,7 +287,9 @@ export interface FileRouteTypes {
     | '/'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/estabelecimentos'
     | '/explorar'
+    | '/familias'
     | '/login'
     | '/para-estabelecimentos'
     | '/privacidade'
@@ -293,7 +315,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/estabelecimentos'
     | '/explorar'
+    | '/familias'
     | '/login'
     | '/para-estabelecimentos'
     | '/privacidade'
@@ -320,7 +344,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
+  EstabelecimentosRoute: typeof EstabelecimentosRoute
   ExplorarRoute: typeof ExplorarRoute
+  FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
   ParaEstabelecimentosRoute: typeof ParaEstabelecimentosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -377,11 +403,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/familias': {
+      id: '/familias'
+      path: '/familias'
+      fullPath: '/familias'
+      preLoaderRoute: typeof FamiliasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explorar': {
       id: '/explorar'
       path: '/explorar'
       fullPath: '/explorar'
       preLoaderRoute: typeof ExplorarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estabelecimentos': {
+      id: '/estabelecimentos'
+      path: '/estabelecimentos'
+      fullPath: '/estabelecimentos'
+      preLoaderRoute: typeof EstabelecimentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -549,7 +589,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
+  EstabelecimentosRoute: EstabelecimentosRoute,
   ExplorarRoute: ExplorarRoute,
+  FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
   ParaEstabelecimentosRoute: ParaEstabelecimentosRoute,
   PrivacidadeRoute: PrivacidadeRoute,

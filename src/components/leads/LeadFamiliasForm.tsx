@@ -47,7 +47,7 @@ const SHARE_TEXT =
   "Conheci o Turismo Azul, a primeira plataforma de turismo para famílias com autismo no Brasil. Estou na lista de espera pra quando lançar: " +
   SHARE_URL;
 
-export function LeadFamiliasForm() {
+export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
@@ -69,10 +69,18 @@ export function LeadFamiliasForm() {
   }, []);
 
   async function loadCount() {
-    const { count: c } = await supabase
-      .from("leads_familias")
-      .select("*", { count: "exact", head: true });
-    setCount(c ?? 0);
+    try {
+      const { count: c, error } = await supabase
+        .from("leads_familias")
+        .select("*", { count: "exact", head: true });
+      if (error) {
+        setCount(-1);
+        return;
+      }
+      setCount(c ?? 0);
+    } catch {
+      setCount(-1);
+    }
   }
 
   const togglePreocupacao = (p: string) => {
@@ -131,7 +139,7 @@ export function LeadFamiliasForm() {
       num_filhos_tea: parsed.data.num_filhos_tea,
       preocupacoes,
       como_conheceu: parsed.data.como_conheceu || null,
-      origem: "home",
+      origem,
     });
     setEnviando(false);
     if (error) {
@@ -144,6 +152,12 @@ export function LeadFamiliasForm() {
     }
     setEnviado(true);
     void loadCount();
+    if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "lead_familia", {
+        event_category: "formulario",
+        event_label: "lista_espera_familia",
+      });
+    }
   }
 
   function copyLink() {
@@ -183,18 +197,18 @@ export function LeadFamiliasForm() {
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
-      <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
-        <Users className="h-4 w-4" />
-        {count === null ? (
-          <span className="opacity-60">Carregando…</span>
-        ) : count === 0 ? (
-          <span>Seja um dos primeiros</span>
-        ) : (
-          <span>
-            🧑‍🤝‍🧑 {count.toLocaleString("pt-BR")} famílias já na lista de espera
-          </span>
-        )}
-      </div>
+      {count !== null && count >= 0 && (
+        <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
+          <Users className="h-4 w-4" />
+          {count === 0 ? (
+            <span>Seja um dos primeiros</span>
+          ) : (
+            <span>
+              🧑‍🤝‍🧑 {count.toLocaleString("pt-BR")} famílias já na lista de espera
+            </span>
+          )}
+        </div>
+      )}
 
       <Field label="Nome do responsável *" error={errors.nome}>
         <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" />

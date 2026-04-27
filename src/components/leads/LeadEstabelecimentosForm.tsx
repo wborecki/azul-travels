@@ -56,7 +56,7 @@ const schema = z.object({
 
 type FormErrors = Partial<Record<keyof z.infer<typeof schema>, string>>;
 
-export function LeadEstabelecimentosForm() {
+export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string } = {}) {
   const [nome, setNome] = useState("");
   const [cargo, setCargo] = useState("");
   const [email, setEmail] = useState("");
@@ -81,10 +81,18 @@ export function LeadEstabelecimentosForm() {
   }, []);
 
   async function loadCount() {
-    const { count: c } = await supabase
-      .from("leads_estabelecimentos")
-      .select("*", { count: "exact", head: true });
-    setCount(c ?? 0);
+    try {
+      const { count: c, error } = await supabase
+        .from("leads_estabelecimentos")
+        .select("*", { count: "exact", head: true });
+      if (error) {
+        setCount(-1);
+        return;
+      }
+      setCount(c ?? 0);
+    } catch {
+      setCount(-1);
+    }
   }
 
   const toggleInteresse = (i: string) => {
@@ -149,7 +157,7 @@ export function LeadEstabelecimentosForm() {
       iniciativa_atual: parsed.data.iniciativa_atual,
       interesses,
       como_conheceu: parsed.data.como_conheceu || null,
-      origem: "home",
+      origem,
     });
     setEnviando(false);
     if (error) {
@@ -162,6 +170,16 @@ export function LeadEstabelecimentosForm() {
     }
     setEnviado(true);
     void loadCount();
+    if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        "event",
+        "lead_estabelecimento",
+        {
+          event_category: "formulario",
+          event_label: "lista_espera_estabelecimento",
+        },
+      );
+    }
   }
 
   if (enviado) {
@@ -181,16 +199,16 @@ export function LeadEstabelecimentosForm() {
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
-      <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
-        <Building2 className="h-4 w-4" />
-        {count === null ? (
-          <span className="opacity-60">Carregando…</span>
-        ) : count === 0 ? (
-          <span>Seja um dos primeiros parceiros</span>
-        ) : (
-          <span>🏨 {count.toLocaleString("pt-BR")} estabelecimentos já cadastrados</span>
-        )}
-      </div>
+      {count !== null && count >= 0 && (
+        <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
+          <Building2 className="h-4 w-4" />
+          {count === 0 ? (
+            <span>Seja um dos primeiros parceiros</span>
+          ) : (
+            <span>🏨 {count.toLocaleString("pt-BR")} estabelecimentos já cadastrados</span>
+          )}
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Nome do responsável *" error={errors.nome}>

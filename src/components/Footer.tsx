@@ -48,11 +48,7 @@ export function Footer() {
           <h4 className="font-display font-semibold mb-3 text-white">Para famílias</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link
-                to="/"
-                search={{ scroll: "form-familias" } as never}
-                className="hover:text-secondary transition"
-              >
+              <Link to="/familias" className="hover:text-secondary transition">
                 Entrar na lista de espera
               </Link>
             </li>
@@ -73,11 +69,7 @@ export function Footer() {
           <h4 className="font-display font-semibold mb-3 text-white">Para estabelecimentos</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link
-                to="/"
-                search={{ scroll: "form-estabelecimentos" } as never}
-                className="hover:text-secondary transition"
-              >
+              <Link to="/estabelecimentos" className="hover:text-secondary transition">
                 Cadastre seu estabelecimento
               </Link>
             </li>

@@ -40,19 +40,19 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-2">
           <Button
+            asChild
             variant="outline"
             size="sm"
-            onClick={() => goScroll("form-familias")}
             className="text-[#1B2E4B] border-[#1B2E4B] hover:bg-[#EBF4F8]"
           >
-            Para famílias
+            <Link to="/familias">Lista de espera — famílias</Link>
           </Button>
           <Button
+            asChild
             size="sm"
-            onClick={() => goScroll("form-estabelecimentos")}
             className="bg-[#1B2E4B] text-white hover:bg-[#2CA8A0]"
           >
-            Para estabelecimentos
+            <Link to="/estabelecimentos">Cadastrar estabelecimento</Link>
           </Button>
         </div>
 
@@ -78,17 +78,18 @@ export function Header() {
               Conteúdo
             </Link>
             <Button
+              asChild
               variant="outline"
-              onClick={() => goScroll("form-familias")}
               className="w-full justify-center"
             >
-              Para famílias
+              <Link to="/familias" onClick={() => setOpen(false)}>
+                Lista de espera — famílias
+              </Link>
             </Button>
-            <Button
-              onClick={() => goScroll("form-estabelecimentos")}
-              className="w-full justify-center bg-[#1B2E4B] text-white"
-            >
-              Para estabelecimentos
+            <Button asChild className="w-full justify-center bg-[#1B2E4B] text-white">
+              <Link to="/estabelecimentos" onClick={() => setOpen(false)}>
+                Cadastrar estabelecimento
+              </Link>
             </Button>
           </div>
         </div>

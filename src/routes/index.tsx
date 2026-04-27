@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
-import { LeadFamiliasForm } from "@/components/leads/LeadFamiliasForm";
-import { LeadEstabelecimentosForm } from "@/components/leads/LeadEstabelecimentosForm";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
   ShieldCheck,
@@ -22,23 +20,35 @@ import {
   Gift,
   CircleDot,
   Construction,
+  Users,
+  Building2,
 } from "lucide-react";
+
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&w=1920&q=80";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Turismo Azul — Plataforma em construção" },
+      { title: "Turismo Azul — Turismo inclusivo para famílias TEA no Brasil" },
       {
         name: "description",
         content:
-          "Estamos construindo o primeiro marketplace brasileiro de turismo para famílias TEA. Entre na lista de espera.",
+          "O primeiro marketplace brasileiro de turismo para famílias com autismo. Destinos verificados, perfil sensorial e selos de qualidade. Em breve.",
       },
-      { property: "og:title", content: "Turismo Azul — Em construção" },
+      {
+        property: "og:title",
+        content: "Turismo Azul — Turismo inclusivo para famílias TEA",
+      },
       {
         property: "og:description",
         content:
-          "Garanta seu lugar na lista de espera do lançamento. Para famílias TEA e estabelecimentos.",
+          "Seja um dos primeiros a entrar quando a plataforma abrir. Lista de espera gratuita.",
       },
+      { property: "og:image", content: HERO_IMAGE },
+      { property: "og:url", content: "https://azul-travels.lovable.app" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: HERO_IMAGE },
     ],
   }),
   component: Landing,
@@ -60,7 +70,6 @@ function scrollToId(id: string) {
 function Landing() {
   const [artigos, setArtigos] = useState<ArtigoCard[] | null>(null);
 
-  // Suporte a /?scroll=form-familias / form-estabelecimentos
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const target = params.get("scroll");
@@ -87,10 +96,10 @@ function Landing() {
       <ComoFunciona />
       <SelosImportantes />
       <OQuePlataformaTera />
-      <FamiliasSection />
+      <FamiliasTeaser />
       <Citacao />
       <MercadoSection />
-      <EstabelecimentosSection />
+      <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
     </div>
@@ -108,22 +117,16 @@ function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232CA8A0' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 50%, #2CA8A0 100%)`,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(27, 46, 75, 0.15) 0%, rgba(27, 46, 75, 0.05) 40%, rgba(27, 46, 75, 0.45) 100%)",
+          backgroundImage: `linear-gradient(to bottom, rgba(27,46,75,0.58) 0%, rgba(27,46,75,0.42) 40%, rgba(27,46,75,0.72) 100%), url('${HERO_IMAGE}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center 30%",
         }}
       />
 
-      <div className="relative container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+      <div className="relative container mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16">
         <div className="max-w-3xl mx-auto text-center text-white animate-fade-in">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-sm font-medium backdrop-blur">
-            🚀 Plataforma em construção — Garanta seu lugar
+            🚀 Plataforma em construção. Garanta seu lugar.
           </span>
 
           <h1 className="mt-6 text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
@@ -138,32 +141,36 @@ function Hero() {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
+              asChild
               size="lg"
-              onClick={() => scrollToId("form-familias")}
               className="bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-7 text-base font-semibold"
             >
-              Sou uma família TEA
+              <Link to="/familias">Sou uma família TEA</Link>
             </Button>
             <Button
+              asChild
               size="lg"
-              onClick={() => scrollToId("form-estabelecimentos")}
               className="bg-white text-primary hover:bg-white/90 border border-white min-h-[52px] px-7 text-base font-semibold"
             >
-              Tenho um estabelecimento
+              <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
           </div>
 
-          <div className="mt-10 inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 rounded-full px-6 py-3 text-sm font-medium">
+          <div className="mt-8 inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 rounded-full px-6 py-3 text-sm font-medium">
             <Lock className="h-4 w-4 text-amarelo" />
             Vagas limitadas na lista de espera do lançamento
           </div>
+        </div>
 
+        <div className="mt-6 flex justify-center">
           <button
             type="button"
             onClick={() => scrollToId("como-funciona")}
-            className="mt-12 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint cursor-pointer"
+            className="inline-flex flex-col items-center gap-1 text-white/70 hover:text-white cursor-pointer animate-bounce"
+            style={{ fontSize: "13px" }}
+            aria-label="Ir para Como funciona"
           >
-            <span>↓ Veja como funciona</span>
+            <span>Como funciona</span>
             <ChevronDown className="h-5 w-5" />
           </button>
         </div>
@@ -190,7 +197,7 @@ function ComoFunciona() {
       Icon: MapPinned,
       titulo: "Encontre lugares prontos pra ele",
       texto:
-        "Nada de ligar pra dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares prontos pra receber o seu filho.",
+        "Nada de ligar pra dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares prontos pra receber vocês.",
     },
     {
       n: "3",
@@ -242,11 +249,11 @@ function ComoFunciona() {
               lançamento.
             </p>
             <Button
-              onClick={() => scrollToId("form-familias")}
+              asChild
               className="mt-5 bg-secondary hover:bg-secondary/90 text-white"
               size="lg"
             >
-              Quero ser avisado
+              <Link to="/familias">Quero ser avisado</Link>
             </Button>
           </div>
         </Reveal>
@@ -287,7 +294,7 @@ function SelosImportantes() {
       cor: "bg-secondary text-secondary-foreground",
       nome: "Concierge TEA",
       descricao:
-        "Profissional especializado em autismo presente durante toda a sua estadia. Não é um funcionário treinado — é alguém que entende de verdade.",
+        "Profissional especializado em autismo presente durante toda a sua estadia. Não é apenas um funcionário treinado. É alguém que entende de autismo de verdade.",
     },
   ];
 
@@ -299,7 +306,7 @@ function SelosImportantes() {
             O que está por trás de cada certificação
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-            Qualquer hotel pode se dizer inclusivo. A gente vai exigir prova.
+            Qualquer hotel pode se dizer inclusivo. A gente exige prova.
           </p>
         </Reveal>
 
@@ -352,7 +359,7 @@ function OQuePlataformaTera() {
       Icon: Puzzle,
       titulo: "Perfil sensorial do seu filho",
       texto:
-        "Você conta o que ele precisa. A plataforma filtra só os lugares prontos para receber ele.",
+        "Você conta o que seu filho precisa. A plataforma filtra só os lugares prontos para receber sua família.",
     },
     {
       Icon: Gift,
@@ -402,25 +409,33 @@ function OQuePlataformaTera() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FORMULÁRIO FAMÍLIAS
+// TEASER FAMÍLIAS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function FamiliasSection() {
+function FamiliasTeaser() {
   return (
-    <section id="form-familias" className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <Reveal className="max-w-2xl mx-auto text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
-            Sou família TEA
+    <section id="form-familias" className="py-20 bg-primary text-primary-foreground">
+      <div className="container mx-auto px-4 max-w-3xl text-center">
+        <Reveal>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-semibold uppercase tracking-wide">
+            <Users className="h-3.5 w-3.5" />
+            Para famílias TEA
+          </div>
+          <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold text-white">
+            Entre na lista de espera
           </h2>
-          <p className="mt-3 text-[15px] text-muted-foreground">
-            Entre na lista de espera. Quando a plataforma abrir, você é um dos primeiros a ser
-            avisado e a ter acesso.
+          <p className="mt-4 text-white/80 text-base md:text-lg">
+            Cadastre sua família e seja avisado em primeira mão quando a plataforma abrir. Acesso
+            gratuito e prioritário.
           </p>
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-8 text-base font-semibold"
+          >
+            <Link to="/familias">Ir para o formulário de famílias</Link>
+          </Button>
         </Reveal>
-        <div className="max-w-2xl mx-auto">
-          <LeadFamiliasForm />
-        </div>
       </div>
     </section>
   );
@@ -432,25 +447,25 @@ function FamiliasSection() {
 
 function Citacao() {
   return (
-    <section className="py-16 bg-primary text-primary-foreground">
+    <section className="py-16 bg-azul-claro">
       <div className="container mx-auto px-4 max-w-3xl">
         <Reveal className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
             Por que isso importa
           </h2>
         </Reveal>
 
         <Reveal>
-          <blockquote className="border-l-4 border-secondary pl-6 italic text-white text-xl leading-relaxed">
+          <blockquote className="border-l-4 border-secondary pl-6 italic text-foreground text-xl leading-relaxed">
             “Antes de sair de casa, eu ligava para vários hotéis tentando explicar o autismo do meu
             filho. A maioria não sabia o que fazer. Às vezes eu simplesmente desistia da viagem.”
-            <footer className="mt-4 not-italic text-sm text-white/70">
-              — Relato real de mãe de criança autista, coletado pela nossa equipe durante a pesquisa
+            <footer className="mt-4 not-italic text-sm text-muted-foreground">
+              Relato real de mãe de criança autista, coletado pela nossa equipe durante a pesquisa
               do produto.
             </footer>
           </blockquote>
 
-          <p className="mt-8 text-center text-white/70 text-[15px]">
+          <p className="mt-8 text-center text-muted-foreground text-[15px]">
             O Turismo Azul foi criado para que nenhuma família precise desistir de viajar por falta
             de informação.
           </p>
@@ -504,25 +519,33 @@ function MercadoSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FORMULÁRIO ESTABELECIMENTOS
+// TEASER ESTABELECIMENTOS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function EstabelecimentosSection() {
+function EstabelecimentosTeaser() {
   return (
     <section id="form-estabelecimentos" className="py-20" style={{ backgroundColor: "#F8FAFB" }}>
-      <div className="container mx-auto px-4">
-        <Reveal className="max-w-2xl mx-auto text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
-            Tenho um estabelecimento
+      <div className="container mx-auto px-4 max-w-3xl text-center">
+        <Reveal>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide">
+            <Building2 className="h-3.5 w-3.5" />
+            Para estabelecimentos
+          </div>
+          <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold text-primary">
+            Cadastre seu estabelecimento
           </h2>
-          <p className="mt-3 text-[15px] text-muted-foreground">
-            Cadastre seu hotel, restaurante ou parque agora. Nossa equipe entra em contato assim que
-            a plataforma abrir para listar os primeiros parceiros.
+          <p className="mt-4 text-muted-foreground text-base md:text-lg">
+            Hotéis, restaurantes, parques e atrações: entre na fila prioritária de parceiros do
+            lançamento e fique no radar de 500 mil famílias TEA.
           </p>
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 bg-primary hover:bg-secondary text-white min-h-[52px] px-8 text-base font-semibold"
+          >
+            <Link to="/estabelecimentos">Ir para o formulário de estabelecimentos</Link>
+          </Button>
         </Reveal>
-        <div className="max-w-2xl mx-auto">
-          <LeadEstabelecimentosForm />
-        </div>
       </div>
     </section>
   );
@@ -611,18 +634,18 @@ function CtaFinal() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
+              asChild
               size="lg"
-              onClick={() => scrollToId("form-familias")}
               className="bg-white text-primary hover:bg-white/90 min-h-[52px] px-7 text-base font-semibold"
             >
-              Sou família TEA
+              <Link to="/familias">Sou família TEA</Link>
             </Button>
             <Button
+              asChild
               size="lg"
-              onClick={() => scrollToId("form-estabelecimentos")}
               className="bg-transparent border-2 border-white text-white hover:bg-white/10 min-h-[52px] px-7 text-base font-semibold"
             >
-              Tenho um estabelecimento
+              <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
           </div>
         </Reveal>
