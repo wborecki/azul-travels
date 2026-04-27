@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /minha-conta/
+Disallow: /auth/
+Sitemap: https://azul-travels.lovable.app/sitemap.xml
