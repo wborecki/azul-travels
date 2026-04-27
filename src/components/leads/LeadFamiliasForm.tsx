@@ -37,9 +37,7 @@ const schema = z.object({
   status_diagnostico: z.string().min(1, "Selecione uma opção"),
   num_filhos_tea: z.string().min(1, "Selecione uma opção"),
   como_conheceu: z.string().optional(),
-  consentimento: z.literal(true, {
-    errorMap: () => ({ message: "Você precisa concordar para se inscrever" }),
-  }),
+  consentimento: z.literal(true, { message: "Você precisa concordar para se inscrever" }),
 });
 
 type FormErrors = Partial<Record<keyof z.infer<typeof schema>, string>>;
