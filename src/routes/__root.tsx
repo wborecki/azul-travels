@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { Link } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
@@ -34,27 +35,20 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Turismo Azul — Marketplace de turismo inclusivo TEA" },
+      { title: "Turismo Azul — Turismo inclusivo para famílias TEA no Brasil" },
       {
         name: "description",
         content:
-          "O primeiro marketplace brasileiro que conecta famílias de pessoas com Transtorno do Espectro Autista a destinos turísticos realmente preparados.",
-      },
-      { property: "og:title", content: "Turismo Azul — Marketplace de turismo inclusivo TEA" },
-      {
-        property: "og:description",
-        content: "Viajar com autismo. Com confiança, com conforto, com alegria.",
+          "O primeiro marketplace brasileiro de turismo para famílias com autismo. Destinos verificados, perfil sensorial e selos de qualidade. Em breve.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Turismo Azul" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Turismo Azul — Marketplace de turismo inclusivo TEA" },
-      { name: "description", content: "Turismo Azul: marketplace web que conecta famílias TEA a estabelecimentos turísticos inclusivos no Brasil." },
-      { property: "og:description", content: "Turismo Azul: marketplace web que conecta famílias TEA a estabelecimentos turísticos inclusivos no Brasil." },
-      { name: "twitter:description", content: "Turismo Azul: marketplace web que conecta famílias TEA a estabelecimentos turísticos inclusivos no Brasil." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1f0b8bb1-3e42-4ff5-9f8a-d8ebd6e1272d/id-preview-fe710600--7bf2bcd5-3bbd-46f8-9d66-38cabb2c62ae.lovable.app-1776897014760.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1f0b8bb1-3e42-4ff5-9f8a-d8ebd6e1272d/id-preview-fe710600--7bf2bcd5-3bbd-46f8-9d66-38cabb2c62ae.lovable.app-1776897014760.png" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -84,6 +78,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
+        <FloatingWhatsApp />
       </div>
       <Toaster richColors position="top-right" />
     </AuthProvider>
