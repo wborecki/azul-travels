@@ -57,7 +57,7 @@ type ConteudoSearch = { q: string; cat: string; page: number };
 
 function ConteudoLista() {
   const { q, cat, page } = Route.useSearch();
-  const navigate = useNavigate({ from: "/conteudo" });
+  const navigate = useNavigate({ from: "/conteudo/" });
 
   const [busca, setBusca] = useState(q);
   // Sincroniza input quando URL muda externamente (ex.: voltar/avançar do navegador)
