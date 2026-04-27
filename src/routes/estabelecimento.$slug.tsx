@@ -3,12 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
+  fetchReservasDaFamiliaPorEstabelecimento,
   criarReserva,
   buildReservaPayload,
   pickEstabMedia,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
+  type ReservaComContexto,
   type ReservaFormInput,
 } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
