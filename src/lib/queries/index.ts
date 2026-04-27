@@ -57,6 +57,7 @@ export {
 
 export {
   fetchReservasDaFamilia,
+  fetchReservasDaFamiliaPorEstabelecimento,
   criarReserva,
   buildReservaPayload,
   type Reserva,
