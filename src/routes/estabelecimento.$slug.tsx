@@ -521,157 +521,175 @@ function EstabPage() {
             </section>
           </div>
 
-          {/* COLUNA DIREITA — formulário sticky */}
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
-              <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
+          {/* COLUNA DIREITA — formulário sticky / confirmação / histórico */}
+          <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
+            {!user ? (
+              <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
+                <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
+                <p className="text-sm text-muted-foreground">
+                  Faça login para solicitar uma reserva e enviar o perfil sensorial do seu filho.
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/login">Entrar ou cadastrar</Link>
+                </Button>
+              </div>
+            ) : reservaEnviada && reservaRecemCriadaId ? (
+              <ConfirmacaoReservaCard
+                reserva={
+                  reservasFamilia.find((r) => r.id === reservaRecemCriadaId) ?? null
+                }
+                estabNome={e.nome}
+                onNovaReserva={() => {
+                  setReservaEnviada(false);
+                  setReservaRecemCriadaId(null);
+                  setMensagem("");
+                  setAutoriza(false);
+                }}
+              />
+            ) : (
+              <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
+                <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
 
-              {!user ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Faça login para solicitar uma reserva e enviar o perfil sensorial do seu filho.
+                {/* Perfil sensorial */}
+                <div>
+                  <Label>Perfil sensorial</Label>
+                  {perfis.length === 0 ? (
+                    <Button
+                      variant="outline"
+                      className="mt-1.5 w-full"
+                      onClick={() => setPerfilModalOpen(true)}
+                    >
+                      <Plus className="h-4 w-4" /> Criar primeiro perfil
+                    </Button>
+                  ) : (
+                    <Select
+                      value={perfilSel}
+                      onValueChange={(v) => {
+                        if (v === "__novo__") {
+                          setPerfilModalOpen(true);
+                        } else {
+                          setPerfilSel(v);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Selecione um perfil" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {perfis.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.nome_autista}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="__novo__">+ Adicionar novo perfil</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    O perfil sensorial será enviado ao estabelecimento ao confirmar a reserva.
                   </p>
-                  <Button asChild className="w-full">
-                    <Link to="/login">Entrar ou cadastrar</Link>
-                  </Button>
                 </div>
-              ) : (
-                <>
-                  {/* Perfil sensorial */}
+
+                {/* Datas */}
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>Perfil sensorial</Label>
-                    {perfis.length === 0 ? (
-                      <Button
-                        variant="outline"
-                        className="mt-1.5 w-full"
-                        onClick={() => setPerfilModalOpen(true)}
-                      >
-                        <Plus className="h-4 w-4" /> Criar primeiro perfil
-                      </Button>
-                    ) : (
-                      <Select
-                        value={perfilSel}
-                        onValueChange={(v) => {
-                          if (v === "__novo__") {
-                            setPerfilModalOpen(true);
-                          } else {
-                            setPerfilSel(v);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="Selecione um perfil" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {perfis.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.nome_autista}
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="__novo__">+ Adicionar novo perfil</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1.5">
-                      O perfil sensorial será enviado ao estabelecimento ao confirmar a reserva.
-                    </p>
-                  </div>
-
-                  {/* Datas */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="checkin">Chegada</Label>
-                      <Input
-                        id="checkin"
-                        type="date"
-                        min={todayPlus(1)}
-                        value={checkin}
-                        onChange={(ev) => setCheckin(ev.target.value)}
-                        className="mt-1.5"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="checkout">Saída</Label>
-                      <Input
-                        id="checkout"
-                        type="date"
-                        min={checkin || todayPlus(2)}
-                        value={checkout}
-                        onChange={(ev) => setCheckout(ev.target.value)}
-                        className="mt-1.5"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Steppers */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <Stepper
-                      label="Adultos"
-                      value={adultos}
-                      onChange={setAdultos}
-                      min={1}
-                      max={10}
-                    />
-                    <Stepper
-                      label="Crianças autistas"
-                      value={autistas}
-                      onChange={setAutistas}
-                      min={1}
-                      max={5}
-                    />
-                  </div>
-
-                  {/* Mensagem */}
-                  <div>
-                    <Label htmlFor="mensagem">Mensagem (opcional)</Label>
-                    <Textarea
-                      id="mensagem"
-                      value={mensagem}
-                      onChange={(ev) => setMensagem(ev.target.value)}
-                      placeholder="Alguma informação adicional que queira passar ao estabelecimento?"
-                      rows={3}
+                    <Label htmlFor="checkin">Chegada</Label>
+                    <Input
+                      id="checkin"
+                      type="date"
+                      min={todayPlus(1)}
+                      value={checkin}
+                      onChange={(ev) => setCheckin(ev.target.value)}
                       className="mt-1.5"
                     />
                   </div>
-
-                  {/* Autorização */}
-                  <label className="flex items-start gap-2 text-xs cursor-pointer">
-                    <Checkbox
-                      checked={autoriza}
-                      onCheckedChange={(v) => setAutoriza(!!v)}
-                      className="mt-0.5"
+                  <div>
+                    <Label htmlFor="checkout">Saída</Label>
+                    <Input
+                      id="checkout"
+                      type="date"
+                      min={checkin || todayPlus(2)}
+                      value={checkout}
+                      onChange={(ev) => setCheckout(ev.target.value)}
+                      className="mt-1.5"
                     />
-                    <span>
-                      Autorizo o envio do perfil sensorial de{" "}
-                      <strong>{perfilSelecionado?.nome_autista || "—"}</strong> para este
-                      estabelecimento.
-                    </span>
-                  </label>
+                  </div>
+                </div>
 
-                  <Button
-                    onClick={enviarReserva}
-                    disabled={enviando || reservaEnviada || perfis.length === 0}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {enviando ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
-                      </>
-                    ) : reservaEnviada ? (
-                      "Reserva enviada ✓"
-                    ) : (
-                      "Solicitar reserva"
-                    )}
-                  </Button>
+                {/* Steppers */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Stepper
+                    label="Adultos"
+                    value={adultos}
+                    onChange={setAdultos}
+                    min={1}
+                    max={10}
+                  />
+                  <Stepper
+                    label="Crianças autistas"
+                    value={autistas}
+                    onChange={setAutistas}
+                    min={1}
+                    max={5}
+                  />
+                </div>
 
-                  <p className="text-[11px] text-muted-foreground leading-snug">
-                    Esta plataforma conecta você ao estabelecimento. O pagamento é feito
-                    diretamente com eles.
-                  </p>
-                </>
-              )}
-            </div>
+                {/* Mensagem */}
+                <div>
+                  <Label htmlFor="mensagem">Mensagem (opcional)</Label>
+                  <Textarea
+                    id="mensagem"
+                    value={mensagem}
+                    onChange={(ev) => setMensagem(ev.target.value)}
+                    placeholder="Alguma informação adicional que queira passar ao estabelecimento?"
+                    rows={3}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                {/* Autorização */}
+                <label className="flex items-start gap-2 text-xs cursor-pointer">
+                  <Checkbox
+                    checked={autoriza}
+                    onCheckedChange={(v) => setAutoriza(!!v)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    Autorizo o envio do perfil sensorial de{" "}
+                    <strong>{perfilSelecionado?.nome_autista || "—"}</strong> para este
+                    estabelecimento.
+                  </span>
+                </label>
+
+                <Button
+                  onClick={enviarReserva}
+                  disabled={enviando || perfis.length === 0}
+                  className="w-full"
+                  size="lg"
+                >
+                  {enviando ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
+                    </>
+                  ) : (
+                    "Solicitar reserva"
+                  )}
+                </Button>
+
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Esta plataforma conecta você ao estabelecimento. O pagamento é feito
+                  diretamente com eles.
+                </p>
+              </div>
+            )}
+
+            {/* Histórico desta família neste estabelecimento */}
+            {user && reservasFamilia.length > 0 && (
+              <HistoricoReservasCard
+                reservas={reservasFamilia}
+                destacarId={reservaRecemCriadaId}
+              />
+            )}
           </aside>
         </div>
       </div>
