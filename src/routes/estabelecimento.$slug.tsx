@@ -715,6 +715,48 @@ function EstabPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal: Tour 360° em iframe */}
+      <Dialog open={tourModalOpen} onOpenChange={setTourModalOpen}>
+        <DialogContent className="max-w-5xl w-[95vw] p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-3">
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-amarelo" />
+              Tour 360° — {e.nome}
+            </DialogTitle>
+            <DialogDescription>
+              Explore os ambientes do estabelecimento sem sair da página. Use o mouse ou o toque para navegar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="relative w-full bg-black" style={{ aspectRatio: "16 / 9" }}>
+            {tour360Url && tourModalOpen && (
+              <iframe
+                src={tour360Url}
+                title={`Tour 360° de ${e.nome}`}
+                className="absolute inset-0 w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
+                allowFullScreen
+                loading="lazy"
+              />
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-3 px-6 py-3 border-t border-border bg-muted/30">
+            <p className="text-xs text-muted-foreground">
+              O tour é fornecido pelo estabelecimento e abre incorporado nesta página.
+            </p>
+            {tour360Url && (
+              <a
+                href={tour360Url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Abrir em nova aba
+              </a>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
