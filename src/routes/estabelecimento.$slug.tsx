@@ -166,6 +166,27 @@ function EstabPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Reservas que esta família já fez para este estabelecimento (histórico).
+  const recarregarReservasFamilia = async (estabId: string) => {
+    if (!user) return [] as ReservaComContexto[];
+    try {
+      const data = await fetchReservasDaFamiliaPorEstabelecimento(user.id, estabId);
+      setReservasFamilia(data);
+      return data;
+    } catch (err) {
+      toast.error("Erro ao carregar suas reservas anteriores", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+      return [] as ReservaComContexto[];
+    }
+  };
+
+  useEffect(() => {
+    if (!user || !detalhe?.estabelecimento.id) return;
+    void recarregarReservasFamilia(detalhe.estabelecimento.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, detalhe?.estabelecimento.id]);
+
   const e: Estab | undefined = detalhe?.estabelecimento;
   const avaliacoes = detalhe?.avaliacoes ?? [];
 
