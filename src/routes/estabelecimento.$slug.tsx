@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { TIPO_LABEL, formatDateBR } from "@/lib/brazil";
+import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
 import {
   Camera,
   MapPin,
@@ -59,6 +60,12 @@ import {
   Minus,
   Plus,
   Loader2,
+  CheckCircle2,
+  Clock,
+  Mail,
+  CalendarCheck,
+  History,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
