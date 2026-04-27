@@ -315,7 +315,7 @@ function ComoFunciona() {
       Icon: UserPlus,
       titulo: "Fale sobre o seu filho",
       texto:
-        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos e muda completamente como você planeja viagens.",
+        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos.",
     },
     {
       n: "2",
