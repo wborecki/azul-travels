@@ -761,14 +761,14 @@ function CtaFinal() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 min-h-[52px] px-7 text-base font-semibold"
+              className="bg-white text-primary hover:bg-secondary hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/familias">Sou família TEA</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              className="bg-transparent border-2 border-white text-white hover:bg-white/10 min-h-[52px] px-7 text-base font-semibold"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
