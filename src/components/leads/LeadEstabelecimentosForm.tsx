@@ -217,7 +217,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
-      {count !== null && count >= 0 && (
+      {!loadingCount && count !== null && (
         <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
           <Building2 className="h-4 w-4" />
           {count === 0 ? (
