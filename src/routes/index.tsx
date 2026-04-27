@@ -243,9 +243,8 @@ function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(27,46,75,0.55) 0%, rgba(27,46,75,0.40) 40%, rgba(27,46,75,0.68) 100%), url('${HERO_IMAGE}'), url('${HERO_FALLBACK}'), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 55%, #2CA8A0 100%)`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 35%",
+          background:
+            "linear-gradient(135deg, #1B2E4B 0%, #1E5270 35%, #1A7A74 70%, #2CA8A0 100%)",
         }}
       />
 
@@ -269,14 +268,14 @@ function Hero() {
             <Button
               asChild
               size="lg"
-              className="bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-7 text-base font-semibold"
+              className="bg-secondary hover:bg-primary text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/familias">Sou uma família TEA</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 border border-white min-h-[52px] px-7 text-base font-semibold"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
