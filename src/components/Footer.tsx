@@ -98,6 +98,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link to="/demo" className="hover:text-secondary transition">
+                Ver demonstração da plataforma
+              </Link>
+            </li>
+            <li>
               <Link to="/privacidade" className="hover:text-secondary transition">
                 Privacidade (LGPD)
               </Link>

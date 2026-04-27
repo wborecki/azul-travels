@@ -102,7 +102,40 @@ function Landing() {
       <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
+      <DemoEntrada />
     </div>
+  );
+}
+
+function DemoEntrada() {
+  return (
+    <section className="py-12" style={{ backgroundColor: "#EBF4F8" }}>
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
+          <div className="text-4xl md:text-5xl">🔭</div>
+          <div className="flex-1">
+            <h2
+              className="font-display font-bold"
+              style={{ color: "#1B2E4B", fontSize: 20 }}
+            >
+              Quer ver como a plataforma vai funcionar?
+            </h2>
+            <p className="mt-1 text-muted-foreground" style={{ fontSize: 14 }}>
+              Preparamos uma demonstração completa com dados de exemplo.
+              Navegue pela busca, veja perfis sensoriais e simule uma reserva.
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-secondary text-secondary hover:bg-secondary hover:text-white whitespace-nowrap font-semibold"
+          >
+            <Link to="/demo">Explorar a demonstração</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }
 
