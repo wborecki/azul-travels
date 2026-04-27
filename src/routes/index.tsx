@@ -1,75 +1,48 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Reveal } from "@/components/Reveal";
-import { useCountUp } from "@/hooks/useReveal";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  fetchEstabelecimentosView,
-  fetchPerfisCompletos,
-  mapEstabCard,
-  type EstabCardVM,
-  type EstabelecimentoView,
-  type PerfilSensorial,
-} from "@/lib/queries";
+import { LeadFamiliasForm } from "@/components/leads/LeadFamiliasForm";
+import { LeadEstabelecimentosForm } from "@/components/leads/LeadEstabelecimentosForm";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
-  Search,
   ShieldCheck,
   Award,
   Home as HomeIcon,
   Heart,
-  Gift,
-  Star,
   ArrowRight,
-  Calendar,
   ChevronDown,
   UserPlus,
   MapPinned,
   HeartHandshake,
-  Plane,
-  MapPin,
-  BellRing,
-  Utensils,
-  DoorOpen,
-  Hotel,
-  UtensilsCrossed,
-  Compass,
-  Briefcase,
-  Camera,
-  type LucideIcon,
+  Lock,
+  Map,
+  Puzzle,
+  Gift,
+  CircleDot,
+  Construction,
 } from "lucide-react";
-// Hero usa fundo de marca (gradiente + textura SVG) — sem foto.
-// Decisão deliberada após validar que as opções de banco de imagens
-// disponíveis não atendiam o briefing (família diversa + criança +
-// lazer + horizontal). Melhor um fundo de marca limpo que uma foto
-// que comunica o oposto da inclusão real.
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Turismo Azul — Viajar com autismo, com confiança" },
+      { title: "Turismo Azul — Plataforma em construção" },
       {
         name: "description",
         content:
-          "Marketplace pioneiro de turismo inclusivo para famílias TEA. Hotéis, restaurantes e parques certificados, com perfil sensorial enviado ao estabelecimento.",
+          "Estamos construindo o primeiro marketplace brasileiro de turismo para famílias TEA. Entre na lista de espera.",
       },
-      { property: "og:title", content: "Turismo Azul" },
+      { property: "og:title", content: "Turismo Azul — Em construção" },
       {
         property: "og:description",
-        content: "Viajar com autismo. Com confiança, com conforto, com alegria.",
+        content:
+          "Garanta seu lugar na lista de espera do lançamento. Para famílias TEA e estabelecimentos.",
       },
     ],
   }),
   component: Landing,
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tipos auxiliares
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface ArtigoCard {
   slug: string;
@@ -80,240 +53,46 @@ interface ArtigoCard {
   criado_em: string;
 }
 
-type CategoriaCor = "primary" | "secondary" | "success" | "amarelo" | "roxo-suave";
-
-const CATEGORIA_COR: Record<string, { bg: string; label: string }> = {
-  legislacao: { bg: "bg-primary text-primary-foreground", label: "Legislação" },
-  dicas_viagem: { bg: "bg-secondary text-secondary-foreground", label: "Dicas de viagem" },
-  boas_praticas: { bg: "bg-success text-success-foreground", label: "Boas práticas" },
-  novidades: { bg: "bg-amarelo text-amarelo-foreground", label: "Novidades" },
-  destinos: { bg: "bg-roxo-suave text-roxo-suave-foreground", label: "Destinos" },
-};
-// (CategoriaCor declarada para documentar o domínio; não usada em runtime)
-void (null as unknown as CategoriaCor);
-
-interface Depoimento {
-  nome: string;
-  cidade: string;
-  filhoNome: string;
-  filhoIdade: number;
-  papel: "Mãe" | "Pai" | "Mãe e Pai";
-  texto: string;
-  estabSlug?: string;
-  estabNome?: string;
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-
-const DEPOIMENTOS_SEED: Depoimento[] = [
-  {
-    nome: "Mariana",
-    cidade: "Curitiba",
-    filhoNome: "Enzo",
-    filhoIdade: 7,
-    papel: "Mãe",
-    texto:
-      "A gente nunca achou que ia conseguir viajar. No hotel que encontramos aqui, o pessoal já sabia do perfil do Enzo antes da gente chegar. Foi a primeira vez que ele dormiu tranquilo fora de casa.",
-  },
-  {
-    nome: "Carlos e Renata",
-    cidade: "São Paulo",
-    filhoNome: "Sofia",
-    filhoIdade: 9,
-    papel: "Mãe e Pai",
-    texto:
-      "A sala sensorial do resort salvou nossa viagem. Quando ficou muito barulhento na piscina, a Sofia teve um lugar seguro pra se reequilibrar. Voltamos mês que vem.",
-  },
-  {
-    nome: "Patrícia",
-    cidade: "Porto Alegre",
-    filhoNome: "João",
-    filhoIdade: 11,
-    papel: "Mãe",
-    texto:
-      "A gente não precisa mais ligar pra vários hotéis explicando sobre o João. A plataforma já filtra. Funciona.",
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Compatibilidade entre perfil sensorial × estabelecimento
-// ─────────────────────────────────────────────────────────────────────────────
-
-const PARES_COMPAT: Array<[keyof PerfilSensorial, keyof EstabelecimentoView]> = [
-  ["precisa_sala_sensorial", "tem_sala_sensorial"],
-  ["precisa_concierge_tea", "tem_concierge_tea"],
-  ["precisa_checkin_antecipado", "tem_checkin_antecipado"],
-  ["precisa_fila_prioritaria", "tem_fila_prioritaria"],
-  ["precisa_cardapio_visual", "tem_cardapio_visual"],
-];
-
-function calcularCompatibilidade(
-  perfil: PerfilSensorial | null,
-  estab: EstabelecimentoView,
-): number | null {
-  if (!perfil) return null;
-  const necessidades = PARES_COMPAT.filter(([p]) => perfil[p] === true);
-  if (necessidades.length === 0) return null;
-  const atendidas = necessidades.filter(([, e]) => estab[e] === true).length;
-  return Math.round((atendidas / necessidades.length) * 100);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Landing
-// ─────────────────────────────────────────────────────────────────────────────
 
 function Landing() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [busca, setBusca] = useState("");
-
-  const [destaques, setDestaques] = useState<EstabelecimentoView[] | null>(null);
-  const [beneficios, setBeneficios] = useState<EstabelecimentoView[] | null>(null);
   const [artigos, setArtigos] = useState<ArtigoCard[] | null>(null);
-  const [perfilPrincipal, setPerfilPrincipal] = useState<PerfilSensorial | null>(null);
-  const [depoimentos, setDepoimentos] = useState<Depoimento[]>(DEPOIMENTOS_SEED);
-  const [stats, setStats] = useState<{ destinos: number; estados: number; media: number }>({
-    destinos: 0,
-    estados: 0,
-    media: 4.8,
-  });
 
-  // Stats reais para o Hero (contadores animados)
+  // Suporte a /?scroll=form-familias / form-estabelecimentos
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("scroll");
+    if (target) {
+      setTimeout(() => scrollToId(target), 200);
+    }
+  }, []);
+
   useEffect(() => {
     void (async () => {
       const { data } = await supabase
-        .from("estabelecimentos")
-        .select("estado")
-        .eq("status", "ativo");
-      const { data: avs } = await supabase
-        .from("avaliacoes")
-        .select("nota_geral")
-        .eq("publica", true)
-        .not("nota_geral", "is", null);
-      const destinos = data?.length ?? 0;
-      const estados = new Set((data ?? []).map((e) => e.estado).filter(Boolean)).size;
-      const notas = (avs ?? []).map((a) => a.nota_geral as number);
-      const media = notas.length
-        ? Number((notas.reduce((s, n) => s + n, 0) / notas.length).toFixed(1))
-        : 4.8;
-      setStats({ destinos, estados, media });
-    })();
-  }, []);
-
-  // Carrega dados públicos
-  useEffect(() => {
-    void (async () => {
-      const [dDestaque, b] = await Promise.all([
-        fetchEstabelecimentosView({ apenasDestaque: true, pagina: 1, tamanhoPagina: 6 }),
-        fetchEstabelecimentosView({ apenasComBeneficio: true, pagina: 1, tamanhoPagina: 3 }),
-      ]);
-
-      // Garante 6 cards no grid (3x2 desktop / 2x3 tablet) — sem card sozinho
-      // na última linha. Se houver menos de 6 com destaque=true, completa
-      // com os demais ativos mais recentes.
-      let d = dDestaque;
-      if (d.length < 6) {
-        const faltam = 6 - d.length;
-        const idsExcluir = d.map((x) => x.id);
-        const extras = await fetchEstabelecimentosView({
-          pagina: 1,
-          tamanhoPagina: faltam + idsExcluir.length,
-        });
-        const complemento = extras.filter((x) => !idsExcluir.includes(x.id)).slice(0, faltam);
-        d = [...d, ...complemento];
-      }
-      setDestaques(d);
-      setBeneficios(b);
-
-
-      const { data: a } = await supabase
         .from("conteudo_tea")
         .select("slug,titulo,resumo,foto_capa,categoria,criado_em")
         .or(filtroConteudoPublico())
         .order("criado_em", { ascending: false })
         .limit(3);
-      setArtigos(a ?? []);
-
-      // Depoimentos reais (5 estrelas, públicos), com nome do estab
-      const { data: avs } = await supabase
-        .from("avaliacoes")
-        .select(
-          "id, comentario, criado_em, nota_geral, familia_profiles(nome_responsavel, cidade), estabelecimentos(nome, slug)",
-        )
-        .eq("publica", true)
-        .eq("nota_geral", 5)
-        .not("comentario", "is", null)
-        .order("criado_em", { ascending: false })
-        .limit(3);
-
-      if (avs && avs.length >= 3) {
-        const reais: Depoimento[] = avs.flatMap((row) => {
-          const nomeResp = (row.familia_profiles as { nome_responsavel?: string | null } | null)
-            ?.nome_responsavel;
-          const cidade = (row.familia_profiles as { cidade?: string | null } | null)?.cidade;
-          const estab = row.estabelecimentos as { nome?: string; slug?: string } | null;
-          if (!row.comentario) return [];
-          return [
-            {
-              nome: nomeResp?.split(/\s+/)[0] ?? "Família",
-              cidade: cidade ?? "Brasil",
-              filhoNome: "—",
-              filhoIdade: 0,
-              papel: "Mãe",
-              texto: row.comentario,
-              estabNome: estab?.nome,
-              estabSlug: estab?.slug,
-            },
-          ];
-        });
-        if (reais.length >= 3) setDepoimentos(reais);
-      }
+      setArtigos(data ?? []);
     })();
   }, []);
 
-  // Carrega perfil principal do usuário logado (para compatibilidade)
-  useEffect(() => {
-    if (!user) {
-      setPerfilPrincipal(null);
-      return;
-    }
-    void (async () => {
-      const perfis = await fetchPerfisCompletos(user.id).catch(() => []);
-      setPerfilPrincipal(perfis[0] ?? null);
-    })();
-  }, [user]);
-
-  /**
-   * Roteamento contextual do CTA "criar perfil sensorial":
-   *   - sem login → /cadastro
-   *   - logado, sem perfil → /minha-conta/perfil-sensorial
-   *   - logado, com perfil → /explorar (já pode usar a plataforma)
-   */
-  const goCriarPerfil = useCallback(() => {
-    if (!user) {
-      void navigate({ to: "/cadastro" });
-      return;
-    }
-    if (!perfilPrincipal) {
-      void navigate({ to: "/minha-conta/perfil-sensorial" });
-      return;
-    }
-    void navigate({ to: "/explorar" });
-  }, [user, perfilPrincipal, navigate]);
-
   return (
     <div>
-      <Hero busca={busca} setBusca={setBusca} stats={stats} />
+      <Hero />
       <ComoFunciona />
       <SelosImportantes />
-      <DestinosDestaque
-        destaques={destaques}
-        perfil={perfilPrincipal}
-        userLogado={!!user}
-        onCriarPerfil={goCriarPerfil}
-      />
-      <Depoimentos depoimentos={depoimentos} />
-      <BeneficiosTea beneficios={beneficios} />
+      <OQuePlataformaTera />
+      <FamiliasSection />
+      <Citacao />
+      <MercadoSection />
+      <EstabelecimentosSection />
       <BlogTeaser artigos={artigos} />
-      <CtaFinal onCriarPerfil={goCriarPerfil} />
+      <CtaFinal />
     </div>
   );
 }
@@ -322,19 +101,9 @@ function Landing() {
 // HERO
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Hero({
-  busca,
-  setBusca,
-  stats,
-}: {
-  busca: string;
-  setBusca: (v: string) => void;
-  stats: { destinos: number; estados: number; media: number };
-}) {
-  const navigate = useNavigate();
+function Hero() {
   return (
     <section id="hero" className="relative overflow-hidden">
-      {/* Fundo de marca: gradiente navy → teal + textura SVG sutil */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -342,7 +111,6 @@ function Hero({
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232CA8A0' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 50%, #2CA8A0 100%)`,
         }}
       />
-      {/* Overlay sutil para profundidade extra na parte inferior (stats) */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -352,97 +120,48 @@ function Hero({
         }}
       />
 
-      <div className="relative container mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32">
+      <div className="relative container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
         <div className="max-w-3xl mx-auto text-center text-white animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-sm font-medium backdrop-blur">
+            🚀 Plataforma em construção — Garanta seu lugar
+          </span>
+
+          <h1 className="mt-6 text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
             Sua família também
             <br />
             <span className="text-secondary">merece viajar.</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            Encontre hotéis, restaurantes e parques que já sabem como cuidar do seu filho antes de
-            vocês chegarem.
+            Estamos construindo o primeiro marketplace brasileiro de turismo para famílias TEA.
+            Seja um dos primeiros a entrar quando a plataforma abrir.
           </p>
 
-          {/* Busca */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const q = busca.trim();
-              void navigate({
-                to: "/explorar",
-                search: q ? { q } : {},
-              });
-            }}
-            className="mt-8 bg-white rounded-2xl p-2 shadow-elegant flex items-center gap-2 max-w-2xl mx-auto"
-          >
-            <div className="flex items-center gap-2 flex-1 px-3">
-              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-              <Input
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder="Para onde sua família quer ir?"
-                className="border-0 shadow-none focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
-                aria-label="Buscar destinos"
-              />
-            </div>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
-              type="submit"
               size="lg"
-              className="rounded-xl bg-primary hover:bg-primary/90 px-6 min-h-[44px]"
+              onClick={() => scrollToId("form-familias")}
+              className="bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-7 text-base font-semibold"
             >
-              Buscar destinos
+              Sou uma família TEA
             </Button>
-          </form>
-
-          {/* Chips de categoria — cada chip filtra por todos os tipos da categoria */}
-          <div className="mt-5 flex flex-wrap gap-2 justify-center">
-            {[
-              { Icon: Hotel, label: "Hospedagem", tipos: ["hotel", "pousada", "resort"] as const },
-              {
-                Icon: Compass,
-                label: "Passeios e experiências",
-                tipos: ["parque", "atracoes", "excursao"] as const,
-              },
-              { Icon: UtensilsCrossed, label: "Onde comer", tipos: ["restaurante"] as const },
-              { Icon: Plane, label: "Transporte", tipos: ["transporte"] as const },
-              { Icon: Briefcase, label: "Planejamento", tipos: ["agencia"] as const },
-            ].map((c) => (
-              <Link
-                key={c.label}
-                to="/explorar"
-                search={{ tipos: [...c.tipos] }}
-                className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-sm font-medium border border-white/20 transition min-h-[44px] inline-flex items-center gap-1.5"
-              >
-                <c.Icon className="h-4 w-4" strokeWidth={2} />
-                {c.label}
-              </Link>
-            ))}
+            <Button
+              size="lg"
+              onClick={() => scrollToId("form-estabelecimentos")}
+              className="bg-white text-primary hover:bg-white/90 border border-white min-h-[52px] px-7 text-base font-semibold"
+            >
+              Tenho um estabelecimento
+            </Button>
           </div>
 
-          {/* Indicadores com contador animado */}
-          <div className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
-            <Counter target={stats.destinos || 247} suffix="" label="Destinos verificados" />
-            <Counter target={stats.estados || 12} suffix="" label="Estados do Brasil" />
-            <Counter
-              target={stats.media}
-              decimals={1}
-              suffix="★"
-              label="Avaliação média das famílias"
-            />
+          <div className="mt-10 inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 rounded-full px-6 py-3 text-sm font-medium">
+            <Lock className="h-4 w-4 text-amarelo" />
+            Vagas limitadas na lista de espera do lançamento
           </div>
 
-          {/* Scroll indicator — scroll suave até a seção "Como funciona" */}
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              document
-                .getElementById("como-funciona")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-            className="mt-14 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint cursor-pointer"
-            aria-label="Veja como funciona — rolar para a seção"
+            onClick={() => scrollToId("como-funciona")}
+            className="mt-12 inline-flex flex-col items-center gap-1 text-white/80 hover:text-white text-xs font-medium animate-scroll-hint cursor-pointer"
           >
             <span>↓ Veja como funciona</span>
             <ChevronDown className="h-5 w-5" />
@@ -450,30 +169,6 @@ function Hero({
         </div>
       </div>
     </section>
-  );
-}
-
-function Counter({
-  target,
-  suffix = "",
-  decimals = 0,
-  label,
-}: {
-  target: number;
-  suffix?: string;
-  decimals?: number;
-  label: string;
-}) {
-  const { ref, value } = useCountUp(target, 1500);
-  const display = decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString();
-  return (
-    <div ref={ref}>
-      <div className="text-2xl md:text-3xl font-display font-bold text-secondary tabular-nums">
-        {display}
-        {suffix}
-      </div>
-      <div className="text-xs text-white/75 mt-1">{label}</div>
-    </div>
   );
 }
 
@@ -502,7 +197,7 @@ function ComoFunciona() {
       Icon: HeartHandshake,
       titulo: "Chegue. A equipe já foi avisada.",
       texto:
-        "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe. Você chega, eles já estão preparados.",
+        "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe.",
     },
   ];
 
@@ -511,10 +206,10 @@ function ComoFunciona() {
       <div className="container mx-auto px-4">
         <Reveal className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-            É assim que funciona.
+            É assim que vai funcionar.
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-            Três passos e sua família está pronta pra viajar.
+            Três passos e sua família estará pronta pra viajar.
           </p>
         </Reveal>
 
@@ -536,6 +231,25 @@ function ComoFunciona() {
             </Reveal>
           ))}
         </div>
+
+        {/* Banner em breve */}
+        <Reveal className="mt-10">
+          <div className="bg-primary text-primary-foreground rounded-2xl p-6 md:p-8 text-center max-w-3xl mx-auto">
+            <p className="text-base md:text-lg font-medium">
+              A plataforma completa com busca, perfil sensorial e reservas estará disponível em
+              breve.
+              <br className="hidden sm:inline" /> Cadastre-se agora e seja notificado no dia do
+              lançamento.
+            </p>
+            <Button
+              onClick={() => scrollToId("form-familias")}
+              className="mt-5 bg-secondary hover:bg-secondary/90 text-white"
+              size="lg"
+            >
+              Quero ser avisado
+            </Button>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -585,7 +299,7 @@ function SelosImportantes() {
             O que está por trás de cada certificação
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-            Qualquer hotel pode se dizer inclusivo. A gente exige prova.
+            Qualquer hotel pode se dizer inclusivo. A gente vai exigir prova.
           </p>
         </Reveal>
 
@@ -614,7 +328,7 @@ function SelosImportantes() {
             to="/sobre-os-selos"
             className="inline-flex items-center gap-1 text-secondary font-semibold hover:text-primary transition"
           >
-            Entenda como auditamos cada estabelecimento <ArrowRight className="h-4 w-4" />
+            Entenda como vamos auditar cada estabelecimento <ArrowRight className="h-4 w-4" />
           </Link>
         </Reveal>
       </div>
@@ -623,406 +337,64 @@ function SelosImportantes() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESTINOS EM DESTAQUE
+// O QUE A PLATAFORMA VAI TER
 // ─────────────────────────────────────────────────────────────────────────────
 
-function DestinosDestaque({
-  destaques,
-  perfil,
-  userLogado,
-  onCriarPerfil,
-}: {
-  destaques: EstabelecimentoView[] | null;
-  perfil: PerfilSensorial | null;
-  userLogado: boolean;
-  onCriarPerfil: () => void;
-}) {
+function OQuePlataformaTera() {
+  const items = [
+    {
+      Icon: Map,
+      titulo: "Destinos verificados em todo o Brasil",
+      texto:
+        "Hotéis, restaurantes, parques e atrações auditados pela nossa equipe. Nenhum dado não verificado entra na plataforma.",
+    },
+    {
+      Icon: Puzzle,
+      titulo: "Perfil sensorial do seu filho",
+      texto:
+        "Você conta o que ele precisa. A plataforma filtra só os lugares prontos para receber ele.",
+    },
+    {
+      Icon: Gift,
+      titulo: "Benefícios exclusivos TEA",
+      texto:
+        "Entrada gratuita, meia-entrada e fila prioritária em estabelecimentos parceiros.",
+    },
+    {
+      Icon: CircleDot,
+      titulo: "Selo Azul em destaque",
+      texto:
+        "Estabelecimentos certificados pela Absoluto Educacional aparecem com badge de destaque nos resultados.",
+    },
+  ];
   return (
-    <section className="py-16 bg-background">
+    <section id="explorar" className="py-16 bg-azul-claro">
       <div className="container mx-auto px-4">
-        <Reveal>
-          <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary max-w-xl">
-                Estabelecimentos mais escolhidos pelas famílias
-              </h2>
-            </div>
-            <Button asChild variant="outline">
-              <Link to="/explorar">
-                Ver todos <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </Reveal>
-
-        {destaques === null ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-[4/3] bg-muted animate-pulse rounded-2xl"
-              />
-            ))}
-          </div>
-        ) : destaques.length === 0 ? (
-          <p className="text-center text-muted-foreground py-10">
-            Em breve novos destinos certificados.
-          </p>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            {destaques.map((e, i) => (
-              <Reveal key={e.id} delay={i * 60}>
-                <DestaqueCard
-                  estab={e}
-                  perfil={perfil}
-                  userLogado={userLogado}
-                  isMaisEscolhido={i === 0}
-                />
-              </Reveal>
-            ))}
-          </div>
-        )}
-
-        <Reveal className="mt-14 text-center max-w-2xl mx-auto">
-          <p className="text-[15px] text-foreground">
-            Quer ver estabelecimentos compatíveis com o perfil do seu filho?
-          </p>
-          <Button
-            type="button"
-            size="lg"
-            className="mt-4 bg-primary hover:bg-primary/90 min-h-[44px]"
-            onClick={onCriarPerfil}
-          >
-            Criar perfil sensorial, é gratuito
-          </Button>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function DestaqueCard({
-  estab,
-  perfil,
-  userLogado,
-  isMaisEscolhido,
-}: {
-  estab: EstabelecimentoView;
-  perfil: PerfilSensorial | null;
-  userLogado: boolean;
-  isMaisEscolhido: boolean;
-}) {
-  const vm: EstabCardVM = useMemo(() => mapEstabCard(estab), [estab]);
-  const compat = useMemo(() => calcularCompatibilidade(perfil, estab), [perfil, estab]);
-
-  const miniRecursos: Array<{ key: string; cond: boolean; Icon: typeof BellRing; tip: string }> = [
-    { key: "sala", cond: estab.tem_sala_sensorial === true, Icon: HomeIcon, tip: "Sala sensorial" },
-    {
-      key: "cardapio",
-      cond: estab.tem_cardapio_visual === true,
-      Icon: Utensils,
-      tip: "Cardápio visual",
-    },
-    {
-      key: "checkin",
-      cond: estab.tem_checkin_antecipado === true,
-      Icon: DoorOpen,
-      tip: "Check-in antecipado",
-    },
-    {
-      key: "fila",
-      cond: estab.tem_fila_prioritaria === true,
-      Icon: BellRing,
-      tip: "Fila prioritária",
-    },
-  ].filter((r) => r.cond);
-
-  // Ícone Lucide de fallback derivado do tipoLabel (sem precisar adicionar campo ao VM)
-  const tipoLower = vm.tipoLabel.toLowerCase();
-  const IconeFallback: LucideIcon = tipoLower.includes("restaurante")
-    ? UtensilsCrossed
-    : tipoLower.includes("parque") ||
-        tipoLower.includes("atra") ||
-        tipoLower.includes("excurs")
-      ? Compass
-      : tipoLower.includes("transporte")
-        ? Plane
-        : tipoLower.includes("agência") || tipoLower.includes("agencia")
-          ? Briefcase
-          : Hotel;
-
-  return (
-    <div
-      className={`bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full flex flex-col ${
-        isMaisEscolhido ? "border-l-4 border-l-secondary" : ""
-      }`}
-    >
-      {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
-      <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
-        {vm.media.fotoCapa ? (
-          <img
-            src={vm.media.fotoCapa}
-            alt={vm.nome}
-            loading="lazy"
-            className="w-full h-full object-cover"
-            style={{ objectPosition: "center 30%" }}
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-azul-claro to-teal-claro"
-          >
-            <IconeFallback className="h-16 w-16 text-primary/25" strokeWidth={1.5} />
-          </div>
-        )}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-1.5rem)]">
-          {vm.temSeloAzul && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold">
-              <ShieldCheck className="h-3 w-3" /> Selo Azul
-            </span>
-          )}
-          {vm.temTour360 && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amarelo text-amarelo-foreground text-[11px] font-semibold">
-              <Camera className="h-3 w-3" /> Tour 360°
-            </span>
-          )}
-          {estab.tem_concierge_tea === true && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[11px] font-semibold">
-              <Heart className="h-3 w-3" /> Concierge TEA
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="p-5 flex-1 flex flex-col gap-3">
-        <div>
-          <h3 className="font-display font-bold text-primary text-lg leading-tight">{vm.nome}</h3>
-          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-            <span className="font-medium">{vm.tipoLabel}</span>
-            {vm.localidade && (
-              <>
-                <span>·</span>
-                <MapPin className="h-3 w-3" />
-                <span>{vm.localidade}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {miniRecursos.length > 0 && (
-          <div className="flex items-center gap-2">
-            {miniRecursos.map((r) => (
-              <span
-                key={r.key}
-                title={r.tip}
-                aria-label={r.tip}
-                className="w-7 h-7 rounded-full bg-azul-claro text-primary flex items-center justify-center"
-              >
-                <r.Icon className="h-3.5 w-3.5" />
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Star className="h-3.5 w-3.5 fill-amarelo text-amarelo" />
-          <span className="font-semibold text-foreground">4.8</span>
-          <span>(novas avaliações)</span>
-        </div>
-
-        {/* Compatibilidade */}
-        {userLogado && compat !== null ? (
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-muted-foreground">Compatibilidade</span>
-              <span className="font-bold text-secondary">{compat}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-secondary transition-[width] duration-700"
-                style={{ width: `${compat}%` }}
-              />
-            </div>
-          </div>
-        ) : userLogado ? (
-          <p className="text-xs text-muted-foreground italic">
-            Crie um perfil sensorial para ver compatibilidade.
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground italic">
-            <Link to="/login" className="text-secondary hover:underline">
-              Faça login
-            </Link>{" "}
-            para ver compatibilidade.
-          </p>
-        )}
-
-        <Button
-          asChild
-          className="mt-auto w-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition"
-        >
-          <Link to="/estabelecimento/$slug" params={{ slug: vm.slug }}>
-            Ver detalhes
-          </Link>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DEPOIMENTOS
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Depoimentos({ depoimentos }: { depoimentos: Depoimento[] }) {
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    if (depoimentos.length <= 1) return;
-    const t = setInterval(() => setIdx((p) => (p + 1) % depoimentos.length), 5000);
-    return () => clearInterval(t);
-  }, [depoimentos.length]);
-
-  const d = depoimentos[idx];
-  if (!d) return null;
-
-  const subtitulo =
-    d.filhoIdade > 0
-      ? `${d.cidade} | ${d.papel} do ${d.filhoNome}, ${d.filhoIdade} anos`
-      : `${d.cidade}`;
-
-  return (
-    <section className="py-16 bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
-            Famílias que voltaram a viajar
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            O que a plataforma vai ter
           </h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-white/75">
-            Histórias reais de quem encontrou o lugar certo.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Em breve disponível para todas as famílias TEA do Brasil.
           </p>
         </Reveal>
 
-        <Reveal className="relative max-w-3xl mx-auto">
-          <div
-            key={idx}
-            className="relative bg-white/5 backdrop-blur rounded-2xl p-8 md:p-10 border-l-4 border-secondary animate-fade-in"
-          >
-            <p className="text-lg md:text-xl text-white leading-relaxed">{d.texto}</p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-display font-bold text-lg">
-                {d.nome.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-[200px]">
-                <div className="font-display font-bold text-white">{d.nome}</div>
-                <div className="text-xs text-white/70">{subtitulo}</div>
-                <div className="mt-1 flex items-center gap-0.5 text-amarelo">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amarelo" />
-                  ))}
+        <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
+          {items.map((it, i) => (
+            <Reveal key={it.titulo} delay={i * 80}>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border h-full flex gap-4">
+                <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                  <it.Icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-primary text-lg">{it.titulo}</h3>
+                  <p className="mt-1.5 text-[15px] text-muted-foreground leading-relaxed">
+                    {it.texto}
+                  </p>
                 </div>
               </div>
-              {d.estabSlug && d.estabNome && (
-                <Link
-                  to="/estabelecimento/$slug"
-                  params={{ slug: d.estabSlug }}
-                  className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground font-semibold hover:bg-white hover:text-primary transition"
-                >
-                  {d.estabNome}
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Dots */}
-          {depoimentos.length > 1 && (
-            <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Depoimentos">
-              {depoimentos.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  role="tab"
-                  aria-selected={i === idx}
-                  aria-label={`Depoimento ${i + 1}`}
-                  onClick={() => setIdx(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === idx ? "w-8 bg-secondary" : "w-2 bg-white/30 hover:bg-white/50"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BENEFÍCIOS TEA
-// ─────────────────────────────────────────────────────────────────────────────
-
-function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | null }) {
-  return (
-    <section className="py-16 bg-teal-claro">
-      <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          <Reveal>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-              Benefícios que você não encontra em lugar nenhum
-            </h2>
-            <p className="mt-4 text-[15px] text-foreground/80 leading-relaxed">
-              Alguns estabelecimentos da plataforma oferecem entrada gratuita, meia-entrada e fila
-              prioritária para pessoas autistas. Tudo verificado pela nossa equipe.
-            </p>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="mt-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              <Link to="/beneficios-tea">
-                Ver todos os benefícios <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </Reveal>
-
-          <div className="space-y-3">
-            {beneficios === null
-              ? [1, 2, 3].map((i) => (
-                  <div key={i} className="h-28 bg-white/60 animate-pulse rounded-xl" />
-                ))
-              : beneficios.length === 0
-                ? (
-                    <p className="text-sm text-muted-foreground">
-                      Em breve novos parceiros com benefícios.
-                    </p>
-                  )
-                : beneficios.map((b, i) => (
-                    <Reveal key={b.id} delay={i * 100}>
-                      <Link
-                        to="/estabelecimento/$slug"
-                        params={{ slug: b.slug }}
-                        className="block bg-card rounded-xl p-5 shadow-sm hover:shadow-md transition border"
-                      >
-                        <h3 className="font-display font-bold text-primary">{b.nome}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {b.tipo} {b.cidade && `· ${b.cidade}${b.estado ? `, ${b.estado}` : ""}`}
-                        </p>
-                        {b.beneficio_tea_descricao && (
-                          <div className="mt-3 text-sm bg-success/10 text-success rounded-lg px-3 py-2 flex items-start gap-2">
-                            <Gift className="h-4 w-4 shrink-0 mt-0.5" />
-                            <span className="text-foreground/90">{b.beneficio_tea_descricao}</span>
-                          </div>
-                        )}
-                        <div className="mt-3 text-xs text-secondary font-semibold inline-flex items-center gap-1">
-                          Ver detalhes <ArrowRight className="h-3 w-3" />
-                        </div>
-                      </Link>
-                    </Reveal>
-                  ))}
-          </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -1030,89 +402,189 @@ function BeneficiosTea({ beneficios }: { beneficios: EstabelecimentoView[] | nul
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BLOG TEASER
+// FORMULÁRIO FAMÍLIAS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function FamiliasSection() {
+  return (
+    <section id="form-familias" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <Reveal className="max-w-2xl mx-auto text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
+            Sou família TEA
+          </h2>
+          <p className="mt-3 text-[15px] text-muted-foreground">
+            Entre na lista de espera. Quando a plataforma abrir, você é um dos primeiros a ser
+            avisado e a ter acesso.
+          </p>
+        </Reveal>
+        <div className="max-w-2xl mx-auto">
+          <LeadFamiliasForm />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CITAÇÃO
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Citacao() {
+  return (
+    <section className="py-16 bg-primary text-primary-foreground">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <Reveal className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
+            Por que isso importa
+          </h2>
+        </Reveal>
+
+        <Reveal>
+          <blockquote className="border-l-4 border-secondary pl-6 italic text-white text-xl leading-relaxed">
+            “Antes de sair de casa, eu ligava para vários hotéis tentando explicar o autismo do meu
+            filho. A maioria não sabia o que fazer. Às vezes eu simplesmente desistia da viagem.”
+            <footer className="mt-4 not-italic text-sm text-white/70">
+              — Relato real de mãe de criança autista, coletado pela nossa equipe durante a pesquisa
+              do produto.
+            </footer>
+          </blockquote>
+
+          <p className="mt-8 text-center text-white/70 text-[15px]">
+            O Turismo Azul foi criado para que nenhuma família precise desistir de viajar por falta
+            de informação.
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MERCADO
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MercadoSection() {
+  const stats = [
+    { numero: "2.000.000", label: "pessoas autistas no Brasil" },
+    { numero: "500.000", label: "famílias que precisam de destinos adaptados" },
+    { numero: "R$ 1 bilhão", label: "potencial de mercado por ano estimado" },
+  ];
+  return (
+    <section className="py-16" style={{ backgroundColor: "#E0F5F4" }}>
+      <div className="container mx-auto px-4">
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+            O mercado que ninguém atendia
+          </h2>
+        </Reveal>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {stats.map((s, i) => (
+            <Reveal key={s.label} delay={i * 100}>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-display font-extrabold text-secondary tabular-nums">
+                  {s.numero}
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground">{s.label}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal>
+          <p className="mt-12 text-center text-muted-foreground max-w-2xl mx-auto text-[15px]">
+            Nenhuma plataforma digital no Brasil conectava essas famílias a destinos preparados. Até
+            a gente decidir construir.
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FORMULÁRIO ESTABELECIMENTOS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function EstabelecimentosSection() {
+  return (
+    <section id="form-estabelecimentos" className="py-20" style={{ backgroundColor: "#F8FAFB" }}>
+      <div className="container mx-auto px-4">
+        <Reveal className="max-w-2xl mx-auto text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
+            Tenho um estabelecimento
+          </h2>
+          <p className="mt-3 text-[15px] text-muted-foreground">
+            Cadastre seu hotel, restaurante ou parque agora. Nossa equipe entra em contato assim que
+            a plataforma abrir para listar os primeiros parceiros.
+          </p>
+        </Reveal>
+        <div className="max-w-2xl mx-auto">
+          <LeadEstabelecimentosForm />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOG
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
+  if (artigos === null) return null;
+  if (artigos.length === 0) return null;
+
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <Reveal>
-          <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-                Conteúdo atualizado sobre turismo TEA
-              </h2>
-            </div>
-            <Button asChild variant="outline">
-              <Link to="/conteudo">
-                Ver todos os artigos <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
+        <Reveal className="flex items-end justify-between flex-wrap gap-4 mb-10">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
+              Conteúdo TEA
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Boas práticas, dicas de viagem e novidades.
+            </p>
           </div>
+          <Button asChild variant="outline">
+            <Link to="/conteudo">
+              Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
         </Reveal>
 
-        {artigos === null ? (
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="aspect-[16/10] bg-muted animate-pulse rounded-2xl" />
-            ))}
-          </div>
-        ) : artigos.length === 0 ? (
-          <p className="text-center text-muted-foreground py-10">Em breve novos artigos.</p>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-6">
-            {artigos.map((a, i) => {
-              const cat = a.categoria ? CATEGORIA_COR[a.categoria] : null;
-              return (
-                <Reveal key={a.slug} delay={i * 100}>
-                  <Link
-                    to="/conteudo/$slug"
-                    params={{ slug: a.slug }}
-                    className="group block bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full"
-                  >
-                    <div className="aspect-video bg-muted overflow-hidden">
-                      {a.foto_capa && (
-                        <img
-                          src={a.foto_capa}
-                          alt={a.titulo}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      )}
-                    </div>
-                    <div className="p-5">
-                      {cat && (
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${cat.bg}`}
-                        >
-                          {cat.label}
-                        </span>
-                      )}
-                      <h3 className="mt-3 font-display font-bold text-primary line-clamp-2 group-hover:text-secondary transition">
-                        {a.titulo}
-                      </h3>
-                      {a.resumo && (
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-                          {a.resumo}
-                        </p>
-                      )}
-                      <div className="mt-4 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground inline-flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(a.criado_em).toLocaleDateString("pt-BR")}
-                        </span>
-                        <span className="text-secondary font-semibold inline-flex items-center gap-1">
-                          Ler artigo <ArrowRight className="h-3 w-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </Reveal>
-              );
-            })}
-          </div>
-        )}
+        <div className="grid md:grid-cols-3 gap-6">
+          {artigos.map((a, i) => (
+            <Reveal key={a.slug} delay={i * 80}>
+              <Link
+                to="/conteudo/$slug"
+                params={{ slug: a.slug }}
+                className="block bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border h-full"
+              >
+                {a.foto_capa && (
+                  <div className="aspect-[16/9] overflow-hidden bg-muted">
+                    <img
+                      src={a.foto_capa}
+                      alt={a.titulo}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-5">
+                  <h3 className="font-display font-bold text-primary text-lg leading-tight">
+                    {a.titulo}
+                  </h3>
+                  {a.resumo && (
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{a.resumo}</p>
+                  )}
+                </div>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1122,29 +594,37 @@ function BlogTeaser({ artigos }: { artigos: ArtigoCard[] | null }) {
 // CTA FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CtaFinal({ onCriarPerfil }: { onCriarPerfil: () => void }) {
+function CtaFinal() {
   return (
-    <section className="py-16 text-white" style={{ backgroundColor: "#1B2E4B" }}>
-      <div className="container mx-auto px-4">
-        <Reveal className="max-w-2xl mx-auto text-center">
-          <Plane className="h-14 w-14 mx-auto text-white/90" aria-hidden />
-          <h2 className="mt-6 text-3xl md:text-4xl font-display font-bold leading-tight">
-            Pronto para a próxima viagem?
+    <section
+      className="py-20"
+      style={{ background: "linear-gradient(135deg, #1B2E4B 0%, #2CA8A0 100%)" }}
+    >
+      <div className="container mx-auto px-4 text-center text-white">
+        <Reveal>
+          <Construction className="h-10 w-10 text-amarelo mx-auto" />
+          <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold">
+            O lançamento está chegando.
           </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-white/85">
-            Crie o perfil sensorial do seu filho agora. É gratuito, leva 3 minutos.
+          <p className="mt-3 text-white/80 text-lg">
+            Garanta seu lugar na lista antes da abertura.
           </p>
-          <Button
-            type="button"
-            size="lg"
-            onClick={onCriarPerfil}
-            className="mt-8 bg-white text-primary hover:bg-secondary hover:text-secondary-foreground px-8 py-6 text-base font-bold min-h-[44px]"
-          >
-            Criar perfil do meu filho
-          </Button>
-          <p className="mt-5 text-xs text-white/60">
-            Gratuito, sem cartão, seus dados protegidos pela LGPD.
-          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              onClick={() => scrollToId("form-familias")}
+              className="bg-white text-primary hover:bg-white/90 min-h-[52px] px-7 text-base font-semibold"
+            >
+              Sou família TEA
+            </Button>
+            <Button
+              size="lg"
+              onClick={() => scrollToId("form-estabelecimentos")}
+              className="bg-transparent border-2 border-white text-white hover:bg-white/10 min-h-[52px] px-7 text-base font-semibold"
+            >
+              Tenho um estabelecimento
+            </Button>
+          </div>
         </Reveal>
       </div>
     </section>
