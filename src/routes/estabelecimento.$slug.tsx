@@ -311,11 +311,13 @@ function EstabPage() {
     };
     setEnviando(true);
     try {
-      await criarReserva(buildReservaPayload(formInput));
+      const created = await criarReserva(buildReservaPayload(formInput));
       toast.success(
         "Reserva solicitada. O estabelecimento vai retornar por e-mail em até 48 horas.",
       );
+      setReservaRecemCriadaId(created.id);
       setReservaEnviada(true);
+      await recarregarReservasFamilia(e.id);
     } catch (err) {
       toast.error("Erro ao enviar reserva", {
         description: err instanceof Error ? err.message : undefined,
