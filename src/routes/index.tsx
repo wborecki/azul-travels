@@ -111,30 +111,124 @@ function Landing() {
 
 function DemoEntrada() {
   return (
-    <section className="py-12" style={{ backgroundColor: "#EBF4F8" }}>
-      <div className="container mx-auto px-4 max-w-5xl">
-        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
-          <div className="text-4xl md:text-5xl">🔭</div>
-          <div className="flex-1">
-            <h2
-              className="font-display font-bold"
-              style={{ color: "#1B2E4B", fontSize: 20 }}
+    <section className="py-16" style={{ backgroundColor: "#1B2E4B" }}>
+      <div className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-[55%_45%] gap-10 items-center max-w-6xl mx-auto">
+          {/* Coluna esquerda */}
+          <div className="text-white">
+            <span
+              className="inline-block px-3 py-1 rounded-full text-xs font-semibold"
+              style={{ backgroundColor: "rgba(44,168,160,0.2)", color: "#2CA8A0" }}
             >
-              Quer ver como a plataforma vai funcionar?
+              Demonstração interativa
+            </span>
+            <h2
+              className="mt-4 font-display font-bold text-white"
+              style={{ fontSize: 30, lineHeight: 1.15 }}
+            >
+              Quer ver a plataforma funcionando de verdade?
             </h2>
-            <p className="mt-1 text-muted-foreground" style={{ fontSize: 14 }}>
-              Preparamos uma demonstração completa com dados de exemplo.
-              Navegue pela busca, veja perfis sensoriais e simule uma reserva.
+            <p className="mt-4 text-white/80" style={{ fontSize: 15 }}>
+              Preparamos uma demonstração completa com dados de exemplo. Navegue pela busca,
+              explore perfis sensoriais, veja como é a página de um estabelecimento certificado
+              e simule uma reserva.
+            </p>
+
+            <ul className="mt-6 space-y-2.5 text-white">
+              {[
+                "Busca com filtros por recursos sensoriais",
+                "Compatibilidade calculada pelo perfil do filho",
+                "Reserva simulada com envio de perfil sensorial",
+              ].map((b) => (
+                <li key={b} className="flex items-start gap-2">
+                  <span className="text-secondary font-bold mt-0.5">✓</span>
+                  <span style={{ fontSize: 15 }}>{b}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-7 flex flex-col sm:flex-row gap-3">
+              <Button
+                asChild
+                size="lg"
+                className="bg-secondary hover:bg-secondary/90 text-white font-semibold"
+              >
+                <Link to="/demo" search={{ view: "familia" }}>
+                  Ver demo para famílias
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white/10 font-semibold"
+              >
+                <Link to="/demo" search={{ view: "estabelecimento" }}>
+                  Ver demo para estabelecimentos
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Coluna direita — preview de card */}
+          <div>
+            <div
+              className="rounded-2xl overflow-hidden border-2 shadow-xl"
+              style={{ backgroundColor: "#243a5e", borderColor: "rgba(44,168,160,0.4)" }}
+            >
+              <div className="aspect-[16/10] overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80"
+                  alt="Preview Resort Praia Azul"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-5 text-white">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-primary text-white">
+                    🛡️ Selo Azul
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-secondary text-white">
+                    Sala Sensorial
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amarelo text-primary">
+                    Concierge TEA
+                  </span>
+                </div>
+                <h3 className="font-display font-bold text-lg">Resort Praia Azul</h3>
+                <p className="text-white/70 text-xs">Florianópolis, SC</p>
+
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-white/80">Compatibilidade com perfil</span>
+                    <span className="font-bold text-secondary">95%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-secondary rounded-full"
+                      style={{ width: "95%" }}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  asChild
+                  size="sm"
+                  className="mt-4 w-full bg-secondary hover:bg-secondary/90 text-white"
+                >
+                  <Link
+                    to="/demo/estabelecimento/$slug"
+                    params={{ slug: "resort-praia-azul" }}
+                  >
+                    Ver detalhes
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <p className="mt-3 text-center text-white/50 text-xs italic">
+              Dados de exemplo
             </p>
           </div>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="border-secondary text-secondary hover:bg-secondary hover:text-white whitespace-nowrap font-semibold"
-          >
-            <Link to="/demo">Explorar a demonstração</Link>
-          </Button>
         </div>
       </div>
     </section>
