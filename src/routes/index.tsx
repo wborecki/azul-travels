@@ -98,13 +98,13 @@ function Landing() {
       <ComoFunciona />
       <SelosImportantes />
       <OQuePlataformaTera />
+      <DemoEntrada />
       <FamiliasTeaser />
       <Citacao />
       <MercadoSection />
       <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
-      <DemoEntrada />
     </div>
   );
 }
