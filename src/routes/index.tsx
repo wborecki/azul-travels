@@ -157,8 +157,7 @@ function DemoEntrada() {
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 font-semibold"
+                className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white font-semibold"
               >
                 <Link to="/demo" search={{ view: "estabelecimento" }}>
                   Ver demo para estabelecimentos
