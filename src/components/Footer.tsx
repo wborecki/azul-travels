@@ -99,7 +99,7 @@ export function Footer() {
             </li>
             <li>
               <Link to="/demo" className="hover:text-secondary transition">
-                Ver demonstração da plataforma
+                Ver demonstração
               </Link>
             </li>
             <li>
