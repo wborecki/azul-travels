@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as EstabelecimentosRouteImport } from './routes/estabelecimentos'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -79,6 +80,11 @@ const ExplorarRoute = ExplorarRouteImport.update({
 const EstabelecimentosRoute = EstabelecimentosRouteImport.update({
   id: '/estabelecimentos',
   path: '/estabelecimentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/demo': typeof DemoRoute
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/demo': typeof DemoRoute
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/demo': typeof DemoRoute
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -344,6 +356,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
+  DemoRoute: typeof DemoRoute
   EstabelecimentosRoute: typeof EstabelecimentosRoute
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
@@ -422,6 +435,13 @@ declare module '@tanstack/react-router' {
       path: '/estabelecimentos'
       fullPath: '/estabelecimentos'
       preLoaderRoute: typeof EstabelecimentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -589,6 +609,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
+  DemoRoute: DemoRoute,
   EstabelecimentosRoute: EstabelecimentosRoute,
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,
