@@ -24,10 +24,7 @@ import {
   Building2,
 } from "lucide-react";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1920&q=80";
-const HERO_FALLBACK =
-  "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=1920&q=80";
+const OG_IMAGE = "/og-image.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
