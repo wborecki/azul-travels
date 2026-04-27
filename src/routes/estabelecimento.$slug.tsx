@@ -773,3 +773,198 @@ function Stepper({
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cards: confirmação de reserva + histórico desta família neste estabelecimento
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STATUS_BADGE_CLASS: Record<ReservaStatus, string> = {
+  pendente: "bg-warning text-warning-foreground",
+  confirmada: "bg-success text-success-foreground",
+  cancelada: "bg-destructive text-destructive-foreground",
+  concluida: "bg-primary text-primary-foreground",
+};
+
+const STATUS_ICON: Record<ReservaStatus, typeof Clock> = {
+  pendente: Clock,
+  confirmada: CheckCircle2,
+  cancelada: XCircle,
+  concluida: CalendarCheck,
+};
+
+function ConfirmacaoReservaCard({
+  reserva,
+  estabNome,
+  onNovaReserva,
+}: {
+  reserva: ReservaComContexto | null;
+  estabNome: string;
+  onNovaReserva: () => void;
+}) {
+  const status: ReservaStatus = reserva?.status ?? "pendente";
+  const StatusIcon = STATUS_ICON[status];
+
+  return (
+    <div className="bg-card rounded-2xl border-2 border-success/30 shadow-lg overflow-hidden">
+      {/* Cabeçalho de sucesso */}
+      <div className="bg-success/10 p-5 text-center border-b border-success/20">
+        <div className="mx-auto h-14 w-14 rounded-full bg-success/20 grid place-items-center mb-3">
+          <CheckCircle2 className="h-8 w-8 text-success" />
+        </div>
+        <h3 className="text-lg font-bold text-primary">Solicitação enviada!</h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Sua reserva em <strong className="text-foreground">{estabNome}</strong> foi registrada.
+        </p>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {/* Status atual */}
+        <div className="rounded-xl bg-muted/40 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Status
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${STATUS_BADGE_CLASS[status]}`}
+            >
+              <StatusIcon className="h-3 w-3" />
+              {RESERVA_STATUS_LABEL[status]}
+            </span>
+          </div>
+
+          {reserva && (
+            <dl className="text-xs space-y-1.5 text-foreground/80">
+              {(reserva.data_checkin || reserva.data_checkout) && (
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Datas</dt>
+                  <dd className="font-medium text-right">
+                    {formatDateBR(reserva.data_checkin)} → {formatDateBR(reserva.data_checkout)}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-2">
+                <dt className="text-muted-foreground">Pessoas</dt>
+                <dd className="font-medium text-right">
+                  {reserva.num_adultos ?? 1} adulto(s)
+                  {(reserva.num_autistas ?? 0) > 0 &&
+                    ` · ${reserva.num_autistas} criança(s) autista(s)`}
+                </dd>
+              </div>
+              {reserva.perfil_sensorial?.nome_autista && (
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Perfil enviado</dt>
+                  <dd className="font-medium text-right">
+                    {reserva.perfil_sensorial.nome_autista} ✓
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-2">
+                <dt className="text-muted-foreground">Solicitada em</dt>
+                <dd className="font-medium text-right">{formatDateBR(reserva.criado_em)}</dd>
+              </div>
+            </dl>
+          )}
+        </div>
+
+        {/* Próximos passos */}
+        <div>
+          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide mb-2">
+            Próximos passos
+          </h4>
+          <ol className="space-y-2 text-xs text-foreground/80">
+            <li className="flex gap-2">
+              <Mail className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
+              <span>
+                O estabelecimento recebeu o perfil sensorial e vai retornar por e-mail em até{" "}
+                <strong>48 horas</strong>.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
+              <span>
+                Quando confirmarem, o status muda para <strong>Confirmada</strong> aqui e você
+                recebe um e-mail.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <Gift className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
+              <span>O pagamento é feito diretamente com o estabelecimento.</span>
+            </li>
+          </ol>
+        </div>
+
+        {/* CTAs */}
+        <div className="space-y-2 pt-1">
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/minha-conta/reservas">Ver todas as minhas reservas</Link>
+          </Button>
+          <button
+            type="button"
+            onClick={onNovaReserva}
+            className="w-full text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+          >
+            Solicitar outra reserva neste local
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoricoReservasCard({
+  reservas,
+  destacarId,
+}: {
+  reservas: ReservaComContexto[];
+  destacarId: string | null;
+}) {
+  // Não duplicar a reserva recém-criada que já está em destaque acima
+  const lista = destacarId ? reservas.filter((r) => r.id !== destacarId) : reservas;
+  if (lista.length === 0) return null;
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <History className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-sm font-bold text-primary">Suas reservas neste local</h3>
+      </div>
+      <ul className="space-y-2">
+        {lista.map((r) => {
+          const status: ReservaStatus = r.status ?? "pendente";
+          const StatusIcon = STATUS_ICON[status];
+          return (
+            <li
+              key={r.id}
+              className="flex items-start justify-between gap-3 py-2 border-b border-border last:border-b-0"
+            >
+              <div className="min-w-0 text-xs">
+                <div className="text-foreground font-medium">
+                  {r.data_checkin || r.data_checkout
+                    ? `${formatDateBR(r.data_checkin)} → ${formatDateBR(r.data_checkout)}`
+                    : "Sem datas definidas"}
+                </div>
+                <div className="text-muted-foreground mt-0.5">
+                  Solicitada em {formatDateBR(r.criado_em)}
+                </div>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1 shrink-0 text-[10px] px-2 py-0.5 rounded-full font-semibold ${STATUS_BADGE_CLASS[status]}`}
+              >
+                <StatusIcon className="h-2.5 w-2.5" />
+                {RESERVA_STATUS_LABEL[status]}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="mt-3 pt-3 border-t border-border">
+        <Link
+          to="/minha-conta/reservas"
+          className="text-xs text-secondary hover:underline font-medium"
+        >
+          Ver detalhes em Minha Conta →
+        </Link>
+      </div>
+    </div>
+  );
+}
