@@ -123,6 +123,7 @@ function EstabPage() {
 
   // Modal "Adicionar novo perfil"
   const [perfilModalOpen, setPerfilModalOpen] = useState(false);
+  const [tourModalOpen, setTourModalOpen] = useState(false);
   const [novoPerfil, setNovoPerfil] = useState<PerfilSensorialDraft>(DEFAULT_PERFIL_DRAFT);
   const [salvandoPerfil, setSalvandoPerfil] = useState(false);
 
