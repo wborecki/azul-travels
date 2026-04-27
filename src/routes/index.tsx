@@ -25,7 +25,9 @@ import {
 } from "lucide-react";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&w=1920&q=80";
+  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1920&q=80";
+const HERO_FALLBACK =
+  "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=1920&q=80";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -150,9 +152,9 @@ function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(27,46,75,0.58) 0%, rgba(27,46,75,0.42) 40%, rgba(27,46,75,0.72) 100%), url('${HERO_IMAGE}')`,
+          backgroundImage: `linear-gradient(to bottom, rgba(27,46,75,0.55) 0%, rgba(27,46,75,0.40) 40%, rgba(27,46,75,0.68) 100%), url('${HERO_IMAGE}'), url('${HERO_FALLBACK}'), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 55%, #2CA8A0 100%)`,
           backgroundSize: "cover",
-          backgroundPosition: "center 30%",
+          backgroundPosition: "center 35%",
         }}
       />
 
