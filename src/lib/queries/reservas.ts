@@ -48,6 +48,27 @@ export async function fetchReservasDaFamilia(familiaId: string): Promise<Reserva
   return data ?? [];
 }
 
+/**
+ * Reservas da família logada para um estabelecimento específico, ordenadas
+ * por data desc. Usado no card de confirmação da página de detalhe para
+ * mostrar o histórico desta família neste local.
+ */
+export async function fetchReservasDaFamiliaPorEstabelecimento(
+  familiaId: string,
+  estabelecimentoId: string,
+): Promise<ReservaComContexto[]> {
+  const { data, error } = await supabase
+    .from("reservas")
+    .select(SELECT)
+    .eq("familia_id", familiaId)
+    .eq("estabelecimento_id", estabelecimentoId)
+    .order("criado_em", { ascending: false })
+    .returns<ReservaComContexto[]>();
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** Cria uma nova reserva (payload tipado). */
 export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
   const { data, error } = await supabase.from("reservas").insert(payload).select("*").single();
