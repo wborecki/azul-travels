@@ -24,10 +24,7 @@ import {
   Building2,
 } from "lucide-react";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1920&q=80";
-const HERO_FALLBACK =
-  "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=1920&q=80";
+const OG_IMAGE = "/og-image.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,10 +44,10 @@ export const Route = createFileRoute("/")({
         content:
           "Seja um dos primeiros a entrar quando a plataforma abrir. Lista de espera gratuita.",
       },
-      { property: "og:image", content: HERO_IMAGE },
+      { property: "og:image", content: OG_IMAGE },
       { property: "og:url", content: "https://azul-travels.lovable.app" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: HERO_IMAGE },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
   }),
   component: Landing,
@@ -160,8 +157,7 @@ function DemoEntrada() {
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 font-semibold"
+                className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white font-semibold"
               >
                 <Link to="/demo" search={{ view: "estabelecimento" }}>
                   Ver demo para estabelecimentos
@@ -246,9 +242,8 @@ function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(27,46,75,0.55) 0%, rgba(27,46,75,0.40) 40%, rgba(27,46,75,0.68) 100%), url('${HERO_IMAGE}'), url('${HERO_FALLBACK}'), linear-gradient(135deg, #1B2E4B 0%, #1E5F6E 55%, #2CA8A0 100%)`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 35%",
+          background:
+            "linear-gradient(135deg, #1B2E4B 0%, #1E5270 35%, #1A7A74 70%, #2CA8A0 100%)",
         }}
       />
 
@@ -272,14 +267,14 @@ function Hero() {
             <Button
               asChild
               size="lg"
-              className="bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-7 text-base font-semibold"
+              className="bg-secondary hover:bg-primary text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/familias">Sou uma família TEA</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 border border-white min-h-[52px] px-7 text-base font-semibold"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
@@ -319,7 +314,7 @@ function ComoFunciona() {
       Icon: UserPlus,
       titulo: "Fale sobre o seu filho",
       texto:
-        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos e muda completamente como você planeja viagens.",
+        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos.",
     },
     {
       n: "2",
@@ -765,14 +760,14 @@ function CtaFinal() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 min-h-[52px] px-7 text-base font-semibold"
+              className="bg-white text-primary hover:bg-secondary hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/familias">Sou família TEA</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              className="bg-transparent border-2 border-white text-white hover:bg-white/10 min-h-[52px] px-7 text-base font-semibold"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold"
             >
               <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>

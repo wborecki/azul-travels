@@ -63,28 +63,41 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [count, setCount] = useState<number | null>(null);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   useEffect(() => {
-    void loadCount();
+    let cancelado = false;
+    const timeout = setTimeout(() => {
+      if (!cancelado) setLoadingCount(false);
+    }, 3000);
+    void (async () => {
+      try {
+        const { count: c, error } = await supabase
+          .from("leads_familias")
+          .select("*", { count: "exact", head: true });
+        if (cancelado) return;
+        setCount(error ? null : (c ?? 0));
+      } catch {
+        if (!cancelado) setCount(null);
+      } finally {
+        if (!cancelado) setLoadingCount(false);
+        clearTimeout(timeout);
+      }
+    })();
+    return () => {
+      cancelado = true;
+      clearTimeout(timeout);
+    };
   }, []);
 
   async function loadCount() {
     try {
-      const timeoutPromise = new Promise<{ count: null; error: Error }>((resolve) =>
-        setTimeout(() => resolve({ count: null, error: new Error("timeout") }), 3000),
-      );
-      const queryPromise = supabase
+      const { count: c, error } = await supabase
         .from("leads_familias")
         .select("*", { count: "exact", head: true });
-      const result = await Promise.race([queryPromise, timeoutPromise]);
-      const { count: c, error } = result as { count: number | null; error: unknown };
-      if (error || c === null) {
-        setCount(-1);
-        return;
-      }
-      setCount(c);
+      if (!error) setCount(c ?? 0);
     } catch {
-      setCount(-1);
+      /* ignore */
     }
   }
 
@@ -202,7 +215,7 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
-      {count !== null && count >= 0 && (
+      {!loadingCount && count !== null && (
         <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
           <Users className="h-4 w-4" />
           {count === 0 ? (
