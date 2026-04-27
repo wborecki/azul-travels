@@ -1,28 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { useAuth } from "@/hooks/useAuth";
-import { Instagram, Facebook, Youtube } from "lucide-react";
+import { Instagram, Facebook, Youtube, Construction } from "lucide-react";
 
-/**
- * Rodapé global.
- *
- * Links auth-aware: alguns destinos da coluna "Para Famílias" exigem login.
- * Quando o visitante está deslogado, a Link cai num fluxo de login/cadastro
- * em vez de levar a uma página vazia.
- */
 export function Footer() {
   const ano = new Date().getFullYear();
-  const { user } = useAuth();
-
-  // Helpers — destino sensível ao estado de auth.
-  const minhaContaTo = user ? "/minha-conta" : "/login";
-  const perfilSensorialTo = user ? "/minha-conta/perfil-sensorial" : "/cadastro";
-  const reservasTo = user ? "/minha-conta/reservas" : "/login";
 
   return (
     <footer className="bg-footer text-footer-foreground mt-20">
+      {/* Status banner */}
+      <div className="bg-secondary/15 border-b border-white/10">
+        <div className="container mx-auto px-4 py-3 text-center text-sm text-secondary font-medium flex items-center justify-center gap-2">
+          <Construction className="h-4 w-4" />
+          <span>🚧 Plataforma em desenvolvimento — Lançamento previsto para 2026</span>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-        {/* Marca */}
         <div className="space-y-4">
           <div className="bg-white/5 inline-block rounded-lg px-2 py-1.5">
             <Logo variant="dark" />
@@ -32,53 +25,35 @@ export function Footer() {
             Espectro Autista.
           </p>
           <div className="flex items-center gap-3 pt-1">
-            <a
-              href="https://instagram.com/turismoazul"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram do Turismo Azul"
-              className="w-11 h-11 rounded-full bg-white/5 hover:bg-secondary hover:text-white flex items-center justify-center transition"
-            >
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a
-              href="https://facebook.com/turismoazul"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook do Turismo Azul"
-              className="w-11 h-11 rounded-full bg-white/5 hover:bg-secondary hover:text-white flex items-center justify-center transition"
-            >
-              <Facebook className="h-4 w-4" />
-            </a>
-            <a
-              href="https://youtube.com/@turismoazul"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="YouTube do Turismo Azul"
-              className="w-11 h-11 rounded-full bg-white/5 hover:bg-secondary hover:text-white flex items-center justify-center transition"
-            >
-              <Youtube className="h-4 w-4" />
-            </a>
+            {[
+              { Icon: Instagram, href: "https://instagram.com/turismoazul", label: "Instagram" },
+              { Icon: Facebook, href: "https://facebook.com/turismoazul", label: "Facebook" },
+              { Icon: Youtube, href: "https://youtube.com/@turismoazul", label: "YouTube" },
+            ].map(({ Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="w-11 h-11 rounded-full bg-white/5 hover:bg-secondary hover:text-white flex items-center justify-center transition"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* Para Famílias */}
         <div>
-          <h4 className="font-display font-semibold mb-3 text-white">Para Famílias</h4>
+          <h4 className="font-display font-semibold mb-3 text-white">Para famílias</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/explorar" className="hover:text-secondary transition">
-                Explorar destinos
-              </Link>
-            </li>
-            <li>
-              <Link to={minhaContaTo} className="hover:text-secondary transition">
-                Minha conta
-              </Link>
-            </li>
-            <li>
-              <Link to={perfilSensorialTo} className="hover:text-secondary transition">
-                Criar perfil sensorial
+              <Link
+                to="/"
+                search={{ scroll: "form-familias" } as never}
+                className="hover:text-secondary transition"
+              >
+                Entrar na lista de espera
               </Link>
             </li>
             <li>
@@ -87,35 +62,28 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to={reservasTo} className="hover:text-secondary transition">
-                Avaliar estabelecimento
+              <Link to="/conteudo" className="hover:text-secondary transition">
+                Conteúdo
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Para Estabelecimentos */}
         <div>
-          <h4 className="font-display font-semibold mb-3 text-white">Para Estabelecimentos</h4>
+          <h4 className="font-display font-semibold mb-3 text-white">Para estabelecimentos</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/para-estabelecimentos" className="hover:text-secondary transition">
-                Seja certificado
+              <Link
+                to="/"
+                search={{ scroll: "form-estabelecimentos" } as never}
+                className="hover:text-secondary transition"
+              >
+                Cadastre seu estabelecimento
               </Link>
             </li>
             <li>
               <Link to="/sobre-os-selos" className="hover:text-secondary transition">
                 Sobre o Selo Azul
-              </Link>
-            </li>
-            <li>
-              <Link to="/para-estabelecimentos" className="hover:text-secondary transition">
-                Listar meu negócio
-              </Link>
-            </li>
-            <li>
-              <Link to="/para-estabelecimentos" className="hover:text-secondary transition">
-                FAQ estabelecimentos
               </Link>
             </li>
             <li>
@@ -129,7 +97,6 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Empresa */}
         <div>
           <h4 className="font-display font-semibold mb-3 text-white">Empresa</h4>
           <ul className="space-y-2 text-sm">
@@ -139,27 +106,14 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/conteudo" className="hover:text-secondary transition">
-                Blog / Conteúdo TEA
-              </Link>
-            </li>
-            <li>
               <Link to="/privacidade" className="hover:text-secondary transition">
-                Política de privacidade (LGPD)
+                Privacidade (LGPD)
               </Link>
             </li>
             <li>
               <Link to="/termos" className="hover:text-secondary transition">
                 Termos de uso
               </Link>
-            </li>
-            <li>
-              <a
-                href="mailto:imprensa@turismoazul.com.br"
-                className="hover:text-secondary transition"
-              >
-                Imprensa / Parcerias
-              </a>
             </li>
           </ul>
         </div>

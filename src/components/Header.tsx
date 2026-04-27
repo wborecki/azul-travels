@@ -1,28 +1,25 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 
 export function Header() {
-  const { user, isAdmin, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const navLinkClass =
     "px-3 py-2 text-sm font-medium text-[#1B2E4B] hover:text-[#2CA8A0] transition-colors duration-150 rounded-md";
-  const navActiveClass = "text-[#2CA8A0] font-semibold";
 
-  const entrarBtnClass =
-    "text-[#1B2E4B] border border-[#1B2E4B] hover:bg-[#EBF4F8] hover:text-[#1B2E4B] transition-colors duration-150";
-
-  const cadastrarBtnClass =
-    "bg-[#1B2E4B] text-white hover:bg-[#2CA8A0] hover:text-white transition-colors duration-150";
+  function goScroll(target: "form-familias" | "form-estabelecimentos" | "explorar") {
+    setOpen(false);
+    if (pathname === "/") {
+      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      void navigate({ to: "/", search: { scroll: target } as never });
+    }
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white shadow-sm h-16">
@@ -30,80 +27,72 @@ export function Header() {
         <Logo />
 
         <nav className="hidden md:flex items-center gap-1">
-          <Link
-            to="/explorar"
-            className={navLinkClass}
-            activeProps={{ className: navActiveClass }}
-          >
+          <button onClick={() => goScroll("explorar")} className={navLinkClass}>
             Explorar destinos
-          </Link>
-          <Link
-            to="/beneficios-tea"
-            className={navLinkClass}
-            activeProps={{ className: navActiveClass }}
-          >
+          </button>
+          <button onClick={() => goScroll("form-familias")} className={navLinkClass}>
             Benefícios TEA
-          </Link>
-          <Link
-            to="/conteudo"
-            className={navLinkClass}
-            activeProps={{ className: navActiveClass }}
-          >
+          </button>
+          <Link to="/conteudo" className={navLinkClass}>
             Conteúdo
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`gap-2 ${entrarBtnClass}`}
-                >
-                  <UserIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Minha conta</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link to="/minha-conta">Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/minha-conta/perfil-sensorial">Perfis sensoriais</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/minha-conta/reservas">Minhas reservas</Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="gap-2">
-                        <Settings className="h-4 w-4" /> Painel admin
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="gap-2 text-destructive">
-                  <LogOut className="h-4 w-4" /> Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <>
-              <Button variant="outline" size="sm" asChild className={entrarBtnClass}>
-                <Link to="/login">Entrar</Link>
-              </Button>
-              <Button size="sm" asChild className={cadastrarBtnClass}>
-                <Link to="/cadastro">Cadastrar grátis</Link>
-              </Button>
-            </>
-          )}
+        <div className="hidden md:flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goScroll("form-familias")}
+            className="text-[#1B2E4B] border-[#1B2E4B] hover:bg-[#EBF4F8]"
+          >
+            Para famílias
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => goScroll("form-estabelecimentos")}
+            className="bg-[#1B2E4B] text-white hover:bg-[#2CA8A0]"
+          >
+            Para estabelecimentos
+          </Button>
         </div>
+
+        <button
+          className="md:hidden p-2"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Menu"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
+
+      {open && (
+        <div className="md:hidden bg-white border-t shadow-md">
+          <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            <button onClick={() => goScroll("explorar")} className="text-left py-2 text-sm">
+              Explorar destinos
+            </button>
+            <button onClick={() => goScroll("form-familias")} className="text-left py-2 text-sm">
+              Benefícios TEA
+            </button>
+            <Link to="/conteudo" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              Conteúdo
+            </Link>
+            <Button
+              variant="outline"
+              onClick={() => goScroll("form-familias")}
+              className="w-full justify-center"
+            >
+              Para famílias
+            </Button>
+            <Button
+              onClick={() => goScroll("form-estabelecimentos")}
+              className="w-full justify-center bg-[#1B2E4B] text-white"
+            >
+              Para estabelecimentos
+            </Button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -442,6 +442,105 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_estabelecimentos: {
+        Row: {
+          cargo: string | null
+          cidade: string
+          como_conheceu: string | null
+          criado_em: string
+          email: string
+          estado: string
+          id: string
+          iniciativa_atual: string | null
+          interesses: string[] | null
+          nome: string
+          nome_estabelecimento: string
+          num_colaboradores: string | null
+          origem: string | null
+          tipo: string | null
+          whatsapp: string
+        }
+        Insert: {
+          cargo?: string | null
+          cidade: string
+          como_conheceu?: string | null
+          criado_em?: string
+          email: string
+          estado: string
+          id?: string
+          iniciativa_atual?: string | null
+          interesses?: string[] | null
+          nome: string
+          nome_estabelecimento: string
+          num_colaboradores?: string | null
+          origem?: string | null
+          tipo?: string | null
+          whatsapp: string
+        }
+        Update: {
+          cargo?: string | null
+          cidade?: string
+          como_conheceu?: string | null
+          criado_em?: string
+          email?: string
+          estado?: string
+          id?: string
+          iniciativa_atual?: string | null
+          interesses?: string[] | null
+          nome?: string
+          nome_estabelecimento?: string
+          num_colaboradores?: string | null
+          origem?: string | null
+          tipo?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      leads_familias: {
+        Row: {
+          cidade: string
+          como_conheceu: string | null
+          criado_em: string
+          email: string
+          estado: string
+          id: string
+          nome: string
+          num_filhos_tea: string | null
+          origem: string | null
+          preocupacoes: string[] | null
+          status_diagnostico: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          cidade: string
+          como_conheceu?: string | null
+          criado_em?: string
+          email: string
+          estado: string
+          id?: string
+          nome: string
+          num_filhos_tea?: string | null
+          origem?: string | null
+          preocupacoes?: string[] | null
+          status_diagnostico?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          cidade?: string
+          como_conheceu?: string | null
+          criado_em?: string
+          email?: string
+          estado?: string
+          id?: string
+          nome?: string
+          num_filhos_tea?: string | null
+          origem?: string | null
+          preocupacoes?: string[] | null
+          status_diagnostico?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       perfil_sensorial: {
         Row: {
           comunicacao_verbal: boolean | null

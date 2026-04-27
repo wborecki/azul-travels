@@ -938,7 +938,7 @@ function ConfirmacaoReservaCard({
         {/* CTAs */}
         <div className="space-y-2 pt-1">
           <Button asChild variant="outline" className="w-full">
-            <Link to="/minha-conta/reservas">Ver todas as minhas reservas</Link>
+            <Link to="/">Voltar à home</Link>
           </Button>
           <button
             type="button"
@@ -1000,11 +1000,8 @@ function HistoricoReservasCard({
         })}
       </ul>
       <div className="mt-3 pt-3 border-t border-border">
-        <Link
-          to="/minha-conta/reservas"
-          className="text-xs text-secondary hover:underline font-medium"
-        >
-          Ver detalhes em Minha Conta →
+        <Link to="/" className="text-xs text-secondary hover:underline font-medium">
+          Voltar à home →
         </Link>
       </div>
     </div>

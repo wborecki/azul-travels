@@ -12,25 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ParaEstabelecimentosRouteImport } from './routes/para-estabelecimentos'
-import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MinhaContaIndexRouteImport } from './routes/minha-conta.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as MinhaContaReservasRouteImport } from './routes/minha-conta.reservas'
-import { Route as MinhaContaPerfisRouteImport } from './routes/minha-conta.perfis'
-import { Route as MinhaContaPerfilSensorialRouteImport } from './routes/minha-conta.perfil-sensorial'
-import { Route as MinhaContaDadosRouteImport } from './routes/minha-conta.dados'
-import { Route as MinhaContaConfiguracoesRouteImport } from './routes/minha-conta.configuracoes'
-import { Route as MinhaContaAvaliacoesRouteImport } from './routes/minha-conta.avaliacoes'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
@@ -58,11 +49,6 @@ const SobreRoute = SobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
-  id: '/redefinir-senha',
-  path: '/redefinir-senha',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
@@ -71,11 +57,6 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const ParaEstabelecimentosRoute = ParaEstabelecimentosRouteImport.update({
   id: '/para-estabelecimentos',
   path: '/para-estabelecimentos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MinhaContaRoute = MinhaContaRouteImport.update({
-  id: '/minha-conta',
-  path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -108,11 +89,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MinhaContaIndexRoute = MinhaContaIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MinhaContaRoute,
-} as any)
 const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
   path: '/conteudo/',
@@ -122,37 +98,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
-} as any)
-const MinhaContaReservasRoute = MinhaContaReservasRouteImport.update({
-  id: '/reservas',
-  path: '/reservas',
-  getParentRoute: () => MinhaContaRoute,
-} as any)
-const MinhaContaPerfisRoute = MinhaContaPerfisRouteImport.update({
-  id: '/perfis',
-  path: '/perfis',
-  getParentRoute: () => MinhaContaRoute,
-} as any)
-const MinhaContaPerfilSensorialRoute =
-  MinhaContaPerfilSensorialRouteImport.update({
-    id: '/perfil-sensorial',
-    path: '/perfil-sensorial',
-    getParentRoute: () => MinhaContaRoute,
-  } as any)
-const MinhaContaDadosRoute = MinhaContaDadosRouteImport.update({
-  id: '/dados',
-  path: '/dados',
-  getParentRoute: () => MinhaContaRoute,
-} as any)
-const MinhaContaConfiguracoesRoute = MinhaContaConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => MinhaContaRoute,
-} as any)
-const MinhaContaAvaliacoesRoute = MinhaContaAvaliacoesRouteImport.update({
-  id: '/avaliacoes',
-  path: '/avaliacoes',
-  getParentRoute: () => MinhaContaRoute,
 } as any)
 const LSlugRoute = LSlugRouteImport.update({
   id: '/l/$slug',
@@ -219,10 +164,8 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
-  '/minha-conta': typeof MinhaContaRouteWithChildren
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -231,15 +174,8 @@ export interface FileRoutesByFullPath {
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/avaliacoes': typeof MinhaContaAvaliacoesRoute
-  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
-  '/minha-conta/dados': typeof MinhaContaDadosRoute
-  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
-  '/minha-conta/perfis': typeof MinhaContaPerfisRoute
-  '/minha-conta/reservas': typeof MinhaContaReservasRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
-  '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -255,7 +191,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -264,15 +199,8 @@ export interface FileRoutesByTo {
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/avaliacoes': typeof MinhaContaAvaliacoesRoute
-  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
-  '/minha-conta/dados': typeof MinhaContaDadosRoute
-  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
-  '/minha-conta/perfis': typeof MinhaContaPerfisRoute
-  '/minha-conta/reservas': typeof MinhaContaReservasRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
-  '/minha-conta': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -288,10 +216,8 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/explorar': typeof ExplorarRoute
   '/login': typeof LoginRoute
-  '/minha-conta': typeof MinhaContaRouteWithChildren
   '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -300,15 +226,8 @@ export interface FileRoutesById {
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/avaliacoes': typeof MinhaContaAvaliacoesRoute
-  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
-  '/minha-conta/dados': typeof MinhaContaDadosRoute
-  '/minha-conta/perfil-sensorial': typeof MinhaContaPerfilSensorialRoute
-  '/minha-conta/perfis': typeof MinhaContaPerfisRoute
-  '/minha-conta/reservas': typeof MinhaContaReservasRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
-  '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -325,10 +244,8 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/explorar'
     | '/login'
-    | '/minha-conta'
     | '/para-estabelecimentos'
     | '/privacidade'
-    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -337,15 +254,8 @@ export interface FileRouteTypes {
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/avaliacoes'
-    | '/minha-conta/configuracoes'
-    | '/minha-conta/dados'
-    | '/minha-conta/perfil-sensorial'
-    | '/minha-conta/perfis'
-    | '/minha-conta/reservas'
     | '/admin/'
     | '/conteudo/'
-    | '/minha-conta/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -361,7 +271,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/para-estabelecimentos'
     | '/privacidade'
-    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -370,15 +279,8 @@ export interface FileRouteTypes {
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/avaliacoes'
-    | '/minha-conta/configuracoes'
-    | '/minha-conta/dados'
-    | '/minha-conta/perfil-sensorial'
-    | '/minha-conta/perfis'
-    | '/minha-conta/reservas'
     | '/admin'
     | '/conteudo'
-    | '/minha-conta'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -393,10 +295,8 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/explorar'
     | '/login'
-    | '/minha-conta'
     | '/para-estabelecimentos'
     | '/privacidade'
-    | '/redefinir-senha'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -405,15 +305,8 @@ export interface FileRouteTypes {
     | '/conteudo/$slug'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/avaliacoes'
-    | '/minha-conta/configuracoes'
-    | '/minha-conta/dados'
-    | '/minha-conta/perfil-sensorial'
-    | '/minha-conta/perfis'
-    | '/minha-conta/reservas'
     | '/admin/'
     | '/conteudo/'
-    | '/minha-conta/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -429,10 +322,8 @@ export interface RootRouteChildren {
   CadastroRoute: typeof CadastroRoute
   ExplorarRoute: typeof ExplorarRoute
   LoginRoute: typeof LoginRoute
-  MinhaContaRoute: typeof MinhaContaRouteWithChildren
   ParaEstabelecimentosRoute: typeof ParaEstabelecimentosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
-  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SobreRoute: typeof SobreRoute
   SobreOsSelosRoute: typeof SobreOsSelosRoute
   TermosRoute: typeof TermosRoute
@@ -465,13 +356,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/redefinir-senha': {
-      id: '/redefinir-senha'
-      path: '/redefinir-senha'
-      fullPath: '/redefinir-senha'
-      preLoaderRoute: typeof RedefinirSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
@@ -484,13 +368,6 @@ declare module '@tanstack/react-router' {
       path: '/para-estabelecimentos'
       fullPath: '/para-estabelecimentos'
       preLoaderRoute: typeof ParaEstabelecimentosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/minha-conta': {
-      id: '/minha-conta'
-      path: '/minha-conta'
-      fullPath: '/minha-conta'
-      preLoaderRoute: typeof MinhaContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -535,13 +412,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/minha-conta/': {
-      id: '/minha-conta/'
-      path: '/'
-      fullPath: '/minha-conta/'
-      preLoaderRoute: typeof MinhaContaIndexRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
     '/conteudo/': {
       id: '/conteudo/'
       path: '/conteudo'
@@ -555,48 +425,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
-    }
-    '/minha-conta/reservas': {
-      id: '/minha-conta/reservas'
-      path: '/reservas'
-      fullPath: '/minha-conta/reservas'
-      preLoaderRoute: typeof MinhaContaReservasRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
-    '/minha-conta/perfis': {
-      id: '/minha-conta/perfis'
-      path: '/perfis'
-      fullPath: '/minha-conta/perfis'
-      preLoaderRoute: typeof MinhaContaPerfisRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
-    '/minha-conta/perfil-sensorial': {
-      id: '/minha-conta/perfil-sensorial'
-      path: '/perfil-sensorial'
-      fullPath: '/minha-conta/perfil-sensorial'
-      preLoaderRoute: typeof MinhaContaPerfilSensorialRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
-    '/minha-conta/dados': {
-      id: '/minha-conta/dados'
-      path: '/dados'
-      fullPath: '/minha-conta/dados'
-      preLoaderRoute: typeof MinhaContaDadosRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
-    '/minha-conta/configuracoes': {
-      id: '/minha-conta/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/minha-conta/configuracoes'
-      preLoaderRoute: typeof MinhaContaConfiguracoesRouteImport
-      parentRoute: typeof MinhaContaRoute
-    }
-    '/minha-conta/avaliacoes': {
-      id: '/minha-conta/avaliacoes'
-      path: '/avaliacoes'
-      fullPath: '/minha-conta/avaliacoes'
-      preLoaderRoute: typeof MinhaContaAvaliacoesRouteImport
-      parentRoute: typeof MinhaContaRoute
     }
     '/l/$slug': {
       id: '/l/$slug'
@@ -716,30 +544,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface MinhaContaRouteChildren {
-  MinhaContaAvaliacoesRoute: typeof MinhaContaAvaliacoesRoute
-  MinhaContaConfiguracoesRoute: typeof MinhaContaConfiguracoesRoute
-  MinhaContaDadosRoute: typeof MinhaContaDadosRoute
-  MinhaContaPerfilSensorialRoute: typeof MinhaContaPerfilSensorialRoute
-  MinhaContaPerfisRoute: typeof MinhaContaPerfisRoute
-  MinhaContaReservasRoute: typeof MinhaContaReservasRoute
-  MinhaContaIndexRoute: typeof MinhaContaIndexRoute
-}
-
-const MinhaContaRouteChildren: MinhaContaRouteChildren = {
-  MinhaContaAvaliacoesRoute: MinhaContaAvaliacoesRoute,
-  MinhaContaConfiguracoesRoute: MinhaContaConfiguracoesRoute,
-  MinhaContaDadosRoute: MinhaContaDadosRoute,
-  MinhaContaPerfilSensorialRoute: MinhaContaPerfilSensorialRoute,
-  MinhaContaPerfisRoute: MinhaContaPerfisRoute,
-  MinhaContaReservasRoute: MinhaContaReservasRoute,
-  MinhaContaIndexRoute: MinhaContaIndexRoute,
-}
-
-const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
-  MinhaContaRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -747,10 +551,8 @@ const rootRouteChildren: RootRouteChildren = {
   CadastroRoute: CadastroRoute,
   ExplorarRoute: ExplorarRoute,
   LoginRoute: LoginRoute,
-  MinhaContaRoute: MinhaContaRouteWithChildren,
   ParaEstabelecimentosRoute: ParaEstabelecimentosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
-  RedefinirSenhaRoute: RedefinirSenhaRoute,
   SobreRoute: SobreRoute,
   SobreOsSelosRoute: SobreOsSelosRoute,
   TermosRoute: TermosRoute,
