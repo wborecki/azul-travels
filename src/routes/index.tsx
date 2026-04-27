@@ -44,10 +44,10 @@ export const Route = createFileRoute("/")({
         content:
           "Seja um dos primeiros a entrar quando a plataforma abrir. Lista de espera gratuita.",
       },
-      { property: "og:image", content: HERO_IMAGE },
+      { property: "og:image", content: OG_IMAGE },
       { property: "og:url", content: "https://azul-travels.lovable.app" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: HERO_IMAGE },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
   }),
   component: Landing,
