@@ -118,6 +118,8 @@ function EstabPage() {
   const [autoriza, setAutoriza] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [reservaEnviada, setReservaEnviada] = useState(false);
+  const [reservasFamilia, setReservasFamilia] = useState<ReservaComContexto[]>([]);
+  const [reservaRecemCriadaId, setReservaRecemCriadaId] = useState<string | null>(null);
 
   // Modal "Adicionar novo perfil"
   const [perfilModalOpen, setPerfilModalOpen] = useState(false);
