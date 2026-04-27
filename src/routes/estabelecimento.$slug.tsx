@@ -352,14 +352,13 @@ function EstabPage() {
         </div>
         {/* Botão Tour 360° */}
         {tour360Url && (
-          <a
-            href={tour360Url}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => setTourModalOpen(true)}
             className="absolute bottom-4 right-4 bg-amarelo text-amarelo-foreground rounded-xl px-4 py-2 font-semibold text-sm flex items-center gap-2 shadow-lg hover:scale-105 transition"
           >
             <Camera className="h-4 w-4" /> Tour 360° dos ambientes
-          </a>
+          </button>
         )}
       </div>
 
