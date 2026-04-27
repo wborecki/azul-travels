@@ -1,26 +1,16 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, Telescope, X } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDemo = pathname === "/demo" || pathname.startsWith("/demo/");
 
   const navLinkClass =
     "px-3 py-2 text-sm font-medium text-[#1B2E4B] hover:text-[#2CA8A0] transition-colors duration-150 rounded-md";
-
-  function goScroll(target: "form-familias" | "form-estabelecimentos" | "explorar") {
-    setOpen(false);
-    if (pathname === "/") {
-      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      void navigate({ to: "/", search: { scroll: target } as never });
-    }
-  }
 
   return (
     <header
@@ -31,18 +21,29 @@ export function Header() {
         <Logo />
 
         <nav className="hidden md:flex items-center gap-1">
-          <button onClick={() => goScroll("explorar")} className={navLinkClass}>
+          <Link to="/demo/explorar" className={navLinkClass} onClick={() => setOpen(false)}>
             Explorar destinos
-          </button>
-          <button onClick={() => goScroll("form-familias")} className={navLinkClass}>
+          </Link>
+          <Link to="/beneficios-tea" className={navLinkClass} onClick={() => setOpen(false)}>
             Benefícios TEA
-          </button>
-          <Link to="/conteudo" className={navLinkClass}>
+          </Link>
+          <Link to="/conteudo" className={navLinkClass} onClick={() => setOpen(false)}>
             Conteúdo
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="border-secondary text-secondary hover:bg-secondary hover:text-white text-xs h-8"
+          >
+            <Link to="/demo">
+              <Telescope className="h-3.5 w-3.5 mr-1" />
+              Ver demo
+            </Link>
+          </Button>
           <Button
             asChild
             variant="outline"
@@ -72,15 +73,25 @@ export function Header() {
       {open && (
         <div className="md:hidden bg-white border-t shadow-md">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <button onClick={() => goScroll("explorar")} className="text-left py-2 text-sm">
+            <Link to="/demo/explorar" className="py-2 text-sm" onClick={() => setOpen(false)}>
               Explorar destinos
-            </button>
-            <button onClick={() => goScroll("form-familias")} className="text-left py-2 text-sm">
+            </Link>
+            <Link to="/beneficios-tea" className="py-2 text-sm" onClick={() => setOpen(false)}>
               Benefícios TEA
-            </button>
+            </Link>
             <Link to="/conteudo" className="py-2 text-sm" onClick={() => setOpen(false)}>
               Conteúdo
             </Link>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full justify-center border-secondary text-secondary"
+            >
+              <Link to="/demo" onClick={() => setOpen(false)}>
+                <Telescope className="h-4 w-4 mr-1" />
+                Ver demo
+              </Link>
+            </Button>
             <Button
               asChild
               variant="outline"

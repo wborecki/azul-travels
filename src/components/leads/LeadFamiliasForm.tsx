@@ -70,14 +70,19 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   async function loadCount() {
     try {
-      const { count: c, error } = await supabase
+      const timeoutPromise = new Promise<{ count: null; error: Error }>((resolve) =>
+        setTimeout(() => resolve({ count: null, error: new Error("timeout") }), 3000),
+      );
+      const queryPromise = supabase
         .from("leads_familias")
         .select("*", { count: "exact", head: true });
-      if (error) {
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      const { count: c, error } = result as { count: number | null; error: unknown };
+      if (error || c === null) {
         setCount(-1);
         return;
       }
-      setCount(c ?? 0);
+      setCount(c);
     } catch {
       setCount(-1);
     }

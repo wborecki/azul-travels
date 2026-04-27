@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { Link } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
@@ -78,7 +77,6 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
-        <FloatingWhatsApp />
       </div>
       <Toaster richColors position="top-right" />
     </AuthProvider>
