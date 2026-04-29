@@ -18,10 +18,10 @@ jobs:
 
       - name: Push to personal repo
         env:
-          PERSONAL_TOKEN: ${{ secrets.PERSONAL_REPO_TOKEN }}
+          PERSONAL_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
           if [ -z "$PERSONAL_TOKEN" ]; then
-            echo "::error::PERSONAL_REPO_TOKEN secret is empty or not set"
+            echo "::error::MIRROR_TOKEN secret is empty or not set"
             exit 1
           fi
           git remote add personal "https://x-access-token:${PERSONAL_TOKEN}@github.com/wborecki/azul-travels.git"
