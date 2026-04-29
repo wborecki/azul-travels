@@ -4,4 +4,4 @@ export const Route = createFileRoute("/$")({
   component: () => {
     return null;
   },
-});
+}); 
