@@ -6,8 +6,12 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// On Vercel (VERCEL=1): disable the Cloudflare plugin and use SPA mode so that
+// TanStack Start generates a static dist/client/index.html that Vercel can serve.
+// The Cloudflare/SSR build is handled by Lovable and deployed separately.
+const isVercel = !!process.env.VERCEL;
+
 export default defineConfig({
-  // Disable the Cloudflare plugin when deploying to Vercel so that TanStack Start
-  // can use the vercel-edge preset (set in app.config.ts) and generate .vercel/output.
-  cloudflare: process.env.VERCEL ? false : undefined,
+  cloudflare: isVercel ? false : undefined,
+  tanstackStart: isVercel ? { spa: true } : undefined,
 });
