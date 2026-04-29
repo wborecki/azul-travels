@@ -1,22 +1,4 @@
 {
   "buildCommand": "bun run build",
-  "installCommand": "bun install --frozen-lockfile",
-  "outputDirectory": "dist/client",
-  "rewrites": [
-    {
-      "source": "/((?!assets|favicon\\.svg|robots\\.txt|sitemap\\.xml|og-image\\.jpg).*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    }
-  ]
+  "installCommand": "bun install --frozen-lockfile"
 }
