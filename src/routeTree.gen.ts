@@ -22,6 +22,7 @@ import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
@@ -104,6 +105,11 @@ const BeneficiosTeaRoute = BeneficiosTeaRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -201,6 +207,7 @@ const AdminEstabelecimentosIdPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
   '/estabelecimentos': typeof EstabelecimentosRoute
@@ -266,6 +274,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/beneficios-tea'
     | '/cadastro'
     | '/estabelecimentos'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
@@ -399,6 +411,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -696,6 +716,7 @@ const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
