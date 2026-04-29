@@ -1,13 +1,6 @@
 {
   "buildCommand": "bun run build",
   "installCommand": "bun install --frozen-lockfile",
-  "outputDirectory": "dist/client",
-  "rewrites": [
-    {
-      "source": "/((?!assets|public|robots\\.txt|sitemap\\.xml).*)",
-      "destination": "/"
-    }
-  ],
   "headers": [
     {
       "source": "/assets/(.*)",
