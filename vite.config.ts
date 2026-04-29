@@ -6,4 +6,8 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig();
+export default defineConfig({
+  // Disable the Cloudflare plugin when deploying to Vercel so that TanStack Start
+  // can use the vercel-edge preset (set in app.config.ts) and generate .vercel/output.
+  cloudflare: process.env.VERCEL ? false : undefined,
+});
