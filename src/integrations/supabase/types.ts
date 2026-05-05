@@ -116,6 +116,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contatos_gerais: {
+        Row: {
+          assunto: string | null
+          criado_em: string
+          email: string
+          id: string
+          mensagem: string
+          nome: string
+          origem: string | null
+          telefone: string | null
+        }
+        Insert: {
+          assunto?: string | null
+          criado_em?: string
+          email: string
+          id?: string
+          mensagem: string
+          nome: string
+          origem?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          assunto?: string | null
+          criado_em?: string
+          email?: string
+          id?: string
+          mensagem?: string
+          nome?: string
+          origem?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
       conteudo_eventos: {
         Row: {
           conteudo_id: string
