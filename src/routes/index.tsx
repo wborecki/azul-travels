@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
-import heroFamilia from "@/assets/hero-familia.jpg";
+import heroFamilia from "@/assets/hero-aeroporto.png";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
@@ -333,7 +333,7 @@ function Hero() {
           <div className="relative">
             <div className="relative mx-auto" style={{ width: "100%", maxWidth: 480, height: 460 }}>
               <img
-                src="https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&q=80"
+                src={heroFamilia}
                 alt="Mãe e filho atípico de mãos dadas em um aeroporto, observando o avião"
                 className="shadow-elegant"
                 style={{
@@ -343,13 +343,6 @@ function Hero() {
                   border: "3px solid #1B4F5C",
                   objectFit: "cover",
                   objectPosition: "center center",
-                }}
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  if (!img.dataset.fallback) {
-                    img.dataset.fallback = "1";
-                    img.src = "https://images.unsplash.com/photo-1544717684-1243da23b545?w=800&q=80";
-                  }
                 }}
               />
 
