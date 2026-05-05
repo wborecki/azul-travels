@@ -540,7 +540,7 @@ function ComoFunciona() {
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={i * 80}>
-              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+              <div className="autismo-border-top relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full overflow-hidden">
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                     {s.n}
