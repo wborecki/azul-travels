@@ -530,7 +530,7 @@ function PorQueExistimos() {
     "linear-gradient(180deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)";
 
   return (
-    <section className="py-20 bg-white">
+    <section id="por-que-existimos" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
