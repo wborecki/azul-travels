@@ -693,7 +693,7 @@ function SelosImportantes() {
         <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
           {selos.map((s, i) => (
             <Reveal key={s.nome} delay={i * 80}>
-              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+              <div className="autismo-border-top relative overflow-hidden bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-10 h-10 rounded-lg ${s.cor} flex items-center justify-center shrink-0`}
