@@ -88,7 +88,7 @@ function DemoDetalhe() {
           <div className="grid grid-rows-2 gap-3">
             {(estab.fotos.length > 0 ? estab.fotos : [estab.foto_capa])
               .slice(0, 2)
-              .map((src, i) => (
+              .map((src: string, i: number) => (
                 <div
                   key={i}
                   className="aspect-video rounded-2xl overflow-hidden bg-azul-claro"
@@ -129,7 +129,7 @@ function DemoDetalhe() {
             {estab.nome}
           </h1>
           <p className="mt-2 text-muted-foreground flex items-center gap-2">
-            <span className="font-medium">{TIPO_LABEL[estab.tipo]}</span>
+            <span className="font-medium">{TIPO_LABEL[estab.tipo as keyof typeof TIPO_LABEL]}</span>
             <span>·</span>
             <MapPin className="h-4 w-4" /> {estab.cidade}, {estab.estado}
             <span>·</span>

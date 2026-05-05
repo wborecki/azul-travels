@@ -254,13 +254,16 @@ function Hero() {
           </span>
 
           <h1 className="mt-6 text-4xl md:text-5xl font-display font-bold leading-[1.1] text-shadow-soft">
-            Sua família também
+            <span className="font-normal text-white/90">Você não precisa mais</span>
             <br />
-            <span className="text-secondary">merece viajar.</span>
+            <span className="font-bold" style={{ color: "#1B4F5C" }}>
+              ter medo de viajar com seu filho.
+            </span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            Estamos construindo o primeiro marketplace brasileiro de turismo para famílias TEA.
-            Seja um dos primeiros a entrar quando a plataforma abrir.
+            A gente sabe o que é a crise no aeroporto. Os olhares de julgamento. O cansaço de
+            explicar o autismo do seu filho pra cada hotel. O Turismo Azul foi criado por quem
+            vive isso, para que você possa viajar com segurança, previsibilidade e tranquilidade.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
@@ -269,7 +272,7 @@ function Hero() {
               size="lg"
               className="bg-secondary hover:bg-primary text-white min-h-[52px] px-7 text-base font-semibold"
             >
-              <Link to="/familias">Sou uma família TEA</Link>
+              <Link to="/familias">Quero viajar com segurança</Link>
             </Button>
             <Button
               asChild
@@ -279,6 +282,10 @@ function Hero() {
               <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
             </Button>
           </div>
+
+          <p className="mt-4 text-white/70" style={{ fontSize: "12px" }}>
+            ❤️ Criado por um pai atípico, a partir da experiência real com o próprio filho.
+          </p>
 
           <div className="mt-8 inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 rounded-full px-6 py-3 text-sm font-medium">
             <Lock className="h-4 w-4 text-amarelo" />
