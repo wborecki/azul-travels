@@ -666,12 +666,12 @@ function ComoFunciona() {
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 80}>
+            <Reveal key={s.n} delay={i * 80} className="h-full">
               <div
+                className="h-full flex flex-col"
                 style={{
-                  height: "auto",
                   padding: "28px 24px",
                   borderRadius: 12,
                   background: "white",
