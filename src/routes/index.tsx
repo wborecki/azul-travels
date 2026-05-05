@@ -756,10 +756,6 @@ function ComoFunciona() {
             </p>
           </div>
         </Reveal>
-            </Reveal>
-          ))}
-        </div>
-
         {/* Banner em breve */}
         <Reveal className="mt-10">
           <div className="bg-primary text-primary-foreground rounded-2xl p-6 md:p-8 text-center max-w-3xl mx-auto">
