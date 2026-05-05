@@ -359,6 +359,22 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
       </Field>
 
       <Field label="O que mais te preocupa numa viagem com seu filho?">
+        <div className="space-y-1.5 mb-3" style={{ fontSize: "13px" }}>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre sensibilidades sensoriais (sons, luz, texturas): perguntamos isso para
+            filtrar estabelecimentos que não tenham ambientes que possam gerar crise. Seu filho
+            nunca vai chegar em um lugar despreparado.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre rotina e previsibilidade: sabemos que imprevistos são difíceis. Com essa
+            informação, avisamos a equipe do destino para manter uma rotina estruturada durante a
+            estadia.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre comportamentos e comunicação: cada criança é única. Quanto mais você nos
+            conta, mais personalizada e tranquila será a viagem de vocês.
+          </p>
+        </div>
         <div className="space-y-2">
           {PREOCUPACOES.map((p) => (
             <label key={p} className="flex items-start gap-2 text-sm cursor-pointer">
