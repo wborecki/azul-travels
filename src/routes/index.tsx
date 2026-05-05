@@ -540,7 +540,7 @@ function ComoFunciona() {
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={i * 80}>
-              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+              <div className="autismo-border-top relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full overflow-hidden">
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                     {s.n}
@@ -594,7 +594,7 @@ function ComoFunciona() {
               ].map((c) => (
                 <div
                   key={c.titulo}
-                  className="bg-white rounded-2xl p-6 border border-amber-100/70 shadow-sm"
+                  className="autismo-border-top relative overflow-hidden bg-white rounded-2xl p-6 border border-amber-100/70 shadow-sm"
                 >
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                     <c.Icon className="h-5 w-5" />
@@ -693,7 +693,7 @@ function SelosImportantes() {
         <div className="grid sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
           {selos.map((s, i) => (
             <Reveal key={s.nome} delay={i * 80}>
-              <div className="relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
+              <div className="autismo-border-top relative overflow-hidden bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-10 h-10 rounded-lg ${s.cor} flex items-center justify-center shrink-0`}
