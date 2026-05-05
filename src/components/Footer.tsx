@@ -7,6 +7,8 @@ export function Footer() {
 
   return (
     <footer className="bg-footer text-footer-foreground mt-20">
+      {/* Barra decorativa com as 4 cores do autismo */}
+      <div className="autismo-bar" aria-hidden="true" />
       {/* Status banner */}
       <div className="bg-secondary/15 border-b border-white/10">
         <div className="container mx-auto px-4 py-3 text-center text-sm text-secondary font-medium flex items-center justify-center gap-2">
