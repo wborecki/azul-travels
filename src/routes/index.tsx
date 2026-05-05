@@ -663,10 +663,22 @@ function ComoFunciona() {
           </p>
         </Reveal>
 
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={i * 80}>
-              <div className="autismo-border-top relative bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition border h-full overflow-hidden">
+              <div
+                style={{
+                  height: "auto",
+                  padding: "28px 24px",
+                  borderRadius: 12,
+                  background: "white",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                  borderTop: "3px solid transparent",
+                  borderImageSource:
+                    "linear-gradient(90deg, #E63946, #1D6FA4, #F4A623, #2A9D8F)",
+                  borderImageSlice: 1,
+                }}
+              >
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                     {s.n}
@@ -677,6 +689,9 @@ function ComoFunciona() {
                 </div>
                 <h3 className="mt-5 font-display font-bold text-primary text-lg">{s.titulo}</h3>
                 <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{s.texto}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
 
         {/* Subseção: E se meu filho entrar em crise? */}
@@ -741,10 +756,6 @@ function ComoFunciona() {
             </p>
           </div>
         </Reveal>
-            </Reveal>
-          ))}
-        </div>
-
         {/* Banner em breve */}
         <Reveal className="mt-10">
           <div className="bg-primary text-primary-foreground rounded-2xl p-6 md:p-8 text-center max-w-3xl mx-auto">
