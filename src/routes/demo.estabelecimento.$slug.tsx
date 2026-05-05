@@ -88,7 +88,7 @@ function DemoDetalhe() {
           <div className="grid grid-rows-2 gap-3">
             {(estab.fotos.length > 0 ? estab.fotos : [estab.foto_capa])
               .slice(0, 2)
-              .map((src, i) => (
+              .map((src: string, i: number) => (
                 <div
                   key={i}
                   className="aspect-video rounded-2xl overflow-hidden bg-azul-claro"
