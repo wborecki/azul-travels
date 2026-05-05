@@ -250,7 +250,7 @@ function Hero() {
   return (
     <section id="hero" className="relative bg-white overflow-hidden">
       <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center min-h-[600px]">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center lg:min-h-[600px]">
           {/* Coluna esquerda — texto */}
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold uppercase tracking-wider text-[#1B2E4B]">
