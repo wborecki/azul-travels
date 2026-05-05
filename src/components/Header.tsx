@@ -14,7 +14,7 @@ export function Header() {
 
   const navItems = [
     { label: "Início", to: "/", type: "route" as const },
-    { label: "Sobre Nós", to: "/sobre", type: "route" as const },
+    { label: "Sobre Nós", href: "/#por-que-existimos", type: "anchor" as const },
     { label: "Como Funciona", href: "/#como-funciona", type: "anchor" as const },
     { label: "Destinos", to: "/explorar", type: "route" as const },
     { label: "Depoimentos", href: "/#depoimentos", type: "anchor" as const },
