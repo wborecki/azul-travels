@@ -107,8 +107,6 @@ function Landing() {
       <SelosImportantes />
       <OQuePlataformaTera />
       <DemoEntrada />
-      <FamiliasTeaser />
-      <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
     </div>
