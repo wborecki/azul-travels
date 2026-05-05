@@ -768,24 +768,6 @@ function ComoFunciona() {
           </div>
         </Reveal>
 
-        {/* Banner em breve */}
-        <Reveal className="mt-10">
-          <div className="bg-primary text-primary-foreground rounded-2xl p-6 md:p-8 text-center max-w-3xl mx-auto">
-            <p className="text-base md:text-lg font-medium">
-              A plataforma completa com busca, perfil sensorial e reservas estará disponível em
-              breve.
-              <br className="hidden sm:inline" /> Cadastre-se agora e seja notificado no dia do
-              lançamento.
-            </p>
-            <Button
-              asChild
-              className="mt-5 bg-secondary hover:bg-secondary/90 text-white"
-              size="lg"
-            >
-              <Link to="/familias">Quero ser avisado</Link>
-            </Button>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
