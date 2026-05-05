@@ -26,7 +26,7 @@ export function EmBreveBlock({
           size="lg"
           className="mt-8 bg-secondary hover:bg-primary text-white min-h-[48px] px-7"
         >
-          <Link to="/" search={{ scroll: scrollTarget } as never}>
+          <Link to={scrollTarget === "form-estabelecimentos" ? "/estabelecimentos" : "/familias"}>
             {ctaLabel}
           </Link>
         </Button>
