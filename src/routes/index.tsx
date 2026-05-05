@@ -94,6 +94,7 @@ function Landing() {
     <div>
       <Hero />
       <DorQueSoQuemViveSabe />
+      <PorQueExistimos />
       <ComoFunciona />
       <SelosImportantes />
       <OQuePlataformaTera />
@@ -387,6 +388,104 @@ function DorQueSoQuemViveSabe() {
             <p className="mt-5 text-center text-sm text-secondary font-medium">
               Isso não vai mais acontecer com você.
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POR QUE A GENTE EXISTE DE VERDADE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PorQueExistimos() {
+  const gradienteAutismo =
+    "linear-gradient(180deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)";
+
+  return (
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="max-w-2xl mx-auto text-center mb-12">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
+            Por que a gente existe de verdade
+          </span>
+        </div>
+
+        <div className="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start max-w-6xl mx-auto">
+          {/* Coluna esquerda — 60% */}
+          <div className="lg:col-span-3">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
+              Não foi uma ideia de negócio. Foi uma necessidade real.
+            </h2>
+
+            <p className="mt-5 text-lg text-foreground/80">
+              O Turismo Azul nasceu da experiência de Gustavo Passinato, pai atípico que tentou
+              viajar com o filho e percebeu que o mundo do turismo simplesmente não estava
+              preparado para recebê-los.
+            </p>
+
+            <p className="mt-4 text-lg text-foreground/80">
+              Nenhum hotel sabia o que fazer. Nenhuma agência tinha respostas. A viagem virou um
+              campo minado de imprevistos, julgamentos e situações que nenhuma família deveria
+              passar sozinha.
+            </p>
+
+            <div className="mt-6 rounded-xl p-[3px]" style={{ background: gradienteAutismo }}>
+              <div
+                className="rounded-[calc(0.75rem-2px)] p-5 md:p-6"
+                style={{ backgroundColor: "#F0F7FF" }}
+              >
+                <p className="text-lg md:text-xl text-primary font-medium italic leading-relaxed">
+                  Foi aí que surgiu a pergunta: e se existisse um lugar onde as famílias atípicas
+                  pudessem viajar sem ter que explicar o autismo do filho pra cada recepcionista?
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-6 text-lg text-foreground/80">
+              É disso que o Turismo Azul é feito. Não de especialistas em turismo que estudaram
+              TEA. Mas de quem vive o autismo todos os dias e decidiu fazer algo a respeito.
+            </p>
+          </div>
+
+          {/* Coluna direita — 40% */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
+              {/* SUBSTITUIR pela foto do Gustavo com o filho */}
+              <div
+                className="mx-auto h-32 w-32 rounded-full p-[4px]"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+                }}
+              >
+                <div className="h-full w-full rounded-full bg-azul-claro flex items-center justify-center">
+                  <Users className="h-14 w-14 text-primary" aria-hidden="true" />
+                </div>
+              </div>
+
+              <h3 className="mt-5 text-xl font-display font-bold text-primary">
+                Gustavo Passinato
+              </h3>
+              <p className="text-sm text-secondary font-semibold mt-1">Fundador · Pai Atípico</p>
+              <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
+                Pai de uma criança autista. Criou o Turismo Azul depois de perceber que o mundo
+                do turismo não estava preparado para receber sua família.
+              </p>
+
+              <div
+                className="mt-6 inline-block rounded-full p-[2px]"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+                }}
+              >
+                <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
+                  🧩 Vive e respira o TEA todos os dias
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
