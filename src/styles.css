@@ -263,6 +263,8 @@
       transform: translateY(8px);
       opacity: 1;
     }
+  }
+
   /* Gradiente das 4 cores do autismo (vermelho, azul, amarelo, verde) */
   .gradient-autismo {
     background: linear-gradient(
@@ -301,7 +303,6 @@
       #2a9d8f 100%
     );
   }
-}
 
   /* Linha conectora horizontal do "Como funciona" (apenas md+) */
   .step-connector {
@@ -315,3 +316,4 @@
     opacity: 0.35;
   }
 }
+
