@@ -594,7 +594,7 @@ function ComoFunciona() {
               ].map((c) => (
                 <div
                   key={c.titulo}
-                  className="bg-white rounded-2xl p-6 border border-amber-100/70 shadow-sm"
+                  className="autismo-border-top relative overflow-hidden bg-white rounded-2xl p-6 border border-amber-100/70 shadow-sm"
                 >
                   <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                     <c.Icon className="h-5 w-5" />
