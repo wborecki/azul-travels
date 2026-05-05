@@ -331,20 +331,28 @@ function Hero() {
 
           {/* Coluna direita — imagem */}
           <div className="relative">
-            <div className="relative aspect-square max-w-[560px] mx-auto">
-              {/* Borda circular azul */}
-              <div
-                className="absolute inset-0 rounded-full border-[6px]"
-                style={{ borderColor: "#1D6FA4" }}
-                aria-hidden="true"
+            <div className="relative mx-auto" style={{ width: "100%", maxWidth: 480, height: 460 }}>
+              <img
+                src="https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&q=80"
+                alt="Mãe e filho atípico de mãos dadas em um aeroporto, observando o avião"
+                className="shadow-elegant"
+                style={{
+                  width: "100%",
+                  height: "460px",
+                  borderRadius: "50%",
+                  border: "3px solid #1B4F5C",
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                }}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = "1";
+                    img.src = "https://images.unsplash.com/photo-1544717684-1243da23b545?w=800&q=80";
+                  }
+                }}
               />
-              <div className="absolute inset-3 rounded-full overflow-hidden shadow-elegant">
-                <img
-                  src={heroFamilia}
-                  alt="Mãe e filho atípico de mãos dadas em um aeroporto, observando o avião"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+
 
               {/* Card flutuante */}
               <div className="absolute top-4 -right-2 md:-right-6 lg:right-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 max-w-[240px] hidden sm:block">
