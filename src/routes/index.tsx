@@ -473,9 +473,13 @@ function DorQueSoQuemViveSabe() {
               invisível que ninguém de fora consegue entender.
             </p>
 
-            <ul className="mt-6 space-y-3">
+            <ul className="mt-6" style={{ lineHeight: 1.8 }}>
               {medos.map((m) => (
-                <li key={m.texto} className="flex items-start gap-3 text-foreground/85">
+                <li
+                  key={m.texto}
+                  className="flex items-start gap-3 text-foreground/85"
+                  style={{ marginBottom: 12, lineHeight: 1.8 }}
+                >
                   <span
                     aria-hidden="true"
                     className="mt-2 inline-block h-3 w-3 rounded-full flex-shrink-0"
