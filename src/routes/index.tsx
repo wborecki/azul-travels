@@ -449,7 +449,7 @@ function DorQueSoQuemViveSabe() {
   ];
 
   return (
-    <section className="py-20" style={{ backgroundColor: "#F0F7FF" }}>
+    <section id="depoimentos" className="py-20" style={{ backgroundColor: "#F0F7FF" }}>
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
