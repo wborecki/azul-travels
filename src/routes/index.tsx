@@ -249,29 +249,29 @@ function DemoEntrada() {
 function Hero() {
   return (
     <section id="hero" className="relative bg-white overflow-hidden">
-      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center lg:min-h-[600px]">
-          {/* Coluna esquerda — texto */}
-          <div className="animate-fade-in">
+      <div className="container mx-auto px-4 py-10 md:py-14 lg:py-16">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Coluna esquerda — texto (5/12) */}
+          <div className="animate-fade-in lg:col-span-5">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold uppercase tracking-wider text-[#1B2E4B]">
               <Heart className="h-3.5 w-3.5 text-[#E63946] fill-[#E63946]" />
               Especialistas em TEA
             </span>
 
-            <h1 className="mt-6 font-display font-extrabold leading-[1.05] tracking-tight text-[44px] sm:text-[52px] lg:text-[56px]">
+            <h1 className="mt-5 font-display font-extrabold leading-[1.05] tracking-tight text-[40px] sm:text-[48px] lg:text-[54px]">
               <span className="block text-[#1a1a2e]">Viajar com seu filho</span>
               <span className="block text-[#1a1a2e]">atípico pode ser</span>
               <span className="block text-[#1B4F5C]">mais leve.</span>
             </h1>
 
-            <p className="mt-6 text-base md:text-[17px] text-gray-600 leading-relaxed max-w-xl">
+            <p className="mt-5 text-base md:text-[17px] text-gray-600 leading-relaxed max-w-xl">
               Planejamento personalizado, suporte antes, durante e depois da viagem e{" "}
               <strong className="text-[#1a1a2e] font-semibold">
                 todo o cuidado que sua família merece.
               </strong>
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <div className="mt-7 flex flex-col sm:flex-row gap-3">
               <Button
                 asChild
                 size="lg"
@@ -296,7 +296,7 @@ function Hero() {
             </div>
 
             {/* Trust badges */}
-            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
+            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center bg-white">
                   <Heart className="h-4 w-4 text-[#1B4F5C]" />
@@ -329,33 +329,39 @@ function Hero() {
             </div>
           </div>
 
-          {/* Coluna direita — imagem */}
-          <div className="relative">
-            <div className="relative mx-auto" style={{ width: "100%", maxWidth: 480, height: 460 }}>
+          {/* Coluna direita — imagem (7/12, maior) */}
+          <div className="relative lg:col-span-7">
+            <div className="relative mx-auto w-full" style={{ maxWidth: 720 }}>
+              {/* Bloco decorativo de fundo */}
+              <div
+                aria-hidden="true"
+                className="absolute -inset-3 rounded-[2rem] -z-0"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(230,57,70,0.08), rgba(29,111,164,0.10), rgba(244,166,35,0.08), rgba(42,157,143,0.10))",
+                }}
+              />
               <img
                 src={heroFamilia}
                 alt="Mãe e filho atípico de mãos dadas em um aeroporto, observando o avião"
-                className="shadow-elegant"
+                className="relative z-10 w-full shadow-elegant"
                 style={{
-                  width: "100%",
-                  height: "460px",
-                  borderRadius: "50%",
+                  height: "clamp(380px, 56vw, 560px)",
+                  borderRadius: "1.75rem",
                   border: "3px solid #1B4F5C",
                   objectFit: "cover",
-                  objectPosition: "center center",
+                  objectPosition: "left center",
                 }}
               />
 
-
-              {/* Card flutuante */}
-              <div className="absolute top-4 -right-2 md:-right-6 lg:right-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 max-w-[240px] hidden sm:block">
+              {/* Card flutuante — canto inferior esquerdo, longe da mãe */}
+              <div className="absolute z-20 -bottom-4 left-2 md:left-4 lg:-left-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 max-w-[260px] hidden sm:block">
                 <div className="flex items-start gap-2.5">
                   <div className="h-9 w-9 rounded-full bg-[#EBF4F8] flex items-center justify-center flex-shrink-0">
-                    <Users className="h-4.5 w-4.5 text-[#1B4F5C]" />
+                    <Users className="h-4 w-4 text-[#1B4F5C]" />
                   </div>
                   <p className="text-[13px] text-gray-700 leading-snug">
-                    Entendemos as necessidades do seu filho para criar uma viagem tranquila e
-                    inesquecível.
+                    Cada viagem pensada para acolher as necessidades do seu filho.
                   </p>
                 </div>
               </div>
