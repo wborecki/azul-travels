@@ -94,6 +94,7 @@ function Landing() {
     <div>
       <Hero />
       <DorQueSoQuemViveSabe />
+      <PorQueExistimos />
       <ComoFunciona />
       <SelosImportantes />
       <OQuePlataformaTera />
