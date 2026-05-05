@@ -5,63 +5,71 @@ type LogoVariant = "light" | "dark";
 /**
  * Logo do Turismo Azul.
  *
- * Comportamento padrão (sem props): cores fixas para fundo claro
- *   - Símbolo (ondas): teal #2CA8A0
- *   - "Turismo": navy #1B2E4B
- *   - "Azul": teal #2CA8A0
+ * Símbolo: coração formado por 4 quadrantes coloridos (cores do autismo)
+ * com linhas brancas estilo quebra-cabeça.
  *
- * A prop `variant="dark"` (ou `light` boolean legada) ainda é aceita para
- * uso em fundos escuros — ex.: Footer. Nesse caso "Turismo" vira branco.
- * O Header NÃO usa variant — usa o padrão estático.
+ * `variant="dark"` (ou `light` boolean legada) é usada em fundos escuros
+ * (Footer). O Header usa o padrão `light`.
  */
 export function Logo({
   variant = "light",
   light,
+  showTagline = true,
 }: {
   variant?: LogoVariant;
   light?: boolean;
+  showTagline?: boolean;
 } = {}) {
   const resolvedVariant: LogoVariant = light ? "dark" : variant;
-  const turismoColor = resolvedVariant === "dark" ? "text-white" : "text-[#1B2E4B]";
+  const titleColor = resolvedVariant === "dark" ? "text-white" : "text-[#1B2E4B]";
+  const taglineColor = resolvedVariant === "dark" ? "text-white/80" : "text-[#2CA8A0]";
+  const subColor = resolvedVariant === "dark" ? "text-white/55" : "text-gray-500";
 
   return (
-    <Link to="/" className="flex items-center gap-2 group" aria-label="Turismo Azul — início">
-      {/* Símbolo (ondas) — sempre teal */}
+    <Link to="/" className="flex items-center gap-3 group" aria-label="Turismo Azul — início">
+      {/* Coração quebra-cabeça com 4 cores do autismo */}
       <svg
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-        fill="none"
+        width="44"
+        height="44"
+        viewBox="0 0 64 64"
         className="shrink-0"
         aria-hidden="true"
       >
-        <path
-          d="M2 20c3-2 5-2 8 0s5 2 8 0 5-2 8 0c2 1.3 4 1.3 4 1.3"
-          stroke="#2CA8A0"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M2 13c3-2 5-2 8 0s5 2 8 0 5-2 8 0"
-          stroke="#2CA8A0"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          opacity={0.85}
-        />
+        <defs>
+          <clipPath id="heart-clip-logo">
+            <path d="M32 58s-22-13-22-30c0-7 5-12 12-12 5 0 8 3 10 6 2-3 5-6 10-6 7 0 12 5 12 12 0 17-22 30-22 30z" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#heart-clip-logo)">
+          <rect x="0" y="0" width="32" height="32" fill="#E63946" />
+          <rect x="32" y="0" width="32" height="32" fill="#1D6FA4" />
+          <rect x="0" y="32" width="32" height="32" fill="#F4A623" />
+          <rect x="32" y="32" width="32" height="32" fill="#2A9D8F" />
+          <line x1="32" y1="0" x2="32" y2="64" stroke="white" strokeWidth="2.5" />
+          <line x1="0" y1="32" x2="64" y2="32" stroke="white" strokeWidth="2.5" />
+          {/* Bolinhas centrais para reforçar visual de quebra-cabeça */}
+          <circle cx="32" cy="20" r="3" fill="white" />
+          <circle cx="44" cy="32" r="3" fill="white" />
+          <circle cx="32" cy="44" r="3" fill="white" />
+          <circle cx="20" cy="32" r="3" fill="white" />
+        </g>
       </svg>
 
-      <span className="font-display font-extrabold text-lg tracking-tight">
-        <span className={turismoColor}>Turismo </span>
-        <span className="text-[#2CA8A0]">Azul</span>
-      </span>
-
-      {/* 4 pontos coloridos do autismo */}
-      <span aria-hidden="true" className="flex items-center gap-1 ml-1">
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#E63946" }} />
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#1D6FA4" }} />
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#F4A623" }} />
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#2A9D8F" }} />
-      </span>
+      <div className="flex flex-col leading-tight">
+        <span className={`font-display font-extrabold text-xl tracking-tight ${titleColor}`}>
+          Turismo Azul
+        </span>
+        {showTagline && (
+          <>
+            <span className={`text-[11px] italic font-medium ${taglineColor}`}>
+              Viagens que acolhem. Experiências que ficam.
+            </span>
+            <span className={`text-[9px] uppercase tracking-wider font-semibold ${subColor}`}>
+              Especialistas em viagens para famílias atípicas
+            </span>
+          </>
+        )}
+      </div>
     </Link>
   );
 }
