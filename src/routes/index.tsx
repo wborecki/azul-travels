@@ -22,6 +22,7 @@ import {
   Construction,
   Users,
   Building2,
+  Quote,
 } from "lucide-react";
 
 const OG_IMAGE = "/og-image.jpg";
