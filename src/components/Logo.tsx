@@ -54,6 +54,14 @@ export function Logo({
         <span className={turismoColor}>Turismo </span>
         <span className="text-[#2CA8A0]">Azul</span>
       </span>
+
+      {/* 4 pontos coloridos do autismo */}
+      <span aria-hidden="true" className="flex items-center gap-1 ml-1">
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#E63946" }} />
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#1D6FA4" }} />
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#F4A623" }} />
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "#2A9D8F" }} />
+      </span>
     </Link>
   );
 }
