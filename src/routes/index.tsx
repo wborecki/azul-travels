@@ -109,7 +109,7 @@ function Landing() {
       <DemoEntrada />
       <FamiliasTeaser />
       <Citacao />
-      <MercadoSection />
+      
       <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
