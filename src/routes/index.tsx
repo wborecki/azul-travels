@@ -990,49 +990,6 @@ function Citacao() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MERCADO
-// ─────────────────────────────────────────────────────────────────────────────
-
-function MercadoSection() {
-  const stats = [
-    { numero: "2.000.000", label: "pessoas autistas no Brasil" },
-    { numero: "500.000", label: "famílias que precisam de destinos adaptados" },
-    { numero: "R$ 1 bilhão", label: "potencial de mercado por ano estimado" },
-  ];
-  return (
-    <section className="py-16" style={{ backgroundColor: "#E0F5F4" }}>
-      <div className="container mx-auto px-4">
-        <Reveal className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-            O mercado que ninguém atendia
-          </h2>
-        </Reveal>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {stats.map((s, i) => (
-            <Reveal key={s.label} delay={i * 100}>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-display font-extrabold text-secondary tabular-nums">
-                  {s.numero}
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">{s.label}</div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal>
-          <p className="mt-12 text-center text-muted-foreground max-w-2xl mx-auto text-[15px]">
-            Nenhuma plataforma digital no Brasil conectava essas famílias a destinos preparados. Até
-            a gente decidir construir.
-          </p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // TEASER ESTABELECIMENTOS
 // ─────────────────────────────────────────────────────────────────────────────
 
