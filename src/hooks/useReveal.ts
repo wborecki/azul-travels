@@ -2,20 +2,34 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Dispara `true` uma única vez quando o elemento entra no viewport.
- * Usado para fade-up das seções e para iniciar contadores animados.
+ * IMPORTANTE: começa como `true` para garantir que o conteúdo fique
+ * visível em SSR e caso o IntersectionObserver não esteja disponível
+ * ou não dispare por algum motivo. Se o JS rodar no cliente e o
+ * elemento ainda não estiver no viewport, voltamos para `false` e
+ * deixamos o observer fazer o reveal animado.
  */
 export function useInView<T extends Element = HTMLDivElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (typeof IntersectionObserver === "undefined") {
-      // SSR / fallback: revelar imediatamente
       setInView(true);
       return;
     }
+
+    // Se já está visível no viewport, mantém true e não anima.
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (rect.top < vh && rect.bottom > 0) {
+      setInView(true);
+      return;
+    }
+
+    // Caso contrário, esconde para fazer a animação ao entrar.
+    setInView(false);
     const obs = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -26,10 +40,17 @@ export function useInView<T extends Element = HTMLDivElement>(options?: Intersec
           }
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px", ...options },
+      { threshold: 0.05, rootMargin: "0px 0px 0px 0px", ...options },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+
+    // Fallback: garante visibilidade após 1.5s mesmo se o observer falhar.
+    const fallback = window.setTimeout(() => setInView(true), 1500);
+
+    return () => {
+      obs.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [options]);
 
   return { ref, inView };
