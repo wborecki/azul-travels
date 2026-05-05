@@ -129,7 +129,7 @@ function DemoDetalhe() {
             {estab.nome}
           </h1>
           <p className="mt-2 text-muted-foreground flex items-center gap-2">
-            <span className="font-medium">{TIPO_LABEL[estab.tipo]}</span>
+            <span className="font-medium">{TIPO_LABEL[estab.tipo as keyof typeof TIPO_LABEL]}</span>
             <span>·</span>
             <MapPin className="h-4 w-4" /> {estab.cidade}, {estab.estado}
             <span>·</span>
