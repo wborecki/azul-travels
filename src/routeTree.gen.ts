@@ -19,6 +19,7 @@ import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as EstabelecimentosRouteImport } from './routes/estabelecimentos'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -90,6 +91,11 @@ const EstabelecimentosRoute = EstabelecimentosRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/contato': typeof ContatoRoute
   '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/contato': typeof ContatoRoute
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/contato': typeof ContatoRoute
   '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/contato'
     | '/demo'
     | '/estabelecimentos'
     | '/explorar'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/contato'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/contato'
     | '/demo'
     | '/estabelecimentos'
     | '/explorar'
@@ -415,6 +427,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
+  ContatoRoute: typeof ContatoRoute
   DemoRoute: typeof DemoRouteWithChildren
   EstabelecimentosRoute: typeof EstabelecimentosRoute
   ExplorarRoute: typeof ExplorarRoute
@@ -501,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -720,6 +740,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
+  ContatoRoute: ContatoRoute,
   DemoRoute: DemoRouteWithChildren,
   EstabelecimentosRoute: EstabelecimentosRoute,
   ExplorarRoute: ExplorarRoute,
