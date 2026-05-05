@@ -312,6 +312,87 @@ function Hero() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// A DOR QUE SÓ QUEM VIVE SABE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DorQueSoQuemViveSabe() {
+  const medos = [
+    { cor: "#E63946", texto: "E se ele tiver uma crise no aeroporto?" },
+    { cor: "#1D7FBF", texto: "E os olhares de julgamento das outras pessoas?" },
+    { cor: "#F4B400", texto: "E se o hotel não souber o que fazer?" },
+    { cor: "#2E9E55", texto: "E se eu não conseguir regulá-lo longe de casa?" },
+    { cor: "#E63946", texto: "E se eu estragar a única viagem que minha família merecia?" },
+  ];
+
+  return (
+    <section className="py-20" style={{ backgroundColor: "#F0F7FF" }}>
+      <div className="container mx-auto px-4">
+        <div className="max-w-2xl mx-auto text-center mb-12">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
+            A dor que só quem vive sabe
+          </span>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center max-w-6xl mx-auto">
+          {/* Coluna esquerda */}
+          <div>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
+              A gente sabe o que passa pela sua cabeça antes de cada viagem.
+            </h2>
+            <p className="mt-5 text-lg text-foreground/80">
+              Não é frescura. Não é exagero. É real. Cada mãe e cada pai atípico carrega um peso
+              invisível que ninguém de fora consegue entender.
+            </p>
+
+            <ul className="mt-6 space-y-3">
+              {medos.map((m) => (
+                <li key={m.texto} className="flex items-start gap-3 text-foreground/85">
+                  <span
+                    aria-hidden="true"
+                    className="mt-2 inline-block h-3 w-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: m.cor }}
+                  />
+                  <span className="text-base md:text-lg">{m.texto}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p className="mt-6 italic text-lg md:text-xl text-primary font-medium">
+              Você já desistiu de viajar por medo. E foi uma dor silenciosa que ninguém viu.
+            </p>
+          </div>
+
+          {/* Coluna direita */}
+          <div>
+            <div
+              className="rounded-3xl p-[3px]"
+              style={{
+                background:
+                  "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+              }}
+            >
+              <div className="bg-white rounded-[calc(1.5rem-2px)] p-8 md:p-10">
+                <Quote className="h-8 w-8 text-secondary mb-4" aria-hidden="true" />
+                <blockquote className="text-lg md:text-xl text-foreground/90 leading-relaxed">
+                  “Antes de sair de casa, eu ligava pra vários hotéis tentando explicar o autismo
+                  do meu filho. A maioria não sabia o que fazer. Às vezes eu simplesmente desistia
+                  da viagem.”
+                </blockquote>
+                <p className="mt-5 text-sm text-muted-foreground font-medium">
+                  — Relato real de mãe de criança autista
+                </p>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-secondary font-medium">
+              Isso não vai mais acontecer com você.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+// ─────────────────────────────────────────────────────────────────────────────
 // COMO FUNCIONA
 // ─────────────────────────────────────────────────────────────────────────────
 
