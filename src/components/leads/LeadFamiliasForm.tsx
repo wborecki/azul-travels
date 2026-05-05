@@ -258,6 +258,15 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
+      {/* Banner de boas-vindas */}
+      <div
+        className="rounded-xl p-4 text-sm leading-relaxed text-primary"
+        style={{ backgroundColor: "#E8F4FD" }}
+      >
+        Essas perguntas levam cerca de 3 minutos e fazem toda a diferença. Cada resposta que
+        você dá aqui é repassada diretamente para a equipe do seu destino antes da sua chegada.
+      </div>
+
       {!loadingCount && count !== null && (
         <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
           <Users className="h-4 w-4" />
