@@ -258,6 +258,15 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
+      {/* Banner de boas-vindas */}
+      <div
+        className="rounded-xl p-4 text-sm leading-relaxed text-primary"
+        style={{ backgroundColor: "#E8F4FD" }}
+      >
+        Essas perguntas levam cerca de 3 minutos e fazem toda a diferença. Cada resposta que
+        você dá aqui é repassada diretamente para a equipe do seu destino antes da sua chegada.
+      </div>
+
       {!loadingCount && count !== null && (
         <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
           <Users className="h-4 w-4" />
@@ -350,6 +359,22 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
       </Field>
 
       <Field label="O que mais te preocupa numa viagem com seu filho?">
+        <div className="space-y-1.5 mb-3" style={{ fontSize: "13px" }}>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre sensibilidades sensoriais (sons, luz, texturas): perguntamos isso para
+            filtrar estabelecimentos que não tenham ambientes que possam gerar crise. Seu filho
+            nunca vai chegar em um lugar despreparado.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre rotina e previsibilidade: sabemos que imprevistos são difíceis. Com essa
+            informação, avisamos a equipe do destino para manter uma rotina estruturada durante a
+            estadia.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            ℹ️ Sobre comportamentos e comunicação: cada criança é única. Quanto mais você nos
+            conta, mais personalizada e tranquila será a viagem de vocês.
+          </p>
+        </div>
         <div className="space-y-2">
           {PREOCUPACOES.map((p) => (
             <label key={p} className="flex items-start gap-2 text-sm cursor-pointer">
