@@ -391,6 +391,7 @@ function DorQueSoQuemViveSabe() {
       </div>
     </section>
   );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMO FUNCIONA
