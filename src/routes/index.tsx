@@ -23,7 +23,7 @@ import {
   CircleDot,
   Construction,
   Users,
-  Building2,
+  
   Quote,
   Headphones,
   MapPinCheck,
