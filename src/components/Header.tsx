@@ -16,7 +16,7 @@ export function Header() {
     { label: "Início", to: "/", type: "route" as const },
     { label: "Sobre Nós", href: "/#por-que-existimos", type: "anchor" as const },
     { label: "Como Funciona", href: "/#como-funciona", type: "anchor" as const },
-    { label: "Destinos", to: "/explorar", type: "route" as const },
+    { label: "Destinos", to: "/demo", type: "route" as const },
     { label: "Depoimentos", href: "/#depoimentos", type: "anchor" as const },
     { label: "Contato", to: "/familias", type: "route" as const },
   ];
