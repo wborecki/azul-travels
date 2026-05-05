@@ -23,6 +23,9 @@ import {
   Users,
   Building2,
   Quote,
+  Headphones,
+  MapPinCheck,
+  Shield,
 } from "lucide-react";
 
 const OG_IMAGE = "/og-image.jpg";
