@@ -108,8 +108,6 @@ function Landing() {
       <OQuePlataformaTera />
       <DemoEntrada />
       <FamiliasTeaser />
-      
-      
       <EstabelecimentosTeaser />
       <BlogTeaser artigos={artigos} />
       <CtaFinal />
