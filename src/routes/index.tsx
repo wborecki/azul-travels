@@ -956,40 +956,6 @@ function FamiliasTeaser() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CITAÇÃO
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Citacao() {
-  return (
-    <section className="py-16 bg-azul-claro">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <Reveal className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-            Por que isso importa
-          </h2>
-        </Reveal>
-
-        <Reveal>
-          <blockquote className="border-l-4 border-secondary pl-6 italic text-foreground text-xl leading-relaxed">
-            “Antes de sair de casa, eu ligava para vários hotéis tentando explicar o autismo do meu
-            filho. A maioria não sabia o que fazer. Às vezes eu simplesmente desistia da viagem.”
-            <footer className="mt-4 not-italic text-sm text-muted-foreground">
-              Relato real de mãe de criança autista, coletado pela nossa equipe durante a pesquisa
-              do produto.
-            </footer>
-          </blockquote>
-
-          <p className="mt-8 text-center text-muted-foreground text-[15px]">
-            O Turismo Azul foi criado para que nenhuma família precise desistir de viajar por falta
-            de informação.
-          </p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // TEASER ESTABELECIMENTOS
 // ─────────────────────────────────────────────────────────────────────────────
 
