@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
@@ -455,7 +456,6 @@ function PorQueExistimos() {
           {/* Coluna direita — 40% */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
-              {/* SUBSTITUIR pela foto do Gustavo com o filho */}
               <div
                 className="mx-auto h-32 w-32 rounded-full p-[4px]"
                 style={{
@@ -463,9 +463,12 @@ function PorQueExistimos() {
                     "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
                 }}
               >
-                <div className="h-full w-full rounded-full bg-azul-claro flex items-center justify-center">
-                  <Users className="h-14 w-14 text-primary" aria-hidden="true" />
-                </div>
+                <img
+                  src={gustavoFoto}
+                  alt="Gustavo Passinato, fundador do Turismo Azul"
+                  className="h-full w-full rounded-full object-cover"
+                  style={{ objectPosition: "center 20%" }}
+                />
               </div>
 
               <h3 className="mt-5 text-xl font-display font-bold text-primary">
