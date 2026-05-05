@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
-import { Check, Copy, Loader2, MessageCircle, Users } from "lucide-react";
+import { Copy, Heart, Loader2, MessageCircle, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const PREOCUPACOES = [
   "Não saber se o local está preparado",
@@ -184,16 +185,52 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   if (enviado) {
     return (
-      <div className="bg-white rounded-2xl border p-8 text-center max-w-2xl mx-auto shadow-sm">
-        <div className="w-16 h-16 rounded-full bg-secondary text-white flex items-center justify-center mx-auto">
-          <Check className="h-8 w-8" />
+      <div className="bg-white rounded-3xl border p-8 md:p-10 max-w-2xl mx-auto shadow-elegant">
+        {/* Coração com gradiente das 4 cores do autismo */}
+        <div className="flex justify-center">
+          <div
+            className="h-24 w-24 rounded-full p-[5px]"
+            style={{
+              background:
+                "linear-gradient(135deg, #E63946 0%, #1D6FA4 33%, #F4A623 66%, #2A9D8F 100%)",
+            }}
+          >
+            <div className="h-full w-full rounded-full bg-white flex items-center justify-center">
+              <Heart className="h-11 w-11 text-[#E63946] fill-[#E63946]" aria-hidden="true" />
+            </div>
+          </div>
         </div>
-        <h3 className="mt-4 text-2xl font-display font-bold text-primary">Você está na lista!</h3>
-        <p className="mt-2 text-muted-foreground">
-          Vamos te avisar por e-mail assim que a plataforma abrir. Compartilhe com outras famílias
-          TEA que você conhece.
+
+        <h1 className="mt-6 text-3xl md:text-4xl font-display font-bold text-primary text-center">
+          Você não está sozinha.
+        </h1>
+
+        <p className="mt-5 text-base md:text-lg text-foreground/80 text-center">
+          Recebemos o cadastro da sua família. E agora sabemos um pouco mais sobre o que o seu
+          filho precisa para viajar com mais tranquilidade.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3 justify-center">
+
+        <div
+          className="mt-6 rounded-2xl p-5 md:p-6 border-l-4"
+          style={{ backgroundColor: "#F0F7FF", borderLeftColor: "#1D6FA4" }}
+        >
+          <p className="text-base md:text-lg text-primary leading-relaxed">
+            Muitas famílias atípicas passam exatamente pelo que você passa. O medo, a incerteza, o
+            cansaço de tentar e não encontrar lugar preparado. O Turismo Azul foi criado por um
+            pai que viveu tudo isso, e decidiu que nenhuma outra família precisaria passar pela
+            mesma coisa sozinha.
+          </p>
+        </div>
+
+        <p className="mt-6 text-base text-foreground/80 text-center">
+          Em breve você receberá um e-mail com mais detalhes sobre como vamos usar as informações
+          que você compartilhou para montar a experiência ideal para sua família.
+        </p>
+
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+            <Link to="/sobre-os-selos">Conheça como funciona nossa certificação →</Link>
+          </Button>
           <Button asChild className="bg-[#25D366] hover:bg-[#1ebe5d] text-white">
             <a
               href={`https://wa.me/?text=${encodeURIComponent(SHARE_TEXT)}`}
@@ -201,7 +238,7 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
               rel="noopener noreferrer"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              Compartilhar no WhatsApp
+              Compartilhar
             </a>
           </Button>
           <Button variant="outline" onClick={copyLink}>
@@ -209,6 +246,12 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
             Copiar link
           </Button>
         </div>
+
+        <p className="mt-8 text-xs text-muted-foreground text-center leading-relaxed max-w-xl mx-auto">
+          As informações que você compartilhou são usadas exclusivamente para personalizar
+          destinos e alertar estabelecimentos parceiros sobre as necessidades do seu filho. Nunca
+          serão vendidas ou compartilhadas com terceiros.
+        </p>
       </div>
     );
   }
