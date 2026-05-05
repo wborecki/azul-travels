@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
-import { Check, Copy, Loader2, MessageCircle, Users } from "lucide-react";
+import { Check, Copy, Heart, Loader2, MessageCircle, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const PREOCUPACOES = [
   "Não saber se o local está preparado",
