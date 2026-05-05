@@ -594,7 +594,7 @@ function PorQueExistimos() {
                   src={gustavoFoto}
                   alt="Gustavo Passinato, fundador do Turismo Azul"
                   className="h-full w-full rounded-full object-cover"
-                  style={{ objectPosition: "center 20%" }}
+                  style={{ objectFit: "cover", objectPosition: "center top" }}
                 />
               </div>
 
