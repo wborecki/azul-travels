@@ -694,40 +694,46 @@ function ComoFunciona() {
           ))}
         </div>
 
-        {/* Subseção: E se meu filho entrar em crise? */}
-        <Reveal className="mt-12">
+        {/* Subseção: E se meu filho entrar em crise? — bloco único */}
+        <Reveal>
           <div
-            className="rounded-3xl p-8 md:p-10 border border-amber-100"
-            style={{ backgroundColor: "#FFF8F0" }}
+            style={{
+              backgroundColor: "#FFF8F0",
+              borderRadius: 16,
+              padding: 40,
+              width: "100%",
+              maxWidth: 1000,
+              margin: "48px auto 0",
+            }}
           >
-            <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
-              <div className="h-14 w-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
-                <Shield className="h-7 w-7" />
-              </div>
+            <div className="text-center max-w-2xl mx-auto">
               <h3 className="text-2xl md:text-3xl font-display font-bold text-primary">
                 E se meu filho entrar em crise?
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Pergunta que toda mãe atípica faz, e que a gente responde de verdade.
+              <p className="mt-2 text-[14px] text-muted-foreground">
+                Pergunta que toda mãe atípica faz — e que a gente responde de verdade.
               </p>
             </div>
 
-            <div className="mt-8 grid md:grid-cols-3 gap-5">
+            <div
+              className="mt-8 grid grid-cols-1 md:grid-cols-3"
+              style={{ gap: 20 }}
+            >
               {[
                 {
-                  Icon: Headphones,
+                  emoji: "🎧",
                   titulo: "Suporte disponível",
                   texto:
                     "Você tem acesso a um canal direto de apoio antes, durante e depois da viagem. Não é um 0800. É alguém que entende de TEA.",
                 },
                 {
-                  Icon: MapPinCheck,
+                  emoji: "📍",
                   titulo: "Alguém te esperando",
                   texto:
                     "Ao chegar no destino, a equipe já foi avisada sobre o perfil do seu filho. Não precisa explicar tudo do zero.",
                 },
                 {
-                  Icon: HomeIcon,
+                  emoji: "🏠",
                   titulo: "Sala sensorial disponível",
                   texto:
                     "Estabelecimentos certificados têm espaço de desregulação. Seu filho tem para onde ir quando precisar.",
@@ -735,12 +741,17 @@ function ComoFunciona() {
               ].map((c) => (
                 <div
                   key={c.titulo}
-                  className="autismo-border-top relative overflow-hidden bg-white rounded-2xl p-6 border border-amber-100/70 shadow-sm"
+                  style={{
+                    background: "white",
+                    borderRadius: 12,
+                    padding: 24,
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  }}
                 >
-                  <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                    <c.Icon className="h-5 w-5" />
+                  <div className="text-2xl" aria-hidden="true">
+                    {c.emoji}
                   </div>
-                  <h4 className="mt-4 font-display font-bold text-primary text-base">
+                  <h4 className="mt-3 font-display font-bold text-primary text-base">
                     {c.titulo}
                   </h4>
                   <p className="mt-2 text-[14px] text-muted-foreground leading-relaxed">
@@ -756,6 +767,7 @@ function ComoFunciona() {
             </p>
           </div>
         </Reveal>
+
         {/* Banner em breve */}
         <Reveal className="mt-10">
           <div className="bg-primary text-primary-foreground rounded-2xl p-6 md:p-8 text-center max-w-3xl mx-auto">
