@@ -1122,31 +1122,29 @@ function CtaFinal() {
       style={{ background: "linear-gradient(135deg, #1B2E4B 0%, #2CA8A0 100%)" }}
     >
       <div className="container mx-auto px-4 text-center text-white">
-        <Reveal>
-          <Construction className="h-10 w-10 text-amarelo mx-auto" />
-          <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold">
-            O lançamento está chegando.
-          </h2>
-          <p className="mt-3 text-white/80 text-lg">
-            Garanta seu lugar na lista antes da abertura.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              asChild
-              size="lg"
-              className="bg-white text-primary hover:bg-secondary hover:text-white min-h-[52px] px-7 text-base font-semibold"
-            >
-              <Link to="/familias">Sou família TEA</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold"
-            >
-              <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
-            </Button>
-          </div>
-        </Reveal>
+        <Construction className="h-10 w-10 text-amarelo mx-auto" />
+        <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold">
+          O lançamento está chegando.
+        </h2>
+        <p className="mt-3 text-white/80 text-lg">
+          Garanta seu lugar na lista antes da abertura.
+        </p>
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            asChild
+            size="lg"
+            className="bg-white text-primary hover:bg-secondary hover:text-white min-h-[52px] px-7 text-base font-semibold rounded-full"
+          >
+            <Link to="/familias">Sou família TEA</Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white min-h-[52px] px-7 text-base font-semibold rounded-full"
+          >
+            <Link to="/estabelecimentos">Tenho um estabelecimento</Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
