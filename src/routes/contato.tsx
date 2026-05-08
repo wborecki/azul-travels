@@ -12,13 +12,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contato")({
   head: () => ({
     meta: [
-      { title: "Contato — Turismo Azul" },
+      { title: "Contato · Turismo Azul" },
       {
         name: "description",
         content:
           "Fale com a equipe do Turismo Azul. Deixe sua mensagem e a gente entra em contato.",
       },
-      { property: "og:title", content: "Contato — Turismo Azul" },
+      { property: "og:title", content: "Contato · Turismo Azul" },
       {
         property: "og:description",
         content: "Fale com a equipe do Turismo Azul.",

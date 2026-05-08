@@ -4,7 +4,7 @@ import { EmBreveBlock } from "@/components/EmBreveBlock";
 export const Route = createFileRoute("/explorar")({
   head: () => ({
     meta: [
-      { title: "Explorar destinos — Em breve" },
+      { title: "Explorar destinos · Em breve" },
       {
         name: "description",
         content:

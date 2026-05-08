@@ -72,7 +72,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/estabelecimento/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug} — Turismo Azul` },
+      { title: `${params.slug} · Turismo Azul` },
       {
         name: "description",
         content:
@@ -332,7 +332,7 @@ function EstabPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      {/* SEÇÃO 1 — Galeria full-width + header */}
+      {/* SEÇÃO 1 · Galeria full-width + header */}
       <div className="relative w-full bg-muted" style={{ height: 420 }}>
         {fotoCapa ? (
           <img src={fotoCapa} alt={e.nome} className="w-full h-full object-cover" />
@@ -384,7 +384,7 @@ function EstabPage() {
           )}
         </div>
 
-        {/* Benefício TEA — caixa verde com ícone */}
+        {/* Benefício TEA · caixa verde com ícone */}
         {temBeneficio && (
           <div className="mb-8 rounded-2xl border border-success/30 bg-success/10 p-5">
             <div className="flex items-start gap-3">
@@ -401,7 +401,7 @@ function EstabPage() {
 
         {/* LAYOUT 2 colunas */}
         <div className="grid lg:grid-cols-[1fr_400px] gap-8">
-          {/* COLUNA ESQUERDA — conteúdo */}
+          {/* COLUNA ESQUERDA · conteúdo */}
           <div className="space-y-10 min-w-0">
             {/* Sobre o local para famílias TEA */}
             <section>
@@ -521,7 +521,7 @@ function EstabPage() {
             </section>
           </div>
 
-          {/* COLUNA DIREITA — formulário sticky / confirmação / histórico */}
+          {/* COLUNA DIREITA · formulário sticky / confirmação / histórico */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
             {!user ? (
               <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
@@ -656,7 +656,7 @@ function EstabPage() {
                   />
                   <span>
                     Autorizo o envio do perfil sensorial de{" "}
-                    <strong>{perfilSelecionado?.nome_autista || "—"}</strong> para este
+                    <strong>{perfilSelecionado?.nome_autista || " · "}</strong> para este
                     estabelecimento.
                   </span>
                 </label>
@@ -721,7 +721,7 @@ function EstabPage() {
           <DialogHeader className="px-6 pt-6 pb-3">
             <DialogTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-amarelo" />
-              Tour 360° — {e.nome}
+              Tour 360° · {e.nome}
             </DialogTitle>
             <DialogDescription>
               Explore os ambientes do estabelecimento sem sair da página. Use o mouse ou o toque para navegar.

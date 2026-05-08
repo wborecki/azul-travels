@@ -28,7 +28,7 @@ export const Route = createFileRoute("/conteudo/")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Conteúdo TEA — Turismo Azul" },
+      { title: "Conteúdo TEA · Turismo Azul" },
       {
         name: "description",
         content: "Artigos, dicas e legislação sobre turismo inclusivo para famílias TEA.",

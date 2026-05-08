@@ -5,13 +5,13 @@ import { ShieldCheck, Award, Home as HomeIcon, Heart, Check } from "lucide-react
 export const Route = createFileRoute("/sobre-os-selos")({
   head: () => ({
     meta: [
-      { title: "Como auditamos cada estabelecimento — Turismo Azul" },
+      { title: "Como auditamos cada estabelecimento · Turismo Azul" },
       {
         name: "description",
         content:
           "Entenda o processo de certificação Turismo Azul: como cada selo é validado e o que muda para a sua família.",
       },
-      { property: "og:title", content: "Como auditamos cada estabelecimento — Turismo Azul" },
+      { property: "og:title", content: "Como auditamos cada estabelecimento · Turismo Azul" },
       {
         property: "og:description",
         content:

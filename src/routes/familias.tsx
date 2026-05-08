@@ -6,7 +6,7 @@ import { LeadFamiliasForm } from "@/components/leads/LeadFamiliasForm";
 export const Route = createFileRoute("/familias")({
   head: () => ({
     meta: [
-      { title: "Lista de espera para famílias TEA — Turismo Azul" },
+      { title: "Lista de espera para famílias TEA · Turismo Azul" },
       {
         name: "description",
         content:
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/familias")({
       },
       {
         property: "og:title",
-        content: "Lista de espera para famílias TEA — Turismo Azul",
+        content: "Lista de espera para famílias TEA · Turismo Azul",
       },
       {
         property: "og:description",

@@ -7,7 +7,7 @@ export const Route = createFileRoute("/login")({
     return r ? { redirect: r } : {};
   },
   head: () => ({
-    meta: [{ title: "Login — Em breve" }],
+    meta: [{ title: "Login · Em breve" }],
   }),
   component: () => (
     <EmBreveBlock
