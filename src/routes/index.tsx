@@ -873,10 +873,6 @@ function ParaQuemEhSection() {
                 </li>
               ))}
             </ul>
-
-            <div className="mt-8 flex justify-center">
-              <SeloBadge size={210} />
-            </div>
           </div>
         </div>
       </div>
