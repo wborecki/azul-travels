@@ -106,6 +106,7 @@ function Landing() {
       <PorQueExistimos />
       <ComoFunciona />
       <ParaQuemEhSection />
+      <SeloDestaqueSection />
       <SelosImportantes />
       <OQuePlataformaTera />
       <DemoEntrada />
