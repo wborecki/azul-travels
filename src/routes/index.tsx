@@ -105,6 +105,7 @@ function Landing() {
       <DorQueSoQuemViveSabe />
       <PorQueExistimos />
       <ComoFunciona />
+      <ParaQuemEhSection />
       <SelosImportantes />
       <OQuePlataformaTera />
       <DemoEntrada />
