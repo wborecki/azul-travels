@@ -1,31 +1,43 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Instagram, Facebook, Youtube, Construction } from "lucide-react";
+import { Instagram, Facebook, Youtube, Construction, Mail, Phone, Globe } from "lucide-react";
 
 export function Footer() {
   const ano = new Date().getFullYear();
 
+  const linkClass =
+    "transition-colors text-white/75 hover:text-[#00b4d8]";
+
   return (
-    <footer className="bg-footer text-footer-foreground mt-20">
-      {/* Barra decorativa com as 4 cores do autismo */}
-      <div className="autismo-bar" aria-hidden="true" />
+    <footer
+      className="text-white mt-20"
+      style={{ backgroundColor: "#1a3666" }}
+    >
       {/* Status banner */}
-      <div className="bg-secondary/15 border-b border-white/10">
-        <div className="container mx-auto px-4 py-3 text-center text-sm text-secondary font-medium flex items-center justify-center gap-2">
+      <div className="border-b border-white/10" style={{ backgroundColor: "rgba(0,180,216,0.12)" }}>
+        <div className="container mx-auto px-4 py-3 text-center text-sm font-medium flex items-center justify-center gap-2" style={{ color: "#00b4d8" }}>
           <Construction className="h-4 w-4" />
           <span>🚧 Plataforma em desenvolvimento — Lançamento previsto para 2026</span>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-        <div className="space-y-4">
+      <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+        {/* Coluna 1 — Logo + descrição + tagline */}
+        <div className="space-y-5">
           <div className="bg-white/5 inline-block rounded-lg px-2 py-1.5">
             <Logo variant="dark" />
           </div>
-          <p className="text-sm leading-relaxed text-footer-muted max-w-sm">
-            O primeiro marketplace brasileiro de turismo inclusivo para famílias com Transtorno do
-            Espectro Autista.
+          <p className="text-sm leading-relaxed text-white/75 max-w-sm">
+            O primeiro marketplace brasileiro de turismo inclusivo para famílias
+            atípicas. Capacitamos, certificamos e conectamos destinos preparados
+            para acolher quem mais precisa.
           </p>
+          <div
+            className="tagline-italic text-base pl-4"
+            style={{ borderLeft: "3px solid #00b4d8", color: "#00b4d8" }}
+          >
+            Inclusão que acolhe, turismo que transforma!
+          </div>
           <div className="flex items-center gap-3 pt-1">
             {[
               { Icon: Instagram, href: "https://instagram.com/turismoazul", label: "Instagram" },
@@ -38,7 +50,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-11 h-11 rounded-full bg-white/5 hover:bg-secondary hover:text-white flex items-center justify-center transition"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center transition-colors hover:bg-[#00b4d8] hover:text-[#1a3666]"
               >
                 <Icon className="h-4 w-4" />
               </a>
@@ -46,82 +58,69 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Coluna 2 — Links rápidos */}
         <div>
-          <h4 className="font-display font-semibold mb-3 text-white">Para famílias</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="/familias" className="hover:text-secondary transition">
-                Entrar na lista de espera
-              </Link>
-            </li>
-            <li>
-              <Link to="/beneficios-tea" className="hover:text-secondary transition">
-                Benefícios TEA
-              </Link>
-            </li>
-            <li>
-              <Link to="/conteudo" className="hover:text-secondary transition">
-                Conteúdo
-              </Link>
-            </li>
+          <h4 className="font-display font-extrabold uppercase tracking-wide mb-4 text-white text-sm">
+            Links rápidos
+          </h4>
+          <ul className="space-y-3 text-sm">
+            <li><Link to="/" hash="como-funciona" className={linkClass}>Como Funciona</Link></li>
+            <li><Link to="/familias" className={linkClass}>Para Famílias</Link></li>
+            <li><Link to="/estabelecimentos" className={linkClass}>Para Parceiros</Link></li>
+            <li><Link to="/sobre-os-selos" className={linkClass}>Selo Azul</Link></li>
+            <li><a href="mailto:contato@turismoazulinclusivo.com.br" className={linkClass}>Contato</a></li>
           </ul>
         </div>
 
+        {/* Coluna 3 — Contato + URL */}
         <div>
-          <h4 className="font-display font-semibold mb-3 text-white">Para estabelecimentos</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="/estabelecimentos" className="hover:text-secondary transition">
-                Cadastre seu estabelecimento
-              </Link>
-            </li>
-            <li>
-              <Link to="/sobre-os-selos" className="hover:text-secondary transition">
-                Sobre o Selo Azul
-              </Link>
-            </li>
-            <li>
-              <a
-                href="mailto:contato@turismoazul.com.br"
-                className="hover:text-secondary transition"
-              >
-                Contato comercial
+          <h4 className="font-display font-extrabold uppercase tracking-wide mb-4 text-white text-sm">
+            Contato
+          </h4>
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-start gap-2 text-white/75">
+              <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: "#00b4d8" }} />
+              <a href="mailto:contato@turismoazulinclusivo.com.br" className={linkClass}>
+                contato@turismoazulinclusivo.com.br
               </a>
             </li>
+            <li className="flex items-start gap-2 text-white/75">
+              <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: "#00b4d8" }} />
+              <span>(11) 9 9999-9999</span>
+            </li>
           </ul>
-        </div>
 
-        <div>
-          <h4 className="font-display font-semibold mb-3 text-white">Empresa</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="/sobre" className="hover:text-secondary transition">
-                Sobre nós
-              </Link>
-            </li>
-            <li>
-              <Link to="/demo/explorar" className="hover:text-secondary transition">
-                Ver demonstração
-              </Link>
-            </li>
-            <li>
-              <Link to="/privacidade" className="hover:text-secondary transition">
-                Privacidade (LGPD)
-              </Link>
-            </li>
-            <li>
-              <Link to="/termos" className="hover:text-secondary transition">
-                Termos de uso
-              </Link>
-            </li>
-          </ul>
+          <div
+            className="mt-6 p-4 rounded-xl flex items-center gap-3"
+            style={{
+              backgroundColor: "rgba(0,180,216,0.12)",
+              border: "1px solid rgba(0,180,216,0.4)",
+            }}
+          >
+            <Globe className="h-5 w-5 flex-shrink-0" style={{ color: "#00b4d8" }} />
+            <a
+              href="https://www.turismoazulinclusivo.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-display font-extrabold uppercase text-sm tracking-wide hover:text-[#00b4d8] transition-colors"
+              style={{ color: "white" }}
+            >
+              www.turismoazulinclusivo.com.br
+            </a>
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-white/10">
-        <div className="container mx-auto px-4 py-6 text-xs text-footer-muted leading-relaxed text-center md:text-left">
-          © {ano} Turismo Azul · Plataforma desenvolvida pela Solutions in BI Consulting LTDA (CNPJ
-          59.668.668/0001-54) em parceria com a Absoluto Educacional (CNPJ 18.536.766/0001-50).
+      {/* Divider semitransparente */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+          <div className="text-center md:text-left leading-relaxed">
+            © {ano} Turismo Azul Inclusivo · Solutions in BI Consulting LTDA em parceria com Absoluto Educacional.
+          </div>
+          <div className="flex items-center gap-5">
+            <Link to="/privacidade" className={linkClass}>Privacidade</Link>
+            <Link to="/termos" className={linkClass}>Termos de uso</Link>
+          </div>
         </div>
       </div>
     </footer>
