@@ -9,7 +9,7 @@ export function DemoBreadcrumb({ items }: { items: Crumb[] }) {
       className="container mx-auto px-4 py-3 text-sm text-muted-foreground flex items-center gap-1 flex-wrap"
       aria-label="breadcrumb"
     >
-      <Link to="/demo" className="hover:text-primary font-medium">
+      <Link to="/demo/explorar" className="hover:text-primary font-medium">
         Demo
       </Link>
       {items.map((it, i) => (
