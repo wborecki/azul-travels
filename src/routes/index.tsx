@@ -38,7 +38,7 @@ const OG_IMAGE = "/og-image.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Turismo Azul — Turismo inclusivo para famílias TEA no Brasil" },
+      { title: "Turismo Azul · Turismo inclusivo para famílias TEA no Brasil" },
       {
         name: "description",
         content:
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "Turismo Azul — Turismo inclusivo para famílias TEA",
+        content: "Turismo Azul · Turismo inclusivo para famílias TEA",
       },
       {
         property: "og:description",
@@ -176,7 +176,7 @@ function DemoEntrada() {
             </div>
           </div>
 
-          {/* Coluna direita — preview de card */}
+          {/* Coluna direita · preview de card */}
           <div>
             <div
               className="rounded-2xl overflow-hidden border-2 shadow-xl"
@@ -268,7 +268,7 @@ function Hero() {
     >
       <div className="container mx-auto px-4 py-16 md:py-20 lg:py-24">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* ESQUERDA — texto */}
+          {/* ESQUERDA · texto */}
           <div className="animate-fade-in lg:col-span-7">
             {/* Pill badge com dot animado */}
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/5 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/95">
@@ -276,7 +276,7 @@ function Hero() {
                 <span className="absolute inline-flex h-full w-full rounded-full bg-[#00b4d8] opacity-75 animate-ping" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00b4d8]" />
               </span>
-              Agência TEA — Turismo Inclusivo
+              Agência TEA · Turismo Inclusivo
             </span>
 
             <h1 className="mt-6 font-display font-extrabold uppercase leading-[1.05] tracking-tight text-[44px] sm:text-[56px] lg:text-[68px] text-white">
@@ -293,7 +293,7 @@ function Hero() {
 
             <p className="mt-3 text-base md:text-[17px] text-white/85 leading-relaxed max-w-xl">
               Preparamos hotéis, restaurantes e atrações para receber famílias
-              atípicas com segurança, previsibilidade e acolhimento — do
+              atípicas com segurança, previsibilidade e acolhimento · do
               planejamento ao check-out.
             </p>
 
@@ -330,7 +330,7 @@ function Hero() {
             </div>
           </div>
 
-          {/* DIREITA — card escuro com stats */}
+          {/* DIREITA · card escuro com stats */}
           <div className="lg:col-span-5">
             <div
               className="rounded-3xl p-8 md:p-10 backdrop-blur-sm shadow-2xl"
@@ -376,7 +376,7 @@ function Hero() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HERO BENEFITS — 4 cards
+// HERO BENEFITS · 4 cards
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HeroBenefits() {
@@ -513,7 +513,7 @@ function DorQueSoQuemViveSabe() {
                   da viagem.”
                 </blockquote>
                 <p className="mt-5 text-sm text-muted-foreground font-medium">
-                  — Relato real de mãe de criança autista
+                  · Relato real de mãe de criança autista
                 </p>
               </div>
             </div>
@@ -545,7 +545,7 @@ function PorQueExistimos() {
         </div>
 
         <div className="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start max-w-6xl mx-auto">
-          {/* Coluna esquerda — 60% */}
+          {/* Coluna esquerda · 60% */}
           <div className="lg:col-span-3">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
               Não foi uma ideia de negócio. Foi uma necessidade real.
@@ -581,7 +581,7 @@ function PorQueExistimos() {
             </p>
           </div>
 
-          {/* Coluna direita — 40% */}
+          {/* Coluna direita · 40% */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
               <div
@@ -742,7 +742,7 @@ function ComoFunciona() {
           ))}
         </div>
 
-        {/* Subseção: E se meu filho entrar em crise? — bloco único */}
+        {/* Subseção: E se meu filho entrar em crise? · bloco único */}
         <Reveal>
           <div
             style={{
@@ -759,7 +759,7 @@ function ComoFunciona() {
                 E se meu filho entrar em crise?
               </h3>
               <p className="mt-2 text-[14px] text-muted-foreground">
-                Pergunta que toda mãe atípica faz — e que a gente responde de verdade.
+                Pergunta que toda mãe atípica faz · e que a gente responde de verdade.
               </p>
             </div>
 
@@ -822,7 +822,7 @@ function ComoFunciona() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PARA QUEM É — dois cards
+// PARA QUEM É · dois cards
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ParaQuemEhSection() {
@@ -930,7 +930,7 @@ function ParaQuemEhSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SELO — DESTAQUE PARCEIRO CERTIFICADO
+// SELO · DESTAQUE PARCEIRO CERTIFICADO
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SeloDestaqueSection() {

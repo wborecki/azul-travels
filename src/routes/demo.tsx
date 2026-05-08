@@ -14,13 +14,13 @@ export const Route = createFileRoute("/demo")({
   component: DemoLayout,
   head: () => ({
     meta: [
-      { title: "Demonstração — Turismo Azul" },
+      { title: "Demonstração · Turismo Azul" },
       {
         name: "description",
         content:
           "Veja como o Turismo Azul vai funcionar. Demonstração com dados de exemplo do primeiro marketplace de turismo para famílias TEA.",
       },
-      { property: "og:title", content: "Demonstração — Turismo Azul" },
+      { property: "og:title", content: "Demonstração · Turismo Azul" },
       {
         property: "og:description",
         content:
@@ -37,7 +37,7 @@ function DemoLayout() {
   return (
     <>
       <DemoBanner ctaTo={ctaTo} />
-      {/* Compensar 36px do banner — o header do site (pt-16) já está acima
+      {/* Compensar 36px do banner · o header do site (pt-16) já está acima
           deste container; aqui adicionamos o offset adicional para o banner. */}
       <div style={{ paddingTop: 36 }}>
         <Outlet />

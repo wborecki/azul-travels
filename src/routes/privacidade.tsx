@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade (LGPD) — Turismo Azul" },
+      { title: "Política de Privacidade (LGPD) · Turismo Azul" },
       {
         name: "description",
         content:

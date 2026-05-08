@@ -3,7 +3,7 @@
  *
  * O loader é isomórfico (roda no servidor para usuários novos vindos
  * de share, e no client em navegação interna). Em ambos os casos:
- *  1. Chama `resolverLinkCurto(slug)` — RPC que atualiza o
+ *  1. Chama `resolverLinkCurto(slug)` · RPC que atualiza o
  *     `ultimo_acesso_em` (alimenta o expurgo) e devolve o path original.
  *  2. Faz `throw redirect(...)` para o path resolvido. TanStack Router
  *     gera 302 no SSR e navega no client.
@@ -11,7 +11,7 @@
  *     em vez de mandar para `/explorar` sem filtros, o que confundiria
  *     o usuário sobre por que o link não funcionou).
  *
- * Não há `component` — o loader sempre redireciona ou lança 404, então
+ * Não há `component` · o loader sempre redireciona ou lança 404, então
  * só `notFoundComponent` faz sentido.
  */
 
@@ -20,7 +20,7 @@ import { resolverLinkCurto } from "@/lib/queries";
 
 export const Route = createFileRoute("/l/$slug")({
   loader: async ({ params }) => {
-    // Filtro defensivo extra além do CHECK do banco — evita uma ida
+    // Filtro defensivo extra além do CHECK do banco · evita uma ida
     // inútil ao Postgres para slugs claramente fora do alfabeto.
     if (!/^[A-Za-z0-9]{6,16}$/.test(params.slug)) {
       throw notFound();

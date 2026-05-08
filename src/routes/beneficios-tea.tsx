@@ -5,7 +5,7 @@ import { Construction, Gift, ArrowRight } from "lucide-react";
 export const Route = createFileRoute("/beneficios-tea")({
   head: () => ({
     meta: [
-      { title: "Benefícios TEA — Turismo Azul" },
+      { title: "Benefícios TEA · Turismo Azul" },
       {
         name: "description",
         content:

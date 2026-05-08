@@ -6,7 +6,7 @@ import { LeadEstabelecimentosForm } from "@/components/leads/LeadEstabelecimento
 export const Route = createFileRoute("/estabelecimentos")({
   head: () => ({
     meta: [
-      { title: "Cadastre seu estabelecimento — Turismo Azul" },
+      { title: "Cadastre seu estabelecimento · Turismo Azul" },
       {
         name: "description",
         content:
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/estabelecimentos")({
       },
       {
         property: "og:title",
-        content: "Cadastre seu estabelecimento — Turismo Azul",
+        content: "Cadastre seu estabelecimento · Turismo Azul",
       },
       {
         property: "og:description",

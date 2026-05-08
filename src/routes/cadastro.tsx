@@ -3,7 +3,7 @@ import { EmBreveBlock } from "@/components/EmBreveBlock";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({
-    meta: [{ title: "Cadastro — Em breve" }],
+    meta: [{ title: "Cadastro · Em breve" }],
   }),
   component: () => (
     <EmBreveBlock
