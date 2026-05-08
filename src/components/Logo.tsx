@@ -8,11 +8,12 @@ type LogoVariant = "light" | "dark";
  * Símbolo: coração formado por 4 quadrantes coloridos (cores do autismo)
  * com linhas brancas estilo quebra-cabeça.
  *
- * `variant="dark"` (ou `light` boolean legada) é usada em fundos escuros
- * (Footer). O Header usa o padrão `light`.
+ * `variant="dark"` é usada em fundos escuros (Header navy / Footer).
+ * Em ambos os contextos o título e a etiqueta superior aparecem em branco
+ * e a tagline "Inclusivo" sai em ciano.
  */
 export function Logo({
-  variant = "light",
+  variant = "dark",
   light,
   showTagline = true,
 }: {
@@ -21,13 +22,13 @@ export function Logo({
   showTagline?: boolean;
 } = {}) {
   const resolvedVariant: LogoVariant = light ? "dark" : variant;
-  const titleColor = resolvedVariant === "dark" ? "text-white" : "text-[#1B2E4B]";
-  const taglineColor = resolvedVariant === "dark" ? "text-white/80" : "text-[#2CA8A0]";
-  const subColor = resolvedVariant === "dark" ? "text-white/55" : "text-gray-500";
+  const titleColor = resolvedVariant === "dark" ? "text-white" : "text-primary";
+  const subColor =
+    resolvedVariant === "dark" ? "text-white/70" : "text-muted-foreground";
 
   return (
     <Link to="/" className="flex items-center gap-3 group" aria-label="Turismo Azul — início">
-      {/* Coração quebra-cabeça com 4 cores do autismo */}
+      {/* Coração quebra-cabeça (azul, laranja, verde, rosa) */}
       <svg
         width="44"
         height="44"
@@ -41,13 +42,13 @@ export function Logo({
           </clipPath>
         </defs>
         <g clipPath="url(#heart-clip-logo)">
-          <rect x="0" y="0" width="32" height="32" fill="#E63946" />
-          <rect x="32" y="0" width="32" height="32" fill="#1D6FA4" />
-          <rect x="0" y="32" width="32" height="32" fill="#F4A623" />
-          <rect x="32" y="32" width="32" height="32" fill="#2A9D8F" />
+          <rect x="0" y="0" width="32" height="32" fill="#2176c8" />
+          <rect x="32" y="0" width="32" height="32" fill="#f5a623" />
+          <rect x="0" y="32" width="32" height="32" fill="#ec4899" />
+          <rect x="32" y="32" width="32" height="32" fill="#10b981" />
           <line x1="32" y1="0" x2="32" y2="64" stroke="white" strokeWidth="2.5" />
           <line x1="0" y1="32" x2="64" y2="32" stroke="white" strokeWidth="2.5" />
-          {/* Bolinhas centrais para reforçar visual de quebra-cabeça */}
+          {/* Bolinhas centrais reforçam visual de quebra-cabeça */}
           <circle cx="32" cy="20" r="3" fill="white" />
           <circle cx="44" cy="32" r="3" fill="white" />
           <circle cx="32" cy="44" r="3" fill="white" />
@@ -56,19 +57,17 @@ export function Logo({
       </svg>
 
       <div className="flex flex-col leading-tight">
-        <span className={`font-display font-extrabold text-xl tracking-tight ${titleColor}`}>
-          Turismo Azul
+        <span className={`text-[10px] uppercase tracking-[0.18em] font-semibold ${subColor}`}>
+          Agência TEA
         </span>
-        {showTagline && (
-          <>
-            <span className={`text-[11px] italic font-medium ${taglineColor}`}>
-              Viagens que acolhem. Experiências que ficam.
-            </span>
-            <span className={`text-[9px] uppercase tracking-wider font-semibold ${subColor}`}>
-              Especialistas em viagens para famílias atípicas
-            </span>
-          </>
-        )}
+        <span className="flex items-baseline gap-1.5">
+          <span className={`font-display font-extrabold text-xl tracking-wide ${titleColor}`}>
+            TURISMO AZUL
+          </span>
+          {showTagline && (
+            <span className="tagline-italic text-sm text-[#00b4d8]">Inclusivo</span>
+          )}
+        </span>
       </div>
     </Link>
   );
