@@ -23,6 +23,7 @@ import {
   CircleDot,
   Construction,
   Users,
+  Check,
   
   Quote,
   Headphones,
