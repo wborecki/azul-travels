@@ -28,7 +28,6 @@ import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
-import { Route as DemoMinhaContaRouteImport } from './routes/demo.minha-conta'
 import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
@@ -136,11 +135,6 @@ const EstabelecimentoSlugRoute = EstabelecimentoSlugRouteImport.update({
   path: '/estabelecimento/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoMinhaContaRoute = DemoMinhaContaRouteImport.update({
-  id: '/minha-conta',
-  path: '/minha-conta',
-  getParentRoute: () => DemoRoute,
-} as any)
 const DemoExplorarRoute = DemoExplorarRouteImport.update({
   id: '/explorar',
   path: '/explorar',
@@ -219,7 +213,6 @@ export interface FileRoutesByFullPath {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
-  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -251,7 +244,6 @@ export interface FileRoutesByTo {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
-  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -285,7 +277,6 @@ export interface FileRoutesById {
   '/admin/reservas': typeof AdminReservasRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
-  '/demo/minha-conta': typeof DemoMinhaContaRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -320,7 +311,6 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/demo/explorar'
-    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin/'
@@ -352,7 +342,6 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/demo/explorar'
-    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin'
@@ -385,7 +374,6 @@ export interface FileRouteTypes {
     | '/admin/reservas'
     | '/conteudo/$slug'
     | '/demo/explorar'
-    | '/demo/minha-conta'
     | '/estabelecimento/$slug'
     | '/l/$slug'
     | '/admin/'
@@ -556,13 +544,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstabelecimentoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/minha-conta': {
-      id: '/demo/minha-conta'
-      path: '/minha-conta'
-      fullPath: '/demo/minha-conta'
-      preLoaderRoute: typeof DemoMinhaContaRouteImport
-      parentRoute: typeof DemoRoute
-    }
     '/demo/explorar': {
       id: '/demo/explorar'
       path: '/explorar'
@@ -683,13 +664,11 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DemoRouteChildren {
   DemoExplorarRoute: typeof DemoExplorarRoute
-  DemoMinhaContaRoute: typeof DemoMinhaContaRoute
   DemoEstabelecimentoSlugRoute: typeof DemoEstabelecimentoSlugRoute
 }
 
 const DemoRouteChildren: DemoRouteChildren = {
   DemoExplorarRoute: DemoExplorarRoute,
-  DemoMinhaContaRoute: DemoMinhaContaRoute,
   DemoEstabelecimentoSlugRoute: DemoEstabelecimentoSlugRoute,
 }
 
@@ -719,3 +698,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
