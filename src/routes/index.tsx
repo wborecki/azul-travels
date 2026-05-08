@@ -875,28 +875,7 @@ function ParaQuemEhSection() {
             </ul>
 
             <div className="mt-8 flex justify-center">
-              <div
-                className="flex flex-col items-center justify-center text-center"
-                style={{
-                  width: 170,
-                  height: 170,
-                  borderRadius: "50%",
-                  backgroundColor: "#1a3666",
-                  border: "3px dashed #f5a623",
-                  padding: 18,
-                  boxShadow: "0 10px 24px rgba(26,54,102,0.25)",
-                }}
-              >
-                <span className="font-display font-extrabold uppercase text-[11px] tracking-widest text-white">
-                  Selo
-                </span>
-                <span className="font-display font-extrabold uppercase text-base leading-tight" style={{ color: "#00b4d8" }}>
-                  Turismo Azul
-                </span>
-                <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white mt-1">
-                  Inclusivo
-                </span>
-              </div>
+              <SeloBadge size={210} />
             </div>
           </div>
         </div>
