@@ -1294,7 +1294,7 @@ function SeloBadge({ size = 320 }: { size?: number }) {
         {/* — SELO — */}
         <text
           x="160"
-          y="208"
+          y="218"
           textAnchor="middle"
           fill="#ffffff"
           fillOpacity="0.65"
@@ -1309,22 +1309,22 @@ function SeloBadge({ size = 320 }: { size?: number }) {
         {/* — ★ TURISMO AZUL ★ — */}
         <text
           x="160"
-          y="240"
+          y="246"
           textAnchor="middle"
           fontFamily="Montserrat, sans-serif"
           fontSize="26"
           fontWeight="900"
           letterSpacing="0.5"
         >
-          <tspan fill="#f5a623">★</tspan>
-          <tspan fill="#00b4d8" dx="6">TURISMO AZUL</tspan>
-          <tspan fill="#f5a623" dx="6">★</tspan>
+          <tspan fill="#f5a623" fontSize="14" dy="-2">★</tspan>
+          <tspan fill="#00b4d8" fontSize="26" dx="3" dy="2">TURISMO AZUL</tspan>
+          <tspan fill="#f5a623" fontSize="14" dx="3" dy="-2">★</tspan>
         </text>
 
         {/* — INCLUSIVO — */}
         <text
           x="160"
-          y="266"
+          y="272"
           textAnchor="middle"
           fill="#ffffff"
           fontFamily="Montserrat, sans-serif"
@@ -1335,25 +1335,26 @@ function SeloBadge({ size = 320 }: { size?: number }) {
           INCLUSIVO
         </text>
 
-        {/* — FITA / RIBBON com cortes em V — */}
+        {/* — FITA / RIBBON com cortes em V suaves — */}
         <g>
           {/* sombra suave */}
           <polygon
-            points="22,308 298,308 282,332 298,356 22,356 38,332"
+            points="22,308 298,308 290,328 298,348 22,348 30,328"
             fill="#000000"
             opacity="0.18"
             transform="translate(0,4)"
           />
-          {/* fita laranja */}
+          {/* fita laranja (altura ~40) */}
           <polygon
-            points="22,308 298,308 282,332 298,356 22,356 38,332"
+            points="22,308 298,308 290,328 298,348 22,348 30,328"
             fill="#f5a623"
           />
-          {/* texto navy */}
+          {/* texto navy centralizado verticalmente */}
           <text
             x="160"
-            y="337"
+            y="328"
             textAnchor="middle"
+            dominantBaseline="middle"
             fill="#1a3666"
             fontFamily="Montserrat, sans-serif"
             fontSize="11"
