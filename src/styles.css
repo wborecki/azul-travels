@@ -210,20 +210,20 @@
   .gradient-hero {
     background: linear-gradient(
       135deg,
-      oklch(0.27 0.06 255) 0%,
-      oklch(0.4 0.08 220) 50%,
-      oklch(0.55 0.1 195) 100%
+      var(--brand-navy) 0%,
+      var(--brand-azul) 60%,
+      var(--brand-ciano) 100%
     );
   }
   .gradient-teal {
-    background: linear-gradient(135deg, oklch(0.66 0.1 195) 0%, oklch(0.58 0.1 210) 100%);
+    background: linear-gradient(135deg, var(--brand-azul) 0%, var(--brand-ciano) 100%);
   }
   .gradient-cta-final {
     background: linear-gradient(
       135deg,
-      oklch(0.27 0.06 255) 0%,
-      oklch(0.45 0.08 220) 50%,
-      oklch(0.66 0.1 195) 100%
+      var(--brand-navy) 0%,
+      var(--brand-azul) 50%,
+      var(--brand-ciano) 100%
     );
   }
   .text-shadow-soft {
