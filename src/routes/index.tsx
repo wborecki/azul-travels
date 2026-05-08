@@ -105,6 +105,7 @@ function Landing() {
       <DorQueSoQuemViveSabe />
       <PorQueExistimos />
       <ComoFunciona />
+      <ParaQuemEhSection />
       <SelosImportantes />
       <OQuePlataformaTera />
       <DemoEntrada />
@@ -814,6 +815,114 @@ function ComoFunciona() {
           </div>
         </Reveal>
 
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PARA QUEM É — dois cards
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ParaQuemEhSection() {
+  const familias = [
+    "Encontre hotéis e destinos preparados para receber sua família",
+    "Viaje com mais segurança, conforto e acolhimento",
+    "Tenha acesso a informações claras sobre estrutura e suporte oferecido",
+  ];
+  const parceiros = [
+    "Diferencie seu negócio",
+    "Seja referência em inclusão",
+    "Aumente sua visibilidade e alcance um público em crescimento",
+    "Contribua para um turismo mais justo e humano",
+  ];
+
+  const Check = ({ color }: { color: string }) => (
+    <span
+      className="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full flex items-center justify-center"
+      style={{ backgroundColor: color }}
+      aria-hidden
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </span>
+  );
+
+  return (
+    <section className="py-16" style={{ backgroundColor: "#f7fbff" }}>
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch max-w-6xl mx-auto">
+          <div
+            className="h-full flex flex-col p-8 md:p-10 rounded-2xl text-white"
+            style={{
+              background: "linear-gradient(135deg, #1a3666 0%, #1e4d8c 100%)",
+              boxShadow: "0 14px 40px rgba(26,54,102,0.25)",
+            }}
+          >
+            <h3 className="font-display font-extrabold uppercase text-xl md:text-2xl tracking-wide">
+              <span aria-hidden>❤️</span> Para famílias atípicas
+            </h3>
+            <ul className="mt-6 space-y-4 flex-1">
+              {familias.map((t) => (
+                <li key={t} className="flex items-start gap-3 text-[15px] leading-relaxed">
+                  <Check color="#00b4d8" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="tagline-italic mt-8 text-lg" style={{ color: "#f5a623" }}>
+              Você não viaja só. A gente vai com você!
+            </p>
+          </div>
+
+          <div
+            className="h-full flex flex-col p-8 md:p-10 rounded-2xl"
+            style={{
+              backgroundColor: "#f7fbff",
+              border: "2px solid #cfe2f7",
+              color: "#1a3666",
+              boxShadow: "0 8px 24px rgba(26,54,102,0.08)",
+            }}
+          >
+            <h3 className="font-display font-extrabold uppercase text-xl md:text-2xl tracking-wide" style={{ color: "#1a3666" }}>
+              <span aria-hidden>🤝</span> Para hotéis e parceiros
+            </h3>
+            <ul className="mt-6 space-y-4 flex-1">
+              {parceiros.map((t) => (
+                <li key={t} className="flex items-start gap-3 text-[15px] leading-relaxed text-foreground">
+                  <Check color="#3ec46d" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 flex justify-center">
+              <div
+                className="flex flex-col items-center justify-center text-center"
+                style={{
+                  width: 170,
+                  height: 170,
+                  borderRadius: "50%",
+                  backgroundColor: "#1a3666",
+                  border: "3px dashed #f5a623",
+                  padding: 18,
+                  boxShadow: "0 10px 24px rgba(26,54,102,0.25)",
+                }}
+              >
+                <span className="font-display font-extrabold uppercase text-[11px] tracking-widest text-white">
+                  Selo
+                </span>
+                <span className="font-display font-extrabold uppercase text-base leading-tight" style={{ color: "#00b4d8" }}>
+                  Turismo Azul
+                </span>
+                <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white mt-1">
+                  Inclusivo
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
