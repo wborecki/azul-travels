@@ -106,6 +106,7 @@ function Landing() {
       <PorQueExistimos />
       <ComoFunciona />
       <ParaQuemEhSection />
+      <SeloDestaqueSection />
       <SelosImportantes />
       <OQuePlataformaTera />
       <DemoEntrada />
@@ -917,6 +918,98 @@ function ParaQuemEhSection() {
                   Turismo Azul
                 </span>
                 <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white mt-1">
+                  Inclusivo
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SELO — DESTAQUE PARCEIRO CERTIFICADO
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SeloDestaqueSection() {
+  return (
+    <section
+      className="py-20"
+      style={{
+        background: "linear-gradient(135deg, #1a3666 0%, #1e4d8c 100%)",
+        color: "white",
+      }}
+    >
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-6xl mx-auto">
+          <div>
+            <h2 className="font-display font-extrabold uppercase text-3xl md:text-4xl leading-tight tracking-wide">
+              Torne-se um Parceiro <span style={{ color: "#00b4d8" }}>Certificado</span>
+            </h2>
+            <p className="mt-5 text-[15px] md:text-base leading-relaxed text-white/85 max-w-xl">
+              O <strong>Selo Turismo Azul Inclusivo</strong> comprova que o seu estabelecimento está preparado para receber famílias atípicas com acolhimento, segurança e respeito. É o reconhecimento de quem investe em formação, adaptação e atendimento humanizado.
+            </p>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/75 max-w-xl">
+              Mais do que uma certificação, é o convite para fazer parte de um movimento que transforma o turismo em uma experiência verdadeiramente inclusiva.
+            </p>
+            <div className="mt-8">
+              <Link
+                to="/estabelecimentos"
+                className="inline-flex items-center gap-2 font-display font-extrabold uppercase tracking-wide text-sm transition-all hover:scale-105"
+                style={{
+                  backgroundColor: "#f5a623",
+                  color: "#1a3666",
+                  padding: "16px 28px",
+                  borderRadius: 50,
+                  boxShadow: "0 10px 24px rgba(245,166,35,0.35)",
+                }}
+              >
+                Quero Receber o Selo →
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex justify-center md:justify-end">
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: 320,
+                height: 320,
+                borderRadius: "50%",
+                border: "3px dashed rgba(245,166,35,0.55)",
+                padding: 14,
+              }}
+            >
+              <div
+                className="flex flex-col items-center justify-center text-center"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  backgroundColor: "#1a3666",
+                  border: "5px solid #f5a623",
+                  padding: 28,
+                  boxShadow: "0 18px 40px rgba(0,0,0,0.35)",
+                }}
+              >
+                <svg width="88" height="88" viewBox="0 0 100 100" aria-hidden>
+                  <path d="M50 88 C20 68 6 48 14 30 C20 16 38 14 50 30 C62 14 80 16 86 30 C94 48 80 68 50 88 Z" fill="#1a3666" stroke="white" strokeWidth="2" />
+                  <path d="M50 30 C38 14 20 16 14 30 C10 39 12 49 18 58 L50 58 Z" fill="#2176c8" />
+                  <path d="M50 30 C62 14 80 16 86 30 C90 39 88 49 82 58 L50 58 Z" fill="#f5a623" />
+                  <path d="M18 58 C26 70 38 80 50 88 L50 58 Z" fill="#10b981" />
+                  <path d="M82 58 C74 70 62 80 50 88 L50 58 Z" fill="#ec4899" />
+                  <line x1="50" y1="20" x2="50" y2="88" stroke="white" strokeWidth="2" />
+                  <line x1="14" y1="58" x2="86" y2="58" stroke="white" strokeWidth="2" />
+                </svg>
+                <span className="mt-3 font-display font-extrabold uppercase text-[11px] tracking-[0.2em] text-white/80">
+                  Selo
+                </span>
+                <span className="font-display font-extrabold uppercase text-base leading-tight mt-1" style={{ color: "#00b4d8" }}>
+                  Turismo Azul
+                </span>
+                <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white">
                   Inclusivo
                 </span>
               </div>
