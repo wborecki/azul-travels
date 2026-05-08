@@ -25,7 +25,6 @@ import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
@@ -122,11 +121,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const DemoIndexRoute = DemoIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DemoRoute,
 } as any)
 const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
@@ -237,7 +231,6 @@ export interface FileRoutesByFullPath {
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
-  '/demo/': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -252,6 +245,7 @@ export interface FileRoutesByTo {
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
   '/contato': typeof ContatoRoute
+  '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
@@ -270,7 +264,6 @@ export interface FileRoutesByTo {
   '/l/$slug': typeof LSlugRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
-  '/demo': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -306,7 +299,6 @@ export interface FileRoutesById {
   '/l/$slug': typeof LSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
-  '/demo/': typeof DemoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
@@ -343,7 +335,6 @@ export interface FileRouteTypes {
     | '/l/$slug'
     | '/admin/'
     | '/conteudo/'
-    | '/demo/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -358,6 +349,7 @@ export interface FileRouteTypes {
     | '/beneficios-tea'
     | '/cadastro'
     | '/contato'
+    | '/demo'
     | '/estabelecimentos'
     | '/explorar'
     | '/familias'
@@ -376,7 +368,6 @@ export interface FileRouteTypes {
     | '/l/$slug'
     | '/admin'
     | '/conteudo'
-    | '/demo'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -411,7 +402,6 @@ export interface FileRouteTypes {
     | '/l/$slug'
     | '/admin/'
     | '/conteudo/'
-    | '/demo/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
@@ -557,13 +547,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/demo/': {
-      id: '/demo/'
-      path: '/'
-      fullPath: '/demo/'
-      preLoaderRoute: typeof DemoIndexRouteImport
-      parentRoute: typeof DemoRoute
     }
     '/conteudo/': {
       id: '/conteudo/'
@@ -721,14 +704,12 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface DemoRouteChildren {
   DemoExplorarRoute: typeof DemoExplorarRoute
   DemoMinhaContaRoute: typeof DemoMinhaContaRoute
-  DemoIndexRoute: typeof DemoIndexRoute
   DemoEstabelecimentoSlugRoute: typeof DemoEstabelecimentoSlugRoute
 }
 
 const DemoRouteChildren: DemoRouteChildren = {
   DemoExplorarRoute: DemoExplorarRoute,
   DemoMinhaContaRoute: DemoMinhaContaRoute,
-  DemoIndexRoute: DemoIndexRoute,
   DemoEstabelecimentoSlugRoute: DemoEstabelecimentoSlugRoute,
 }
 

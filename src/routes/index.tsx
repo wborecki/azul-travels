@@ -157,7 +157,7 @@ function DemoEntrada() {
                 size="lg"
                 className="bg-secondary hover:bg-secondary/90 text-white font-semibold"
               >
-                <Link to="/demo" search={{ view: "familia" }}>
+                <Link to="/demo/explorar" search={{ view: "familia" }}>
                   Ver demo para famílias
                 </Link>
               </Button>
@@ -166,7 +166,7 @@ function DemoEntrada() {
                 size="lg"
                 className="bg-transparent border-2 border-white text-white hover:bg-white/15 hover:text-white font-semibold"
               >
-                <Link to="/demo" search={{ view: "estabelecimento" }}>
+                <Link to="/demo/explorar" search={{ view: "estabelecimento" }}>
                   Ver demo para estabelecimentos
                 </Link>
               </Button>
