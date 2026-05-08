@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
-import heroFamilia from "@/assets/hero-aeroporto.png";
+
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
@@ -23,6 +23,7 @@ import {
   CircleDot,
   Construction,
   Users,
+  Check,
   
   Quote,
   Headphones,
@@ -243,123 +244,126 @@ function DemoEntrada() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero() {
+  const bullets = [
+    { titulo: "Treina", texto: "equipes para acolher famílias atípicas" },
+    { titulo: "Adapta", texto: "ambientes e jornadas com perfil sensorial" },
+    { titulo: "Certifica", texto: "parceiros com o Selo Azul de inclusão" },
+  ];
+
+  const stats = [
+    { n: "+500k", l: "famílias TEA no Brasil" },
+    { n: "120+", l: "parceiros em onboarding" },
+    { n: "27", l: "estados no radar" },
+  ];
+
   return (
-    <section id="hero" className="relative bg-white overflow-hidden">
-      <div className="container mx-auto px-4 py-10 md:py-14 lg:py-16">
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Coluna esquerda — texto (5/12) */}
-          <div className="animate-fade-in lg:col-span-5">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold uppercase tracking-wider text-[#1B2E4B]">
-              <Heart className="h-3.5 w-3.5 text-[#E63946] fill-[#E63946]" />
-              Especialistas em TEA
+    <section
+      id="hero"
+      className="relative overflow-hidden text-white"
+      style={{
+        background: "linear-gradient(135deg, #1a3666 0%, #1a6ea8 100%)",
+      }}
+    >
+      <div className="container mx-auto px-4 py-16 md:py-20 lg:py-24">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          {/* ESQUERDA — texto */}
+          <div className="animate-fade-in lg:col-span-7">
+            {/* Pill badge com dot animado */}
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/5 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/95">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[#00b4d8] opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00b4d8]" />
+              </span>
+              Agência TEA — Turismo Inclusivo
             </span>
 
-            <h1 className="mt-5 font-display font-extrabold leading-[1.05] tracking-tight text-[40px] sm:text-[48px] lg:text-[54px]">
-              <span className="block text-[#1a1a2e]">Viajar com seu filho</span>
-              <span className="block text-[#1a1a2e]">atípico pode ser</span>
-              <span className="block text-[#1B4F5C]">mais leve.</span>
+            <h1 className="mt-6 font-display font-extrabold uppercase leading-[1.05] tracking-tight text-[44px] sm:text-[56px] lg:text-[68px] text-white">
+              Turismo que <span className="text-[#00b4d8]">ACOLHE.</span>
             </h1>
 
-            <p className="mt-5 text-base md:text-[17px] text-gray-600 leading-relaxed max-w-xl">
-              Planejamento personalizado, suporte antes, durante e depois da viagem e{" "}
-              <strong className="text-[#1a1a2e] font-semibold">
-                todo o cuidado que sua família merece.
-              </strong>
+            <p className="tagline-italic mt-3 text-2xl md:text-3xl text-[#f5a623]">
+              Experiências que transformam!
             </p>
 
-            <div className="mt-7 flex flex-col sm:flex-row gap-3">
-              <Button
-                asChild
-                size="lg"
-                className="bg-[#1B2E4B] hover:bg-[#2CA8A0] text-white rounded-full min-h-[56px] px-7 text-base font-semibold"
-              >
-                <Link to="/familias">
-                  <Users className="h-5 w-5 mr-2" />
-                  Quero me cadastrar
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-2 border-[#1B2E4B] text-[#1B2E4B] hover:bg-[#1B2E4B] hover:text-white rounded-full min-h-[56px] px-7 text-base font-semibold bg-white"
-              >
-                <a href="#como-funciona">
-                  <Play className="h-5 w-5 mr-2" />
-                  Como funciona
-                </a>
-              </Button>
-            </div>
+            <p className="mt-6 text-lg md:text-xl text-white font-semibold">
+              Sua família também merece viajar.
+            </p>
 
-            {/* Trust badges */}
-            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
-              <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center bg-white">
-                  <Heart className="h-4 w-4 text-[#1B4F5C]" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 leading-tight">
-                  Especialistas
-                  <br />
-                  em TEA
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center bg-white">
-                  <Shield className="h-4 w-4 text-[#1B4F5C]" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 leading-tight">
-                  Suporte antes
-                  <br />e durante a viagem
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center bg-white">
-                  <Users className="h-4 w-4 text-[#1B4F5C]" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 leading-tight">
-                  Experiência
-                  <br />
-                  que acolhe
-                </span>
-              </div>
+            <p className="mt-3 text-base md:text-[17px] text-white/85 leading-relaxed max-w-xl">
+              Preparamos hotéis, restaurantes e atrações para receber famílias
+              atípicas com segurança, previsibilidade e acolhimento — do
+              planejamento ao check-out.
+            </p>
+
+            {/* Bullets com ícone circular ciano */}
+            <ul className="mt-7 space-y-3">
+              {bullets.map((b) => (
+                <li key={b.titulo} className="flex items-start gap-3">
+                  <span className="mt-0.5 h-7 w-7 rounded-full bg-[#00b4d8] flex items-center justify-center flex-shrink-0">
+                    <Check className="h-4 w-4 text-[#1a3666]" strokeWidth={3} />
+                  </span>
+                  <span className="text-white/90 text-[15px] leading-snug">
+                    <strong className="text-white font-bold">{b.titulo}</strong>{" "}
+                    {b.texto}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <Link
+                to="/familias"
+                className="inline-flex items-center justify-center gap-2 h-14 px-7 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-lg"
+                style={{ borderRadius: 50 }}
+              >
+                <span aria-hidden="true">🧡</span> Sou Família Atípica
+              </Link>
+              <Link
+                to="/estabelecimentos"
+                className="inline-flex items-center justify-center gap-2 h-14 px-7 font-bold text-white border-2 border-white/80 hover:bg-white/10 transition-colors"
+                style={{ borderRadius: 50 }}
+              >
+                <span aria-hidden="true">🏨</span> Sou Hotel/Parceiro
+              </Link>
             </div>
           </div>
 
-          {/* Coluna direita — imagem (7/12, maior) */}
-          <div className="relative lg:col-span-7">
-            <div className="relative mx-auto w-full" style={{ maxWidth: 720 }}>
-              {/* Bloco decorativo de fundo */}
-              <div
-                aria-hidden="true"
-                className="absolute -inset-3 rounded-[2rem] -z-0"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(230,57,70,0.08), rgba(29,111,164,0.10), rgba(244,166,35,0.08), rgba(42,157,143,0.10))",
-                }}
-              />
-              <img
-                src={heroFamilia}
-                alt="Mãe e filho atípico de mãos dadas em um aeroporto, observando o avião"
-                className="relative z-10 w-full shadow-elegant"
-                style={{
-                  height: "clamp(380px, 56vw, 560px)",
-                  borderRadius: "1.75rem",
-                  border: "3px solid #1B4F5C",
-                  objectFit: "cover",
-                  objectPosition: "left center",
-                }}
-              />
-
-              {/* Card flutuante — canto inferior esquerdo, longe da mãe */}
-              <div className="absolute z-20 -bottom-4 left-2 md:left-4 lg:-left-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 max-w-[260px] hidden sm:block">
-                <div className="flex items-start gap-2.5">
-                  <div className="h-9 w-9 rounded-full bg-[#EBF4F8] flex items-center justify-center flex-shrink-0">
-                    <Users className="h-4 w-4 text-[#1B4F5C]" />
+          {/* DIREITA — card escuro com stats */}
+          <div className="lg:col-span-5">
+            <div
+              className="rounded-3xl p-8 md:p-10 backdrop-blur-sm shadow-2xl"
+              style={{
+                background:
+                  "linear-gradient(160deg, rgba(15,33,72,0.85) 0%, rgba(15,33,72,0.55) 100%)",
+                border: "1px solid rgba(255,255,255,0.18)",
+              }}
+            >
+              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#00b4d8]">
+                A travessia em números
+              </p>
+              <div className="mt-6 space-y-6">
+                {stats.map((s, i) => (
+                  <div
+                    key={s.l}
+                    className={
+                      i > 0
+                        ? "pt-6 border-t border-white/10"
+                        : ""
+                    }
+                  >
+                    <div className="font-display font-extrabold text-4xl md:text-5xl text-white tabular-nums">
+                      {s.n}
+                    </div>
+                    <div className="mt-1 text-sm text-white/75">{s.l}</div>
                   </div>
-                  <p className="text-[13px] text-gray-700 leading-snug">
-                    Cada viagem pensada para acolher as necessidades do seu filho.
-                  </p>
-                </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3">
+                <Heart className="h-5 w-5 text-[#f5a623] fill-[#f5a623] mt-0.5 flex-shrink-0" />
+                <p className="tagline-italic text-base md:text-lg text-white leading-snug">
+                  Você não viaja só. A gente vai com você! ♡
+                </p>
               </div>
             </div>
           </div>
