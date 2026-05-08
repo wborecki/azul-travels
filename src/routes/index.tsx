@@ -330,43 +330,18 @@ function Hero() {
             </div>
           </div>
 
-          {/* DIREITA · card escuro com stats */}
+          {/* DIREITA · imagem */}
           <div className="lg:col-span-5">
             <div
-              className="rounded-3xl p-8 md:p-10 backdrop-blur-sm shadow-2xl"
-              style={{
-                background:
-                  "linear-gradient(160deg, rgba(15,33,72,0.85) 0%, rgba(15,33,72,0.55) 100%)",
-                border: "1px solid rgba(255,255,255,0.18)",
-              }}
+              className="rounded-3xl overflow-hidden shadow-2xl"
+              style={{ border: "1px solid rgba(255,255,255,0.18)" }}
             >
-              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#00b4d8]">
-                A travessia em números
-              </p>
-              <div className="mt-6 space-y-6">
-                {stats.map((s, i) => (
-                  <div
-                    key={s.l}
-                    className={
-                      i > 0
-                        ? "pt-6 border-t border-white/10"
-                        : ""
-                    }
-                  >
-                    <div className="font-display font-extrabold text-4xl md:text-5xl text-white tabular-nums">
-                      {s.n}
-                    </div>
-                    <div className="mt-1 text-sm text-white/75">{s.l}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-white/10 flex items-start gap-3">
-                <Heart className="h-5 w-5 text-[#f5a623] fill-[#f5a623] mt-0.5 flex-shrink-0" />
-                <p className="tagline-italic text-base md:text-lg text-white leading-snug">
-                  Você não viaja só. A gente vai com você! ♡
-                </p>
-              </div>
+              <img
+                src={heroAeroporto}
+                alt="Mãe e filho no aeroporto, prontos para viajar"
+                className="w-full h-full object-cover aspect-[4/5]"
+                loading="eager"
+              />
             </div>
           </div>
         </div>
