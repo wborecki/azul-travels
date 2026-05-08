@@ -633,65 +633,108 @@ function ComoFunciona() {
   const steps = [
     {
       n: "1",
-      Icon: UserPlus,
-      titulo: "Fale sobre o seu filho",
-      texto:
-        "Sensibilidades, preferências, o que funciona pra ele e o que não funciona. Leva 3 minutos.",
+      emoji: "🎓",
+      titulo: "Formação",
+      texto: "Capacitamos equipes de hotéis, pousadas e restaurantes em acolhimento de famílias atípicas.",
+      bg: "#eaf3ff",
+      border: "#5b9bf5",
     },
     {
       n: "2",
-      Icon: MapPinned,
-      titulo: "Encontre lugares prontos pra ele",
-      texto:
-        "Nada de ligar pra dezenas de hotéis explicando o autismo. A plataforma filtra e sugere só os lugares prontos pra receber vocês.",
+      emoji: "🏠",
+      titulo: "Adaptação",
+      texto: "Orientamos ajustes sensoriais, ambientais e de atendimento para receber bem cada família.",
+      bg: "#e6f8ee",
+      border: "#3ec46d",
     },
     {
       n: "3",
-      Icon: HeartHandshake,
-      titulo: "Chegue. A equipe já foi avisada.",
-      texto:
-        "Ao confirmar a reserva, o estabelecimento recebe o perfil sensorial do seu filho e assume o compromisso de cuidar de cada detalhe.",
+      emoji: "✅",
+      titulo: "Certificação",
+      texto: "Estabelecimentos aprovados recebem o **Selo Turismo Azul Inclusivo**, sinal de compromisso real.",
+      bg: "#fff3e0",
+      border: "#f5a623",
+    },
+    {
+      n: "4",
+      emoji: "🌍",
+      titulo: "Divulgação",
+      texto: "Levamos esses destinos certificados até as famílias que mais precisam encontrá-los.",
+      bg: "#fde7f0",
+      border: "#f26f9e",
+    },
+    {
+      n: "5",
+      emoji: "💙",
+      titulo: "Experiência Inclusiva",
+      texto: "Famílias atípicas viajam com segurança, acolhimento e a leveza de serem bem recebidas.",
+      bg: "#e0f7fb",
+      border: "#00b4d8",
     },
   ];
 
   return (
-    <section id="como-funciona" className="py-16 bg-background">
+    <section id="como-funciona" className="py-16" style={{ backgroundColor: "#f7fbff" }}>
       <div className="container mx-auto px-4">
+        <div
+          style={{
+            height: 6,
+            borderRadius: 999,
+            background: "linear-gradient(90deg, #5b9bf5, #3ec46d, #f5a623, #f26f9e, #00b4d8)",
+            maxWidth: 320,
+            margin: "0 auto 24px",
+          }}
+        />
         <Reveal className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-            É assim que vai funcionar.
+          <h2 className="text-2xl md:text-4xl font-display font-extrabold uppercase" style={{ color: "#1a3666", letterSpacing: "0.02em" }}>
+            Como funciona nosso projeto
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-            Três passos e sua família estará pronta pra viajar.
+            Cinco etapas para transformar o turismo em uma experiência verdadeiramente inclusiva.
           </p>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 items-stretch">
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={i * 80} className="h-full">
               <div
-                className="h-full flex flex-col"
+                className="h-full flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1.5"
                 style={{
-                  padding: "28px 24px",
-                  borderRadius: 12,
-                  background: "white",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                  borderTop: "3px solid transparent",
-                  borderImageSource:
-                    "linear-gradient(90deg, #E63946, #1D6FA4, #F4A623, #2A9D8F)",
-                  borderImageSlice: 1,
+                  padding: "28px 20px",
+                  borderRadius: 14,
+                  background: s.bg,
+                  borderTop: `5px solid ${s.border}`,
+                  boxShadow: "0 2px 10px rgba(26,54,102,0.06)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = "0 14px 30px rgba(26,54,102,0.18)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "0 2px 10px rgba(26,54,102,0.06)";
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                    {s.n}
-                  </span>
-                  <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-                    <s.Icon className="h-5 w-5" />
-                  </div>
-                </div>
-                <h3 className="mt-5 font-display font-bold text-primary text-lg">{s.titulo}</h3>
-                <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{s.texto}</p>
+                <span
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-extrabold text-white"
+                  style={{ backgroundColor: s.border }}
+                >
+                  {s.n}
+                </span>
+                <div className="text-5xl mt-4" aria-hidden>{s.emoji}</div>
+                <h3
+                  className="mt-4 font-display font-extrabold uppercase text-base"
+                  style={{ color: "#1a3666", letterSpacing: "0.03em" }}
+                >
+                  {s.titulo}
+                </h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+                  {s.texto.split(/(\*\*[^*]+\*\*)/).map((part, idx) =>
+                    part.startsWith("**") && part.endsWith("**") ? (
+                      <strong key={idx} style={{ color: "#1a3666" }}>{part.slice(2, -2)}</strong>
+                    ) : (
+                      <span key={idx}>{part}</span>
+                    )
+                  )}
+                </p>
               </div>
             </Reveal>
           ))}
