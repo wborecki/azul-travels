@@ -875,28 +875,7 @@ function ParaQuemEhSection() {
             </ul>
 
             <div className="mt-8 flex justify-center">
-              <div
-                className="flex flex-col items-center justify-center text-center"
-                style={{
-                  width: 170,
-                  height: 170,
-                  borderRadius: "50%",
-                  backgroundColor: "#1a3666",
-                  border: "3px dashed #f5a623",
-                  padding: 18,
-                  boxShadow: "0 10px 24px rgba(26,54,102,0.25)",
-                }}
-              >
-                <span className="font-display font-extrabold uppercase text-[11px] tracking-widest text-white">
-                  Selo
-                </span>
-                <span className="font-display font-extrabold uppercase text-base leading-tight" style={{ color: "#00b4d8" }}>
-                  Turismo Azul
-                </span>
-                <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white mt-1">
-                  Inclusivo
-                </span>
-              </div>
+              <SeloBadge size={210} />
             </div>
           </div>
         </div>
@@ -948,48 +927,7 @@ function SeloDestaqueSection() {
           </div>
 
           <div className="flex justify-center md:justify-end">
-            <div
-              className="flex items-center justify-center"
-              style={{
-                width: 320,
-                height: 320,
-                borderRadius: "50%",
-                border: "3px dashed rgba(245,166,35,0.55)",
-                padding: 14,
-              }}
-            >
-              <div
-                className="flex flex-col items-center justify-center text-center"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  backgroundColor: "#1a3666",
-                  border: "5px solid #f5a623",
-                  padding: 28,
-                  boxShadow: "0 18px 40px rgba(0,0,0,0.35)",
-                }}
-              >
-                <svg width="88" height="88" viewBox="0 0 100 100" aria-hidden>
-                  <path d="M50 88 C20 68 6 48 14 30 C20 16 38 14 50 30 C62 14 80 16 86 30 C94 48 80 68 50 88 Z" fill="#1a3666" stroke="white" strokeWidth="2" />
-                  <path d="M50 30 C38 14 20 16 14 30 C10 39 12 49 18 58 L50 58 Z" fill="#2176c8" />
-                  <path d="M50 30 C62 14 80 16 86 30 C90 39 88 49 82 58 L50 58 Z" fill="#f5a623" />
-                  <path d="M18 58 C26 70 38 80 50 88 L50 58 Z" fill="#10b981" />
-                  <path d="M82 58 C74 70 62 80 50 88 L50 58 Z" fill="#ec4899" />
-                  <line x1="50" y1="20" x2="50" y2="88" stroke="white" strokeWidth="2" />
-                  <line x1="14" y1="58" x2="86" y2="58" stroke="white" strokeWidth="2" />
-                </svg>
-                <span className="mt-3 font-display font-extrabold uppercase text-[11px] tracking-[0.2em] text-white/80">
-                  Selo
-                </span>
-                <span className="font-display font-extrabold uppercase text-base leading-tight mt-1" style={{ color: "#00b4d8" }}>
-                  Turismo Azul
-                </span>
-                <span className="font-display font-extrabold uppercase text-[13px] tracking-wide text-white">
-                  Inclusivo
-                </span>
-              </div>
-            </div>
+            <SeloBadge size={360} />
           </div>
         </div>
       </div>
@@ -1241,5 +1179,179 @@ function CtaFinal() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SELO BADGE · componente reutilizável (selo circular premium com fita)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SeloBadge({ size = 320 }: { size?: number }) {
+  // tipografia escala suavemente com o tamanho do selo
+  const s = size / 320;
+  const px = (n: number) => `${Math.max(8, n * s)}px`;
+
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size * 1.18 }}
+    >
+      {/* SVG do círculo (anéis + coração + textos) */}
+      <svg
+        viewBox="0 0 320 320"
+        width={size}
+        height={size}
+        className="absolute top-0 left-0"
+        aria-hidden
+      >
+        <defs>
+          <clipPath id="selo-heart-clip">
+            <path d="M160 268 C70 210 28 150 50 96 C66 56 116 50 160 96 C204 50 254 56 270 96 C292 150 250 210 160 268 Z" />
+          </clipPath>
+        </defs>
+
+        {/* Anel externo dentado/pontilhado em laranja (selo premium) */}
+        <circle
+          cx="160"
+          cy="160"
+          r="155"
+          fill="none"
+          stroke="#f5a623"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray="2 12"
+        />
+        {/* Anel sólido fino */}
+        <circle cx="160" cy="160" r="144" fill="none" stroke="#f5a623" strokeWidth="1.5" />
+        {/* Anel tracejado sutil */}
+        <circle
+          cx="160"
+          cy="160"
+          r="138"
+          fill="none"
+          stroke="#f5a623"
+          strokeWidth="1"
+          strokeDasharray="3 4"
+          opacity="0.7"
+        />
+
+        {/* Círculo principal navy */}
+        <circle cx="160" cy="160" r="130" fill="#1a3666" />
+
+        {/* AGÊNCIA TEA — topo interno */}
+        <text
+          x="160"
+          y="64"
+          textAnchor="middle"
+          fill="rgba(255,255,255,0.55)"
+          fontFamily="Montserrat, sans-serif"
+          fontSize="11"
+          fontWeight="700"
+          letterSpacing="3.5"
+        >
+          AGÊNCIA TEA
+        </text>
+
+        {/* Coração puzzle 4 quadrantes */}
+        <g clipPath="url(#selo-heart-clip)">
+          <rect x="40" y="40" width="120" height="120" fill="#2176c8" />
+          <rect x="160" y="40" width="120" height="120" fill="#f5a623" />
+          <rect x="40" y="160" width="120" height="120" fill="#3ec46d" />
+          <rect x="160" y="160" width="120" height="120" fill="#f26f9e" />
+          {/* divisórias brancas */}
+          <line x1="160" y1="40" x2="160" y2="280" stroke="#ffffff" strokeWidth="3" />
+          <line x1="40" y1="160" x2="280" y2="160" stroke="#ffffff" strokeWidth="3" />
+          {/* encaixes do puzzle */}
+          <circle cx="160" cy="110" r="9" fill="#ffffff" />
+          <circle cx="210" cy="160" r="9" fill="#ffffff" />
+          <circle cx="160" cy="210" r="9" fill="#ffffff" />
+          <circle cx="110" cy="160" r="9" fill="#ffffff" />
+        </g>
+        {/* contorno do coração */}
+        <path
+          d="M160 268 C70 210 28 150 50 96 C66 56 116 50 160 96 C204 50 254 56 270 96 C292 150 250 210 160 268 Z"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="2"
+          opacity="0.35"
+        />
+      </svg>
+
+      {/* Conteúdo HTML sobreposto (textos inferiores + fita) */}
+      <div
+        className="absolute flex flex-col items-center justify-end text-center"
+        style={{ width: size, height: size, paddingBottom: size * 0.06 }}
+      >
+        {/* "SELO" abaixo do coração - posicionado na parte inferior do círculo */}
+        <div
+          className="font-display font-extrabold uppercase"
+          style={{
+            color: "rgba(255,255,255,0.65)",
+            fontSize: px(12),
+            letterSpacing: "5px",
+          }}
+        >
+          Selo
+        </div>
+
+        {/* TURISMO AZUL com estrelas */}
+        <div
+          className="flex items-center justify-center gap-2 mt-1"
+          style={{ color: "#00b4d8" }}
+        >
+          <span style={{ color: "#f5a623", fontSize: px(14) }}>★</span>
+          <span
+            className="font-display uppercase"
+            style={{
+              fontSize: px(27),
+              fontWeight: 900,
+              letterSpacing: "1px",
+              lineHeight: 1,
+            }}
+          >
+            Turismo Azul
+          </span>
+          <span style={{ color: "#f5a623", fontSize: px(14) }}>★</span>
+        </div>
+
+        {/* INCLUSIVO */}
+        <div
+          className="font-display uppercase text-white mt-1"
+          style={{
+            fontSize: px(15),
+            fontWeight: 700,
+            letterSpacing: "4px",
+          }}
+        >
+          Inclusivo
+        </div>
+      </div>
+
+      {/* Fita / banner inferior */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+        style={{
+          bottom: 0,
+          width: size * 0.85,
+          height: size * 0.13,
+          backgroundColor: "#f5a623",
+          color: "#1a3666",
+          // cortes em V nas pontas (estilo ribbon)
+          clipPath:
+            "polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%)",
+          boxShadow: "0 6px 14px rgba(0,0,0,0.18)",
+        }}
+      >
+        <span
+          className="font-display font-extrabold uppercase"
+          style={{
+            fontSize: px(11),
+            letterSpacing: "2px",
+          }}
+        >
+          Certificação Oficial
+        </span>
+      </div>
+    </div>
   );
 }
