@@ -44,7 +44,7 @@ export const Route = createFileRoute("/l/$slug")({
       </p>
       <Link
         to="/explorar"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         Ir para Explorar
       </Link>
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/l/$slug")({
       <p className="text-muted-foreground mb-6">{error.message}</p>
       <Link
         to="/explorar"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         Ir para Explorar
       </Link>
