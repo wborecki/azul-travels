@@ -1187,30 +1187,29 @@ function CtaFinal() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SeloBadge({ size = 320 }: { size?: number }) {
-  // tipografia escala suavemente com o tamanho do selo
-  const s = size / 320;
-  const px = (n: number) => `${Math.max(8, n * s)}px`;
+  // ViewBox unificado: 320 (largura) x 380 (altura, inclui fita)
+  const VB_W = 320;
+  const VB_H = 380;
+  const ratio = VB_H / VB_W;
 
   return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{ width: size, height: size * 1.18 }}
-    >
-      {/* SVG do círculo (anéis + coração + textos) */}
+    <div style={{ width: size, height: size * ratio }} className="relative">
       <svg
-        viewBox="0 0 320 320"
+        viewBox={`0 0 ${VB_W} ${VB_H}`}
         width={size}
-        height={size}
-        className="absolute top-0 left-0"
-        aria-hidden
+        height={size * ratio}
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Selo Turismo Azul Inclusivo · Certificação Oficial"
       >
         <defs>
+          {/* Coração centrado em (160, 130), bbox aprox y:78–182 */}
           <clipPath id="selo-heart-clip">
-            <path d="M160 268 C70 210 28 150 50 96 C66 56 116 50 160 96 C204 50 254 56 270 96 C292 150 250 210 160 268 Z" />
+            <path d="M160 182 C 96 152, 84 108, 108 92 C 130 78, 152 92, 160 110 C 168 92, 190 78, 212 92 C 236 108, 224 152, 160 182 Z" />
           </clipPath>
         </defs>
 
-        {/* Anel externo dentado/pontilhado em laranja (selo premium) */}
+        {/* — ANÉIS EXTERNOS — */}
+        {/* Anel externo dentado/pontilhado (selo premium) */}
         <circle
           cx="160"
           cy="160"
@@ -1235,15 +1234,16 @@ function SeloBadge({ size = 320 }: { size?: number }) {
           opacity="0.7"
         />
 
-        {/* Círculo principal navy */}
+        {/* — CÍRCULO PRINCIPAL NAVY — */}
         <circle cx="160" cy="160" r="130" fill="#1a3666" />
 
-        {/* AGÊNCIA TEA — topo interno */}
+        {/* — AGÊNCIA TEA (topo interno) — */}
         <text
           x="160"
-          y="64"
+          y="62"
           textAnchor="middle"
-          fill="rgba(255,255,255,0.55)"
+          fill="#ffffff"
+          fillOpacity="0.55"
           fontFamily="Montserrat, sans-serif"
           fontSize="11"
           fontWeight="700"
@@ -1252,106 +1252,104 @@ function SeloBadge({ size = 320 }: { size?: number }) {
           AGÊNCIA TEA
         </text>
 
-        {/* Coração puzzle 4 quadrantes */}
+        {/* — CORAÇÃO PUZZLE (4 quadrantes) — */}
         <g clipPath="url(#selo-heart-clip)">
-          <rect x="40" y="40" width="120" height="120" fill="#2176c8" />
-          <rect x="160" y="40" width="120" height="120" fill="#f5a623" />
-          <rect x="40" y="160" width="120" height="120" fill="#3ec46d" />
-          <rect x="160" y="160" width="120" height="120" fill="#f26f9e" />
-          {/* divisórias brancas */}
-          <line x1="160" y1="40" x2="160" y2="280" stroke="#ffffff" strokeWidth="3" />
-          <line x1="40" y1="160" x2="280" y2="160" stroke="#ffffff" strokeWidth="3" />
-          {/* encaixes do puzzle */}
-          <circle cx="160" cy="110" r="9" fill="#ffffff" />
-          <circle cx="210" cy="160" r="9" fill="#ffffff" />
-          <circle cx="160" cy="210" r="9" fill="#ffffff" />
-          <circle cx="110" cy="160" r="9" fill="#ffffff" />
+          {/* Quadrantes ao redor de (160, 130) */}
+          <rect x="80"  y="70"  width="80" height="60" fill="#2176c8" />
+          <rect x="160" y="70"  width="80" height="60" fill="#f5a623" />
+          <rect x="80"  y="130" width="80" height="60" fill="#3ec46d" />
+          <rect x="160" y="130" width="80" height="60" fill="#f26f9e" />
+          {/* Divisórias brancas */}
+          <line x1="160" y1="70"  x2="160" y2="190" stroke="#ffffff" strokeWidth="2.5" />
+          <line x1="80"  y1="130" x2="240" y2="130" stroke="#ffffff" strokeWidth="2.5" />
+          {/* Encaixes do puzzle */}
+          <circle cx="160" cy="105" r="6" fill="#ffffff" />
+          <circle cx="190" cy="130" r="6" fill="#ffffff" />
+          <circle cx="160" cy="155" r="6" fill="#ffffff" />
+          <circle cx="130" cy="130" r="6" fill="#ffffff" />
         </g>
-        {/* contorno do coração */}
+        {/* Contorno suave do coração */}
         <path
-          d="M160 268 C70 210 28 150 50 96 C66 56 116 50 160 96 C204 50 254 56 270 96 C292 150 250 210 160 268 Z"
+          d="M160 182 C 96 152, 84 108, 108 92 C 130 78, 152 92, 160 110 C 168 92, 190 78, 212 92 C 236 108, 224 152, 160 182 Z"
           fill="none"
           stroke="#ffffff"
-          strokeWidth="2"
-          opacity="0.35"
+          strokeWidth="1.5"
+          opacity="0.4"
         />
-      </svg>
 
-      {/* Conteúdo HTML sobreposto (textos inferiores + fita) */}
-      <div
-        className="absolute flex flex-col items-center justify-end text-center"
-        style={{ width: size, height: size, paddingBottom: size * 0.06 }}
-      >
-        {/* "SELO" abaixo do coração - posicionado na parte inferior do círculo */}
-        <div
-          className="font-display font-extrabold uppercase"
-          style={{
-            color: "rgba(255,255,255,0.65)",
-            fontSize: px(12),
-            letterSpacing: "5px",
-          }}
+        {/* — SELO — */}
+        <text
+          x="160"
+          y="208"
+          textAnchor="middle"
+          fill="#ffffff"
+          fillOpacity="0.65"
+          fontFamily="Montserrat, sans-serif"
+          fontSize="12"
+          fontWeight="700"
+          letterSpacing="5"
         >
-          Selo
-        </div>
+          SELO
+        </text>
 
-        {/* TURISMO AZUL com estrelas */}
-        <div
-          className="flex items-center justify-center gap-2 mt-1"
-          style={{ color: "#00b4d8" }}
+        {/* — ★ TURISMO AZUL ★ — */}
+        <text
+          x="160"
+          y="240"
+          textAnchor="middle"
+          fontFamily="Montserrat, sans-serif"
+          fontSize="26"
+          fontWeight="900"
+          letterSpacing="0.5"
         >
-          <span style={{ color: "#f5a623", fontSize: px(14) }}>★</span>
-          <span
-            className="font-display uppercase"
-            style={{
-              fontSize: px(27),
-              fontWeight: 900,
-              letterSpacing: "1px",
-              lineHeight: 1,
-            }}
+          <tspan fill="#f5a623">★</tspan>
+          <tspan fill="#00b4d8" dx="6">TURISMO AZUL</tspan>
+          <tspan fill="#f5a623" dx="6">★</tspan>
+        </text>
+
+        {/* — INCLUSIVO — */}
+        <text
+          x="160"
+          y="266"
+          textAnchor="middle"
+          fill="#ffffff"
+          fontFamily="Montserrat, sans-serif"
+          fontSize="15"
+          fontWeight="700"
+          letterSpacing="4"
+        >
+          INCLUSIVO
+        </text>
+
+        {/* — FITA / RIBBON com cortes em V — */}
+        <g>
+          {/* sombra suave */}
+          <polygon
+            points="22,308 298,308 282,332 298,356 22,356 38,332"
+            fill="#000000"
+            opacity="0.18"
+            transform="translate(0,4)"
+          />
+          {/* fita laranja */}
+          <polygon
+            points="22,308 298,308 282,332 298,356 22,356 38,332"
+            fill="#f5a623"
+          />
+          {/* texto navy */}
+          <text
+            x="160"
+            y="337"
+            textAnchor="middle"
+            fill="#1a3666"
+            fontFamily="Montserrat, sans-serif"
+            fontSize="11"
+            fontWeight="800"
+            letterSpacing="2"
           >
-            Turismo Azul
-          </span>
-          <span style={{ color: "#f5a623", fontSize: px(14) }}>★</span>
-        </div>
-
-        {/* INCLUSIVO */}
-        <div
-          className="font-display uppercase text-white mt-1"
-          style={{
-            fontSize: px(15),
-            fontWeight: 700,
-            letterSpacing: "4px",
-          }}
-        >
-          Inclusivo
-        </div>
-      </div>
-
-      {/* Fita / banner inferior */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
-        style={{
-          bottom: 0,
-          width: size * 0.85,
-          height: size * 0.13,
-          backgroundColor: "#f5a623",
-          color: "#1a3666",
-          // cortes em V nas pontas (estilo ribbon)
-          clipPath:
-            "polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%)",
-          boxShadow: "0 6px 14px rgba(0,0,0,0.18)",
-        }}
-      >
-        <span
-          className="font-display font-extrabold uppercase"
-          style={{
-            fontSize: px(11),
-            letterSpacing: "2px",
-          }}
-        >
-          Certificação Oficial
-        </span>
-      </div>
+            CERTIFICAÇÃO OFICIAL
+          </text>
+        </g>
+      </svg>
     </div>
   );
 }
