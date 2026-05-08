@@ -13,7 +13,6 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as ParaEstabelecimentosRouteImport } from './routes/para-estabelecimentos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
@@ -60,11 +59,6 @@ const SobreRoute = SobreRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParaEstabelecimentosRoute = ParaEstabelecimentosRouteImport.update({
-  id: '/para-estabelecimentos',
-  path: '/para-estabelecimentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -217,7 +211,6 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
@@ -250,7 +243,6 @@ export interface FileRoutesByTo {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
@@ -285,7 +277,6 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/para-estabelecimentos': typeof ParaEstabelecimentosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
@@ -321,7 +312,6 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
-    | '/para-estabelecimentos'
     | '/privacidade'
     | '/sobre'
     | '/sobre-os-selos'
@@ -354,7 +344,6 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
-    | '/para-estabelecimentos'
     | '/privacidade'
     | '/sobre'
     | '/sobre-os-selos'
@@ -388,7 +377,6 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
-    | '/para-estabelecimentos'
     | '/privacidade'
     | '/sobre'
     | '/sobre-os-selos'
@@ -423,7 +411,6 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
-  ParaEstabelecimentosRoute: typeof ParaEstabelecimentosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
   SobreOsSelosRoute: typeof SobreOsSelosRoute
@@ -462,13 +449,6 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/para-estabelecimentos': {
-      id: '/para-estabelecimentos'
-      path: '/para-estabelecimentos'
-      fullPath: '/para-estabelecimentos'
-      preLoaderRoute: typeof ParaEstabelecimentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -727,7 +707,6 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
-  ParaEstabelecimentosRoute: ParaEstabelecimentosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
   SobreOsSelosRoute: SobreOsSelosRoute,
@@ -740,3 +719,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
