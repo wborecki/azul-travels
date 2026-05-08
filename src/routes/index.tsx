@@ -1183,15 +1183,26 @@ function CtaFinal() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SeloBadge({ size = 320 }: { size?: number }) {
-  // ViewBox unificado: 320 (largura) x 380 (altura, inclui fita)
-  const VB_W = 320;
-  const VB_H = 380;
+  // ViewBox com padding extra para garantir que os anéis externos não cortem
+  const VB_W = 350;
+  const VB_H = 410;
   const ratio = VB_H / VB_W;
+
+  // Diamantes ao redor do anel externo (selo de autenticidade)
+  const diamondCount = 32;
+  const diamondRadius = 152;
+  const diamonds = Array.from({ length: diamondCount }, (_, i) => {
+    const angle = (i * 360) / diamondCount;
+    const rad = (angle * Math.PI) / 180;
+    const cx = 160 + diamondRadius * Math.cos(rad);
+    const cy = 160 + diamondRadius * Math.sin(rad);
+    return { cx, cy, angle };
+  });
 
   return (
     <div style={{ width: size, height: size * ratio }} className="relative">
       <svg
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        viewBox={`-15 -15 ${VB_W} ${VB_H}`}
         width={size}
         height={size * ratio}
         xmlns="http://www.w3.org/2000/svg"
@@ -1202,20 +1213,28 @@ function SeloBadge({ size = 320 }: { size?: number }) {
           <clipPath id="selo-heart-clip">
             <path d="M160 182 C 96 152, 84 108, 108 92 C 130 78, 152 92, 160 110 C 168 92, 190 78, 212 92 C 236 108, 224 152, 160 182 Z" />
           </clipPath>
+          {/* Arco superior para o texto curvado AGÊNCIA TEA */}
+          <path
+            id="selo-arc-top"
+            d="M 55,160 A 105,105 0 0 1 265,160"
+            fill="none"
+          />
         </defs>
 
         {/* — ANÉIS EXTERNOS — */}
-        {/* Anel externo dentado/pontilhado (selo premium) */}
-        <circle
-          cx="160"
-          cy="160"
-          r="155"
-          fill="none"
-          stroke="#f5a623"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray="2 12"
-        />
+        {/* Diamantes ao redor (selo de autenticidade) */}
+        <g fill="#f5a623">
+          {diamonds.map((d, i) => (
+            <rect
+              key={i}
+              x={d.cx - 3}
+              y={d.cy - 3}
+              width="6"
+              height="6"
+              transform={`rotate(${d.angle + 45} ${d.cx} ${d.cy})`}
+            />
+          ))}
+        </g>
         {/* Anel sólido fino */}
         <circle cx="160" cy="160" r="144" fill="none" stroke="#f5a623" strokeWidth="1.5" />
         {/* Anel tracejado sutil */}
@@ -1233,11 +1252,8 @@ function SeloBadge({ size = 320 }: { size?: number }) {
         {/* — CÍRCULO PRINCIPAL NAVY — */}
         <circle cx="160" cy="160" r="130" fill="#1a3666" />
 
-        {/* — AGÊNCIA TEA (topo interno) — */}
+        {/* — AGÊNCIA TEA (curvado no arco superior) — */}
         <text
-          x="160"
-          y="62"
-          textAnchor="middle"
           fill="#ffffff"
           fillOpacity="0.55"
           fontFamily="Montserrat, sans-serif"
@@ -1245,7 +1261,9 @@ function SeloBadge({ size = 320 }: { size?: number }) {
           fontWeight="700"
           letterSpacing="3.5"
         >
-          AGÊNCIA TEA
+          <textPath href="#selo-arc-top" startOffset="50%" textAnchor="middle">
+            AGÊNCIA TEA
+          </textPath>
         </text>
 
         {/* — CORAÇÃO PUZZLE (4 quadrantes) — */}
