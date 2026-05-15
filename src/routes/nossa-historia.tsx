@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, Hotel, Puzzle, BadgeCheck, Map } from "lucide-react";
+import { Heart, Hotel, Puzzle, BadgeCheck, Map, Check } from "lucide-react";
 import restaurante from "@/assets/historia-restaurante.jpeg";
 import parqueAquatico from "@/assets/historia-parque-aquatico.jpeg";
 import helicoptero from "@/assets/historia-helicoptero.jpeg";
@@ -294,6 +294,19 @@ function NossaHistoriaPage() {
               Conhecer o Projeto
             </Link>
           </div>
+
+          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-white text-sm md:text-base font-medium">
+            {["Sem burocracia", "Para toda a família", "Apoio 24h"].map((item) => (
+              <li key={item} className="inline-flex items-center gap-2">
+                <Check className="h-4 w-4 md:h-5 md:w-5" strokeWidth={3} />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-5 text-xs md:text-sm text-white/70">
+            Já são famílias que viajam com mais tranquilidade.
+          </p>
         </div>
       </section>
     </div>
