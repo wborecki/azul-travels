@@ -18,6 +18,7 @@ import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
 import { Copy, Heart, Loader2, MessageCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { CreateAccountModal } from "@/components/auth/CreateAccountModal";
 
 const PREOCUPACOES = [
   "Sensibilidades sensoriais (sons, luz, texturas)",
