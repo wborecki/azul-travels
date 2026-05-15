@@ -79,7 +79,7 @@ function AdminDashboard() {
   return (
     <div className="space-y-8 max-w-7xl">
       <header>
-        <h1 className="text-3xl font-display font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-[#1a2f5e]">Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Visão geral do Turismo Azul.
         </p>
@@ -87,34 +87,38 @@ function AdminDashboard() {
 
       <div className="grid sm:grid-cols-2 gap-5">
         <MetricCard
-          icon={<Users className="h-6 w-6" />}
+          icon={<Users className="h-5 w-5" />}
           label="Famílias cadastradas"
           value={fmt(stats?.total_familias)}
-          accent="bg-blue-50 text-blue-700"
+          iconBg="#dbeafe"
+          iconColor="#2563eb"
         />
         <MetricCard
-          icon={<Building2 className="h-6 w-6" />}
+          icon={<Building2 className="h-5 w-5" />}
           label="Estabelecimentos cadastrados"
           value={fmt(stats?.total_estabelecimentos)}
-          accent="bg-emerald-50 text-emerald-700"
+          iconBg="#dcfce7"
+          iconColor="#15803d"
         />
         <MetricCard
-          icon={<ClipboardList className="h-6 w-6" />}
+          icon={<ClipboardList className="h-5 w-5" />}
           label="Perfis TEA preenchidos"
           value={fmt(stats?.familias_com_perfil_tea)}
-          accent="bg-violet-50 text-violet-700"
+          iconBg="#fef9c3"
+          iconColor="#a16207"
         />
         <MetricCard
-          icon={<Sparkles className="h-6 w-6" />}
+          icon={<Sparkles className="h-5 w-5" />}
           label="Novos cadastros esta semana"
           value={fmt(stats?.novos_esta_semana)}
-          accent="bg-amber-50 text-amber-700"
+          iconBg="#fce7f3"
+          iconColor="#be185d"
         />
       </div>
 
-      <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="font-display font-semibold text-foreground">Cadastros recentes</h2>
+      <section className="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-[#e5e7eb] flex items-center justify-between">
+          <h2 className="font-semibold text-[#1a2f5e]">Cadastros recentes</h2>
           <span className="text-xs text-muted-foreground">Últimos 10</span>
         </div>
         {loading ? (
@@ -123,29 +127,33 @@ function AdminDashboard() {
           <div className="p-10 text-center text-muted-foreground text-sm">Nenhum cadastro recente.</div>
         ) : (
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#f8fafc]">
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Cidade/UF</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60">Nome</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60">Tipo</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60">Cidade/UF</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60">Data</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60">Status</TableHead>
+                <TableHead className="text-[11px] uppercase tracking-wider text-foreground/60 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {recents.map((r) => (
-                <TableRow key={`${r.tipo}-${r.id}`}>
-                  <TableCell className="font-medium">{r.nome ?? "—"}</TableCell>
+                <TableRow key={`${r.tipo}-${r.id}`} className="hover:bg-[#f8fafc] transition-colors">
+                  <TableCell className="font-medium">
+                    {r.nome ?? <EmptyCell />}
+                  </TableCell>
                   <TableCell>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      r.tipo === "familia" ? "bg-blue-50 text-blue-700" : "bg-emerald-50 text-emerald-700"
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      r.tipo === "familia"
+                        ? "bg-[#dbeafe] text-[#1d4ed8]"
+                        : "bg-[#dcfce7] text-[#15803d]"
                     }`}>
                       {r.tipo === "familia" ? "Família" : "Estabelecimento"}
                     </span>
                   </TableCell>
                   <TableCell className="text-foreground/80">
-                    {[r.cidade, r.estado].filter(Boolean).join(" / ") || "—"}
+                    {[r.cidade, r.estado].filter(Boolean).join(" / ") || <EmptyCell />}
                   </TableCell>
                   <TableCell className="text-foreground/70 text-xs">
                     {new Date(r.criado_em).toLocaleDateString("pt-BR")}
@@ -171,25 +179,41 @@ function AdminDashboard() {
   );
 }
 
+function EmptyCell() {
+  return <span className="text-xs italic text-muted-foreground">Não informado</span>;
+}
+
 function MetricCard({
   icon,
   label,
   value,
-  accent,
+  iconBg,
+  iconColor,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  accent: string;
+  iconBg: string;
+  iconColor: string;
 }) {
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="bg-white border border-[#e5e7eb] rounded-2xl p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-          <p className="mt-3 text-4xl font-display font-bold text-foreground">{value}</p>
+          <p className="text-[11px] font-medium text-foreground/60 uppercase tracking-wider">
+            {label}
+          </p>
+          <p
+            className="mt-3 font-bold text-[#1a2f5e]"
+            style={{ fontSize: 36, lineHeight: 1.1 }}
+          >
+            {value}
+          </p>
         </div>
-        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${accent}`}>
+        <span
+          className="flex items-center justify-center rounded-full shrink-0"
+          style={{ width: 40, height: 40, background: iconBg, color: iconColor }}
+        >
           {icon}
         </span>
       </div>
@@ -201,11 +225,11 @@ function StatusPill({ status }: { status: string | null }) {
   const s = status ?? "—";
   const tone =
     s === "ativo"
-      ? "bg-emerald-50 text-emerald-700"
+      ? "bg-[#dcfce7] text-[#15803d]"
       : s === "pendente"
-      ? "bg-amber-50 text-amber-700"
+      ? "bg-[#fef9c3] text-[#a16207]"
       : s === "inativo"
       ? "bg-gray-100 text-gray-600"
       : "bg-gray-50 text-gray-500";
-  return <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${tone}`}>{s}</span>;
+  return <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${tone}`}>{s}</span>;
 }
