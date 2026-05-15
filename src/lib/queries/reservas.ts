@@ -131,7 +131,7 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
   return {
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
-    perfil_tea_id: input.perfil_tea_id,
+    perfil_tea_id: input.perfil_tea_id ?? null,
     perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
     data_checkout: emptyToNull(input.data_checkout),
