@@ -284,6 +284,19 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
         </Field>
       </div>
 
+      <Field label="Crie uma senha *" error={errors.password}>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mínimo 6 caracteres"
+          autoComplete="new-password"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Você usará essa senha para entrar em /minha-empresa e gerenciar o cadastro do local.
+        </p>
+      </Field>
+
       <Field label="Nome do estabelecimento *" error={errors.nome_estabelecimento}>
         <Input value={nomeEstab} onChange={(e) => setNomeEstab(e.target.value)} />
       </Field>
