@@ -109,19 +109,23 @@ function NossaHistoriaPage() {
             </h2>
             <div className="mt-8 space-y-5 text-[17px] md:text-lg leading-relaxed text-foreground/85">
               <p>
-                Mas o que deveria ser descanso, muitas vezes se transformava em
-                medo, ansiedade e frustração.
+                O Turismo Azul nasceu da percepção de uma realidade silenciosa
+                vivida por muitas famílias atípicas: o medo constante da
+                imprevisibilidade.
               </p>
               <p>
-                Hotéis sem preparo. Ambientes com excesso de estímulos. Falta de
-                compreensão. Olhares de julgamento. Equipes que não sabiam
-                acolher. Lugares que não entendiam que, por trás de uma crise,
-                existe uma criança que só precisa ser respeitada.
+                Enquanto muitas pessoas enxergam viagens e momentos de lazer como
+                descanso, para diversas famílias de pessoas autistas esses
+                momentos podem representar ansiedade, insegurança e exaustão
+                emocional. A falta de preparo dos ambientes, o excesso de
+                estímulos, a ausência de comunicação acessível e o receio de
+                julgamentos fazem com que muitas famílias deixem de viver
+                experiências que deveriam ser leves, felizes e acolhedoras.
               </p>
               <p>
-                E foi vivendo tudo isso que percebi uma realidade dolorosa:
-                muitas famílias atípicas deixam de viajar não por falta de
-                vontade, mas por medo do que vão enfrentar.
+                A dor que nos moveu foi justamente perceber que o problema não
+                estava nas famílias, mas na ausência de espaços preparados para
+                recebê-las.
               </p>
             </div>
           </div>
