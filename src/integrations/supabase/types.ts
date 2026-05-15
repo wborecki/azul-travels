@@ -231,30 +231,51 @@ export type Database = {
       }
       estabelecimento_profiles: {
         Row: {
+          atualizado_em: string
           cargo: string | null
+          cidade: string | null
           criado_em: string
           email: string | null
           estabelecimento_id: string | null
+          estado: string | null
           id: string
+          last_seen_at: string | null
           nome_responsavel: string | null
+          notes: string | null
+          origem: string | null
+          status: string
           whatsapp: string | null
         }
         Insert: {
+          atualizado_em?: string
           cargo?: string | null
+          cidade?: string | null
           criado_em?: string
           email?: string | null
           estabelecimento_id?: string | null
+          estado?: string | null
           id: string
+          last_seen_at?: string | null
           nome_responsavel?: string | null
+          notes?: string | null
+          origem?: string | null
+          status?: string
           whatsapp?: string | null
         }
         Update: {
+          atualizado_em?: string
           cargo?: string | null
+          cidade?: string | null
           criado_em?: string
           email?: string | null
           estabelecimento_id?: string | null
+          estado?: string | null
           id?: string
+          last_seen_at?: string | null
           nome_responsavel?: string | null
+          notes?: string | null
+          origem?: string | null
+          status?: string
           whatsapp?: string | null
         }
         Relationships: []
@@ -480,30 +501,45 @@ export type Database = {
       }
       familia_profiles: {
         Row: {
+          atualizado_em: string
           cidade: string | null
           criado_em: string
           email: string | null
           estado: string | null
           id: string
+          last_seen_at: string | null
           nome_responsavel: string | null
+          notes: string | null
+          origem: string | null
+          status: string
           telefone: string | null
         }
         Insert: {
+          atualizado_em?: string
           cidade?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
           id: string
+          last_seen_at?: string | null
           nome_responsavel?: string | null
+          notes?: string | null
+          origem?: string | null
+          status?: string
           telefone?: string | null
         }
         Update: {
+          atualizado_em?: string
           cidade?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
           id?: string
+          last_seen_at?: string | null
           nome_responsavel?: string | null
+          notes?: string | null
+          origem?: string | null
+          status?: string
           telefone?: string | null
         }
         Relationships: []
@@ -1244,18 +1280,21 @@ export type Database = {
         Row: {
           criado_em: string
           id: string
+          promoted_by: string | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           criado_em?: string
           id?: string
+          promoted_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           criado_em?: string
           id?: string
+          promoted_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
@@ -1267,6 +1306,7 @@ export type Database = {
     }
     Functions: {
       expurgar_links_curtos_inativos: { Args: never; Returns: number }
+      get_dashboard_stats: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1274,6 +1314,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
     }
