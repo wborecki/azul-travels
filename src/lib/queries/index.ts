@@ -144,6 +144,7 @@ export {
   type EstabAuditoriaAdminPage,
   type PerfilSensorialRow,
   type AdminCounts,
+  type DashboardStats,
 } from "./admin";
 
 // Filtros padrão de exploração — preferências por usuário (1:1).
