@@ -45,14 +45,13 @@ function AdminLayout() {
 
   useEffect(() => {
     if (!user) return;
-    void supabase
-      .from("profiles")
-      .select("nome_completo")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setAdminName(data?.nome_completo ?? user.email ?? "");
-      });
+    const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const fromMeta =
+      (typeof meta.nome_completo === "string" && meta.nome_completo) ||
+      (typeof meta.full_name === "string" && meta.full_name) ||
+      (typeof meta.name === "string" && meta.name) ||
+      "";
+    setAdminName(fromMeta || user.email || "");
   }, [user]);
 
   if (loading) {
