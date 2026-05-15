@@ -97,13 +97,23 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
 export interface ReservaFormInput {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
-  perfil_sensorial_id: NonNullable<ReservaInsert["perfil_sensorial_id"]>;
+  perfil_tea_id: NonNullable<ReservaInsert["perfil_tea_id"]>;
+  /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
+  perfil_sensorial_id: ReservaInsert["perfil_sensorial_id"];
   data_checkin: string;
   data_checkout: string;
   num_adultos: NonNullable<Reserva["num_adultos"]>;
   num_autistas: NonNullable<Reserva["num_autistas"]>;
   mensagem: string;
   perfil_enviado_ao_estabelecimento: NonNullable<Reserva["perfil_enviado_ao_estabelecimento"]>;
+  // Campos opcionais específicos da reserva (smart pre-checkin)
+  num_acompanhantes?: number | null;
+  pessoa_referencia?: string | null;
+  objetivo_viagem?: string[];
+  notas_especificas?: string | null;
+  historico_negativo?: string | null;
+  recomendacoes_adicionais?: string | null;
+  conversa_previa_equipe?: boolean;
 }
 
 /** Trim de string; vazio vira `null`. Idêntico ao usado em mídia. */
