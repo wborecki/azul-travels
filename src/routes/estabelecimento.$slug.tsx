@@ -534,7 +534,7 @@ function EstabPage() {
                 className="w-full bg-secondary hover:bg-secondary/90 text-white"
                 size="lg"
               >
-                <Link to="/pre-checkin/$slug" params={{ slug: e.slug }}>
+                <Link to="/minha-conta/reservas/nova" search={{ slug: e.slug } as never}>
                   Solicitar Reserva
                 </Link>
               </Button>
