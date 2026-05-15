@@ -72,7 +72,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
-  if (isAdmin) {
+  const isAuthFlow = pathname === "/login" || pathname === "/cadastro" || pathname === "/selecionar-perfil" || pathname === "/reset-password" || pathname === "/forgot-password";
+  if (isAdmin || isAuthFlow) {
     return (
       <AuthProvider>
         <Outlet />
