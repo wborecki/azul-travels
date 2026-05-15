@@ -51,6 +51,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
   const [cargo, setCargo] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
+  const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [nomeEstab, setNomeEstab] = useState("");
   const [tipo, setTipo] = useState("");
