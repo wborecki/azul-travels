@@ -97,7 +97,8 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
 export interface ReservaFormInput {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
-  perfil_tea_id: NonNullable<ReservaInsert["perfil_tea_id"]>;
+  /** Vínculo ao Perfil TEA permanente da família (preferencial). */
+  perfil_tea_id?: ReservaInsert["perfil_tea_id"];
   /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
   perfil_sensorial_id: ReservaInsert["perfil_sensorial_id"];
   data_checkin: string;
