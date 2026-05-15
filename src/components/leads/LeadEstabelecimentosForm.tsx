@@ -17,18 +17,7 @@ import {
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
 import { Building2, Check, Loader2 } from "lucide-react";
-
-const TIPOS = [
-  "Hotel",
-  "Pousada",
-  "Resort",
-  "Restaurante",
-  "Parque",
-  "Atração turística",
-  "Agência de turismo",
-  "Transporte",
-  "Outro",
-] as const;
+import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 
 const NUM_COL = ["Até 10", "11 a 30", "31 a 60", "61 a 100", "Mais de 100"] as const;
 
