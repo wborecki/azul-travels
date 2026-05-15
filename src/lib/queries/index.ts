@@ -125,6 +125,7 @@ export {
   fetchEstabAuditoriaAdminPaginated,
   fetchPerfisSensoriaisDaFamilia,
   fetchAdminCounts,
+  fetchDashboardStats,
   ESTAB_ADMIN_VIEW_SELECT,
   type EstabAdminRow,
   type EstabelecimentoAdminView,
@@ -143,6 +144,7 @@ export {
   type EstabAuditoriaAdminPage,
   type PerfilSensorialRow,
   type AdminCounts,
+  type DashboardStats,
 } from "./admin";
 
 // Filtros padrão de exploração — preferências por usuário (1:1).
