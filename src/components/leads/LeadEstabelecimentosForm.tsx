@@ -266,9 +266,9 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            {TIPOS.map((t) => (
+            {ESTAB_TIPOS.map((t) => (
               <SelectItem key={t} value={t}>
-                {t}
+                {ESTAB_TIPO_LABEL[t]}
               </SelectItem>
             ))}
           </SelectContent>
