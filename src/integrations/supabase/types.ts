@@ -576,16 +576,27 @@ export type Database = {
       }
       perfil_sensorial: {
         Row: {
+          alimentacao_observacoes: string | null
+          alimentacao_restricoes: string[] | null
+          alimentacao_seletiva: boolean | null
+          apoio_alimentacao: boolean | null
+          apoio_higiene: boolean | null
+          apoio_mobilidade: boolean | null
+          apoio_seguranca: boolean | null
           comunicacao_verbal: boolean | null
           criado_em: string
           dificuldade_esperar: boolean | null
           dificuldade_mudanca_rotina: boolean | null
+          estrategias_acalmar: string | null
+          estrategias_que_funcionam: string | null
           familia_id: string
+          gatilhos: string[] | null
           gosta_animais: boolean | null
           gosta_atividades_agua: boolean | null
           gosta_natureza: boolean | null
           id: string
           idade: number | null
+          interesses_extra: string[] | null
           nivel_tea: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais: string | null
@@ -594,25 +605,46 @@ export type Database = {
           precisa_concierge_tea: boolean | null
           precisa_fila_prioritaria: boolean | null
           precisa_sala_sensorial: boolean | null
+          quarto_andar_baixo: boolean | null
+          quarto_blackout: boolean | null
+          quarto_cama_extra: boolean | null
+          quarto_longe_elevador: boolean | null
+          quarto_observacoes: string | null
+          quarto_sem_estampas: boolean | null
+          rotina_horario_acordar: string | null
+          rotina_horario_dormir: string | null
+          rotina_observacoes: string | null
           sensivel_cheiros: boolean | null
           sensivel_luz: boolean | null
           sensivel_multidao: boolean | null
           sensivel_sons: boolean | null
           sensivel_texturas: boolean | null
+          sinais_sobrecarga: string | null
           usa_caa: boolean | null
           usa_libras: boolean | null
         }
         Insert: {
+          alimentacao_observacoes?: string | null
+          alimentacao_restricoes?: string[] | null
+          alimentacao_seletiva?: boolean | null
+          apoio_alimentacao?: boolean | null
+          apoio_higiene?: boolean | null
+          apoio_mobilidade?: boolean | null
+          apoio_seguranca?: boolean | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          estrategias_acalmar?: string | null
+          estrategias_que_funcionam?: string | null
           familia_id: string
+          gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
           id?: string
           idade?: number | null
+          interesses_extra?: string[] | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais?: string | null
@@ -621,25 +653,46 @@ export type Database = {
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          quarto_andar_baixo?: boolean | null
+          quarto_blackout?: boolean | null
+          quarto_cama_extra?: boolean | null
+          quarto_longe_elevador?: boolean | null
+          quarto_observacoes?: string | null
+          quarto_sem_estampas?: boolean | null
+          rotina_horario_acordar?: string | null
+          rotina_horario_dormir?: string | null
+          rotina_observacoes?: string | null
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sinais_sobrecarga?: string | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
         }
         Update: {
+          alimentacao_observacoes?: string | null
+          alimentacao_restricoes?: string[] | null
+          alimentacao_seletiva?: boolean | null
+          apoio_alimentacao?: boolean | null
+          apoio_higiene?: boolean | null
+          apoio_mobilidade?: boolean | null
+          apoio_seguranca?: boolean | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          estrategias_acalmar?: string | null
+          estrategias_que_funcionam?: string | null
           familia_id?: string
+          gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
           id?: string
           idade?: number | null
+          interesses_extra?: string[] | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista?: string
           notas_adicionais?: string | null
@@ -648,11 +701,21 @@ export type Database = {
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          quarto_andar_baixo?: boolean | null
+          quarto_blackout?: boolean | null
+          quarto_cama_extra?: boolean | null
+          quarto_longe_elevador?: boolean | null
+          quarto_observacoes?: string | null
+          quarto_sem_estampas?: boolean | null
+          rotina_horario_acordar?: string | null
+          rotina_horario_dormir?: string | null
+          rotina_observacoes?: string | null
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sinais_sobrecarga?: string | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
         }
@@ -716,6 +779,7 @@ export type Database = {
       }
       reservas: {
         Row: {
+          acompanhantes: Json | null
           criado_em: string
           data_checkin: string | null
           data_checkout: string | null
@@ -725,11 +789,13 @@ export type Database = {
           mensagem: string | null
           num_adultos: number | null
           num_autistas: number | null
+          objetivo: string | null
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
           status: Database["public"]["Enums"]["reserva_status"] | null
         }
         Insert: {
+          acompanhantes?: Json | null
           criado_em?: string
           data_checkin?: string | null
           data_checkout?: string | null
@@ -739,11 +805,13 @@ export type Database = {
           mensagem?: string | null
           num_adultos?: number | null
           num_autistas?: number | null
+          objetivo?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
         }
         Update: {
+          acompanhantes?: Json | null
           criado_em?: string
           data_checkin?: string | null
           data_checkout?: string | null
@@ -753,6 +821,7 @@ export type Database = {
           mensagem?: string | null
           num_adultos?: number | null
           num_autistas?: number | null
+          objetivo?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null

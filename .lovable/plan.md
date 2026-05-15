@@ -1,46 +1,64 @@
+## Arquitetura final
 
+```text
+CONTA DA FAMÍLIA (login obrigatório)
+└── /minha-conta                  → dashboard
+    ├── /minha-conta/perfil       → Perfil TEA único (8 seções, editável)
+    └── /minha-conta/reservas     → lista + nova reserva
+        └── /minha-conta/reservas/$id → detalhe
+```
 
-## Reagrupamento de categorias de estabelecimento
+- **Perfil TEA** vive na tabela `perfil_sensorial` (1 por familia_id).
+- **Reservas** usam a tabela `reservas` existente, com `perfil_sensorial_id` apontando para o perfil da família — quando a família abre uma reserva, o perfil é puxado automaticamente.
+- Botão **"Solicitar Reserva"** no marketplace passa a:
+  - sem login → manda para `/login?next=/minha-conta/reservas/nova?slug=...`
+  - logado e sem perfil → manda para `/minha-conta/perfil?next=...`
+  - logado e com perfil → abre `/minha-conta/reservas/nova?slug=...` já com o perfil selecionado.
+- O fluxo anônimo `/pre-checkin/$slug` é **descontinuado** (rota redireciona para o novo fluxo).
 
-### Sugestão
+## Mudanças no banco
 
-Hoje existem 8 tipos no banco (`hotel`, `pousada`, `resort`, `restaurante`, `parque`, `atracoes`, `agencia`, `transporte`). Sugiro consolidar em **5 categorias mais legíveis para a família**, sem perder granularidade — o tipo original vira um subtipo informativo dentro do card.
+**Estender `perfil_sensorial`** com colunas para as seções que ainda não existem (todas opcionais, default vazio):
 
-| Nova categoria | Engloba | Por quê |
-|---|---|---|
-| **Hospedagem** | hotel, pousada, resort | A família busca "onde dormir", não a classificação hoteleira. Um único filtro com 3x mais resultados é mais útil. |
-| **Passeios e experiências** | parque, atracoes + nova subcategoria `excursao` | Resposta direta pra sua pergunta: passeios, excursões e atrações cabem todos aqui. É o "o que fazer no destino". |
-| **Onde comer** | restaurante | Mantém separado. Uso e momento de busca distintos de hospedagem/passeios. |
-| **Transporte** | transporte | Mantém separado. Decisão logística, não experiencial. |
-| **Planejamento** | agencia | Mantém separado. Quem busca agência tá numa fase diferente da jornada (ainda planejando). |
+- *Necessidades de apoio diário*: `apoio_higiene`, `apoio_alimentacao`, `apoio_mobilidade`, `apoio_seguranca` (boolean)
+- *Rotina e horários*: `rotina_horario_acordar`, `rotina_horario_dormir` (text), `rotina_observacoes` (text)
+- *Alimentação*: `alimentacao_seletiva` (boolean), `alimentacao_restricoes` (text[]), `alimentacao_observacoes` (text)
+- *Regulação emocional*: `gatilhos` (text[]), `estrategias_acalmar` (text), `sinais_sobrecarga` (text)
+- *Preferências de quarto*: `quarto_andar_baixo`, `quarto_longe_elevador`, `quarto_blackout`, `quarto_sem_estampas`, `quarto_cama_extra` (boolean), `quarto_observacoes` (text)
+- *Interesses e estratégias*: `interesses_extra` (text[]), `estrategias_que_funcionam` (text)
 
-### Por que não criar categoria isolada para excursões
+**Estender `reservas`** com:
+- `objetivo` (text) — "Por que essa viagem?"
+- `acompanhantes` (jsonb) — `[{ nome, idade, parentesco }]`
 
-Excursão, passeio guiado e experiência local são variações do mesmo intent: "atividade pra fazer com a criança no destino". Separar em 3 categorias gera filtros vazios e fragmenta resultados. Um único guarda-chuva **Passeios e experiências** com subtipo no card resolve.
+Constraint: `unique(familia_id)` em `perfil_sensorial` para garantir 1 perfil por família (somente 1 filho TEA por conta nesta versão — múltiplos filhos fica como evolução futura, conforme a estrutura solicitada).
 
-### Impacto no produto
+## Telas a construir
 
-**UI (home + /explorar):**
-- 5 chips de categoria em vez de 8. Visualmente mais limpo, decisão mais rápida.
-- Cada card continua mostrando o tipo específico ("Hotel", "Pousada", "Excursão guiada") como label fino abaixo do nome — não se perde informação.
-- Filtros de `/explorar` ganham um nível: categoria (agrupador) + tipo específico (refino opcional dentro da categoria selecionada).
+1. **`/minha-conta`** — dashboard simples: card "Perfil TEA" (criar/editar) + card "Reservas" (lista resumida) + atalho "Explorar destinos".
+2. **`/minha-conta/perfil`** — formulário único com as 8 seções em accordion/abas, salva tudo numa única submissão (upsert por `familia_id`).
+3. **`/minha-conta/reservas`** — lista de reservas com status, datas e estabelecimento.
+4. **`/minha-conta/reservas/nova`** — formulário curto: estabelecimento (pré-preenchido por `?slug`), datas, acompanhantes, objetivo, notas. Mostra resumo do Perfil TEA que será enviado.
+5. **`/minha-conta/reservas/$id`** — detalhe da reserva + snapshot do perfil enviado.
 
-**Banco:**
-- Adicionar valor `excursao` ao enum `estab_tipo` (migration aditiva, não destrutiva).
-- Criar enum novo `estab_categoria` com os 5 valores e uma função `categoria_de_tipo(estab_tipo)` que faz o mapeamento. Sem coluna nova — categoria é derivada do tipo.
-- Atualizar `src/lib/enums.ts` com `ESTAB_CATEGORIA_LABEL` e o mapa `TIPO_PARA_CATEGORIA`.
+Layout `_minhaconta.tsx` (rota pathless) faz o gate de auth: sem sessão → redirect `/login?next=...`.
 
-**Onde aparece:**
-- Home: chips do hero passam de 5 tipos misturados ("Hotéis, Restaurantes, Parques, Resorts, Pousadas") para 5 categorias coerentes.
-- `/explorar`: filtro principal vira categoria; tipo específico aparece como sub-filtro só quando a categoria tem múltiplos tipos (Hospedagem, Passeios).
-- Card do estabelecimento: ícone derivado da categoria (mais consistente que do tipo), label do tipo específico abaixo do nome.
+## Marketplace e pré-check-in
 
-### Decisão pendente
+- `src/routes/explorar.tsx`: botão "Solicitar Reserva →" passa a apontar para `/minha-conta/reservas/nova?slug=…` (com gate de auth/perfil).
+- `src/routes/estabelecimento.$slug.tsx`: idem.
+- `src/routes/demo.estabelecimento.$slug.tsx`: idem (usuário entendeu antes que demo e produção compartilham fluxo).
+- `src/routes/pre-checkin.$slug.tsx`: vira página de redirect (`Navigate` para `/minha-conta/reservas/nova?slug=…`) para não quebrar links existentes.
 
-Antes de implementar, preciso confirmar dois pontos:
+## Detalhes técnicos
 
-1. **Nome do enum em PT-BR**: prefere "Passeios e experiências" (proposto) ou outro rótulo tipo "O que fazer", "Atrações", "Atividades"?
-2. **Onde adicionar excursões na UX**: só como novo tipo dentro de "Passeios e experiências", ou também quer que a equipe possa cadastrar produtos avulsos (ex: "Passeio de barco com guia TEA — meio dia") como item destacado em outro lugar (ex: seção própria na home)?
+- RLS já existente em `perfil_sensorial` e `reservas` (`auth.uid() = familia_id`) é suficiente — sem necessidade de novas policies.
+- `PerfilSensorialForm` é estendido para aceitar as novas seções; mantém compatibilidade com o uso atual.
+- Sem alterações em header, footer, área admin, conteúdo ou outras páginas.
 
-Responda esses dois pontos e eu sigo com a implementação completa (migration + enum + UI da home + filtros de /explorar + card).
+## Fora do escopo
 
+- Múltiplos filhos por família (estrutura permite 1 perfil/família agora).
+- Notificação por e-mail ao estabelecimento.
+- Chat família ↔ estabelecimento.
+- Pagamento/reserva financeira real.

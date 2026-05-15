@@ -313,7 +313,7 @@ function DemoDetalhe() {
                 className="w-full mt-4 bg-secondary hover:bg-secondary/90 text-white"
                 size="lg"
               >
-                <Link to="/pre-checkin/$slug" params={{ slug: estab.slug }}>
+                <Link to="/minha-conta/reservas/nova" search={{ slug: estab.slug } as never}>
                   Solicitar reserva
                 </Link>
               </Button>

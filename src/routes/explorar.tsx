@@ -243,7 +243,7 @@ function EstabCard({ estab }: { estab: EstabelecimentoView }) {
             </Link>
           </Button>
           <Button asChild size="sm" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-            <Link to="/pre-checkin/$slug" params={{ slug: estab.slug }}>
+            <Link to="/minha-conta/reservas/nova" search={{ slug: estab.slug } as never}>
               Solicitar Reserva →
             </Link>
           </Button>

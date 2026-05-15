@@ -2,8 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Após login bem-sucedido, decide entre:
- * - /minha-conta/perfil-sensorial → se ainda não há perfil cadastrado
- * - destino solicitado (redirect) ou /explorar → caso contrário
+ * - /minha-conta/perfil → se ainda não há perfil cadastrado
+ * - destino solicitado (redirect) ou /minha-conta → caso contrário
  */
 export async function resolvePostLoginPath(
   userId: string,
@@ -19,10 +19,10 @@ export async function resolvePostLoginPath(
     .limit(1);
 
   if (error) {
-    return "/explorar";
+    return "/minha-conta";
   }
   if (!data || data.length === 0) {
-    return "/minha-conta/perfil-sensorial";
+    return "/minha-conta/perfil";
   }
-  return "/explorar";
+  return "/minha-conta";
 }
