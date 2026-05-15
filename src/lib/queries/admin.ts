@@ -711,6 +711,22 @@ export interface AdminCounts {
   familias: number;
 }
 
+export interface DashboardStats {
+  total_familias: number;
+  total_estabelecimentos: number;
+  total_admins: number;
+  novos_esta_semana: number;
+  familias_com_perfil_tea: number;
+  estabelecimentos_com_perfil: number;
+}
+
+/** Chama a RPC `get_dashboard_stats` (somente admins). */
+export async function fetchDashboardStats(): Promise<DashboardStats> {
+  const { data, error } = await supabase.rpc("get_dashboard_stats");
+  if (error) throw error;
+  return data as unknown as DashboardStats;
+}
+
 /** Conta linhas de cada domínio (head: true — não traz payload). */
 export async function fetchAdminCounts(): Promise<AdminCounts> {
   const [estabs, reservas, conteudos, familias] = await Promise.all([
