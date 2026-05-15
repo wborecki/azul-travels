@@ -60,16 +60,32 @@ function NossaHistoriaPage() {
       {/* Quem somos */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center max-w-6xl mx-auto">
-            <div className="order-2 md:order-1">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto mb-12 md:mb-16">
+            <figure className="flex flex-col">
               <img
                 src={restaurante}
                 alt="Gustavo Passinato e seu filho Arthur sorrindo em um restaurante"
                 className="w-full h-auto rounded-2xl shadow-lg object-cover aspect-[4/5]"
                 loading="lazy"
               />
-            </div>
-            <div className="order-1 md:order-2">
+              <figcaption className="mt-3 text-center text-sm font-medium text-foreground/70">
+                Gustavo Passinato
+              </figcaption>
+            </figure>
+            <figure className="flex flex-col">
+              <img
+                src={giselaArthur1}
+                alt="Gisela Antoniucci e seu filho Arthur"
+                className="w-full h-auto rounded-2xl shadow-lg object-cover aspect-[4/5]"
+                loading="lazy"
+              />
+              <figcaption className="mt-3 text-center text-sm font-medium text-foreground/70">
+                Gisela Antoniucci
+              </figcaption>
+            </figure>
+          </div>
+          <div className="max-w-3xl mx-auto">
+            <div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3666]">
                 Quem somos
               </h2>
