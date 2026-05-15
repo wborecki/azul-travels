@@ -1,12 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, UserCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDemo = pathname === "/demo" || pathname.startsWith("/demo/");
+  const { user, role, isAdmin, isEstabelecimento } = useAuth();
+
+  const accountLink = isAdmin
+    ? { to: "/admin", label: "Admin" }
+    : isEstabelecimento
+      ? { to: "/minha-empresa", label: "Minha empresa" }
+      : { to: "/minha-conta", label: "Minha conta" };
 
   const navLinkClass =
     "px-3 py-2 text-[15px] font-semibold text-white/85 hover:text-white transition-colors duration-150";
