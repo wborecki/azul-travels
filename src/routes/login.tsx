@@ -73,7 +73,7 @@ function LoginPage() {
       >
         <div className="max-w-sm text-center flex flex-col items-center">
           <div className="flex justify-center" style={{ height: 48 }}>
-            <Logo variant="dark" showTagline={false} className="h-12" />
+            <Logo variant="dark" showTagline={false} />
           </div>
           <div
             style={{
