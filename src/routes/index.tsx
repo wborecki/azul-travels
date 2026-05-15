@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
+import arthurPiscinaSplash from "@/assets/arthur-piscina-splash.jpeg";
+import arthurConfiante from "@/assets/arthur-confiante.jpeg";
+import arthurParque from "@/assets/arthur-parque.jpeg";
+import arthurAviao from "@/assets/arthur-aviao.jpeg";
+import arthurPraia from "@/assets/arthur-praia.jpeg";
+import arthurCharrete from "@/assets/arthur-charrete.jpeg";
+import arthurMilkshake from "@/assets/arthur-milkshake.jpeg";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
@@ -112,8 +119,91 @@ function Landing() {
       <OQuePlataformaTera />
       <DemoEntrada />
       <BlogTeaser artigos={artigos} />
+      <ArthurGaleria />
       <CtaFinal />
     </div>
+  );
+}
+
+function ArthurGaleria() {
+  const fotos = [
+    { src: arthurConfiante, alt: "Arthur de braços cruzados em mirante com paisagem ao fundo" },
+    { src: arthurParque, alt: "Arthur gargalhando em brinquedo de parque" },
+    { src: arthurAviao, alt: "Arthur empolgado no avião à noite" },
+    { src: arthurPraia, alt: "Arthur na praia com óculos de sol" },
+    { src: arthurCharrete, alt: "Arthur em charrete de madeira em parque temático" },
+    { src: arthurMilkshake, alt: "Arthur tomando milkshake com tapa-olho e óculos" },
+  ];
+
+  return (
+    <section className="py-20" style={{ backgroundColor: "#F2F8FC" }}>
+      <div className="container mx-auto px-4">
+        <Reveal>
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-[#1a3666] leading-tight">
+              Arthur vai a todo lugar.{" "}
+              <span className="text-[#2176c8]">O seu filho também pode.</span>
+            </h2>
+            <p className="mt-5 text-lg text-foreground/75 leading-relaxed">
+              Essas são memórias reais de uma família real. É isso que queremos
+              para a sua família também.
+            </p>
+          </div>
+        </Reveal>
+
+        {/* Mosaico desktop */}
+        <div className="hidden md:grid mt-12 grid-cols-6 auto-rows-[180px] gap-4 max-w-6xl mx-auto">
+          <div className="col-span-3 row-span-2 overflow-hidden rounded-2xl shadow-md bg-white">
+            <img
+              src={arthurPiscinaSplash}
+              alt="Arthur na piscina com splash e braços levantados"
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {fotos.map((f) => (
+            <div
+              key={f.src}
+              className="col-span-3 lg:col-span-1 row-span-1 overflow-hidden rounded-2xl shadow-md bg-white"
+            >
+              <img
+                src={f.src}
+                alt={f.alt}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Scroll horizontal mobile */}
+        <div className="md:hidden mt-10 -mx-4 px-4 overflow-x-auto">
+          <div className="flex gap-4 snap-x snap-mandatory pb-4">
+            <div className="snap-start shrink-0 w-[80vw] aspect-[4/5] overflow-hidden rounded-2xl shadow-md bg-white">
+              <img
+                src={arthurPiscinaSplash}
+                alt="Arthur na piscina com splash e braços levantados"
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {fotos.map((f) => (
+              <div
+                key={f.src}
+                className="snap-start shrink-0 w-[65vw] aspect-[4/5] overflow-hidden rounded-2xl shadow-md bg-white"
+              >
+                <img
+                  src={f.src}
+                  alt={f.alt}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
