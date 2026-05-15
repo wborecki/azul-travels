@@ -97,13 +97,24 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
 export interface ReservaFormInput {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
-  perfil_sensorial_id: NonNullable<ReservaInsert["perfil_sensorial_id"]>;
+  /** Vínculo ao Perfil TEA permanente da família (preferencial). */
+  perfil_tea_id?: ReservaInsert["perfil_tea_id"];
+  /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
+  perfil_sensorial_id: ReservaInsert["perfil_sensorial_id"];
   data_checkin: string;
   data_checkout: string;
   num_adultos: NonNullable<Reserva["num_adultos"]>;
   num_autistas: NonNullable<Reserva["num_autistas"]>;
   mensagem: string;
   perfil_enviado_ao_estabelecimento: NonNullable<Reserva["perfil_enviado_ao_estabelecimento"]>;
+  // Campos opcionais específicos da reserva (smart pre-checkin)
+  num_acompanhantes?: number | null;
+  pessoa_referencia?: string | null;
+  objetivo_viagem?: string[];
+  notas_especificas?: string | null;
+  historico_negativo?: string | null;
+  recomendacoes_adicionais?: string | null;
+  conversa_previa_equipe?: boolean;
 }
 
 /** Trim de string; vazio vira `null`. Idêntico ao usado em mídia. */
@@ -120,7 +131,8 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
   return {
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
-    perfil_sensorial_id: input.perfil_sensorial_id,
+    perfil_tea_id: input.perfil_tea_id ?? null,
+    perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
     data_checkout: emptyToNull(input.data_checkout),
     num_adultos: input.num_adultos,
@@ -128,5 +140,20 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
     mensagem: emptyToNull(input.mensagem),
     status: "pendente",
     perfil_enviado_ao_estabelecimento: input.perfil_enviado_ao_estabelecimento,
+    num_acompanhantes: input.num_acompanhantes ?? null,
+    pessoa_referencia: input.pessoa_referencia
+      ? emptyToNull(input.pessoa_referencia)
+      : null,
+    objetivo_viagem: input.objetivo_viagem ?? [],
+    notas_especificas: input.notas_especificas
+      ? emptyToNull(input.notas_especificas)
+      : null,
+    historico_negativo: input.historico_negativo
+      ? emptyToNull(input.historico_negativo)
+      : null,
+    recomendacoes_adicionais: input.recomendacoes_adicionais
+      ? emptyToNull(input.recomendacoes_adicionais)
+      : null,
+    conversa_previa_equipe: input.conversa_previa_equipe ?? false,
   };
 }

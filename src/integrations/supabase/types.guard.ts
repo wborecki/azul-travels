@@ -418,8 +418,8 @@ type _CheckFormEstabId = AssertEqual<
 >;
 type _CheckFormPerfilId = AssertEqual<
   ReservaFormInput["perfil_sensorial_id"],
-  PerfilSensorialId,
-  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu de perfil_sensorial.id"
+  PerfilSensorialId | null,
+  "REGRESSION: ReservaFormInput.perfil_sensorial_id divergiu de perfil_sensorial.id | null"
 >;
 type _CheckFormAdultos = AssertEqual<
   ReservaFormInput["num_adultos"],
