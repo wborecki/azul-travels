@@ -32,6 +32,7 @@ const PREOCUPACOES = [
 const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Senha precisa ter no mínimo 6 caracteres").max(72),
   whatsapp: z.string().trim().max(20).optional().or(z.literal("")),
   cidade: z.string().trim().min(2, "Informe sua cidade").max(120),
   estado: z.string().length(2, "Selecione um estado"),
