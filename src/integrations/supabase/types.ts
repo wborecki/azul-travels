@@ -229,6 +229,36 @@ export type Database = {
         }
         Relationships: []
       }
+      estabelecimento_profiles: {
+        Row: {
+          cargo: string | null
+          criado_em: string
+          email: string | null
+          estabelecimento_id: string | null
+          id: string
+          nome_responsavel: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          criado_em?: string
+          email?: string | null
+          estabelecimento_id?: string | null
+          id: string
+          nome_responsavel?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          criado_em?: string
+          email?: string | null
+          estabelecimento_id?: string | null
+          id?: string
+          nome_responsavel?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       estabelecimentos: {
         Row: {
           atualizado_em: string
@@ -250,6 +280,7 @@ export type Database = {
           longitude: number | null
           mensalidade_ativa: boolean | null
           nome: string
+          owner_user_id: string | null
           selo_azul: boolean | null
           selo_azul_validade: string | null
           selo_governamental: boolean | null
@@ -289,6 +320,7 @@ export type Database = {
           longitude?: number | null
           mensalidade_ativa?: boolean | null
           nome: string
+          owner_user_id?: string | null
           selo_azul?: boolean | null
           selo_azul_validade?: string | null
           selo_governamental?: boolean | null
@@ -328,6 +360,7 @@ export type Database = {
           longitude?: number | null
           mensalidade_ativa?: boolean | null
           nome?: string
+          owner_user_id?: string | null
           selo_azul?: boolean | null
           selo_azul_validade?: string | null
           selo_governamental?: boolean | null
@@ -1245,7 +1278,7 @@ export type Database = {
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "estabelecimento"
       conteudo_categoria:
         | "legislacao"
         | "dicas_viagem"
@@ -1392,7 +1425,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "estabelecimento"],
       conteudo_categoria: [
         "legislacao",
         "dicas_viagem",
