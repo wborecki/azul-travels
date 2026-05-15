@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/select";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
-import { Building2, Check, Loader2 } from "lucide-react";
+import { Building2, Check, Heart, Loader2 } from "lucide-react";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
+import { Button as _Button2 } from "@/components/ui/button";
+import { CreateAccountModal } from "@/components/auth/CreateAccountModal";
 
 const NUM_COL = ["Até 10", "11 a 30", "31 a 60", "61 a 100", "Mais de 100"] as const;
 
