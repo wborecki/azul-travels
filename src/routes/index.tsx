@@ -611,8 +611,8 @@ function PorQueExistimos() {
           </span>
         </div>
 
-        {/* Bloco superior — texto corrido, largura total */}
-        <div className="max-w-4xl mx-auto">
+        {/* Bloco superior — texto corrido, centralizado */}
+        <div className="max-w-[720px] mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
             Não foi uma ideia de negócio. Foi uma necessidade real.
           </h2>
