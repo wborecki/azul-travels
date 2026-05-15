@@ -77,9 +77,9 @@ function EstabelecimentosPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[45%_55%]">
-        <aside className="bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col">
-          <div className="max-w-md mx-auto lg:mx-0 flex-1 w-full">
+      <div className="grid lg:grid-cols-2">
+        <aside className="bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+          <div className="max-w-lg mx-auto lg:ml-auto lg:mr-12 w-full">
             <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-semibold uppercase tracking-wide">
               Parceiros do lançamento
             </span>
