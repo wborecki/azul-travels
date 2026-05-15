@@ -152,9 +152,9 @@ function NossaHistoriaPage() {
 
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {[
-              { src: parqueAquatico, alt: "Pai e filho em brinquedo de parque aquático" },
-              { src: helicoptero, alt: "Filho usando abafador de ouvidos em voo de helicóptero" },
-              { src: piscina, alt: "Filho sorrindo na beira da piscina" },
+              { src: parqueAquatico, alt: "Gustavo e Arthur em brinquedo de parque aquático" },
+              { src: giselaArthur2, alt: "Gisela e Arthur em momento de carinho" },
+              { src: piscina, alt: "Gustavo e Arthur na piscina" },
             ].map((img) => (
               <div
                 key={img.src}
