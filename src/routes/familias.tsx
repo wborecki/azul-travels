@@ -151,8 +151,8 @@ function FamiliasPage() {
         </aside>
 
         {/* Coluna direita */}
-        <main className="bg-white p-6 md:p-12 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:overflow-y-auto flex items-start lg:items-center self-start">
-          <div className="w-full max-w-xl mx-auto">
+        <main className="bg-white p-6 md:p-12 lg:p-16 flex items-center justify-center">
+          <div className="w-full max-w-xl">
             <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
               Entre na lista de espera
             </h2>
