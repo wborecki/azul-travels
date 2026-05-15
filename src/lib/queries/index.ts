@@ -125,6 +125,7 @@ export {
   fetchEstabAuditoriaAdminPaginated,
   fetchPerfisSensoriaisDaFamilia,
   fetchAdminCounts,
+  fetchDashboardStats,
   ESTAB_ADMIN_VIEW_SELECT,
   type EstabAdminRow,
   type EstabelecimentoAdminView,
