@@ -1,6 +1,7 @@
-import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   Building2,
@@ -11,6 +12,7 @@ import {
   Users,
   Crown,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -18,9 +20,22 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
+const PAGE_TITLES: Record<string, string> = {
+  "/admin": "Dashboard",
+  "/admin/familias": "Famílias TEA",
+  "/admin/estabelecimentos": "Estabelecimentos",
+  "/admin/administradores": "Administradores",
+  "/admin/reservas": "Reservas",
+  "/admin/conteudo": "Conteúdo TEA",
+  "/admin/usuarios": "Configurações",
+  "/admin/auditoria": "Auditoria",
+};
+
 function AdminLayout() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [adminName, setAdminName] = useState<string>("");
 
   useEffect(() => {
     if (loading) return;
@@ -28,9 +43,23 @@ function AdminLayout() {
     else if (!isAdmin) navigate({ to: "/" });
   }, [user, loading, isAdmin, navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+    void supabase
+      .from("profiles")
+      .select("nome_completo")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setAdminName(data?.nome_completo ?? user.email ?? "");
+      });
+  }, [user]);
+
   if (loading) {
     return (
-      <div className="container mx-auto p-12 text-center text-muted-foreground">Carregando...</div>
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">
+        Carregando...
+      </div>
     );
   }
 
@@ -52,19 +81,41 @@ function AdminLayout() {
     );
   }
 
+  // Determine current page title
+  let pageTitle = "Admin";
+  const sortedPaths = Object.keys(PAGE_TITLES).sort((a, b) => b.length - a.length);
+  for (const p of sortedPaths) {
+    if (pathname === p || pathname.startsWith(p + "/")) {
+      pageTitle = PAGE_TITLES[p];
+      break;
+    }
+  }
+
+  const initial = (adminName || user.email || "?").trim().charAt(0).toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
+
   return (
-    <div className="min-h-screen flex bg-[#f8f9fa]">
-      <aside className="w-64 shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen">
-        <div className="px-5 py-5 border-b border-white/10">
+    <div className="min-h-screen flex bg-[#f8fafc]">
+      <aside
+        className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen"
+        style={{ width: 220 }}
+      >
+        <div className="px-6 py-6 flex justify-center">
           <Logo variant="dark" showTagline={false} />
         </div>
+        <div className="border-t border-white/10 mx-4" />
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <NavItem to="/admin" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" exact />
           <NavItem to="/admin/familias" icon={<Users className="h-4 w-4" />} label="Famílias TEA" />
           <NavItem to="/admin/estabelecimentos" icon={<Building2 className="h-4 w-4" />} label="Estabelecimentos" />
           <NavItem to="/admin/administradores" icon={<Crown className="h-4 w-4" />} label="Administradores" />
-          <div className="pt-4 mt-4 border-t border-white/10">
-            <div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wider text-white/50">
+
+          <div className="pt-5 mt-3">
+            <div className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Operação
             </div>
             <NavItem to="/admin/reservas" icon={<CalendarCheck className="h-4 w-4" />} label="Reservas" />
@@ -73,10 +124,34 @@ function AdminLayout() {
             <NavItem to="/admin/auditoria" icon={<History className="h-4 w-4" />} label="Auditoria" />
           </div>
         </nav>
+        <div className="px-4 py-3 text-[10px] text-white/30 border-t border-white/5">
+          v0.1 · Beta
+        </div>
       </aside>
-      <main className="flex-1 min-w-0 p-8">
-        <Outlet />
-      </main>
+
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header
+          className="bg-white border-b border-[#e5e7eb] flex items-center justify-between px-6 sticky top-0 z-10"
+          style={{ height: 48 }}
+        >
+          <h1 className="text-sm font-bold text-[#1a2f5e]">{pageTitle}</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-foreground/80 hidden sm:inline">{adminName}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a2f5e] text-white text-xs font-semibold">
+              {initial}
+            </span>
+            <button
+              onClick={handleSignOut}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground/70 hover:text-foreground border border-[#e5e7eb] rounded-md px-2.5 py-1.5 hover:bg-[#f8fafc] transition"
+            >
+              <LogOut className="h-3.5 w-3.5" /> Sair
+            </button>
+          </div>
+        </header>
+        <main className="flex-1 p-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
@@ -96,8 +171,8 @@ function NavItem({
     <Link
       to={to}
       activeOptions={{ exact }}
-      className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-white/75 hover:bg-white/10 hover:text-white transition"
-      activeProps={{ className: "bg-white/15 text-white font-semibold" }}
+      className="flex items-center gap-3 px-4 py-3 text-sm rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition"
+      activeProps={{ className: "!bg-[#2563eb] !text-white font-semibold" }}
     >
       {icon} {label}
     </Link>
