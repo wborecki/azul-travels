@@ -2,9 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchReservasDaFamilia, type ReservaComContexto } from "@/lib/queries/reservas";
 import { Button } from "@/components/ui/button";
-import { CalendarCheck, User, Compass, ArrowRight, Loader2 } from "lucide-react";
+import { HeartPulse, Plane, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/minha-conta/")({
   component: MinhaContaIndex,
@@ -12,30 +11,42 @@ export const Route = createFileRoute("/minha-conta/")({
 
 function MinhaContaIndex() {
   const { user } = useAuth();
-  const [perfilExiste, setPerfilExiste] = useState<boolean | null>(null);
   const [perfilNome, setPerfilNome] = useState<string | null>(null);
-  const [reservas, setReservas] = useState<ReservaComContexto[]>([]);
+  const [perfilExiste, setPerfilExiste] = useState(false);
+  const [posicao, setPosicao] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     let alive = true;
     setLoading(true);
+
     Promise.all([
       supabase
         .from("perfil_sensorial")
         .select("id, nome_autista")
         .eq("familia_id", user.id)
         .maybeSingle(),
-      fetchReservasDaFamilia(user.id),
-    ])
-      .then(([perfilRes, reservasRes]) => {
-        if (!alive) return;
-        setPerfilExiste(!!perfilRes.data);
-        setPerfilNome(perfilRes.data?.nome_autista ?? null);
-        setReservas(reservasRes);
-      })
-      .finally(() => alive && setLoading(false));
+      supabase
+        .from("familia_profiles")
+        .select("criado_em")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]).then(async ([perfilRes, meRes]) => {
+      if (!alive) return;
+      setPerfilExiste(!!perfilRes.data);
+      setPerfilNome(perfilRes.data?.nome_autista ?? null);
+
+      if (meRes.data?.criado_em) {
+        const { count } = await supabase
+          .from("familia_profiles")
+          .select("id", { count: "exact", head: true })
+          .lte("criado_em", meRes.data.criado_em);
+        if (alive) setPosicao(count ?? null);
+      }
+      if (alive) setLoading(false);
+    });
+
     return () => {
       alive = false;
     };
@@ -51,98 +62,73 @@ function MinhaContaIndex() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-display font-bold text-primary">Minha conta</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Mantenha o Perfil TEA da sua família atualizado e gerencie suas reservas.
+      {/* Banner de boas-vindas */}
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white p-6 sm:p-8 shadow-sm">
+        <h1 className="font-display font-bold text-2xl sm:text-3xl">
+          Bem-vinda à Turismo Azul 💙
+        </h1>
+        <p className="mt-2 text-white/90 max-w-2xl">
+          A plataforma está em construção. Você será avisada assim que lançarmos.
         </p>
-      </header>
+      </div>
 
+      {/* Dois cards de ação */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-white border rounded-2xl p-5">
-          <div className="flex items-center gap-2 text-primary">
-            <User className="h-5 w-5" />
-            <h2 className="font-display font-bold">Perfil TEA</h2>
+        {/* CARD 1 — Perfil TEA */}
+        <div className="bg-white border rounded-2xl p-6 flex flex-col">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
+              <HeartPulse className="h-6 w-6" />
+            </div>
+            <h2 className="font-display font-bold text-lg text-primary">
+              Perfil Sensorial do seu filho
+            </h2>
           </div>
+
           {perfilExiste ? (
             <>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Perfil de <strong className="text-foreground">{perfilNome}</strong> salvo.
-                Será enviado automaticamente em cada reserva.
+              <p className="mt-3 text-sm text-foreground/80 flex-1">
+                Perfil de <strong>{perfilNome ?? "seu filho"}</strong> completo ✓
               </p>
-              <Button asChild variant="outline" size="sm" className="mt-4">
-                <Link to="/minha-conta/perfil">Editar perfil →</Link>
+              <Button asChild variant="outline" className="mt-4 self-start border-primary text-primary hover:bg-azul-claro">
+                <Link to="/minha-conta/perfil">Ver ou atualizar →</Link>
               </Button>
             </>
           ) : (
             <>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Você ainda não cadastrou o Perfil TEA. Preencha uma vez — será reaproveitado
-                em todas as reservas.
+              <p className="mt-3 text-sm text-foreground/80 flex-1">
+                Preencha uma vez agora. Na hora da reserva, ele já vem pronto.
               </p>
               <Button
                 asChild
-                size="sm"
-                className="mt-4 bg-secondary hover:bg-secondary/90 text-white"
+                className="mt-4 self-start bg-secondary hover:bg-secondary/90 text-white"
               >
-                <Link to="/minha-conta/perfil">Cadastrar Perfil TEA →</Link>
+                <Link to="/minha-conta/perfil">Criar perfil agora →</Link>
               </Button>
             </>
           )}
         </div>
 
-        <div className="bg-white border rounded-2xl p-5">
-          <div className="flex items-center gap-2 text-primary">
-            <CalendarCheck className="h-5 w-5" />
-            <h2 className="font-display font-bold">Reservas</h2>
+        {/* CARD 2 — Lista de espera */}
+        <div className="bg-white border rounded-2xl p-6 flex flex-col">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
+              <Plane className="h-6 w-6" />
+            </div>
+            <h2 className="font-display font-bold text-lg text-primary">
+              Você está na lista
+            </h2>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {reservas.length === 0
-              ? "Nenhuma reserva ainda."
-              : `${reservas.length} reserva${reservas.length === 1 ? "" : "s"}.`}
+          <p className="mt-3 text-sm text-foreground/80 flex-1">
+            Avisaremos você assim que a plataforma abrir na sua região.
           </p>
-          <div className="mt-4 flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/minha-conta/reservas">Ver reservas</Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link to="/explorar">
-                <Compass className="h-4 w-4 mr-1" /> Explorar destinos
-              </Link>
-            </Button>
-          </div>
+          {posicao !== null && (
+            <span className="mt-4 self-start inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-azul-claro text-primary">
+              Posição #{posicao} na fila
+            </span>
+          )}
         </div>
       </div>
-
-      {reservas.length > 0 && (
-        <div className="bg-white border rounded-2xl p-5">
-          <h2 className="font-display font-bold text-primary mb-3">Últimas reservas</h2>
-          <ul className="divide-y">
-            {reservas.slice(0, 3).map((r) => (
-              <li key={r.id}>
-                <Link
-                  to="/minha-conta/reservas/$id"
-                  params={{ id: r.id }}
-                  className="flex items-center justify-between py-3 hover:bg-azul-claro/30 rounded-lg px-2 -mx-2"
-                >
-                  <div>
-                    <div className="font-semibold text-sm text-foreground">
-                      {r.estabelecimentos?.nome ?? "—"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {r.estabelecimentos?.cidade}
-                      {r.estabelecimentos?.estado && ` · ${r.estabelecimentos.estado}`}
-                      {" · "}
-                      <span className="capitalize">{r.status}</span>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }
