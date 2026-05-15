@@ -219,7 +219,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
   }
 
   return (
-    <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
+    <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-3">
       <Field label="Nome do responsável *" error={errors.nome}>
         <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" />
       </Field>
