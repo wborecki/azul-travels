@@ -729,6 +729,288 @@ export type Database = {
           },
         ]
       }
+      perfil_tea: {
+        Row: {
+          abafadores_descricao: string | null
+          alimentos_aceitos: string | null
+          alimentos_recusados: string | null
+          apoio_alimentacao: string | null
+          apoio_deslocamento: string | null
+          apoio_higiene: string | null
+          apoio_regras: string | null
+          apoio_vestir: string | null
+          atividades_preferidas: string | null
+          autonomia_espacos: string | null
+          checkin_ansiedade: boolean | null
+          checkin_equipe_saber: boolean | null
+          checkin_evitar_fila: boolean | null
+          compreende_instrucoes: string | null
+          comunicacao_misto_descricao: string | null
+          created_at: string
+          desencadeadores: string | null
+          dorme_melhor_com: string[]
+          espera_fila_restaurante: string | null
+          estimulos_acalmam: string | null
+          estrategias_ambientes_novos: string | null
+          estrategias_funcionam: string[]
+          forma_comunicacao: string[]
+          formas_abordagem: string | null
+          gatilho_sensorial: string | null
+          gosta_piscina: string | null
+          horario_acordar: string | null
+          horario_almoco: string | null
+          horario_cafe: string | null
+          horario_dormir: string | null
+          horario_jantar: string | null
+          horario_lanche: string | null
+          id: string
+          idade: number | null
+          marca_favorece_aceitacao: string | null
+          mudanca_rotina_sofrimento: boolean | null
+          nome_pessoa: string
+          o_que_gera_alegria: string | null
+          o_que_nao_fazer: string | null
+          objetos_adaptacao: string | null
+          objetos_personagens: string | null
+          observacoes_comunicacao: string | null
+          piscina_horario_tranquilo: boolean | null
+          piscina_muitas_pessoas: boolean | null
+          piscina_supervisao: boolean | null
+          piscina_temperatura: boolean | null
+          prefere_ambiente_reservado: boolean | null
+          preferencia_crise: string[]
+          preferencia_localizacao: string | null
+          preparacao_especial_quarto: string | null
+          recreacao_evitar: string | null
+          recreacao_gosta: boolean | null
+          recreacao_interesses: string | null
+          recreacao_preferencia: string | null
+          recreacao_tolera_som: boolean | null
+          recursos_comunicacao: string[]
+          responde_melhor_a: string | null
+          restaurante_apoio_visual: boolean | null
+          restaurante_fila: string | null
+          restaurante_horario_tranquilo: boolean | null
+          restaurante_reservado: boolean | null
+          risco_fuga: boolean | null
+          risco_recusa_alimentar: string | null
+          rotina_matinal_descricao: string | null
+          seletividade: string | null
+          sensibilidade_ar_condicionado: boolean | null
+          sensibilidade_iluminacao: boolean | null
+          sensibilidades_alimentares: string[]
+          sensorial_barulho_pessoas: string | null
+          sensorial_calor: string | null
+          sensorial_cheiros_fortes: string | null
+          sensorial_eco: string | null
+          sensorial_frio: string | null
+          sensorial_iluminacao_intensa: string | null
+          sensorial_locais_cheios: string | null
+          sensorial_luz_piscando: string | null
+          sensorial_movimento_visual: string | null
+          sensorial_musica_ambiente: string | null
+          sensorial_perfumes: string | null
+          sensorial_sons_subitos: string | null
+          sensorial_superficies_molhadas: string | null
+          sensorial_toque_inesperado: string | null
+          sinais_desconforto: string[]
+          supervisao_constante: boolean | null
+          tem_rotina_matinal: boolean | null
+          temas_interesses: string | null
+          tempo_acalmar: string | null
+          updated_at: string
+          usa_abafadores: string | null
+          user_id: string
+          utensilios_especificos: boolean | null
+        }
+        Insert: {
+          abafadores_descricao?: string | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
+          apoio_alimentacao?: string | null
+          apoio_deslocamento?: string | null
+          apoio_higiene?: string | null
+          apoio_regras?: string | null
+          apoio_vestir?: string | null
+          atividades_preferidas?: string | null
+          autonomia_espacos?: string | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: string | null
+          comunicacao_misto_descricao?: string | null
+          created_at?: string
+          desencadeadores?: string | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: string | null
+          estimulos_acalmam?: string | null
+          estrategias_ambientes_novos?: string | null
+          estrategias_funcionam?: string[]
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
+          gatilho_sensorial?: string | null
+          gosta_piscina?: string | null
+          horario_acordar?: string | null
+          horario_almoco?: string | null
+          horario_cafe?: string | null
+          horario_dormir?: string | null
+          horario_jantar?: string | null
+          horario_lanche?: string | null
+          id?: string
+          idade?: number | null
+          marca_favorece_aceitacao?: string | null
+          mudanca_rotina_sofrimento?: boolean | null
+          nome_pessoa: string
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preferencia_localizacao?: string | null
+          preparacao_especial_quarto?: string | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string | null
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: string | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: string | null
+          rotina_matinal_descricao?: string | null
+          seletividade?: string | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
+          sensorial_barulho_pessoas?: string | null
+          sensorial_calor?: string | null
+          sensorial_cheiros_fortes?: string | null
+          sensorial_eco?: string | null
+          sensorial_frio?: string | null
+          sensorial_iluminacao_intensa?: string | null
+          sensorial_locais_cheios?: string | null
+          sensorial_luz_piscando?: string | null
+          sensorial_movimento_visual?: string | null
+          sensorial_musica_ambiente?: string | null
+          sensorial_perfumes?: string | null
+          sensorial_sons_subitos?: string | null
+          sensorial_superficies_molhadas?: string | null
+          sensorial_toque_inesperado?: string | null
+          sinais_desconforto?: string[]
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          temas_interesses?: string | null
+          tempo_acalmar?: string | null
+          updated_at?: string
+          usa_abafadores?: string | null
+          user_id: string
+          utensilios_especificos?: boolean | null
+        }
+        Update: {
+          abafadores_descricao?: string | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
+          apoio_alimentacao?: string | null
+          apoio_deslocamento?: string | null
+          apoio_higiene?: string | null
+          apoio_regras?: string | null
+          apoio_vestir?: string | null
+          atividades_preferidas?: string | null
+          autonomia_espacos?: string | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: string | null
+          comunicacao_misto_descricao?: string | null
+          created_at?: string
+          desencadeadores?: string | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: string | null
+          estimulos_acalmam?: string | null
+          estrategias_ambientes_novos?: string | null
+          estrategias_funcionam?: string[]
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
+          gatilho_sensorial?: string | null
+          gosta_piscina?: string | null
+          horario_acordar?: string | null
+          horario_almoco?: string | null
+          horario_cafe?: string | null
+          horario_dormir?: string | null
+          horario_jantar?: string | null
+          horario_lanche?: string | null
+          id?: string
+          idade?: number | null
+          marca_favorece_aceitacao?: string | null
+          mudanca_rotina_sofrimento?: boolean | null
+          nome_pessoa?: string
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preferencia_localizacao?: string | null
+          preparacao_especial_quarto?: string | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string | null
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: string | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: string | null
+          rotina_matinal_descricao?: string | null
+          seletividade?: string | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
+          sensorial_barulho_pessoas?: string | null
+          sensorial_calor?: string | null
+          sensorial_cheiros_fortes?: string | null
+          sensorial_eco?: string | null
+          sensorial_frio?: string | null
+          sensorial_iluminacao_intensa?: string | null
+          sensorial_locais_cheios?: string | null
+          sensorial_luz_piscando?: string | null
+          sensorial_movimento_visual?: string | null
+          sensorial_musica_ambiente?: string | null
+          sensorial_perfumes?: string | null
+          sensorial_sons_subitos?: string | null
+          sensorial_superficies_molhadas?: string | null
+          sensorial_toque_inesperado?: string | null
+          sinais_desconforto?: string[]
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          temas_interesses?: string | null
+          tempo_acalmar?: string | null
+          updated_at?: string
+          usa_abafadores?: string | null
+          user_id?: string
+          utensilios_especificos?: boolean | null
+        }
+        Relationships: []
+      }
       pre_checkins: {
         Row: {
           criado_em: string
@@ -780,50 +1062,74 @@ export type Database = {
       reservas: {
         Row: {
           acompanhantes: Json | null
+          conversa_previa_equipe: boolean | null
           criado_em: string
           data_checkin: string | null
           data_checkout: string | null
           estabelecimento_id: string
           familia_id: string
+          historico_negativo: string | null
           id: string
           mensagem: string | null
+          notas_especificas: string | null
+          num_acompanhantes: number | null
           num_adultos: number | null
           num_autistas: number | null
           objetivo: string | null
+          objetivo_viagem: string[]
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
+          perfil_tea_id: string | null
+          pessoa_referencia: string | null
+          recomendacoes_adicionais: string | null
           status: Database["public"]["Enums"]["reserva_status"] | null
         }
         Insert: {
           acompanhantes?: Json | null
+          conversa_previa_equipe?: boolean | null
           criado_em?: string
           data_checkin?: string | null
           data_checkout?: string | null
           estabelecimento_id: string
           familia_id: string
+          historico_negativo?: string | null
           id?: string
           mensagem?: string | null
+          notas_especificas?: string | null
+          num_acompanhantes?: number | null
           num_adultos?: number | null
           num_autistas?: number | null
           objetivo?: string | null
+          objetivo_viagem?: string[]
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
+          perfil_tea_id?: string | null
+          pessoa_referencia?: string | null
+          recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
         }
         Update: {
           acompanhantes?: Json | null
+          conversa_previa_equipe?: boolean | null
           criado_em?: string
           data_checkin?: string | null
           data_checkout?: string | null
           estabelecimento_id?: string
           familia_id?: string
+          historico_negativo?: string | null
           id?: string
           mensagem?: string | null
+          notas_especificas?: string | null
+          num_acompanhantes?: number | null
           num_adultos?: number | null
           num_autistas?: number | null
           objetivo?: string | null
+          objetivo_viagem?: string[]
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
+          perfil_tea_id?: string | null
+          pessoa_referencia?: string | null
+          recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
         }
         Relationships: [
@@ -846,6 +1152,13 @@ export type Database = {
             columns: ["perfil_sensorial_id"]
             isOneToOne: false
             referencedRelation: "perfil_sensorial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_perfil_tea_id_fkey"
+            columns: ["perfil_tea_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_tea"
             referencedColumns: ["id"]
           },
         ]
