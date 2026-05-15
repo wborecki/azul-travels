@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
+import seloTurismoAzul from "@/assets/selo-turismo-azul.svg";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
@@ -1183,188 +1184,14 @@ function CtaFinal() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SeloBadge({ size = 320 }: { size?: number }) {
-  // ViewBox com padding extra para garantir que os anéis externos não cortem
-  const VB_W = 350;
-  const VB_H = 410;
-  const ratio = VB_H / VB_W;
-
-  // Diamantes ao redor do anel externo (selo de autenticidade)
-  const diamondCount = 32;
-  const diamondRadius = 152;
-  const diamonds = Array.from({ length: diamondCount }, (_, i) => {
-    const angle = (i * 360) / diamondCount;
-    const rad = (angle * Math.PI) / 180;
-    const cx = 160 + diamondRadius * Math.cos(rad);
-    const cy = 160 + diamondRadius * Math.sin(rad);
-    return { cx, cy, angle };
-  });
-
   return (
-    <div style={{ width: size, height: size * ratio }} className="relative">
-      <svg
-        viewBox={`-15 -15 ${VB_W} ${VB_H}`}
-        width={size}
-        height={size * ratio}
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label="Selo Turismo Azul Inclusivo · Certificação Oficial"
-      >
-        <defs>
-          {/* Coração centrado em (160, 130), bbox aprox y:78–182 */}
-          <clipPath id="selo-heart-clip">
-            <path d="M160 182 C 96 152, 84 108, 108 92 C 130 78, 152 92, 160 110 C 168 92, 190 78, 212 92 C 236 108, 224 152, 160 182 Z" />
-          </clipPath>
-          {/* Arco superior para o texto curvado AGÊNCIA TEA */}
-          <path
-            id="selo-arc-top"
-            d="M 55,160 A 105,105 0 0 1 265,160"
-            fill="none"
-          />
-        </defs>
-
-        {/* — ANÉIS EXTERNOS — */}
-        {/* Diamantes ao redor (selo de autenticidade) */}
-        <g fill="#f5a623">
-          {diamonds.map((d, i) => (
-            <rect
-              key={i}
-              x={d.cx - 3}
-              y={d.cy - 3}
-              width="6"
-              height="6"
-              transform={`rotate(${d.angle + 45} ${d.cx} ${d.cy})`}
-            />
-          ))}
-        </g>
-        {/* Anel sólido fino */}
-        <circle cx="160" cy="160" r="144" fill="none" stroke="#f5a623" strokeWidth="1.5" />
-        {/* Anel tracejado sutil */}
-        <circle
-          cx="160"
-          cy="160"
-          r="138"
-          fill="none"
-          stroke="#f5a623"
-          strokeWidth="1"
-          strokeDasharray="3 4"
-          opacity="0.7"
-        />
-
-        {/* — CÍRCULO PRINCIPAL NAVY — */}
-        <circle cx="160" cy="160" r="130" fill="#1a3666" />
-
-        {/* — AGÊNCIA TEA (curvado no arco superior) — */}
-        <text
-          fill="#ffffff"
-          fillOpacity="0.55"
-          fontFamily="Montserrat, sans-serif"
-          fontSize="11"
-          fontWeight="700"
-          letterSpacing="3.5"
-        >
-          <textPath href="#selo-arc-top" startOffset="50%" textAnchor="middle">
-            AGÊNCIA TEA
-          </textPath>
-        </text>
-
-        {/* — CORAÇÃO PUZZLE (4 quadrantes) — */}
-        <g clipPath="url(#selo-heart-clip)">
-          {/* Quadrantes ao redor de (160, 130) */}
-          <rect x="80"  y="70"  width="80" height="60" fill="#2176c8" />
-          <rect x="160" y="70"  width="80" height="60" fill="#f5a623" />
-          <rect x="80"  y="130" width="80" height="60" fill="#3ec46d" />
-          <rect x="160" y="130" width="80" height="60" fill="#f26f9e" />
-          {/* Divisórias brancas */}
-          <line x1="160" y1="70"  x2="160" y2="190" stroke="#ffffff" strokeWidth="2.5" />
-          <line x1="80"  y1="130" x2="240" y2="130" stroke="#ffffff" strokeWidth="2.5" />
-          {/* Encaixes do puzzle */}
-          <circle cx="160" cy="105" r="6" fill="#ffffff" />
-          <circle cx="190" cy="130" r="6" fill="#ffffff" />
-          <circle cx="160" cy="155" r="6" fill="#ffffff" />
-          <circle cx="130" cy="130" r="6" fill="#ffffff" />
-        </g>
-        {/* Contorno suave do coração */}
-        <path
-          d="M160 182 C 96 152, 84 108, 108 92 C 130 78, 152 92, 160 110 C 168 92, 190 78, 212 92 C 236 108, 224 152, 160 182 Z"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="1.5"
-          opacity="0.4"
-        />
-
-        {/* — SELO — */}
-        <text
-          x="160"
-          y="218"
-          textAnchor="middle"
-          fill="#ffffff"
-          fillOpacity="0.65"
-          fontFamily="Montserrat, sans-serif"
-          fontSize="12"
-          fontWeight="700"
-          letterSpacing="5"
-        >
-          SELO
-        </text>
-
-        {/* — ★ TURISMO AZUL ★ — */}
-        <text
-          x="160"
-          y="246"
-          textAnchor="middle"
-          fontFamily="Montserrat, sans-serif"
-          fontSize="26"
-          fontWeight="900"
-          letterSpacing="0.5"
-        >
-          <tspan fill="#f5a623" fontSize="14" dy="-2">★</tspan>
-          <tspan fill="#00b4d8" fontSize="26" dx="3" dy="2">TURISMO AZUL</tspan>
-          <tspan fill="#f5a623" fontSize="14" dx="3" dy="-2">★</tspan>
-        </text>
-
-        {/* — INCLUSIVO — */}
-        <text
-          x="160"
-          y="272"
-          textAnchor="middle"
-          fill="#ffffff"
-          fontFamily="Montserrat, sans-serif"
-          fontSize="15"
-          fontWeight="700"
-          letterSpacing="4"
-        >
-          INCLUSIVO
-        </text>
-
-        {/* — FITA / RIBBON com cortes em V suaves — */}
-        <g>
-          {/* sombra suave */}
-          <polygon
-            points="22,308 298,308 290,328 298,348 22,348 30,328"
-            fill="#000000"
-            opacity="0.18"
-            transform="translate(0,4)"
-          />
-          {/* fita laranja (altura ~40) */}
-          <polygon
-            points="22,308 298,308 290,328 298,348 22,348 30,328"
-            fill="#f5a623"
-          />
-          {/* texto navy centralizado verticalmente */}
-          <text
-            x="160"
-            y="328"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#1a3666"
-            fontFamily="Montserrat, sans-serif"
-            fontSize="11"
-            fontWeight="800"
-            letterSpacing="2"
-          >
-            CERTIFICAÇÃO OFICIAL
-          </text>
-        </g>
-      </svg>
-    </div>
+    <img
+      src={seloTurismoAzul}
+      alt="Selo Turismo Azul Inclusivo · Certificação Oficial"
+      width={size}
+      height={size}
+      style={{ width: size, height: size }}
+      className="block"
+    />
   );
 }
