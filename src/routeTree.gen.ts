@@ -38,7 +38,9 @@ import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
+import { Route as AdminFamiliasRouteImport } from './routes/admin.familias'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
+import { Route as AdminAdministradoresRouteImport } from './routes/admin.administradores'
 import { Route as MinhaContaReservasIndexRouteImport } from './routes/minha-conta.reservas.index'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 import { Route as AdminConteudoIndexRouteImport } from './routes/admin.conteudo.index'
@@ -195,9 +197,19 @@ const AdminReservasRoute = AdminReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFamiliasRoute = AdminFamiliasRouteImport.update({
+  id: '/familias',
+  path: '/familias',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdministradoresRoute = AdminAdministradoresRouteImport.update({
+  id: '/administradores',
+  path: '/administradores',
   getParentRoute: () => AdminRoute,
 } as any)
 const MinhaContaReservasIndexRoute = MinhaContaReservasIndexRouteImport.update({
@@ -272,7 +284,9 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/familias': typeof AdminFamiliasRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -312,7 +326,9 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/familias': typeof AdminFamiliasRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -355,7 +371,9 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/familias': typeof AdminFamiliasRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -399,7 +417,9 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
+    | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/familias'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -439,7 +459,9 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
+    | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/familias'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -481,7 +503,9 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
+    | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/familias'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -736,11 +760,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReservasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/familias': {
+      id: '/admin/familias'
+      path: '/familias'
+      fullPath: '/admin/familias'
+      preLoaderRoute: typeof AdminFamiliasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auditoria': {
       id: '/admin/auditoria'
       path: '/auditoria'
       fullPath: '/admin/auditoria'
       preLoaderRoute: typeof AdminAuditoriaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/administradores': {
+      id: '/admin/administradores'
+      path: '/administradores'
+      fullPath: '/admin/administradores'
+      preLoaderRoute: typeof AdminAdministradoresRouteImport
       parentRoute: typeof AdminRoute
     }
     '/minha-conta/reservas/': {
@@ -831,7 +869,9 @@ const AdminEstabelecimentosIdRouteWithChildren =
   )
 
 interface AdminRouteChildren {
+  AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
+  AdminFamiliasRoute: typeof AdminFamiliasRoute
   AdminReservasRoute: typeof AdminReservasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -843,7 +883,9 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminAuditoriaRoute: AdminAuditoriaRoute,
+  AdminFamiliasRoute: AdminFamiliasRoute,
   AdminReservasRoute: AdminReservasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
