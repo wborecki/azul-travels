@@ -278,19 +278,21 @@ function PreCheckinPage() {
     // Submit
     if (!estab) return;
     setEnviando(true);
-    const { error } = await supabase.from("pre_checkins").insert({
-      estabelecimento_id: estab.id,
-      estabelecimento_slug: estab.slug,
-      nome_autista: form.nome_autista,
-      idade: form.idade ? Number(form.idade) : null,
-      nome_responsavel: form.nome_responsavel,
-      email: form.email.toLowerCase(),
-      telefone: form.telefone,
-      data_checkin: form.data_checkin || null,
-      data_checkout: form.data_checkout || null,
-      dados: form as unknown as Record<string, unknown>,
-      origem: "marketplace",
-    });
+    const { error } = await supabase.from("pre_checkins").insert([
+      {
+        estabelecimento_id: estab.id,
+        estabelecimento_slug: estab.slug,
+        nome_autista: form.nome_autista,
+        idade: form.idade ? Number(form.idade) : null,
+        nome_responsavel: form.nome_responsavel,
+        email: form.email.toLowerCase(),
+        telefone: form.telefone,
+        data_checkin: form.data_checkin || null,
+        data_checkout: form.data_checkout || null,
+        dados: form as unknown as Record<string, unknown>,
+        origem: "marketplace",
+      },
+    ]);
     setEnviando(false);
     if (error) {
       toast.error("Erro ao enviar pré-check-in. Tente novamente.");
