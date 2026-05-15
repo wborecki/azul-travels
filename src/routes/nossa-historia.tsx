@@ -8,6 +8,10 @@ import roar from "@/assets/historia-roar.jpeg";
 import miranteCidade from "@/assets/historia-mirante-cidade.jpeg";
 import miranteMar from "@/assets/historia-mirante-mar.jpeg";
 import paiFilhoRua from "@/assets/historia-pai-filho-rua.jpeg";
+import giselaArthur1 from "@/assets/gisela-arthur-1.jpeg";
+import giselaArthur2 from "@/assets/gisela-arthur-2.jpeg";
+import giselaArthur3 from "@/assets/gisela-arthur-3.jpeg";
+import giselaArthur4 from "@/assets/gisela-arthur-4.jpeg";
 
 export const Route = createFileRoute("/nossa-historia")({
   head: () => ({
