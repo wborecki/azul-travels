@@ -289,7 +289,7 @@ function PreCheckinPage() {
         telefone: form.telefone,
         data_checkin: form.data_checkin || null,
         data_checkout: form.data_checkout || null,
-        dados: form as unknown as Record<string, unknown>,
+        dados: JSON.parse(JSON.stringify(form)),
         origem: "marketplace",
       },
     ]);
