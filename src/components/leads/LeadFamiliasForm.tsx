@@ -16,17 +16,17 @@ import {
 } from "@/components/ui/select";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
-import { Copy, Heart, Loader2, MessageCircle, Users } from "lucide-react";
+import { Copy, Heart, Loader2, MessageCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const PREOCUPACOES = [
-  "Não saber se o local está preparado",
-  "Medo de crises em público",
-  "Dificuldade com filas e esperas",
-  "Falta de cardápio ou comida adequada",
-  "Não ter um espaço calmo se precisar",
-  "Comunicação com a equipe do local",
-  "Outro",
+  "Sensibilidades sensoriais (sons, luz, texturas)",
+  "Quebra de rotina e imprevistos",
+  "Equipe do hotel despreparada",
+  "Não saber se o local está preparado antes",
+  "Julgamentos de outras pessoas",
+  "Alimentação seletiva fora de casa",
+  "Segurança — meu filho pode se perder",
 ] as const;
 
 const schema = z.object({
@@ -48,7 +48,7 @@ const SHARE_TEXT =
   "Conheci o Turismo Azul, a primeira plataforma de turismo para famílias com autismo no Brasil. Estou na lista de espera pra quando lançar: " +
   SHARE_URL;
 
-export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) {
+export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: string; onSuccess?: () => void } = {}) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
@@ -63,44 +63,6 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
   const [errors, setErrors] = useState<FormErrors>({});
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
-  const [count, setCount] = useState<number | null>(null);
-  const [loadingCount, setLoadingCount] = useState(true);
-
-  useEffect(() => {
-    let cancelado = false;
-    const timeout = setTimeout(() => {
-      if (!cancelado) setLoadingCount(false);
-    }, 3000);
-    void (async () => {
-      try {
-        const { count: c, error } = await supabase
-          .from("leads_familias")
-          .select("*", { count: "exact", head: true });
-        if (cancelado) return;
-        setCount(error ? null : (c ?? 0));
-      } catch {
-        if (!cancelado) setCount(null);
-      } finally {
-        if (!cancelado) setLoadingCount(false);
-        clearTimeout(timeout);
-      }
-    })();
-    return () => {
-      cancelado = true;
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  async function loadCount() {
-    try {
-      const { count: c, error } = await supabase
-        .from("leads_familias")
-        .select("*", { count: "exact", head: true });
-      if (!error) setCount(c ?? 0);
-    } catch {
-      /* ignore */
-    }
-  }
 
   const togglePreocupacao = (p: string) => {
     setPreocupacoes((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
@@ -170,7 +132,7 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
       return;
     }
     setEnviado(true);
-    void loadCount();
+    onSuccess?.();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
       (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "lead_familia", {
         event_category: "formulario",
@@ -258,28 +220,6 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
 
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-5">
-      {/* Banner de boas-vindas */}
-      <div
-        className="rounded-xl p-4 text-sm leading-relaxed text-primary"
-        style={{ backgroundColor: "#E8F4FD" }}
-      >
-        Essas perguntas levam cerca de 3 minutos e fazem toda a diferença. Cada resposta que
-        você dá aqui é repassada diretamente para a equipe do seu destino antes da sua chegada.
-      </div>
-
-      {!loadingCount && count !== null && (
-        <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
-          <Users className="h-4 w-4" />
-          {count === 0 ? (
-            <span>Seja um dos primeiros</span>
-          ) : (
-            <span>
-              🧑‍🤝‍🧑 {count.toLocaleString("pt-BR")} famílias já na lista de espera
-            </span>
-          )}
-        </div>
-      )}
-
       <Field label="Nome do responsável *" error={errors.nome}>
         <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" />
       </Field>
@@ -359,22 +299,6 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
       </Field>
 
       <Field label="O que mais te preocupa numa viagem com seu filho?">
-        <div className="space-y-1.5 mb-3" style={{ fontSize: "13px" }}>
-          <p className="text-muted-foreground leading-relaxed">
-            ℹ️ Sobre sensibilidades sensoriais (sons, luz, texturas): perguntamos isso para
-            filtrar estabelecimentos que não tenham ambientes que possam gerar crise. Seu filho
-            nunca vai chegar em um lugar despreparado.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            ℹ️ Sobre rotina e previsibilidade: sabemos que imprevistos são difíceis. Com essa
-            informação, avisamos a equipe do destino para manter uma rotina estruturada durante a
-            estadia.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            ℹ️ Sobre comportamentos e comunicação: cada criança é única. Quanto mais você nos
-            conta, mais personalizada e tranquila será a viagem de vocês.
-          </p>
-        </div>
         <div className="space-y-2">
           {PREOCUPACOES.map((p) => (
             <label key={p} className="flex items-start gap-2 text-sm cursor-pointer">
@@ -426,9 +350,13 @@ export function LeadFamiliasForm({ origem = "home" }: { origem?: string } = {}) 
             Enviando…
           </>
         ) : (
-          "Entrar na lista de espera"
+          "Quero ser avisada no lançamento →"
         )}
       </Button>
+
+      <p className="text-xs text-muted-foreground text-center">
+        Seus dados são confidenciais e usados apenas para avisar você no lançamento.
+      </p>
     </form>
   );
 }
