@@ -1185,7 +1185,7 @@ function CtaFinal() {
 function SeloBadge({ size = 320 }: { size?: number }) {
   return (
     <img
-      src={seloTurismoAzul}
+      src="/selo-turismo-azul.svg"
       alt="Selo Turismo Azul Inclusivo · Certificação Oficial"
       width={size}
       height={size}
