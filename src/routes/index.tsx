@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
+import giselaFoto from "@/assets/gisela-antoniucci.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
 import arthurPiscinaSplash from "@/assets/arthur-piscina-splash.jpeg";
 import arthurConfiante from "@/assets/arthur-confiante.jpeg";
@@ -618,9 +619,14 @@ function PorQueExistimos() {
             </h2>
 
             <p className="mt-5 text-lg text-foreground/80">
-              O Turismo Azul nasceu da experiência de Gustavo Passinato, pai atípico que tentou
-              viajar com o filho e percebeu que o mundo do turismo simplesmente não estava
-              preparado para recebê-los.
+              O Turismo Azul nasceu de dois olhares que se completam.
+            </p>
+            <p className="mt-4 text-lg text-foreground/80">
+              Gustavo Passinato, pai atípico, tentou viajar com o filho e percebeu que o
+              mundo do turismo simplesmente não estava preparado para recebê-los. Gisela
+              Antoniucci, psicopedagoga especialista em autismo e mãe atípica, via as mesmas
+              barreiras todos os dias — de dentro de casa e de dentro das salas de formação
+              onde preparava equipes para a inclusão.
             </p>
 
             <p className="mt-4 text-lg text-foreground/80">
@@ -648,7 +654,7 @@ function PorQueExistimos() {
           </div>
 
           {/* Coluna direita · 40% */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
               <div
                 className="mx-auto h-32 w-32 rounded-full p-[4px]"
@@ -683,6 +689,47 @@ function PorQueExistimos() {
               >
                 <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
                   🧩 Vive e respira o TEA todos os dias
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
+              <div
+                className="mx-auto h-32 w-32 rounded-full p-[4px]"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+                }}
+              >
+                <img
+                  src={giselaFoto}
+                  alt="Gisela Antoniucci, co-fundadora do Turismo Azul"
+                  className="h-full w-full rounded-full object-cover"
+                  style={{ objectFit: "cover", objectPosition: "center top" }}
+                />
+              </div>
+
+              <h3 className="mt-5 text-xl font-display font-bold text-primary">
+                Gisela Antoniucci
+              </h3>
+              <p className="text-sm text-secondary font-semibold mt-1">
+                Co-fundadora · Mãe Atípica
+              </p>
+              <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
+                Psicopedagoga especialista em autismo e palestrante. Vive a maternidade
+                atípica todos os dias e transformou esse olhar em conhecimento e acolhimento
+                real.
+              </p>
+
+              <div
+                className="mt-6 inline-block rounded-full p-[2px]"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+                }}
+              >
+                <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
+                  ✦ Especialista em autismo há mais de 10 anos
                 </span>
               </div>
             </div>
