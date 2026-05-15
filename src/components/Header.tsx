@@ -112,14 +112,25 @@ export function Header() {
                 </a>
               ),
             )}
-            <Link
-              to="/familias"
-              onClick={() => setOpen(false)}
-              className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623]"
-              style={{ borderRadius: 50 }}
-            >
-              Quero Conhecer <ArrowRight className="h-4 w-4" />
-            </Link>
+            {user && role ? (
+              <Link
+                to={accountLink.to}
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
+                style={{ borderRadius: 50 }}
+              >
+                <UserCircle2 className="h-4 w-4" /> {accountLink.label}
+              </Link>
+            ) : (
+              <Link
+                to="/familias"
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623]"
+                style={{ borderRadius: 50 }}
+              >
+                Quero Conhecer <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         </div>
       )}
