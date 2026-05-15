@@ -33,7 +33,6 @@ const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(120),
   cargo: z.string().trim().min(2, "Informe seu cargo").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
-  password: z.string().min(6, "Senha precisa ter no mínimo 6 caracteres").max(72),
   whatsapp: z.string().trim().min(14, "WhatsApp obrigatório"),
   nome_estabelecimento: z.string().trim().min(2, "Informe o nome").max(200),
   tipo: z.string().min(1, "Selecione o tipo"),
