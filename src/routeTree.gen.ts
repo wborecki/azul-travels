@@ -36,6 +36,7 @@ import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as MinhaContaReservasIndexRouteImport } from './routes/minha-conta.reservas.index'
@@ -184,6 +185,11 @@ const ConteudoSlugRoute = ConteudoSlugRouteImport.update({
   path: '/conteudo/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReservasRoute = AdminReservasRouteImport.update({
   id: '/reservas',
   path: '/reservas',
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/reservas': typeof AdminReservasRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
+    | '/admin/usuarios'
     | '/conteudo/$slug'
     | '/demo/explorar'
     | '/estabelecimento/$slug'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
+    | '/admin/usuarios'
     | '/conteudo/$slug'
     | '/demo/explorar'
     | '/estabelecimento/$slug'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/auditoria'
     | '/admin/reservas'
+    | '/admin/usuarios'
     | '/conteudo/$slug'
     | '/demo/explorar'
     | '/estabelecimento/$slug'
@@ -710,6 +722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConteudoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reservas': {
       id: '/admin/reservas'
       path: '/reservas'
@@ -814,6 +833,7 @@ const AdminEstabelecimentosIdRouteWithChildren =
 interface AdminRouteChildren {
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminReservasRoute: typeof AdminReservasRoute
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminConteudoIdRoute: typeof AdminConteudoIdRoute
   AdminConteudoAnalyticsRoute: typeof AdminConteudoAnalyticsRoute
@@ -825,6 +845,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminReservasRoute: AdminReservasRoute,
+  AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminConteudoIdRoute: AdminConteudoIdRoute,
   AdminConteudoAnalyticsRoute: AdminConteudoAnalyticsRoute,
@@ -895,12 +916,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
