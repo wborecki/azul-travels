@@ -147,10 +147,76 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     void navigator.clipboard.writeText(SHARE_URL).then(() => toast.success("Link copiado!"));
   }
 
-  if (enviado) {
+  if (enviado && !acceptOnly) {
+    return (
+      <>
+        <div className="bg-white rounded-3xl border p-8 md:p-10 max-w-2xl mx-auto shadow-elegant text-center">
+          <div className="flex justify-center">
+            <div className="h-20 w-20 rounded-full bg-azul-claro flex items-center justify-center">
+              <Heart className="h-10 w-10 text-primary fill-primary" aria-hidden="true" />
+            </div>
+          </div>
+          <h2 className="mt-6 text-2xl md:text-3xl font-display font-bold text-primary">
+            Você está na lista 💙
+          </h2>
+          <p className="mt-3 text-foreground/80">
+            Recebemos seu cadastro. Agora você pode dar um passo a mais:
+          </p>
+
+          {/* Card destaque — Criar conta */}
+          <div className="mt-6 rounded-2xl border-2 border-secondary/40 bg-gradient-to-br from-azul-claro/40 to-white p-6 text-left shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Heart className="h-6 w-6 text-primary fill-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-bold text-lg text-primary">
+                  Criar minha conta agora
+                </h3>
+                <p className="mt-1 text-sm text-foreground/80">
+                  Com uma conta você já pode preencher o perfil sensorial do seu filho. Na hora
+                  da reserva, ele já vem pronto.
+                </p>
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="mt-4 bg-secondary hover:bg-secondary/90 text-white font-semibold"
+                >
+                  Criar conta →
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Link discreto */}
+          <button
+            type="button"
+            onClick={() => setAcceptOnly(true)}
+            className="mt-5 text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
+          >
+            Só quero a lista de espera por enquanto
+          </button>
+        </div>
+
+        <CreateAccountModal
+          open={showAuthModal}
+          onOpenChange={setShowAuthModal}
+          accountType="familia"
+          email={email.trim().toLowerCase()}
+          signupMetadata={{
+            nome_responsavel: nome,
+            telefone: whatsapp || null,
+            cidade,
+            estado,
+            origem: "formulario_familia",
+          }}
+        />
+      </>
+    );
+  }
+
+  if (enviado && acceptOnly) {
     return (
       <div className="bg-white rounded-3xl border p-8 md:p-10 max-w-2xl mx-auto shadow-elegant">
-        {/* Coração com gradiente das 4 cores do autismo */}
         <div className="flex justify-center">
           <div
             className="h-24 w-24 rounded-full p-[5px]"
@@ -170,30 +236,12 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
         </h1>
 
         <p className="mt-5 text-base md:text-lg text-foreground/80 text-center">
-          Recebemos o cadastro da sua família. E agora sabemos um pouco mais sobre o que o seu
-          filho precisa para viajar com mais tranquilidade.
-        </p>
-
-        <div
-          className="mt-6 rounded-2xl p-5 md:p-6 border-l-4"
-          style={{ backgroundColor: "#F0F7FF", borderLeftColor: "#1D6FA4" }}
-        >
-          <p className="text-base md:text-lg text-primary leading-relaxed">
-            Muitas famílias atípicas passam exatamente pelo que você passa. O medo, a incerteza, o
-            cansaço de tentar e não encontrar lugar preparado. O Turismo Azul foi criado por um
-            pai que viveu tudo isso, e decidiu que nenhuma outra família precisaria passar pela
-            mesma coisa sozinha.
-          </p>
-        </div>
-
-        <p className="mt-6 text-base text-foreground/80 text-center">
-          Em breve você receberá um e-mail com mais detalhes sobre como vamos usar as informações
-          que você compartilhou para montar a experiência ideal para sua família.
+          Recebemos o cadastro da sua família. Em breve você receberá um e-mail com mais detalhes.
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-            <Link to="/sobre-os-selos">Conheça como funciona nossa certificação →</Link>
+            <Link to="/sobre-os-selos">Conheça nossa certificação →</Link>
           </Button>
           <Button asChild className="bg-[#25D366] hover:bg-[#1ebe5d] text-white">
             <a
@@ -210,12 +258,6 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
             Copiar link
           </Button>
         </div>
-
-        <p className="mt-8 text-xs text-muted-foreground text-center leading-relaxed max-w-xl mx-auto">
-          As informações que você compartilhou são usadas exclusivamente para personalizar
-          destinos e alertar estabelecimentos parceiros sobre as necessidades do seu filho. Nunca
-          serão vendidas ou compartilhadas com terceiros.
-        </p>
       </div>
     );
   }
