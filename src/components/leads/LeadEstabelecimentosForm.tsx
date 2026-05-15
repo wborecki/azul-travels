@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/select";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
-import { Building2, Check, Loader2 } from "lucide-react";
+import { Building2, Check, Heart, Loader2 } from "lucide-react";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
+import { CreateAccountModal } from "@/components/auth/CreateAccountModal";
 
 const NUM_COL = ["Até 10", "11 a 30", "31 a 60", "61 a 100", "Mais de 100"] as const;
 
@@ -32,7 +33,6 @@ const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(120),
   cargo: z.string().trim().min(2, "Informe seu cargo").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
-  password: z.string().min(6, "Senha precisa ter no mínimo 6 caracteres").max(72),
   whatsapp: z.string().trim().min(14, "WhatsApp obrigatório"),
   nome_estabelecimento: z.string().trim().min(2, "Informe o nome").max(200),
   tipo: z.string().min(1, "Selecione o tipo"),
@@ -51,7 +51,8 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
   const [cargo, setCargo] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
-  const [password, setPassword] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [acceptOnly, setAcceptOnly] = useState(false);
   const [whatsapp, setWhatsapp] = useState("");
   const [nomeEstab, setNomeEstab] = useState("");
   const [tipo, setTipo] = useState("");
@@ -128,7 +129,6 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       nome,
       cargo,
       email,
-      password,
       whatsapp,
       nome_estabelecimento: nomeEstab,
       tipo,
@@ -155,38 +155,8 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
     setErrors({});
     setEnviando(true);
 
-    // 1) Cria conta de estabelecimento via signUp (trigger handle_new_user cuida do perfil + role + cadastro stub)
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: parsed.data.email.toLowerCase(),
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/minha-empresa`,
-        data: {
-          account_type: "estabelecimento",
-          nome_responsavel: parsed.data.nome,
-          cargo: parsed.data.cargo,
-          whatsapp: parsed.data.whatsapp,
-          nome_estabelecimento: parsed.data.nome_estabelecimento,
-          tipo: parsed.data.tipo,
-          cidade: parsed.data.cidade,
-          estado: parsed.data.estado,
-        },
-      },
-    });
-
-    if (signUpError) {
-      setEnviando(false);
-      const msg = signUpError.message?.toLowerCase() ?? "";
-      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
-        setErrors({ email: "Este e-mail já tem conta. Faça login." });
-      } else {
-        toast.error(signUpError.message || "Erro ao criar conta. Tente novamente.");
-      }
-      return;
-    }
-
-    // 2) Mantém o lead (CRM)
-    await supabase.from("leads_estabelecimentos").insert({
+    // Salva o lead na waitlist (sem criar conta ainda)
+    const { error: insertError } = await supabase.from("leads_estabelecimentos").insert({
       nome: parsed.data.nome,
       cargo: parsed.data.cargo,
       email: parsed.data.email.toLowerCase(),
@@ -203,6 +173,10 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
     });
 
     setEnviando(false);
+    if (insertError) {
+      toast.error("Erro ao enviar. Tente novamente.");
+      return;
+    }
     setEnviado(true);
     void loadCount();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
@@ -217,7 +191,75 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
     }
   }
 
-  if (enviado) {
+  if (enviado && !acceptOnly) {
+    return (
+      <>
+        <div className="bg-white rounded-3xl border p-8 md:p-10 max-w-2xl mx-auto shadow-elegant text-center">
+          <div className="flex justify-center">
+            <div className="h-20 w-20 rounded-full bg-azul-claro flex items-center justify-center">
+              <Building2 className="h-10 w-10 text-primary" aria-hidden="true" />
+            </div>
+          </div>
+          <h2 className="mt-6 text-2xl md:text-3xl font-display font-bold text-primary">
+            Cadastro recebido 💙
+          </h2>
+          <p className="mt-3 text-foreground/80">
+            Você está na nossa lista. Para agilizar:
+          </p>
+
+          <div className="mt-6 rounded-2xl border-2 border-secondary/40 bg-gradient-to-br from-azul-claro/40 to-white p-6 text-left shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Heart className="h-6 w-6 text-primary fill-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-bold text-lg text-primary">
+                  Criar minha conta agora
+                </h3>
+                <p className="mt-1 text-sm text-foreground/80">
+                  Com uma conta você já pode preencher o perfil do seu estabelecimento e agilizar
+                  o processo de certificação.
+                </p>
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="mt-4 bg-secondary hover:bg-secondary/90 text-white font-semibold"
+                >
+                  Criar conta →
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setAcceptOnly(true)}
+            className="mt-5 text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
+          >
+            Só quero a lista de espera por enquanto
+          </button>
+        </div>
+
+        <CreateAccountModal
+          open={showAuthModal}
+          onOpenChange={setShowAuthModal}
+          accountType="estabelecimento"
+          email={email.trim().toLowerCase()}
+          signupMetadata={{
+            nome_responsavel: nome,
+            cargo,
+            whatsapp,
+            nome_estabelecimento: nomeEstab,
+            tipo,
+            cidade,
+            estado,
+            origem: "formulario_parceiro",
+          }}
+        />
+      </>
+    );
+  }
+
+  if (enviado && acceptOnly) {
     return (
       <div className="bg-white rounded-2xl border p-8 text-center max-w-2xl mx-auto shadow-sm">
         <div className="w-16 h-16 rounded-full bg-secondary text-white flex items-center justify-center mx-auto">
@@ -283,19 +325,6 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
           />
         </Field>
       </div>
-
-      <Field label="Crie uma senha *" error={errors.password}>
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mínimo 6 caracteres"
-          autoComplete="new-password"
-        />
-        <p className="mt-1 text-xs text-muted-foreground">
-          Você usará essa senha para entrar em /minha-empresa e gerenciar o cadastro do local.
-        </p>
-      </Field>
 
       <Field label="Nome do estabelecimento *" error={errors.nome_estabelecimento}>
         <Input value={nomeEstab} onChange={(e) => setNomeEstab(e.target.value)} />
