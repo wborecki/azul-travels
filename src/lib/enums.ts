@@ -150,6 +150,7 @@ export const TEA_NIVEL_LABEL: Record<TeaNivel, string> = {
 export const APP_ROLE_LABEL: Record<AppRole, string> = {
   admin: "Administrador",
   user: "Usuário",
+  estabelecimento: "Estabelecimento",
 };
 
 export const CONTEUDO_CATEGORIA_LABEL: Record<ConteudoCategoria, string> = {
