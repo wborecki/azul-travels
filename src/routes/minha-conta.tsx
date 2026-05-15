@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut, Loader2 } from "lucide-react";
-import logo from "@/assets/logo-turismo-azul.png";
+import logo from "@/assets/logo-turismo-azul.svg";
 
 export const Route = createFileRoute("/minha-conta")({
   head: () => ({
