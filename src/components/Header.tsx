@@ -60,13 +60,23 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
-          <Link
-            to="/familias"
-            className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-sm"
-            style={{ borderRadius: 50 }}
-          >
-            Quero Conhecer <ArrowRight className="h-4 w-4" />
-          </Link>
+          {user && role ? (
+            <Link
+              to={accountLink.to}
+              className="inline-flex items-center gap-1.5 h-11 px-5 font-bold text-white border border-white/30 hover:bg-white/10 transition-colors"
+              style={{ borderRadius: 50 }}
+            >
+              <UserCircle2 className="h-4 w-4" /> {accountLink.label}
+            </Link>
+          ) : (
+            <Link
+              to="/familias"
+              className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-sm"
+              style={{ borderRadius: 50 }}
+            >
+              Quero Conhecer <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
 
         <button
