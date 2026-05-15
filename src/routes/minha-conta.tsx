@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { LayoutDashboard, User, CalendarCheck, LogOut, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/minha-conta")({
@@ -89,5 +88,3 @@ function NavItem({
   );
 }
 
-// re-export Button to silence unused import lint
-export { Button };
