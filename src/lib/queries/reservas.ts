@@ -130,7 +130,8 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
   return {
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
-    perfil_sensorial_id: input.perfil_sensorial_id,
+    perfil_tea_id: input.perfil_tea_id,
+    perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
     data_checkout: emptyToNull(input.data_checkout),
     num_adultos: input.num_adultos,
@@ -138,5 +139,20 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
     mensagem: emptyToNull(input.mensagem),
     status: "pendente",
     perfil_enviado_ao_estabelecimento: input.perfil_enviado_ao_estabelecimento,
+    num_acompanhantes: input.num_acompanhantes ?? null,
+    pessoa_referencia: input.pessoa_referencia
+      ? emptyToNull(input.pessoa_referencia)
+      : null,
+    objetivo_viagem: input.objetivo_viagem ?? [],
+    notas_especificas: input.notas_especificas
+      ? emptyToNull(input.notas_especificas)
+      : null,
+    historico_negativo: input.historico_negativo
+      ? emptyToNull(input.historico_negativo)
+      : null,
+    recomendacoes_adicionais: input.recomendacoes_adicionais
+      ? emptyToNull(input.recomendacoes_adicionais)
+      : null,
+    conversa_previa_equipe: input.conversa_previa_equipe ?? false,
   };
 }
