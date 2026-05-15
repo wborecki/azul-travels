@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as SelecionarPerfilRouteImport } from './routes/selecionar-perfil'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
 import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
@@ -66,6 +67,11 @@ const SobreOsSelosRoute = SobreOsSelosRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SelecionarPerfilRoute = SelecionarPerfilRouteImport.update({
+  id: '/selecionar-perfil',
+  path: '/selecionar-perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
   '/sobre-os-selos': typeof SobreOsSelosRoute
   '/termos': typeof TermosRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/selecionar-perfil'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/selecionar-perfil'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/selecionar-perfil'
     | '/sobre'
     | '/sobre-os-selos'
     | '/termos'
@@ -558,6 +570,7 @@ export interface RootRouteChildren {
   MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  SelecionarPerfilRoute: typeof SelecionarPerfilRoute
   SobreRoute: typeof SobreRoute
   SobreOsSelosRoute: typeof SobreOsSelosRoute
   TermosRoute: typeof TermosRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/selecionar-perfil': {
+      id: '/selecionar-perfil'
+      path: '/selecionar-perfil'
+      fullPath: '/selecionar-perfil'
+      preLoaderRoute: typeof SelecionarPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -967,6 +987,7 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  SelecionarPerfilRoute: SelecionarPerfilRoute,
   SobreRoute: SobreRoute,
   SobreOsSelosRoute: SobreOsSelosRoute,
   TermosRoute: TermosRoute,
