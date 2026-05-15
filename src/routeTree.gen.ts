@@ -14,6 +14,7 @@ import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
+import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
@@ -65,6 +66,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const NossaHistoriaRoute = NossaHistoriaRouteImport.update({
   id: '/nossa-historia',
   path: '/nossa-historia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaContaRoute = MinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -321,6 +330,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/minha-conta'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/minha-conta'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/minha-conta'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -423,6 +435,7 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
+  MinhaContaRoute: typeof MinhaContaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
@@ -470,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/nossa-historia'
       fullPath: '/nossa-historia'
       preLoaderRoute: typeof NossaHistoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-conta': {
+      id: '/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof MinhaContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -726,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
+  MinhaContaRoute: MinhaContaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
