@@ -53,6 +53,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
+  const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
