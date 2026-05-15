@@ -90,7 +90,6 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     const parsed = schema.safeParse({
       nome,
       email,
-      password,
       whatsapp,
       cidade,
       estado,
@@ -115,35 +114,8 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     setErrors({});
     setEnviando(true);
 
-    // 1) Cria conta de família via signUp (trigger handle_new_user cuida do perfil + role)
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: parsed.data.email.toLowerCase(),
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/minha-conta`,
-        data: {
-          account_type: "familia",
-          nome_responsavel: parsed.data.nome,
-          telefone: parsed.data.whatsapp || null,
-          cidade: parsed.data.cidade,
-          estado: parsed.data.estado,
-        },
-      },
-    });
-
-    if (signUpError) {
-      setEnviando(false);
-      const msg = signUpError.message?.toLowerCase() ?? "";
-      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
-        setErrors({ email: "Este e-mail já tem conta. Faça login." });
-      } else {
-        toast.error(signUpError.message || "Erro ao criar conta. Tente novamente.");
-      }
-      return;
-    }
-
-    // 2) Mantém o lead (CRM) — não bloqueia o sucesso se falhar
-    await supabase.from("leads_familias").insert({
+    // Salva o lead na waitlist (sem criar conta ainda)
+    const { error: insertError } = await supabase.from("leads_familias").insert({
       nome: parsed.data.nome,
       email: parsed.data.email.toLowerCase(),
       whatsapp: parsed.data.whatsapp || null,
@@ -157,6 +129,10 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     });
 
     setEnviando(false);
+    if (insertError) {
+      toast.error("Erro ao enviar. Tente novamente.");
+      return;
+    }
     setEnviado(true);
     onSuccess?.();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
