@@ -212,7 +212,7 @@ function NossaHistoriaPage() {
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 max-w-6xl mx-auto">
-            {[roar, miranteCidade, miranteMar, paiFilhoRua].map((src, i) => (
+            {[roar, giselaArthur3, paiFilhoRua, giselaArthur4].map((src, i) => (
               <div
                 key={i}
                 className="group overflow-hidden rounded-2xl shadow-md bg-white"
