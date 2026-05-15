@@ -666,6 +666,54 @@ export type Database = {
           },
         ]
       }
+      pre_checkins: {
+        Row: {
+          criado_em: string
+          dados: Json
+          data_checkin: string | null
+          data_checkout: string | null
+          email: string
+          estabelecimento_id: string
+          estabelecimento_slug: string
+          id: string
+          idade: number | null
+          nome_autista: string
+          nome_responsavel: string
+          origem: string | null
+          telefone: string
+        }
+        Insert: {
+          criado_em?: string
+          dados?: Json
+          data_checkin?: string | null
+          data_checkout?: string | null
+          email: string
+          estabelecimento_id: string
+          estabelecimento_slug: string
+          id?: string
+          idade?: number | null
+          nome_autista: string
+          nome_responsavel: string
+          origem?: string | null
+          telefone: string
+        }
+        Update: {
+          criado_em?: string
+          dados?: Json
+          data_checkin?: string | null
+          data_checkout?: string | null
+          email?: string
+          estabelecimento_id?: string
+          estabelecimento_slug?: string
+          id?: string
+          idade?: number | null
+          nome_autista?: string
+          nome_responsavel?: string
+          origem?: string | null
+          telefone?: string
+        }
+        Relationships: []
+      }
       reservas: {
         Row: {
           criado_em: string

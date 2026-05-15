@@ -309,11 +309,13 @@ function DemoDetalhe() {
 
             {!enviado ? (
               <Button
-                onClick={enviar}
+                asChild
                 className="w-full mt-4 bg-secondary hover:bg-secondary/90 text-white"
                 size="lg"
               >
-                Solicitar reserva
+                <Link to="/pre-checkin/$slug" params={{ slug: estab.slug }}>
+                  Solicitar reserva
+                </Link>
               </Button>
             ) : (
               <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-sm text-emerald-900">

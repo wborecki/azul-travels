@@ -27,6 +27,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as PreCheckinSlugRouteImport } from './routes/pre-checkin.$slug'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
@@ -131,6 +132,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const PreCheckinSlugRoute = PreCheckinSlugRouteImport.update({
+  id: '/pre-checkin/$slug',
+  path: '/pre-checkin/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LSlugRoute = LSlugRouteImport.update({
   id: '/l/$slug',
   path: '/l/$slug',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
+  '/pre-checkin/$slug': typeof PreCheckinSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
+  '/pre-checkin/$slug': typeof PreCheckinSlugRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
+  '/pre-checkin/$slug': typeof PreCheckinSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
+    | '/pre-checkin/$slug'
     | '/admin/'
     | '/conteudo/'
     | '/admin/conteudo/$id'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
+    | '/pre-checkin/$slug'
     | '/admin'
     | '/conteudo'
     | '/admin/conteudo/$id'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
+    | '/pre-checkin/$slug'
     | '/admin/'
     | '/conteudo/'
     | '/admin/conteudo/$id'
@@ -419,6 +431,7 @@ export interface RootRouteChildren {
   ConteudoSlugRoute: typeof ConteudoSlugRoute
   EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
   LSlugRoute: typeof LSlugRoute
+  PreCheckinSlugRoute: typeof PreCheckinSlugRoute
   ConteudoIndexRoute: typeof ConteudoIndexRoute
 }
 
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/pre-checkin/$slug': {
+      id: '/pre-checkin/$slug'
+      path: '/pre-checkin/$slug'
+      fullPath: '/pre-checkin/$slug'
+      preLoaderRoute: typeof PreCheckinSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/l/$slug': {
       id: '/l/$slug'
@@ -714,17 +734,9 @@ const rootRouteChildren: RootRouteChildren = {
   ConteudoSlugRoute: ConteudoSlugRoute,
   EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
   LSlugRoute: LSlugRoute,
+  PreCheckinSlugRoute: PreCheckinSlugRoute,
   ConteudoIndexRoute: ConteudoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
