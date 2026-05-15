@@ -10,6 +10,7 @@ interface AuthCtx {
   isAdmin: boolean;
   isEstabelecimento: boolean;
   role: AppRole | null;
+  roles: AppRole[];
   signOut: () => Promise<void>;
 }
 
@@ -20,6 +21,7 @@ const Ctx = createContext<AuthCtx>({
   isAdmin: false,
   isEstabelecimento: false,
   role: null,
+  roles: [],
   signOut: async () => {},
 });
 
@@ -27,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
@@ -39,16 +42,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq("user_id", s.user.id);
           if (!data || data.length === 0) {
             setRole(null);
+            setRoles([]);
             return;
           }
-          const roles = data.map((r) => r.role as AppRole);
-          // priority: admin > estabelecimento > user
-          if (roles.includes("admin")) setRole("admin");
-          else if (roles.includes("estabelecimento")) setRole("estabelecimento");
+          const list = data.map((r) => r.role as AppRole);
+          setRoles(list);
+          if (list.includes("admin")) setRole("admin");
+          else if (list.includes("estabelecimento")) setRole("estabelecimento");
           else setRole("user");
         }, 0);
       } else {
         setRole(null);
+        setRoles([]);
       }
     });
 
@@ -73,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: role === "admin",
         isEstabelecimento: role === "estabelecimento",
         role,
+        roles,
         signOut,
       }}
     >

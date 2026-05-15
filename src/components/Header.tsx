@@ -1,20 +1,54 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Menu, X, ArrowRight, UserCircle2 } from "lucide-react";
+import { Menu, X, ArrowRight, LogOut, ShieldCheck, User } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDemo = pathname === "/demo" || pathname.startsWith("/demo/");
-  const { user, role, isAdmin, isEstabelecimento } = useAuth();
+  const { user, role, roles, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const accountLink = isAdmin
-    ? { to: "/admin", label: "Admin" }
-    : isEstabelecimento
-      ? { to: "/minha-empresa", label: "Minha empresa" }
-      : { to: "/minha-conta", label: "Minha conta" };
+  const isAdmin = roles.includes("admin");
+  const isEstab = roles.includes("estabelecimento");
+  const distinctRoles = Array.from(new Set(roles));
+  const hasMultiple = distinctRoles.length >= 2;
+
+  const accountTo = hasMultiple
+    ? "/selecionar-perfil"
+    : isAdmin
+      ? "/admin"
+      : isEstab
+        ? "/meu-estabelecimento"
+        : "/minha-conta";
+
+  const accountLabel = hasMultiple
+    ? "Selecionar perfil"
+    : isAdmin
+      ? "Painel Admin"
+      : isEstab
+        ? "Meu estabelecimento"
+        : "Minha conta";
+
+  const initial = (
+    (user?.user_metadata as Record<string, unknown> | undefined)?.nome_responsavel as string | undefined
+    ?? user?.email
+    ?? "?"
+  ).trim().charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
 
   const navLinkClass =
     "px-3 py-2 text-[15px] font-semibold text-white/85 hover:text-white transition-colors duration-150";
@@ -61,20 +95,46 @@ export function Header() {
 
         <div className="hidden lg:flex items-center gap-2">
           {user && role ? (
-            <Link
-              to={accountLink.to}
-              className="inline-flex items-center gap-1.5 h-11 px-5 font-bold text-white border border-white/30 hover:bg-white/10 transition-colors"
-              style={{ borderRadius: 50 }}
-            >
-              <UserCircle2 className="h-4 w-4" /> {accountLink.label}
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 border border-white/30 text-white font-bold hover:bg-white/20 transition"
+                  aria-label="Conta"
+                >
+                  {initial}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">
+                  {user.email}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to={accountTo} className="cursor-pointer">
+                    <User className="h-4 w-4 mr-2" /> {accountLabel}
+                  </Link>
+                </DropdownMenuItem>
+                {isAdmin && !hasMultiple ? null : isAdmin ? (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="cursor-pointer">
+                      <ShieldCheck className="h-4 w-4 mr-2" /> Painel Admin
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link
-              to="/familias"
-              className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-sm"
+              to="/login"
+              className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-white border border-white/40 hover:bg-white/10 transition-colors"
               style={{ borderRadius: 50 }}
             >
-              Quero Conhecer <ArrowRight className="h-4 w-4" />
+              Entrar <ArrowRight className="h-4 w-4" />
             </Link>
           )}
         </div>
@@ -113,22 +173,41 @@ export function Header() {
               ),
             )}
             {user && role ? (
-              <Link
-                to={accountLink.to}
-                onClick={() => setOpen(false)}
-                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
-                style={{ borderRadius: 50 }}
-              >
-                <UserCircle2 className="h-4 w-4" /> {accountLink.label}
-              </Link>
+              <>
+                <Link
+                  to={accountTo}
+                  onClick={() => setOpen(false)}
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
+                  style={{ borderRadius: 50 }}
+                >
+                  <User className="h-4 w-4" /> {accountLabel}
+                </Link>
+                {isAdmin && !hasMultiple ? null : isAdmin ? (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="mt-2 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
+                    style={{ borderRadius: 50 }}
+                  >
+                    <ShieldCheck className="h-4 w-4" /> Painel Admin
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); void handleLogout(); }}
+                  className="mt-2 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white/90"
+                >
+                  <LogOut className="h-4 w-4" /> Sair
+                </button>
+              </>
             ) : (
               <Link
-                to="/familias"
+                to="/login"
                 onClick={() => setOpen(false)}
-                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623]"
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/40"
                 style={{ borderRadius: 50 }}
               >
-                Quero Conhecer <ArrowRight className="h-4 w-4" />
+                Entrar <ArrowRight className="h-4 w-4" />
               </Link>
             )}
           </div>
