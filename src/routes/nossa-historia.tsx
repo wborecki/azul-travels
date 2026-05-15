@@ -8,6 +8,10 @@ import roar from "@/assets/historia-roar.jpeg";
 import miranteCidade from "@/assets/historia-mirante-cidade.jpeg";
 import miranteMar from "@/assets/historia-mirante-mar.jpeg";
 import paiFilhoRua from "@/assets/historia-pai-filho-rua.jpeg";
+import giselaArthur1 from "@/assets/gisela-arthur-1.jpeg";
+import giselaArthur2 from "@/assets/gisela-arthur-2.jpeg";
+import giselaArthur3 from "@/assets/gisela-arthur-3.jpeg";
+import giselaArthur4 from "@/assets/gisela-arthur-4.jpeg";
 
 export const Route = createFileRoute("/nossa-historia")({
   head: () => ({
@@ -56,16 +60,32 @@ function NossaHistoriaPage() {
       {/* Quem somos */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center max-w-6xl mx-auto">
-            <div className="order-2 md:order-1">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto mb-12 md:mb-16">
+            <figure className="flex flex-col">
               <img
                 src={restaurante}
                 alt="Gustavo Passinato e seu filho Arthur sorrindo em um restaurante"
                 className="w-full h-auto rounded-2xl shadow-lg object-cover aspect-[4/5]"
                 loading="lazy"
               />
-            </div>
-            <div className="order-1 md:order-2">
+              <figcaption className="mt-3 text-center text-sm font-medium text-foreground/70">
+                Gustavo Passinato
+              </figcaption>
+            </figure>
+            <figure className="flex flex-col">
+              <img
+                src={giselaArthur1}
+                alt="Gisela Antoniucci e seu filho Arthur"
+                className="w-full h-auto rounded-2xl shadow-lg object-cover aspect-[4/5]"
+                loading="lazy"
+              />
+              <figcaption className="mt-3 text-center text-sm font-medium text-foreground/70">
+                Gisela Antoniucci
+              </figcaption>
+            </figure>
+          </div>
+          <div className="max-w-3xl mx-auto">
+            <div>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3666]">
                 Quem somos
               </h2>
@@ -132,9 +152,9 @@ function NossaHistoriaPage() {
 
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {[
-              { src: parqueAquatico, alt: "Pai e filho em brinquedo de parque aquático" },
-              { src: helicoptero, alt: "Filho usando abafador de ouvidos em voo de helicóptero" },
-              { src: piscina, alt: "Filho sorrindo na beira da piscina" },
+              { src: parqueAquatico, alt: "Gustavo e Arthur em brinquedo de parque aquático" },
+              { src: giselaArthur2, alt: "Gisela e Arthur em momento de carinho" },
+              { src: piscina, alt: "Gustavo e Arthur na piscina" },
             ].map((img) => (
               <div
                 key={img.src}
@@ -192,7 +212,7 @@ function NossaHistoriaPage() {
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 max-w-6xl mx-auto">
-            {[roar, miranteCidade, miranteMar, paiFilhoRua].map((src, i) => (
+            {[roar, giselaArthur3, paiFilhoRua, giselaArthur4].map((src, i) => (
               <div
                 key={i}
                 className="group overflow-hidden rounded-2xl shadow-md bg-white"
