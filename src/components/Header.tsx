@@ -1,12 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, UserCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDemo = pathname === "/demo" || pathname.startsWith("/demo/");
+  const { user, role, isAdmin, isEstabelecimento } = useAuth();
+
+  const accountLink = isAdmin
+    ? { to: "/admin", label: "Admin" }
+    : isEstabelecimento
+      ? { to: "/minha-empresa", label: "Minha empresa" }
+      : { to: "/minha-conta", label: "Minha conta" };
 
   const navLinkClass =
     "px-3 py-2 text-[15px] font-semibold text-white/85 hover:text-white transition-colors duration-150";
@@ -52,13 +60,23 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
-          <Link
-            to="/familias"
-            className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-sm"
-            style={{ borderRadius: 50 }}
-          >
-            Quero Conhecer <ArrowRight className="h-4 w-4" />
-          </Link>
+          {user && role ? (
+            <Link
+              to={accountLink.to}
+              className="inline-flex items-center gap-1.5 h-11 px-5 font-bold text-white border border-white/30 hover:bg-white/10 transition-colors"
+              style={{ borderRadius: 50 }}
+            >
+              <UserCircle2 className="h-4 w-4" /> {accountLink.label}
+            </Link>
+          ) : (
+            <Link
+              to="/familias"
+              className="inline-flex items-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623] hover:bg-[#e09415] transition-colors shadow-sm"
+              style={{ borderRadius: 50 }}
+            >
+              Quero Conhecer <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
 
         <button
@@ -94,14 +112,25 @@ export function Header() {
                 </a>
               ),
             )}
-            <Link
-              to="/familias"
-              onClick={() => setOpen(false)}
-              className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623]"
-              style={{ borderRadius: 50 }}
-            >
-              Quero Conhecer <ArrowRight className="h-4 w-4" />
-            </Link>
+            {user && role ? (
+              <Link
+                to={accountLink.to}
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
+                style={{ borderRadius: 50 }}
+              >
+                <UserCircle2 className="h-4 w-4" /> {accountLink.label}
+              </Link>
+            ) : (
+              <Link
+                to="/familias"
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-[#1a3666] bg-[#f5a623]"
+                style={{ borderRadius: 50 }}
+              >
+                Quero Conhecer <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         </div>
       )}
