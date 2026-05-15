@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { LeadFamiliasForm } from "@/components/leads/LeadFamiliasForm";
 
@@ -29,20 +31,38 @@ export const Route = createFileRoute("/familias")({
 function FamiliasPage() {
   const bullets = [
     {
-      titulo: "Destinos verificados pela nossa equipe",
-      texto: "Só entra na plataforma quem passou pela nossa auditoria.",
+      titulo: "O destino já sabe quem é seu filho",
+      texto:
+        "O estabelecimento recebe o perfil antes da chegada. Sem ter que explicar tudo de novo na recepção.",
     },
     {
-      titulo: "Perfil sensorial do seu filho",
+      titulo: "Ambientes verificados por quem entende de TEA",
       texto:
-        "A plataforma aprende o que ele precisa e filtra os lugares certos pra vocês.",
+        "Só entra na plataforma quem passou pela nossa auditoria. Nada de surpresa na chegada.",
     },
     {
-      titulo: "Sem surpresas na chegada",
+      titulo: "Apoio 24h durante toda a estadia",
       texto:
-        "O estabelecimento recebe o perfil antes de vocês chegarem.",
+        "Nossa equipe está disponível a qualquer hora. Porque imprevistos não escolhem horário.",
     },
   ];
+
+  const [count, setCount] = useState<number | null>(null);
+
+  async function loadCount() {
+    try {
+      const { count: c, error } = await supabase
+        .from("leads_familias")
+        .select("*", { count: "exact", head: true });
+      if (!error) setCount(c ?? 0);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  useEffect(() => {
+    void loadCount();
+  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] -mt-16 pt-16 bg-white">
@@ -68,11 +88,11 @@ function FamiliasPage() {
               Lista de espera
             </span>
             <h1 className="mt-5 text-3xl md:text-4xl font-display font-bold leading-[1.15]">
-              Viajar com seu filho autista ficou mais fácil.
+              Sua família também merece viajar.
             </h1>
             <p className="mt-4 text-base text-white/80 leading-relaxed">
               Estamos construindo o primeiro marketplace brasileiro de turismo para famílias TEA.
-              Cadastre-se e seja avisado no lançamento.
+              Cadastre-se e seja avisada no lançamento.
             </p>
 
             <div className="mt-6 h-0.5 w-16 bg-secondary rounded-full" />
@@ -109,8 +129,23 @@ function FamiliasPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Leva menos de 2 minutos. Você pode sair da lista quando quiser.
             </p>
+
+            {count !== null && (
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-3xl font-display font-bold text-secondary">
+                  {count.toLocaleString("pt-BR")}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  famílias já cadastradas
+                </span>
+              </div>
+            )}
+
             <div className="mt-6">
-              <LeadFamiliasForm origem="pagina_familias" />
+              <LeadFamiliasForm
+                origem="pagina_familias"
+                onSuccess={loadCount}
+              />
             </div>
           </div>
         </main>
