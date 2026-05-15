@@ -128,6 +128,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       nome,
       cargo,
       email,
+      password,
       whatsapp,
       nome_estabelecimento: nomeEstab,
       tipo,
@@ -153,7 +154,39 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
     }
     setErrors({});
     setEnviando(true);
-    const { error } = await supabase.from("leads_estabelecimentos").insert({
+
+    // 1) Cria conta de estabelecimento via signUp (trigger handle_new_user cuida do perfil + role + cadastro stub)
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: parsed.data.email.toLowerCase(),
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/minha-empresa`,
+        data: {
+          account_type: "estabelecimento",
+          nome_responsavel: parsed.data.nome,
+          cargo: parsed.data.cargo,
+          whatsapp: parsed.data.whatsapp,
+          nome_estabelecimento: parsed.data.nome_estabelecimento,
+          tipo: parsed.data.tipo,
+          cidade: parsed.data.cidade,
+          estado: parsed.data.estado,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setEnviando(false);
+      const msg = signUpError.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        setErrors({ email: "Este e-mail já tem conta. Faça login." });
+      } else {
+        toast.error(signUpError.message || "Erro ao criar conta. Tente novamente.");
+      }
+      return;
+    }
+
+    // 2) Mantém o lead (CRM)
+    await supabase.from("leads_estabelecimentos").insert({
       nome: parsed.data.nome,
       cargo: parsed.data.cargo,
       email: parsed.data.email.toLowerCase(),
@@ -168,15 +201,8 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       como_conheceu: parsed.data.como_conheceu || null,
       origem,
     });
+
     setEnviando(false);
-    if (error) {
-      if (error.code === "23505") {
-        setErrors({ email: "Este e-mail já está cadastrado." });
-        return;
-      }
-      toast.error("Erro ao enviar. Tente novamente.");
-      return;
-    }
     setEnviado(true);
     void loadCount();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
