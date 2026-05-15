@@ -242,19 +242,6 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
         )}
       </Field>
 
-      <Field label="Crie uma senha *" error={errors.password}>
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mínimo 6 caracteres"
-          autoComplete="new-password"
-        />
-        <p className="mt-1 text-xs text-muted-foreground">
-          Você usará essa senha para entrar e gerenciar o Perfil TEA da sua família.
-        </p>
-      </Field>
-
       <Field label="WhatsApp (opcional)">
         <Input
           value={whatsapp}
