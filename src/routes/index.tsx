@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
-import seloTurismoAzul from "@/assets/selo-turismo-azul.svg";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
@@ -1186,7 +1185,7 @@ function CtaFinal() {
 function SeloBadge({ size = 320 }: { size?: number }) {
   return (
     <img
-      src={seloTurismoAzul}
+      src="/selo-turismo-azul.svg"
       alt="Selo Turismo Azul Inclusivo · Certificação Oficial"
       width={size}
       height={size}

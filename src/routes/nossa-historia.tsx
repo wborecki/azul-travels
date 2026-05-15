@@ -71,17 +71,28 @@ function NossaHistoriaPage() {
               </h2>
               <div className="mt-6 space-y-5 text-[17px] leading-relaxed text-foreground/85">
                 <p>
-                  Sou <strong>Gustavo Passinato</strong>, pai do{" "}
-                  <strong>Arthur</strong>, uma criança autista que completa 10
-                  anos este mês. E, ao longo dessa jornada, aprendi que o amor
-                  de um pai é capaz de mover o mundo inteiro para ver um filho
-                  feliz.
+                  O Turismo Azul nasceu do encontro entre experiência
+                  profissional, vivência familiar e o desejo genuíno de
+                  transformar o turismo em um espaço mais acessível, acolhedor
+                  e possível para pessoas autistas e suas famílias.
                 </p>
                 <p>
-                  Entre terapias, desafios, crises, descobertas, evolução e
-                  pequenas grandes conquistas, sempre existiu um sonho simples:
-                  proporcionar ao meu filho momentos leves, felizes e
-                  inesquecíveis através das viagens em família.
+                  O projeto foi idealizado por <strong>Gisela Antoniucci</strong>{" "}
+                  e <strong>Gustavo Passinato</strong>. Gisela é psicopedagoga,
+                  especialista em autismo, palestrante e mãe atípica, atuando
+                  há anos na formação de professores, equipes
+                  multidisciplinares e instituições voltadas à inclusão. Mais
+                  do que uma especialista, Gisela vive diariamente os desafios
+                  e as necessidades da maternidade atípica. Essa vivência trouxe
+                  um olhar humano, sensível e real sobre as barreiras enfrentadas
+                  pelas famílias em momentos simples da vida — inclusive no lazer
+                  e nas viagens.
+                </p>
+                <p>
+                  Ao lado dela, Gustavo Passinato contribui com sua experiência
+                  em gestão, estruturação de projetos e desenvolvimento
+                  estratégico, ajudando a transformar propósito em ação concreta
+                  e impacto social.
                 </p>
               </div>
             </div>
@@ -98,19 +109,23 @@ function NossaHistoriaPage() {
             </h2>
             <div className="mt-8 space-y-5 text-[17px] md:text-lg leading-relaxed text-foreground/85">
               <p>
-                Mas o que deveria ser descanso, muitas vezes se transformava em
-                medo, ansiedade e frustração.
+                O Turismo Azul nasceu da percepção de uma realidade silenciosa
+                vivida por muitas famílias atípicas: o medo constante da
+                imprevisibilidade.
               </p>
               <p>
-                Hotéis sem preparo. Ambientes com excesso de estímulos. Falta de
-                compreensão. Olhares de julgamento. Equipes que não sabiam
-                acolher. Lugares que não entendiam que, por trás de uma crise,
-                existe uma criança que só precisa ser respeitada.
+                Enquanto muitas pessoas enxergam viagens e momentos de lazer como
+                descanso, para diversas famílias de pessoas autistas esses
+                momentos podem representar ansiedade, insegurança e exaustão
+                emocional. A falta de preparo dos ambientes, o excesso de
+                estímulos, a ausência de comunicação acessível e o receio de
+                julgamentos fazem com que muitas famílias deixem de viver
+                experiências que deveriam ser leves, felizes e acolhedoras.
               </p>
               <p>
-                E foi vivendo tudo isso que percebi uma realidade dolorosa:
-                muitas famílias atípicas deixam de viajar não por falta de
-                vontade, mas por medo do que vão enfrentar.
+                A dor que nos moveu foi justamente perceber que o problema não
+                estava nas famílias, mas na ausência de espaços preparados para
+                recebê-las.
               </p>
             </div>
           </div>
