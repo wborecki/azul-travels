@@ -234,48 +234,78 @@ export type Database = {
           atualizado_em: string
           cargo: string | null
           cidade: string | null
+          contato_preferido: string | null
           criado_em: string
           email: string | null
+          endereco: string | null
           estabelecimento_id: string | null
           estado: string | null
+          estrutura: Json
           id: string
+          iniciativa_atual: string | null
           last_seen_at: string | null
           nome_responsavel: string | null
           notes: string | null
+          num_capacitacao: string | null
+          num_colaboradores: string | null
+          observacoes: string | null
           origem: string | null
+          perfil_completo: boolean
           status: string
+          tipo: string | null
+          website: string | null
           whatsapp: string | null
         }
         Insert: {
           atualizado_em?: string
           cargo?: string | null
           cidade?: string | null
+          contato_preferido?: string | null
           criado_em?: string
           email?: string | null
+          endereco?: string | null
           estabelecimento_id?: string | null
           estado?: string | null
+          estrutura?: Json
           id: string
+          iniciativa_atual?: string | null
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
+          num_capacitacao?: string | null
+          num_colaboradores?: string | null
+          observacoes?: string | null
           origem?: string | null
+          perfil_completo?: boolean
           status?: string
+          tipo?: string | null
+          website?: string | null
           whatsapp?: string | null
         }
         Update: {
           atualizado_em?: string
           cargo?: string | null
           cidade?: string | null
+          contato_preferido?: string | null
           criado_em?: string
           email?: string | null
+          endereco?: string | null
           estabelecimento_id?: string | null
           estado?: string | null
+          estrutura?: Json
           id?: string
+          iniciativa_atual?: string | null
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
+          num_capacitacao?: string | null
+          num_colaboradores?: string | null
+          observacoes?: string | null
           origem?: string | null
+          perfil_completo?: boolean
           status?: string
+          tipo?: string | null
+          website?: string | null
           whatsapp?: string | null
         }
         Relationships: []
