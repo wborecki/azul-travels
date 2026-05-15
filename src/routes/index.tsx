@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
+import arthurPiscinaSplash from "@/assets/arthur-piscina-splash.jpeg";
+import arthurConfiante from "@/assets/arthur-confiante.jpeg";
+import arthurParque from "@/assets/arthur-parque.jpeg";
+import arthurAviao from "@/assets/arthur-aviao.jpeg";
+import arthurPraia from "@/assets/arthur-praia.jpeg";
+import arthurCharrete from "@/assets/arthur-charrete.jpeg";
+import arthurMilkshake from "@/assets/arthur-milkshake.jpeg";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
