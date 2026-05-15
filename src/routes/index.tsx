@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
+import giselaFoto from "@/assets/gisela-antoniucci.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
 import arthurPiscinaSplash from "@/assets/arthur-piscina-splash.jpeg";
 import arthurConfiante from "@/assets/arthur-confiante.jpeg";
