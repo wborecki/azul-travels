@@ -80,10 +80,10 @@ function FamiliasPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[45%_55%]">
+      <div className="grid lg:grid-cols-2">
         {/* Coluna esquerda */}
-        <aside className="bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col">
-          <div className="max-w-md mx-auto lg:mx-0 flex-1 w-full">
+        <aside className="bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+          <div className="max-w-lg mx-auto lg:ml-auto lg:mr-12 w-full">
             <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-semibold uppercase tracking-wide">
               Lista de espera
             </span>
@@ -151,8 +151,8 @@ function FamiliasPage() {
         </aside>
 
         {/* Coluna direita */}
-        <main className="bg-white p-6 md:p-12 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:overflow-y-auto flex items-start lg:items-center self-start">
-          <div className="w-full max-w-xl mx-auto">
+        <main className="bg-white p-6 md:p-12 lg:p-16 flex items-center justify-center">
+          <div className="w-full max-w-xl">
             <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
               Entre na lista de espera
             </h2>
