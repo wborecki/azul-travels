@@ -611,127 +611,125 @@ function PorQueExistimos() {
           </span>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start max-w-6xl mx-auto">
-          {/* Coluna esquerda · 60% */}
-          <div className="lg:col-span-3">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
-              Não foi uma ideia de negócio. Foi uma necessidade real.
-            </h2>
+        {/* Bloco superior — texto corrido, largura total */}
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
+            Não foi uma ideia de negócio. Foi uma necessidade real.
+          </h2>
 
-            <p className="mt-5 text-lg text-foreground/80">
-              O Turismo Azul nasceu de dois olhares que se completam.
-            </p>
-            <p className="mt-4 text-lg text-foreground/80">
-              Gustavo Passinato, pai atípico, tentou viajar com o filho e percebeu que o
-              mundo do turismo simplesmente não estava preparado para recebê-los. Gisela
-              Antoniucci, psicopedagoga especialista em autismo e mãe atípica, via as mesmas
-              barreiras todos os dias — de dentro de casa e de dentro das salas de formação
-              onde preparava equipes para a inclusão.
-            </p>
+          <p className="mt-5 text-lg text-foreground/80">
+            O Turismo Azul nasceu de dois olhares que se completam.
+          </p>
+          <p className="mt-4 text-lg text-foreground/80">
+            Gustavo Passinato, pai atípico, tentou viajar com o filho e percebeu que o
+            mundo do turismo simplesmente não estava preparado para recebê-los. Gisela
+            Antoniucci, psicopedagoga especialista em autismo e mãe atípica, via as mesmas
+            barreiras todos os dias — de dentro de casa e de dentro das salas de formação
+            onde preparava equipes para a inclusão.
+          </p>
 
-            <p className="mt-4 text-lg text-foreground/80">
-              Nenhum hotel sabia o que fazer. Nenhuma agência tinha respostas. A viagem virou um
-              campo minado de imprevistos, julgamentos e situações que nenhuma família deveria
-              passar sozinha.
-            </p>
+          <p className="mt-4 text-lg text-foreground/80">
+            Nenhum hotel sabia o que fazer. Nenhuma agência tinha respostas. A viagem virou um
+            campo minado de imprevistos, julgamentos e situações que nenhuma família deveria
+            passar sozinha.
+          </p>
 
-            <div className="mt-6 rounded-xl p-[3px]" style={{ background: gradienteAutismo }}>
-              <div
-                className="rounded-[calc(0.75rem-2px)] p-5 md:p-6"
-                style={{ backgroundColor: "#F0F7FF" }}
-              >
-                <p className="text-lg md:text-xl text-primary font-medium italic leading-relaxed">
-                  Foi aí que surgiu a pergunta: e se existisse um lugar onde as famílias atípicas
-                  pudessem viajar sem ter que explicar o autismo do filho pra cada recepcionista?
-                </p>
-              </div>
+          <div className="mt-6 rounded-xl p-[3px]" style={{ background: gradienteAutismo }}>
+            <div
+              className="rounded-[calc(0.75rem-2px)] p-5 md:p-6"
+              style={{ backgroundColor: "#F0F7FF" }}
+            >
+              <p className="text-lg md:text-xl text-primary font-medium italic leading-relaxed">
+                Foi aí que surgiu a pergunta: e se existisse um lugar onde as famílias atípicas
+                pudessem viajar sem ter que explicar o autismo do filho pra cada recepcionista?
+              </p>
             </div>
-
-            <p className="mt-6 text-lg text-foreground/80">
-              É disso que o Turismo Azul é feito. Não de especialistas em turismo que estudaram
-              TEA. Mas de quem vive o autismo todos os dias e decidiu fazer algo a respeito.
-            </p>
           </div>
 
-          {/* Coluna direita · 40% */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
-              <div
-                className="mx-auto h-32 w-32 rounded-full p-[4px]"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
-                }}
-              >
-                <img
-                  src={gustavoFoto}
-                  alt="Gustavo Passinato, fundador do Turismo Azul"
-                  className="h-full w-full rounded-full object-cover"
-                  style={{ objectFit: "cover", objectPosition: "center top" }}
-                />
-              </div>
+          <p className="mt-6 text-lg text-foreground/80">
+            É disso que o Turismo Azul é feito. Não de especialistas em turismo que estudaram
+            TEA. Mas de quem vive o autismo todos os dias e decidiu fazer algo a respeito.
+          </p>
+        </div>
 
-              <h3 className="mt-5 text-xl font-display font-bold text-primary">
-                Gustavo Passinato
-              </h3>
-              <p className="text-sm text-secondary font-semibold mt-1">Fundador · Pai Atípico</p>
-              <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
-                Pai de uma criança autista. Criou o Turismo Azul depois de perceber que o mundo
-                do turismo não estava preparado para receber sua família.
-              </p>
-
-              <div
-                className="mt-6 inline-block rounded-full p-[2px]"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
-                }}
-              >
-                <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
-                  🧩 Vive e respira o TEA todos os dias
-                </span>
-              </div>
+        {/* Bloco inferior — cards dos fundadores lado a lado */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-[864px] mx-auto mt-14 items-stretch">
+          <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
+            <div
+              className="mx-auto h-32 w-32 rounded-full p-[4px]"
+              style={{
+                background:
+                  "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+              }}
+            >
+              <img
+                src={gustavoFoto}
+                alt="Gustavo Passinato, fundador do Turismo Azul"
+                className="h-full w-full rounded-full object-cover"
+                style={{ objectFit: "cover", objectPosition: "center top" }}
+              />
             </div>
 
-            <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
-              <div
-                className="mx-auto h-32 w-32 rounded-full p-[4px]"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
-                }}
-              >
-                <img
-                  src={giselaFoto}
-                  alt="Gisela Antoniucci, co-fundadora do Turismo Azul"
-                  className="h-full w-full rounded-full object-cover"
-                  style={{ objectFit: "cover", objectPosition: "center top" }}
-                />
-              </div>
+            <h3 className="mt-5 text-xl font-display font-bold text-primary">
+              Gustavo Passinato
+            </h3>
+            <p className="text-sm text-secondary font-semibold mt-1">Fundador · Pai Atípico</p>
+            <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
+              Pai de uma criança autista. Criou o Turismo Azul depois de perceber que o mundo
+              do turismo não estava preparado para receber sua família.
+            </p>
 
-              <h3 className="mt-5 text-xl font-display font-bold text-primary">
-                Gisela Antoniucci
-              </h3>
-              <p className="text-sm text-secondary font-semibold mt-1">
-                Co-fundadora · Mãe Atípica
-              </p>
-              <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
-                Psicopedagoga especialista em autismo e palestrante. Vive a maternidade
-                atípica todos os dias e transformou esse olhar em conhecimento e acolhimento
-                real.
-              </p>
+            <div
+              className="mt-6 inline-block rounded-full p-[2px]"
+              style={{
+                background:
+                  "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+              }}
+            >
+              <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
+                🧩 Vive e respira o TEA todos os dias
+              </span>
+            </div>
+          </div>
 
-              <div
-                className="mt-6 inline-block rounded-full p-[2px]"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
-                }}
-              >
-                <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
-                  ✦ Especialista em autismo há mais de 10 anos
-                </span>
-              </div>
+          <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
+            <div
+              className="mx-auto h-32 w-32 rounded-full p-[4px]"
+              style={{
+                background:
+                  "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+              }}
+            >
+              <img
+                src={giselaFoto}
+                alt="Gisela Antoniucci, co-fundadora do Turismo Azul"
+                className="h-full w-full rounded-full object-cover"
+                style={{ objectFit: "cover", objectPosition: "center top" }}
+              />
+            </div>
+
+            <h3 className="mt-5 text-xl font-display font-bold text-primary">
+              Gisela Antoniucci
+            </h3>
+            <p className="text-sm text-secondary font-semibold mt-1">
+              Co-fundadora · Mãe Atípica
+            </p>
+            <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
+              Psicopedagoga especialista em autismo e palestrante. Vive a maternidade
+              atípica todos os dias e transformou esse olhar em conhecimento e acolhimento
+              real.
+            </p>
+
+            <div
+              className="mt-6 inline-block rounded-full p-[2px]"
+              style={{
+                background:
+                  "linear-gradient(90deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+              }}
+            >
+              <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-xs font-semibold text-primary">
+                ✦ Especialista em autismo há mais de 10 anos
+              </span>
             </div>
           </div>
         </div>
