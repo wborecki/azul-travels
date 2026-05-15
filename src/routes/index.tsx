@@ -119,6 +119,7 @@ function Landing() {
       <OQuePlataformaTera />
       <DemoEntrada />
       <BlogTeaser artigos={artigos} />
+      <ArthurGaleria />
       <CtaFinal />
     </div>
   );
