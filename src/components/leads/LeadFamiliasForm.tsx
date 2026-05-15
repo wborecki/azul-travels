@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ const PREOCUPACOES = [
 const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Senha precisa ter no mínimo 6 caracteres").max(72),
   whatsapp: z.string().trim().max(20).optional().or(z.literal("")),
   cidade: z.string().trim().min(2, "Informe sua cidade").max(120),
   estado: z.string().length(2, "Selecione um estado"),
@@ -52,6 +53,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
+  const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
@@ -87,6 +89,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     const parsed = schema.safeParse({
       nome,
       email,
+      password,
       whatsapp,
       cidade,
       estado,
@@ -110,7 +113,36 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
     }
     setErrors({});
     setEnviando(true);
-    const { error } = await supabase.from("leads_familias").insert({
+
+    // 1) Cria conta de família via signUp (trigger handle_new_user cuida do perfil + role)
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: parsed.data.email.toLowerCase(),
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/minha-conta`,
+        data: {
+          account_type: "familia",
+          nome_responsavel: parsed.data.nome,
+          telefone: parsed.data.whatsapp || null,
+          cidade: parsed.data.cidade,
+          estado: parsed.data.estado,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setEnviando(false);
+      const msg = signUpError.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        setErrors({ email: "Este e-mail já tem conta. Faça login." });
+      } else {
+        toast.error(signUpError.message || "Erro ao criar conta. Tente novamente.");
+      }
+      return;
+    }
+
+    // 2) Mantém o lead (CRM) — não bloqueia o sucesso se falhar
+    await supabase.from("leads_familias").insert({
       nome: parsed.data.nome,
       email: parsed.data.email.toLowerCase(),
       whatsapp: parsed.data.whatsapp || null,
@@ -122,15 +154,8 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
       como_conheceu: parsed.data.como_conheceu || null,
       origem,
     });
+
     setEnviando(false);
-    if (error) {
-      if (error.code === "23505") {
-        setErrors({ email: "Este e-mail já está na lista." });
-        return;
-      }
-      toast.error("Erro ao enviar. Tente novamente.");
-      return;
-    }
     setEnviado(true);
     onSuccess?.();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
@@ -238,6 +263,19 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
         {emailDup && !errors.email && (
           <p className="mt-1 text-sm text-destructive">Este e-mail já está na lista.</p>
         )}
+      </Field>
+
+      <Field label="Crie uma senha *" error={errors.password}>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mínimo 6 caracteres"
+          autoComplete="new-password"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Você usará essa senha para entrar e gerenciar o Perfil TEA da sua família.
+        </p>
       </Field>
 
       <Field label="WhatsApp (opcional)">

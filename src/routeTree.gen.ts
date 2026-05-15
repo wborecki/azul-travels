@@ -14,6 +14,7 @@ import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
+import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
@@ -71,6 +72,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const NossaHistoriaRoute = NossaHistoriaRouteImport.update({
   id: '/nossa-historia',
   path: '/nossa-historia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaEmpresaRoute = MinhaEmpresaRouteImport.update({
+  id: '/minha-empresa',
+  path: '/minha-empresa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MinhaContaRoute = MinhaContaRouteImport.update({
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
   '/minha-conta': typeof MinhaContaRouteWithChildren
+  '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/familias'
     | '/login'
     | '/minha-conta'
+    | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/familias'
     | '/login'
     | '/minha-conta'
+    | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
     | '/sobre'
@@ -494,6 +506,7 @@ export interface RootRouteChildren {
   FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
+  MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       path: '/nossa-historia'
       fullPath: '/nossa-historia'
       preLoaderRoute: typeof NossaHistoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-empresa': {
+      id: '/minha-empresa'
+      path: '/minha-empresa'
+      fullPath: '/minha-empresa'
+      preLoaderRoute: typeof MinhaEmpresaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/minha-conta': {
@@ -860,6 +880,7 @@ const rootRouteChildren: RootRouteChildren = {
   FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
   MinhaContaRoute: MinhaContaRouteWithChildren,
+  MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,

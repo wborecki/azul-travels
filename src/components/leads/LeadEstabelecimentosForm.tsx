@@ -17,18 +17,7 @@ import {
 import { ESTADOS_BR } from "@/lib/brazil";
 import { maskWhatsapp } from "@/lib/whatsapp";
 import { Building2, Check, Loader2 } from "lucide-react";
-
-const TIPOS = [
-  "Hotel",
-  "Pousada",
-  "Resort",
-  "Restaurante",
-  "Parque",
-  "Atração turística",
-  "Agência de turismo",
-  "Transporte",
-  "Outro",
-] as const;
+import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 
 const NUM_COL = ["Até 10", "11 a 30", "31 a 60", "61 a 100", "Mais de 100"] as const;
 
@@ -43,6 +32,7 @@ const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(120),
   cargo: z.string().trim().min(2, "Informe seu cargo").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Senha precisa ter no mínimo 6 caracteres").max(72),
   whatsapp: z.string().trim().min(14, "WhatsApp obrigatório"),
   nome_estabelecimento: z.string().trim().min(2, "Informe o nome").max(200),
   tipo: z.string().min(1, "Selecione o tipo"),
@@ -61,6 +51,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
   const [cargo, setCargo] = useState("");
   const [email, setEmail] = useState("");
   const [emailDup, setEmailDup] = useState(false);
+  const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [nomeEstab, setNomeEstab] = useState("");
   const [tipo, setTipo] = useState("");
@@ -137,6 +128,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       nome,
       cargo,
       email,
+      password,
       whatsapp,
       nome_estabelecimento: nomeEstab,
       tipo,
@@ -162,7 +154,39 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
     }
     setErrors({});
     setEnviando(true);
-    const { error } = await supabase.from("leads_estabelecimentos").insert({
+
+    // 1) Cria conta de estabelecimento via signUp (trigger handle_new_user cuida do perfil + role + cadastro stub)
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: parsed.data.email.toLowerCase(),
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/minha-empresa`,
+        data: {
+          account_type: "estabelecimento",
+          nome_responsavel: parsed.data.nome,
+          cargo: parsed.data.cargo,
+          whatsapp: parsed.data.whatsapp,
+          nome_estabelecimento: parsed.data.nome_estabelecimento,
+          tipo: parsed.data.tipo,
+          cidade: parsed.data.cidade,
+          estado: parsed.data.estado,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setEnviando(false);
+      const msg = signUpError.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        setErrors({ email: "Este e-mail já tem conta. Faça login." });
+      } else {
+        toast.error(signUpError.message || "Erro ao criar conta. Tente novamente.");
+      }
+      return;
+    }
+
+    // 2) Mantém o lead (CRM)
+    await supabase.from("leads_estabelecimentos").insert({
       nome: parsed.data.nome,
       cargo: parsed.data.cargo,
       email: parsed.data.email.toLowerCase(),
@@ -177,15 +201,8 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       como_conheceu: parsed.data.como_conheceu || null,
       origem,
     });
+
     setEnviando(false);
-    if (error) {
-      if (error.code === "23505") {
-        setErrors({ email: "Este e-mail já está cadastrado." });
-        return;
-      }
-      toast.error("Erro ao enviar. Tente novamente.");
-      return;
-    }
     setEnviado(true);
     void loadCount();
     if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
@@ -267,6 +284,19 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
         </Field>
       </div>
 
+      <Field label="Crie uma senha *" error={errors.password}>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mínimo 6 caracteres"
+          autoComplete="new-password"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Você usará essa senha para entrar em /minha-empresa e gerenciar o cadastro do local.
+        </p>
+      </Field>
+
       <Field label="Nome do estabelecimento *" error={errors.nome_estabelecimento}>
         <Input value={nomeEstab} onChange={(e) => setNomeEstab(e.target.value)} />
       </Field>
@@ -277,9 +307,9 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            {TIPOS.map((t) => (
+            {ESTAB_TIPOS.map((t) => (
               <SelectItem key={t} value={t}>
-                {t}
+                {ESTAB_TIPO_LABEL[t]}
               </SelectItem>
             ))}
           </SelectContent>

@@ -1,64 +1,64 @@
-## Arquitetura final
 
-```text
-CONTA DA FAMÍLIA (login obrigatório)
-└── /minha-conta                  → dashboard
-    ├── /minha-conta/perfil       → Perfil TEA único (8 seções, editável)
-    └── /minha-conta/reservas     → lista + nova reserva
-        └── /minha-conta/reservas/$id → detalhe
+# Arquitetura de contas e papéis
+
+## 1. Banco de dados (migration)
+
+**Enum `app_role`** — adicionar valor `estabelecimento`:
+```
+ALTER TYPE app_role ADD VALUE 'estabelecimento';
 ```
 
-- **Perfil TEA** vive na tabela `perfil_sensorial` (1 por familia_id).
-- **Reservas** usam a tabela `reservas` existente, com `perfil_sensorial_id` apontando para o perfil da família — quando a família abre uma reserva, o perfil é puxado automaticamente.
-- Botão **"Solicitar Reserva"** no marketplace passa a:
-  - sem login → manda para `/login?next=/minha-conta/reservas/nova?slug=...`
-  - logado e sem perfil → manda para `/minha-conta/perfil?next=...`
-  - logado e com perfil → abre `/minha-conta/reservas/nova?slug=...` já com o perfil selecionado.
-- O fluxo anônimo `/pre-checkin/$slug` é **descontinuado** (rota redireciona para o novo fluxo).
+**Nova tabela `estabelecimento_profiles`** (perfil do dono da conta, separado de `estabelecimentos` que é o cadastro público):
+- `id uuid PK` (= auth.users.id)
+- `nome_responsavel`, `cargo`, `email`, `whatsapp`
+- `estabelecimento_id uuid` (FK lógica para `estabelecimentos`, nullable até admin aprovar/criar)
+- `criado_em`
+- RLS: dono lê/edita o próprio; admin lê todos.
 
-## Mudanças no banco
+**Coluna nova em `estabelecimentos`**: `owner_user_id uuid` (nullable) — vincula o registro público ao dono logado. Atualizar policy: dono pode UPDATE quando `owner_user_id = auth.uid()`.
 
-**Estender `perfil_sensorial`** com colunas para as seções que ainda não existem (todas opcionais, default vazio):
+**Atualizar `handle_new_user()`**: ler `raw_user_meta_data->>'account_type'`:
+- `familia` (default) → cria `familia_profiles` + role `user`
+- `estabelecimento` → cria `estabelecimento_profiles` + role `estabelecimento` + cria registro stub em `estabelecimentos` (nome, tipo, cidade, estado vindos do metadata) com `owner_user_id = NEW.id`.
 
-- *Necessidades de apoio diário*: `apoio_higiene`, `apoio_alimentacao`, `apoio_mobilidade`, `apoio_seguranca` (boolean)
-- *Rotina e horários*: `rotina_horario_acordar`, `rotina_horario_dormir` (text), `rotina_observacoes` (text)
-- *Alimentação*: `alimentacao_seletiva` (boolean), `alimentacao_restricoes` (text[]), `alimentacao_observacoes` (text)
-- *Regulação emocional*: `gatilhos` (text[]), `estrategias_acalmar` (text), `sinais_sobrecarga` (text)
-- *Preferências de quarto*: `quarto_andar_baixo`, `quarto_longe_elevador`, `quarto_blackout`, `quarto_sem_estampas`, `quarto_cama_extra` (boolean), `quarto_observacoes` (text)
-- *Interesses e estratégias*: `interesses_extra` (text[]), `estrategias_que_funcionam` (text)
+## 2. Formulários de waitlist viram signup
 
-**Estender `reservas`** com:
-- `objetivo` (text) — "Por que essa viagem?"
-- `acompanhantes` (jsonb) — `[{ nome, idade, parentesco }]`
+**`LeadFamiliasForm`**: adicionar campo senha; ao submeter:
+1. `supabase.auth.signUp({ email, password, options: { data: { account_type: 'familia', nome_responsavel, telefone, cidade, estado } } })`
+2. INSERT em `leads_familias` (mantém o lead para CRM)
+3. Redireciona para `/minha-conta` (já existe).
 
-Constraint: `unique(familia_id)` em `perfil_sensorial` para garantir 1 perfil por família (somente 1 filho TEA por conta nesta versão — múltiplos filhos fica como evolução futura, conforme a estrutura solicitada).
+**`LeadEstabelecimentosForm`**: idem, com `account_type: 'estabelecimento'` + dados do estabelecimento no metadata. Redireciona para `/minha-empresa`.
 
-## Telas a construir
+## 3. Nova área `/minha-empresa`
 
-1. **`/minha-conta`** — dashboard simples: card "Perfil TEA" (criar/editar) + card "Reservas" (lista resumida) + atalho "Explorar destinos".
-2. **`/minha-conta/perfil`** — formulário único com as 8 seções em accordion/abas, salva tudo numa única submissão (upsert por `familia_id`).
-3. **`/minha-conta/reservas`** — lista de reservas com status, datas e estabelecimento.
-4. **`/minha-conta/reservas/nova`** — formulário curto: estabelecimento (pré-preenchido por `?slug`), datas, acompanhantes, objetivo, notas. Mostra resumo do Perfil TEA que será enviado.
-5. **`/minha-conta/reservas/$id`** — detalhe da reserva + snapshot do perfil enviado.
+- Layout protegido (verifica role `estabelecimento`).
+- Página única: editar perfil do local — nome, tipo, descrição, descricao_tea, cidade, estado, endereço, cep, telefone, email, website, recursos TEA (checkboxes: tem_caa, tem_sala_sensorial, etc.), foto_capa.
+- Salva em `estabelecimentos` filtrado por `owner_user_id = auth.uid()`.
+- Mostra status (rascunho / ativo) — só admin muda status.
 
-Layout `_minhaconta.tsx` (rota pathless) faz o gate de auth: sem sessão → redirect `/login?next=...`.
+## 4. Painel admin de usuários
 
-## Marketplace e pré-check-in
+Nova rota `/admin/usuarios`:
+- Lista famílias (`familia_profiles`) + estabelecimentos (`estabelecimento_profiles`) com role atual.
+- Botão "Promover a admin" / "Remover admin" → INSERT/DELETE em `user_roles`.
+- Item no menu lateral admin.
 
-- `src/routes/explorar.tsx`: botão "Solicitar Reserva →" passa a apontar para `/minha-conta/reservas/nova?slug=…` (com gate de auth/perfil).
-- `src/routes/estabelecimento.$slug.tsx`: idem.
-- `src/routes/demo.estabelecimento.$slug.tsx`: idem (usuário entendeu antes que demo e produção compartilham fluxo).
-- `src/routes/pre-checkin.$slug.tsx`: vira página de redirect (`Navigate` para `/minha-conta/reservas/nova?slug=…`) para não quebrar links existentes.
+## 5. Header / Auth
+
+- `useAuth` passa a expor `role: 'admin' | 'estabelecimento' | 'user'`.
+- Header: link "Minha conta" para família, "Minha empresa" para estabelecimento, "Admin" para admin.
+- `resolvePostLoginPath`: se role = estabelecimento → `/minha-empresa`; senão lógica atual.
+
+## 6. Fora de escopo (deixar para depois)
+
+- Reservas chegando ao estabelecimento (já existe `reservas`, mas sem UI no painel do parceiro).
+- Aprovação manual / fluxo de moderação (estabelecimento entra como `status='ativo'` direto; admin pode despublicar).
+- Confirmação de email permanece desligada ou conforme config atual; não vamos auto-confirmar.
 
 ## Detalhes técnicos
 
-- RLS já existente em `perfil_sensorial` e `reservas` (`auth.uid() = familia_id`) é suficiente — sem necessidade de novas policies.
-- `PerfilSensorialForm` é estendido para aceitar as novas seções; mantém compatibilidade com o uso atual.
-- Sem alterações em header, footer, área admin, conteúdo ou outras páginas.
-
-## Fora do escopo
-
-- Múltiplos filhos por família (estrutura permite 1 perfil/família agora).
-- Notificação por e-mail ao estabelecimento.
-- Chat família ↔ estabelecimento.
-- Pagamento/reserva financeira real.
+- Migration: ALTER TYPE + CREATE TABLE + ALTER TABLE estabelecimentos + REPLACE FUNCTION handle_new_user + RLS policies.
+- Após migration, regenerar types acontece automaticamente.
+- Manter inserção em `leads_*` para não perder histórico do CRM.
+- Validação: senha mínima 6 chars; mostrar erro se email já existir.
