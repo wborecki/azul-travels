@@ -619,9 +619,14 @@ function PorQueExistimos() {
             </h2>
 
             <p className="mt-5 text-lg text-foreground/80">
-              O Turismo Azul nasceu da experiência de Gustavo Passinato, pai atípico que tentou
-              viajar com o filho e percebeu que o mundo do turismo simplesmente não estava
-              preparado para recebê-los.
+              O Turismo Azul nasceu de dois olhares que se completam.
+            </p>
+            <p className="mt-4 text-lg text-foreground/80">
+              Gustavo Passinato, pai atípico, tentou viajar com o filho e percebeu que o
+              mundo do turismo simplesmente não estava preparado para recebê-los. Gisela
+              Antoniucci, psicopedagoga especialista em autismo e mãe atípica, via as mesmas
+              barreiras todos os dias — de dentro de casa e de dentro das salas de formação
+              onde preparava equipes para a inclusão.
             </p>
 
             <p className="mt-4 text-lg text-foreground/80">
