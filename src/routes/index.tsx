@@ -618,20 +618,11 @@ function PorQueExistimos() {
           </h2>
 
           <p className="mt-5 text-lg text-foreground/80">
-            O Turismo Azul nasceu de dois olhares que se completam.
-          </p>
-          <p className="mt-4 text-lg text-foreground/80">
-            Gustavo Passinato, pai atípico, tentou viajar com o filho e percebeu que o
-            mundo do turismo simplesmente não estava preparado para recebê-los. Gisela
-            Antoniucci, psicopedagoga especialista em autismo e mãe atípica, via as mesmas
-            barreiras todos os dias — de dentro de casa e de dentro das salas de formação
-            onde preparava equipes para a inclusão.
-          </p>
-
-          <p className="mt-4 text-lg text-foreground/80">
-            Nenhum hotel sabia o que fazer. Nenhuma agência tinha respostas. A viagem virou um
-            campo minado de imprevistos, julgamentos e situações que nenhuma família deveria
-            passar sozinha.
+            O Turismo Azul nasceu da vivência de Gustavo Passinato, pai atípico que tentou
+            viajar com o filho e percebeu que o mundo do turismo simplesmente não estava
+            preparado para recebê-los. Nenhum hotel sabia o que fazer. Nenhuma agência tinha
+            respostas. A viagem virou um campo minado de imprevistos, julgamentos e situações
+            que nenhuma família deveria passar sozinha.
           </p>
 
           <div className="mt-6 rounded-xl p-[3px]" style={{ background: gradienteAutismo }}>
@@ -647,6 +638,12 @@ function PorQueExistimos() {
           </div>
 
           <p className="mt-6 text-lg text-foreground/80">
+            A formação e capacitação dos parceiros é conduzida por Gisela Antoniucci —
+            psicopedagoga especialista em autismo e mãe atípica — que traz um olhar técnico
+            e humano sobre as necessidades reais de cada família.
+          </p>
+
+          <p className="mt-4 text-lg text-foreground/80">
             É disso que o Turismo Azul é feito. Não de especialistas em turismo que estudaram
             TEA. Mas de quem vive o autismo todos os dias e decidiu fazer algo a respeito.
           </p>
@@ -712,7 +709,7 @@ function PorQueExistimos() {
               Gisela Antoniucci
             </h3>
             <p className="text-sm text-secondary font-semibold mt-1">
-              Co-fundadora · Mãe Atípica
+              Especialista em Formação · Mãe Atípica
             </p>
             <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
               Psicopedagoga especialista em autismo e palestrante. Vive a maternidade
