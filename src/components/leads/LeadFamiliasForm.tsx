@@ -27,7 +27,7 @@ const PREOCUPACOES = [
   "Não saber se o local está preparado antes",
   "Julgamentos de outras pessoas",
   "Alimentação seletiva fora de casa",
-  "Segurança — meu filho pode se perder",
+  "Segurança - meu filho pode se perder",
 ] as const;
 
 const schema = z.object({
@@ -163,7 +163,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
             Recebemos seu cadastro. Agora você pode dar um passo a mais:
           </p>
 
-          {/* Card destaque — Criar conta */}
+          {/* Card destaque - Criar conta */}
           <div className="mt-6 rounded-2xl border-2 border-secondary/40 bg-gradient-to-br from-azul-claro/40 to-white p-6 text-left shadow-sm">
             <div className="flex items-start gap-4">
               <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -305,7 +305,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
             <SelectContent>
               {ESTADOS_BR.map((e) => (
                 <SelectItem key={e.sigla} value={e.sigla}>
-                  {e.sigla} — {e.nome}
+                  {e.sigla} - {e.nome}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -7,7 +7,7 @@
  *
  * Tipagem:
  *  - `data` é inferido **diretamente** do retorno da query
- *    (`AvaliacaoComFamilia[]`) — sem `any`/`unknown`. Os guards em
+ *    (`AvaliacaoComFamilia[]`) - sem `any`/`unknown`. Os guards em
  *    `core-payloads.guard.ts` e o teste de regressão em
  *    `__tests__/avaliacoes.regression.test.ts` cobrem o contrato.
  *  - `error` é `Error | null`; preservamos a `Error` original do
@@ -17,12 +17,12 @@
  *  Este projeto ainda não tem QueryClientProvider configurado e o resto
  *  das páginas usa o padrão `useState + useEffect`. Manter a mesma
  *  forma evita inconsistência. Se um dia adotarmos Query, este hook
- *  é o único ponto de troca — a UI consumidora não muda.
+ *  é o único ponto de troca - a UI consumidora não muda.
  *
  * Cancelamento:
  *  Cada efeito guarda uma flag `cancelled` para descartar respostas de
  *  requests obsoletos (e.g. `estabelecimentoId` mudou no meio do voo)
- *  — evita "flash" de dados antigos e atualização em componente
+ *  - evita "flash" de dados antigos e atualização em componente
  *  desmontado.
  */
 
@@ -33,7 +33,7 @@ import {
 } from "@/lib/queries/avaliacoes";
 
 export interface UseAvaliacoesPublicasResult {
-  /** Avaliações públicas do estabelecimento (sempre array — nunca null). */
+  /** Avaliações públicas do estabelecimento (sempre array - nunca null). */
   data: AvaliacaoComFamilia[];
   /** `true` enquanto a primeira carga (ou um refetch) está em andamento. */
   loading: boolean;
@@ -56,14 +56,14 @@ export function useAvaliacoesPublicasPorEstab(
   const [data, setData] = useState<AvaliacaoComFamilia[]>([]);
   const [loading, setLoading] = useState<boolean>(Boolean(estabelecimentoId));
   const [error, setError] = useState<Error | null>(null);
-  // Token incrementado a cada `refetch()` — força o efeito a rodar de novo
+  // Token incrementado a cada `refetch()` - força o efeito a rodar de novo
   // sem precisar mexer nas deps "reais". Evita dependência circular com
   // uma função `load` em `useCallback`.
   const [refetchToken, setRefetchToken] = useState(0);
 
   useEffect(() => {
     if (!estabelecimentoId) {
-      // Modo "pausado" — limpa o estado para não exibir dados de outro
+      // Modo "pausado" - limpa o estado para não exibir dados de outro
       // estabelecimento que tenha sido carregado antes.
       setData([]);
       setLoading(false);

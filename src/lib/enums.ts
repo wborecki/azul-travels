@@ -2,17 +2,17 @@
  * Fonte única de verdade para enums do schema.
  *
  * Todos os labels (PT-BR) e listas de opções para selects/filtros nascem
- * aqui — derivados diretamente de `Database["public"]["Enums"]` e
+ * aqui - derivados diretamente de `Database["public"]["Enums"]` e
  * `Constants.public.Enums` (gerados pelo Supabase).
  *
  * Por que centralizar?
  *  - **Exaustividade**: cada label é `Record<EnumValue, string>`, sem
- *    `Record<string, string>` — o build quebra se o enum ganhar um valor
+ *    `Record<string, string>` - o build quebra se o enum ganhar um valor
  *    novo no banco e a UI esquecer de traduzi-lo.
  *  - **Sem coerção**: helpers `is<Enum>` e `to<Enum>` substituem casts
  *    (`as Status`) com narrowing real em runtime.
  *  - **Sem duplicação**: não há mais arrays `["pendente", ...]` redigitados
- *    nos forms — tudo vem de `Constants.public.Enums.*`.
+ *    nos forms - tudo vem de `Constants.public.Enums.*`.
  *
  * Os guards em `types.guard.ts` travam o build se algum label divergir.
  */
@@ -32,7 +32,7 @@ export type AppRole = Database["public"]["Enums"]["app_role"];
 export type ConteudoCategoria = Database["public"]["Enums"]["conteudo_categoria"];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Listas (readonly tuples) — use em forms, filtros, validações Zod
+// Listas (readonly tuples) - use em forms, filtros, validações Zod
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Todos os tipos de estabelecimento, na ordem do enum do banco. */
@@ -54,7 +54,7 @@ export const APP_ROLES = Constants.public.Enums.app_role;
 export const CONTEUDO_CATEGORIAS = Constants.public.Enums.conteudo_categoria;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Labels (PT-BR) — exhaustive: build quebra se faltar valor
+// Labels (PT-BR) - exhaustive: build quebra se faltar valor
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const ESTAB_TIPO_LABEL: Record<EstabTipo, string> = {
@@ -72,7 +72,7 @@ export const ESTAB_TIPO_LABEL: Record<EstabTipo, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Categorias (agrupadores de tipos para a UI da home + filtro de /explorar)
 //
-// Não é um enum do banco — é uma camada puramente de produto. Cada tipo
+// Não é um enum do banco - é uma camada puramente de produto. Cada tipo
 // pertence a exatamente uma categoria. A categoria é derivada do tipo
 // via `categoriaDoTipo()`. Mantemos `Record<EstabCategoria, ...>` para
 // que o build trave caso uma categoria nova entre sem label/mapa.
@@ -162,7 +162,7 @@ export const CONTEUDO_CATEGORIA_LABEL: Record<ConteudoCategoria, string> = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Type guards (runtime narrowing — substituem `as EstabStatus` etc.)
+// Type guards (runtime narrowing - substituem `as EstabStatus` etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ESTAB_TIPO_SET = new Set<string>(ESTAB_TIPOS);
@@ -192,7 +192,7 @@ export function isConteudoCategoria(v: unknown): v is ConteudoCategoria {
 }
 
 /**
- * Coerce com fallback — útil pra ler valores de URL/query string sem
+ * Coerce com fallback - útil pra ler valores de URL/query string sem
  * recorrer a `as`. Se inválido, retorna `fallback`.
  */
 export function toEstabStatus<F extends EstabStatus | undefined>(
@@ -212,7 +212,7 @@ export function toTeaNivel<F extends TeaNivel | undefined>(v: unknown, fallback:
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Listas para Selects (label + value) — atalho idiomático para `<Select>`
+// Listas para Selects (label + value) - atalho idiomático para `<Select>`
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface EnumOption<T extends string> {
@@ -237,12 +237,12 @@ export const CONTEUDO_CATEGORIA_OPTIONS = makeOptions(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Máquina de estados — reservas
+// Máquina de estados - reservas
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Transições válidas para o status de uma reserva. Espelha exatamente a
- * trigger `validar_transicao_reserva_status` no banco — qualquer mudança
+ * trigger `validar_transicao_reserva_status` no banco - qualquer mudança
  * aqui exige migration correspondente.
  *
  *   pendente   → confirmada | cancelada
@@ -269,7 +269,7 @@ export function podeTransicionarReserva(de: ReservaStatus, para: ReservaStatus):
  * (presente em `error.message`/`error.details`/`error.hint` dependendo do
  * driver) e também faz fallback heurístico para "Transição inválida".
  *
- * Retorna `null` quando o erro NÃO é de transição inválida — o caller
+ * Retorna `null` quando o erro NÃO é de transição inválida - o caller
  * deve então mostrar a mensagem genérica original.
  */
 export function mensagemTransicaoInvalida(

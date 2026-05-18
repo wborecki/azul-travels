@@ -217,22 +217,22 @@ function AnalyticsConteudoPage() {
         <KpiCard
           icon={<Eye className="h-5 w-5" />}
           label="Visualizações"
-          value={loading ? "—" : formatNumber(data?.resumo.totalViews ?? 0)}
+          value={loading ? "-" : formatNumber(data?.resumo.totalViews ?? 0)}
         />
         <KpiCard
           icon={<MousePointerClick className="h-5 w-5" />}
           label="Cliques"
-          value={loading ? "—" : formatNumber(data?.resumo.totalClicks ?? 0)}
+          value={loading ? "-" : formatNumber(data?.resumo.totalClicks ?? 0)}
         />
         <KpiCard
           icon={<Users className="h-5 w-5" />}
           label="Visitantes únicos"
-          value={loading ? "—" : formatNumber(data?.resumo.visitantesUnicos ?? 0)}
+          value={loading ? "-" : formatNumber(data?.resumo.visitantesUnicos ?? 0)}
         />
         <KpiCard
           icon={<Percent className="h-5 w-5" />}
           label="Taxa de cliques (CTR)"
-          value={loading ? "—" : formatPct(data?.resumo.ctr ?? 0)}
+          value={loading ? "-" : formatPct(data?.resumo.ctr ?? 0)}
         />
       </div>
 

@@ -244,16 +244,16 @@ function AdminFamiliasPage() {
               {filtrados.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">
-                    {r.nome_responsavel ?? "—"}
+                    {r.nome_responsavel ?? "-"}
                     {r.is_admin && (
                       <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
                         ADMIN
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{r.email ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{r.telefone ?? "—"}</TableCell>
-                  <TableCell>{[r.cidade, r.estado].filter(Boolean).join("/") || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{r.email ?? "-"}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{r.telefone ?? "-"}</TableCell>
+                  <TableCell>{[r.cidade, r.estado].filter(Boolean).join("/") || "-"}</TableCell>
                   <TableCell className="text-xs">
                     {new Date(r.criado_em).toLocaleDateString("pt-BR")}
                   </TableCell>
@@ -263,7 +263,7 @@ function AdminFamiliasPage() {
                         Preenchido
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -356,7 +356,7 @@ function Field({ label, value }: { label: string; value: string | null | undefin
   return (
     <div className="flex justify-between gap-4 border-b pb-1.5">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium text-right">{value || "—"}</span>
+      <span className="font-medium text-right">{value || "-"}</span>
     </div>
   );
 }

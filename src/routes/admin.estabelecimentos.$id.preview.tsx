@@ -30,7 +30,7 @@ import { toast } from "sonner";
  * Pré-visualização administrativa do estabelecimento.
  *
  * Renderiza o mesmo layout da página pública (`/estabelecimento/$slug`),
- * mas busca por `id` via `fetchEstabelecimentoAdminDetalhe` — ignora o
+ * mas busca por `id` via `fetchEstabelecimentoAdminDetalhe` - ignora o
  * filtro `status = 'ativo'` para que admins revisem como o registro
  * aparecerá para famílias com TEA antes de publicar.
  *
@@ -108,7 +108,7 @@ function AdminEstabelecimentoPreview() {
 
   return (
     <div className="space-y-6">
-      {/* Barra superior admin — fora do layout público */}
+      {/* Barra superior admin - fora do layout público */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amarelo/30 bg-amarelo/10 px-4 py-3">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="icon" className="h-9 w-9">
@@ -123,7 +123,7 @@ function AdminEstabelecimentoPreview() {
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4 text-amarelo-foreground" />
             <span className="text-sm font-semibold text-amarelo-foreground">
-              Pré-visualização — como famílias com TEA verão este estabelecimento
+              Pré-visualização - como famílias com TEA verão este estabelecimento
             </span>
           </div>
         </div>
@@ -159,7 +159,7 @@ function AdminEstabelecimentoPreview() {
         </div>
       )}
 
-      {/* Galeria — espelha /estabelecimento/$slug */}
+      {/* Galeria - espelha /estabelecimento/$slug */}
       <div className="grid lg:grid-cols-3 gap-3 max-h-[480px]">
         <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-muted aspect-[16/9] lg:aspect-auto">
           {fotoCapa ? (
@@ -199,7 +199,7 @@ function AdminEstabelecimentoPreview() {
               {e.nome}
             </h1>
             <p className="mt-1 text-muted-foreground flex items-center gap-1">
-              <MapPin className="h-4 w-4" /> {e.cidade || "—"}
+              <MapPin className="h-4 w-4" /> {e.cidade || "-"}
               {e.estado ? `, ${e.estado}` : ""}
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -378,7 +378,7 @@ function AdminEstabelecimentoPreview() {
             </div>
 
             <p className="text-[11px] text-muted-foreground leading-snug">
-              O bloco de reserva foi ocultado nesta visualização — admins não enviam reservas.
+              O bloco de reserva foi ocultado nesta visualização - admins não enviam reservas.
             </p>
           </div>
         </aside>

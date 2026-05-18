@@ -18,8 +18,8 @@ export type Estab = EstabelecimentoView;
 
 /**
  * Props do EstabCard. Aceita:
- *  - `vm: EstabCardVM` + `tipo` (preferido — tipagem forte via `EstabCardProps`)
- *  - `e: EstabelecimentoView` (legado — mapeia internamente, tipo vem da row)
+ *  - `vm: EstabCardVM` + `tipo` (preferido - tipagem forte via `EstabCardProps`)
+ *  - `e: EstabelecimentoView` (legado - mapeia internamente, tipo vem da row)
  */
 type EstabCardComponentProps =
   | (EstabCardProps & { tipo?: EstabTipo })
@@ -58,7 +58,7 @@ export function EstabCard(props: EstabCardComponentProps) {
       params={{ slug: vm.slug }}
       className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-300 border border-border/50 flex flex-col h-full animate-fade-up"
     >
-      {/* Imagem com altura FIXA (h-48 = 192px) — uniforme em todos os cards */}
+      {/* Imagem com altura FIXA (h-48 = 192px) - uniforme em todos os cards */}
       <div className="relative w-full h-48 overflow-hidden bg-azul-claro">
         {vm.media.fotoCapa ? (
           <img

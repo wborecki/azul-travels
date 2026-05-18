@@ -147,7 +147,7 @@ function MinhaEmpresaPage() {
               />
             </Field>
 
-            <Field label="Descrição TEA — o que vocês oferecem para autistas?">
+            <Field label="Descrição TEA - o que vocês oferecem para autistas?">
               <Textarea
                 rows={4}
                 value={estab.descricao_tea ?? ""}

@@ -1,5 +1,5 @@
 /**
- * Teste de regressão — `familia_profiles.nome_responsavel`.
+ * Teste de regressão - `familia_profiles.nome_responsavel`.
  *
  * Existe especificamente para travar UM contrato crítico que já mordeu o
  * projeto antes: o campo `nome_responsavel` embutido no payload de
@@ -13,7 +13,7 @@
  *   - Este arquivo cobre o caso "Supabase devolveu valor com formato
  *     diferente em runtime" (e.g. embed virou objeto aninhado, virou
  *     array, virou número). Se a API do PostgREST mudar, o tsc passa
- *     mas a UI quebra — o teste runtime pega.
+ *     mas a UI quebra - o teste runtime pega.
  *   - `expectTypeOf` adiciona uma terceira camada: roda dentro do
  *     vitest (não só no `tsc`), garantindo que a checagem está
  *     realmente sendo exercitada no CI.
@@ -44,7 +44,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-// Import depois do mock — o módulo capturará a versão mockada.
+// Import depois do mock - o módulo capturará a versão mockada.
 import { fetchAvaliacoesPublicasPorEstab } from "@/lib/queries/avaliacoes";
 import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
 
@@ -52,7 +52,7 @@ afterEach(() => {
   orderMock.mockReset();
 });
 
-// Helper para montar uma row válida — só os campos que importam ao teste.
+// Helper para montar uma row válida - só os campos que importam ao teste.
 function makeRow(familia: AvaliacaoComFamilia["familia_profiles"]): AvaliacaoComFamilia {
   return {
     id: "av-1",
@@ -136,7 +136,7 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
 
   // ── DETECÇÃO de payload corrompido ────────────────────────────────────────
   // A função `fetchAvaliacoesPublicasPorEstab` repassa o que o Supabase
-  // devolve — não valida shape em runtime. Estes testes documentam o
+  // devolve - não valida shape em runtime. Estes testes documentam o
   // CONTRATO esperado: se a UI receber `nome_responsavel` que não é
   // `string | null`, é regressão. Os testes detectam isso explicitamente
   // (em vez de fingir que a função sanitiza).
@@ -144,7 +144,7 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
   it("DETECTA: number devolvido pelo Supabase é regressão de contrato", async () => {
     orderMock.mockResolvedValueOnce({
       data: [
-        // @ts-expect-error — propósito: documentar que o tipo proíbe number.
+        // @ts-expect-error - propósito: documentar que o tipo proíbe number.
         makeRow({ nome_responsavel: 12345 }),
       ],
       error: null,
@@ -154,7 +154,7 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
     const valor = rows[0]!.familia_profiles!.nome_responsavel;
 
     // Se este `expect` falhar (i.e. o valor PASSAR no contrato),
-    // ótimo — significa que adicionamos validação runtime na função.
+    // ótimo - significa que adicionamos validação runtime na função.
     // Atualize o teste para refletir a nova garantia.
     const respeitaContrato = typeof valor === "string" || valor === null;
     expect(respeitaContrato).toBe(false);
@@ -163,7 +163,7 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
   it("DETECTA: objeto aninhado devolvido pelo Supabase é regressão", async () => {
     orderMock.mockResolvedValueOnce({
       data: [
-        // @ts-expect-error — propósito: PostgREST mudou shape do embed.
+        // @ts-expect-error - propósito: PostgREST mudou shape do embed.
         makeRow({ nome_responsavel: { value: "Maria" } }),
       ],
       error: null,
@@ -178,7 +178,7 @@ describe("regressão: familia_profiles.nome_responsavel", () => {
 
   // ── PROPAGAÇÃO DE ERRO ────────────────────────────────────────────────────
   // Se a query falhar (e.g. RLS bloqueia, FK ausente), a função
-  // precisa lançar — e não devolver `[]` silenciosamente.
+  // precisa lançar - e não devolver `[]` silenciosamente.
 
   it("propaga erro do Supabase em vez de mascarar com array vazio", async () => {
     orderMock.mockResolvedValueOnce({

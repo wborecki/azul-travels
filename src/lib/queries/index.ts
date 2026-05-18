@@ -45,7 +45,7 @@ export {
   type EstabelecimentoCard, // deprecated alias
 } from "./estabelecimentos";
 
-// Helpers únicos de mídia (galeria + Tour 360°) — mesmo shape em
+// Helpers únicos de mídia (galeria + Tour 360°) - mesmo shape em
 // página de detalhe, card de listagem, form admin e embeds.
 export {
   pickEstabMedia,
@@ -74,7 +74,7 @@ export {
   type PerfilOption,
 } from "./perfis";
 
-// Mapeadores Row → ViewModel — fonte única de derivações para a UI.
+// Mapeadores Row → ViewModel - fonte única de derivações para a UI.
 export {
   mapAvaliacao,
   mapAvaliacoes,
@@ -104,7 +104,7 @@ export type {
   WithOpenChange,
 } from "./component-props";
 
-// Camada admin — listagens/joins do painel + dashboard counts.
+// Camada admin - listagens/joins do painel + dashboard counts.
 // Toda leitura admin importa daqui (writes ficam inline nas rotas).
 export {
   fetchEstabelecimentosAdmin,
@@ -147,7 +147,7 @@ export {
   type DashboardStats,
 } from "./admin";
 
-// Filtros padrão de exploração — preferências por usuário (1:1).
+// Filtros padrão de exploração - preferências por usuário (1:1).
 export {
   fetchFiltrosPadrao,
   salvarFiltrosPadrao,

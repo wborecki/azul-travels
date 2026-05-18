@@ -17,7 +17,7 @@
  *     desta pasta.
  *
  * Apenas **leituras** ficam aqui. `insert`/`update`/`delete` continuam
- * inline nas rotas — eles já recebem `TablesInsert`/`TablesUpdate`
+ * inline nas rotas - eles já recebem `TablesInsert`/`TablesUpdate`
  * tipados pelo client gerado e não têm shape de leitura para divergir.
  */
 
@@ -38,20 +38,20 @@ import { fetchAvaliacoesPublicasPorEstab } from "./avaliacoes";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Estabelecimentos — listagem admin
+// Estabelecimentos - listagem admin
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * View administrativa de estabelecimento.
  *
  * **Reutiliza** integralmente `EstabelecimentoView` (mesmo shape do
- * card público — selos, recursos, destaque, mídia) e **adiciona** apenas
+ * card público - selos, recursos, destaque, mídia) e **adiciona** apenas
  * os campos exclusivos do painel admin:
  *
- *  - `status` — exibe inclusive `pendente`/`inativo`, que o público nunca vê.
- *  - `criado_em` — ordenação cronológica e auditoria.
- *  - `mensalidade_ativa` — flag comercial (assinatura paga).
- *  - `listagem_basica` — controla se o estab aparece em listagens free.
+ *  - `status` - exibe inclusive `pendente`/`inativo`, que o público nunca vê.
+ *  - `criado_em` - ordenação cronológica e auditoria.
+ *  - `mensalidade_ativa` - flag comercial (assinatura paga).
+ *  - `listagem_basica` - controla se o estab aparece em listagens free.
  *
  * Garantia: qualquer mudança no payload base de view (novo selo,
  * novo recurso) propaga automaticamente para o admin sem refator.
@@ -66,7 +66,7 @@ export type EstabelecimentoAdminView = EstabelecimentoView &
 /**
  * SELECT do payload admin = SELECT da view + 4 campos administrativos.
  * Mantido como template literal para reaproveitar `ESTAB_VIEW_SELECT`
- * — fonte única, impossível divergir do shape público.
+ * - fonte única, impossível divergir do shape público.
  */
 export const ESTAB_ADMIN_VIEW_SELECT = `
   ${ESTAB_VIEW_SELECT},
@@ -79,7 +79,7 @@ export const ESTAB_ADMIN_VIEW_SELECT = `
  * Mantido como `Pick<EstabelecimentoAdminView, ...>` para garantir
  * que qualquer renomeação de campo na view admin propague aqui.
  *
- * @deprecated Prefira `EstabelecimentoAdminView` para novas telas —
+ * @deprecated Prefira `EstabelecimentoAdminView` para novas telas -
  * inclui selos/recursos/destaque sem custo extra de banda.
  */
 export type EstabAdminRow = Pick<
@@ -91,7 +91,7 @@ export type EstabAdminRow = Pick<
  * Lista estabelecimentos no payload admin completo (qualquer status).
  *
  * Aceita os mesmos filtros de `fetchEstabelecimentosView` (busca, tipos,
- * selos, recursos, paginação) — diferença é que **não** força
+ * selos, recursos, paginação) - diferença é que **não** força
  * `status = 'ativo'`, então traz pendentes/inativos para o painel.
  */
 export async function fetchEstabelecimentosAdminView(
@@ -110,7 +110,7 @@ export async function fetchEstabelecimentosAdminView(
 }
 
 /**
- * Versão legada/enxuta — devolve apenas as colunas de `EstabAdminRow`.
+ * Versão legada/enxuta - devolve apenas as colunas de `EstabAdminRow`.
  *
  * Implementada por cima de `fetchEstabelecimentosAdminView` para nunca
  * divergir do shape canônico. Filtra colunas via `Pick` em runtime.
@@ -133,7 +133,7 @@ export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdmi
 }
 
 /**
- * Página tipada do payload admin — items + metadados de paginação.
+ * Página tipada do payload admin - items + metadados de paginação.
  * Análoga a `EstabelecimentosViewPage` mas para o payload com `status`/`criado_em`.
  */
 export interface EstabelecimentosAdminPage {
@@ -145,7 +145,7 @@ export interface EstabelecimentosAdminPage {
 }
 
 /**
- * Versão paginada de `fetchEstabelecimentosAdminView` — uma única ida
+ * Versão paginada de `fetchEstabelecimentosAdminView` - uma única ida
  * ao banco com `count: "exact"`. **Não** força `status='ativo'`, então
  * traz pendentes/inativos para o painel.
  */
@@ -196,7 +196,7 @@ export async function fetchEstabelecimentoAdminPorId(
  * Detalhe completo do estabelecimento para a tela de **pré-visualização** admin.
  *
  * Mesmo shape de `fetchEstabelecimentoDetalhe` (página pública), mas busca por
- * `id` e **ignora** o filtro `status = 'ativo'` — admins precisam revisar
+ * `id` e **ignora** o filtro `status = 'ativo'` - admins precisam revisar
  * estabelecimentos `pendente`/`inativo` exatamente como apareceriam para
  * famílias com TEA antes de publicar.
  *
@@ -219,7 +219,7 @@ export async function fetchEstabelecimentoAdminDetalhe(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Conteúdo TEA — listagem admin
+// Conteúdo TEA - listagem admin
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ConteudoAdminRow = Pick<
@@ -251,7 +251,7 @@ export async function fetchConteudosAdmin(limit = 300): Promise<ConteudoAdminRow
 
 /** Filtros aceitos pela listagem paginada de conteúdo admin. */
 export interface ConteudosAdminFilters {
-  /** Texto livre — busca em titulo, slug e autor (ilike). */
+  /** Texto livre - busca em titulo, slug e autor (ilike). */
   busca?: string;
   /** Filtra por categoria do enum (omita para todas). */
   categoria?: Database["public"]["Enums"]["conteudo_categoria"];
@@ -330,7 +330,7 @@ export async function fetchConteudoAdminPorId(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Reserva enriquecida para o painel admin — inclui dados de contato
+ * Reserva enriquecida para o painel admin - inclui dados de contato
  * da família e identificação do estabelecimento.
  */
 export type ReservaAdminRow = Tables<"reservas"> & {
@@ -362,7 +362,7 @@ export async function fetchReservasAdmin(limit = 300): Promise<ReservaAdminRow[]
 
 /** Filtros aceitos pela listagem paginada de reservas admin. */
 export interface ReservasAdminFilters {
-  /** Texto livre — busca em mensagem (ilike). Para campos de tabelas
+  /** Texto livre - busca em mensagem (ilike). Para campos de tabelas
    * embutidas (estabelecimentos.nome, familia_profiles.email) o filtro
    * **complementar** acontece no cliente sobre a página atual. */
   busca?: string;
@@ -390,7 +390,7 @@ export interface ReservasAdminPage {
 
 /**
  * Versão paginada da listagem admin de reservas. Faz busca server-side
- * por `mensagem` (ilike), `status` (eq) e intervalos de data — tanto
+ * por `mensagem` (ilike), `status` (eq) e intervalos de data - tanto
  * `data_checkin` (date) quanto `criado_em` (timestamptz, com clamp para
  * fim do dia em `criadoAte`). Filtros adicionais por dados embutidos
  * (`estabelecimentos.nome`, `familia_profiles.*`) permanecem opcionais
@@ -436,7 +436,7 @@ export async function fetchReservasAdminPaginated(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Contagem global por status — usada no painel de filtros para mostrar
+ * Contagem global por status - usada no painel de filtros para mostrar
  * o total real (todas as páginas) sem precisar carregar todas as linhas.
  *
  * Faz uma query `head: true` por status em paralelo + uma `total` geral.
@@ -494,7 +494,7 @@ export async function fetchAuditoriaPorReserva(reservaId: string): Promise<Audit
  * de cada reserva da lista. Usado pela tabela admin para mostrar um
  * indicador truncado da observação mais recente sem fazer N+1 fetches.
  *
- * Retorna um Map(reserva_id → log) — ausência de chave significa que
+ * Retorna um Map(reserva_id → log) - ausência de chave significa que
  * a reserva ainda não tem observação registrada.
  */
 export async function fetchUltimaObservacaoPorReservas(
@@ -521,7 +521,7 @@ export async function fetchUltimaObservacaoPorReservas(
 
 /** Filtros aceitos pela listagem paginada da auditoria de reservas. */
 export interface AuditoriaAdminFilters {
-  /** Busca livre — case-insensitive em `ator_email`, `acao`, `observacao`. */
+  /** Busca livre - case-insensitive em `ator_email`, `acao`, `observacao`. */
   busca?: string;
   /** ISO inicial (`>=`) de `criado_em`. */
   desde?: string;
@@ -540,7 +540,7 @@ export interface AuditoriaAdminPage {
 }
 
 /**
- * Versão paginada da auditoria de reservas — uma única ida ao banco
+ * Versão paginada da auditoria de reservas - uma única ida ao banco
  * com `count: "exact"`. Filtros de data e busca são server-side.
  */
 export async function fetchAuditoriaAdminPaginated(
@@ -575,7 +575,7 @@ export async function fetchAuditoriaAdminPaginated(
   };
 }
 
-/** Heurística simples — evita injetar termos não-UUID no `eq.` de `reserva_id`. */
+/** Heurística simples - evita injetar termos não-UUID no `eq.` de `reserva_id`. */
 function isUuid(s: string) {
   return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
 }
@@ -603,7 +603,7 @@ export async function fetchAuditoriaPorEstabelecimento(
 
 /** Filtros aceitos pela listagem global de auditoria de estabelecimentos. */
 export interface EstabAuditoriaAdminFilters {
-  /** Busca livre — case-insensitive em ator_email, campo, nome do estabelecimento. */
+  /** Busca livre - case-insensitive em ator_email, campo, nome do estabelecimento. */
   busca?: string;
   /** ISO inicial (`>=`) de `criado_em`. */
   desde?: string;
@@ -661,12 +661,12 @@ export async function fetchEstabAuditoriaAdminPaginated(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Perfis sensoriais — listagem rica para `/minha-conta/perfil-sensorial`
+// Perfis sensoriais - listagem rica para `/minha-conta/perfil-sensorial`
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Subset usado na página de perfis sensoriais da família. Exporta só
- * os campos que a UI realmente exibe — evita carregar a row gigante.
+ * os campos que a UI realmente exibe - evita carregar a row gigante.
  */
 export type PerfilSensorialRow = Pick<
   Tables<"perfil_sensorial">,
@@ -701,7 +701,7 @@ export async function fetchPerfisSensoriaisDaFamilia(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Dashboard counts — `/admin`
+// Dashboard counts - `/admin`
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AdminCounts {
@@ -727,7 +727,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   return data as unknown as DashboardStats;
 }
 
-/** Conta linhas de cada domínio (head: true — não traz payload). */
+/** Conta linhas de cada domínio (head: true - não traz payload). */
 export async function fetchAdminCounts(): Promise<AdminCounts> {
   const [estabs, reservas, conteudos, familias] = await Promise.all([
     supabase.from("estabelecimentos").select("id", { count: "exact", head: true }),
@@ -747,7 +747,7 @@ export async function fetchAdminCounts(): Promise<AdminCounts> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Conteúdo TEA — leituras públicas (consumidas em /conteudo, /conteudo/$slug
+// Conteúdo TEA - leituras públicas (consumidas em /conteudo, /conteudo/$slug
 // e na home). Mesma fonte da listagem admin, payload simplificado.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -824,7 +824,7 @@ export async function fetchIsAdmin(userId: string): Promise<boolean> {
   return !!data;
 }
 
-/** Primeiro perfil sensorial completo da família — usado em /explorar. */
+/** Primeiro perfil sensorial completo da família - usado em /explorar. */
 export async function fetchPrimeiroPerfilSensorial(
   familiaId: string,
 ): Promise<Tables<"perfil_sensorial"> | null> {

@@ -30,7 +30,7 @@ function gerarSlug(): string {
   let out = "";
   for (let i = 0; i < SLUG_LENGTH; i++) {
     // Mod 62: levíssimo viés (256 % 62 = 8 valores extras), aceitável
-    // para slug não-criptográfico — colisão já é tratada por UNIQUE.
+    // para slug não-criptográfico - colisão já é tratada por UNIQUE.
     out += SLUG_ALPHABET[bytes[i]! % SLUG_ALPHABET.length];
   }
   return out;

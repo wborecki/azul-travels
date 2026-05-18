@@ -1,5 +1,5 @@
 /**
- * Props tipadas de componentes — derivadas dos View Models centrais.
+ * Props tipadas de componentes - derivadas dos View Models centrais.
  *
  * Esta camada existe para que **nenhum componente declare suas próprias
  * props ad-hoc** quando o dado vem de um payload do Supabase. Em vez
@@ -9,7 +9,7 @@
  * Vantagens:
  *  - Você nunca passa um campo que o VM não tem (TS rejeita).
  *  - Renomear um campo no mapper quebra TODOS os componentes que o
- *    consomem — em build, não em produção.
+ *    consomem - em build, não em produção.
  *  - Componentes "Banner"/"Modal" novos podem usar `Pick`/`Omit` em
  *    cima do VM e ganhar tipagem forte de graça.
  *
@@ -40,7 +40,7 @@ export interface WithOpenChange {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Props do `EstabCard` — exige o VM completo. Não aceitar a row crua
+ * Props do `EstabCard` - exige o VM completo. Não aceitar a row crua
  * evita que um caller esqueça de chamar `mapEstabCard` antes.
  */
 export interface EstabCardProps {
@@ -51,7 +51,7 @@ export interface EstabCardProps {
 
 /**
  * Props de um item de avaliação dentro de listas (card por avaliação).
- * Vem direto do VM — `AvaliacaoCardProps["avaliacao"]` === `AvaliacaoVM`.
+ * Vem direto do VM - `AvaliacaoCardProps["avaliacao"]` === `AvaliacaoVM`.
  */
 export interface AvaliacaoCardProps {
   avaliacao: AvaliacaoVM;
@@ -68,7 +68,7 @@ export interface ReservaCardProps {
 
 /**
  * Banner de destaque para um estabelecimento (hero, faixa promocional).
- * Usa apenas o subset visível em formato banner — não precisa dos
+ * Usa apenas o subset visível em formato banner - não precisa dos
  * recursos sensoriais nem dos selos secundários.
  */
 export type EstabBannerProps = Pick<
@@ -83,11 +83,11 @@ export type EstabBannerProps = Pick<
 export interface ErrorBannerProps extends WithRetry {
   /** Título curto do erro (ex.: "Não foi possível carregar"). */
   title: string;
-  /** Mensagem detalhada — geralmente `error.message`. */
+  /** Mensagem detalhada - geralmente `error.message`. */
   message: string;
 }
 
-/** Banner vazio — usado quando uma listagem retorna 0 itens. */
+/** Banner vazio - usado quando uma listagem retorna 0 itens. */
 export interface EmptyBannerProps {
   /** Mensagem amigável para o usuário. */
   message: string;
@@ -111,7 +111,7 @@ export interface CancelarReservaModalProps extends WithOpenChange {
 }
 
 /**
- * Modal de detalhe de avaliação (expand do card). VM completo —
+ * Modal de detalhe de avaliação (expand do card). VM completo -
  * permite mostrar comentário longo + nota + responsável.
  */
 export interface AvaliacaoDetalheModalProps extends WithOpenChange {

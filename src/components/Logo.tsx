@@ -23,7 +23,7 @@ export function Logo({
     resolvedVariant === "dark" ? "text-[#f0c25a]" : "text-[#c69820]";
 
   return (
-    <Link to="/" className="flex items-center gap-3 group" aria-label="Turismo Azul Inclusivo — início">
+    <Link to="/" className="flex items-center gap-3 group" aria-label="Turismo Azul Inclusivo - início">
       {/* Coração quebra-cabeça oficial */}
       <svg
         width="48"

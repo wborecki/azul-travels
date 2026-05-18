@@ -1,6 +1,6 @@
 /**
  * Dados estáticos para a demonstração da plataforma em /demo/*.
- * Nenhuma rota /demo/* faz chamadas ao Supabase — tudo vem daqui.
+ * Nenhuma rota /demo/* faz chamadas ao Supabase - tudo vem daqui.
  */
 
 export type DemoEstabelecimento = {

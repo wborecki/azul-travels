@@ -12,7 +12,7 @@
  * `publicado` ainda é `false` para artigos agendados que já venceram.
  */
 export function filtroConteudoPublico(now: Date = new Date()): string {
-  // ISO 8601 em UTC — PostgREST aceita e o Postgres compara timestamptz corretamente.
+  // ISO 8601 em UTC - PostgREST aceita e o Postgres compara timestamptz corretamente.
   const iso = now.toISOString();
   return `publicado.eq.true,publicar_em.lte.${iso}`;
 }

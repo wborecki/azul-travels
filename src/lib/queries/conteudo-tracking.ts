@@ -2,7 +2,7 @@
  * Tracking de eventos de conteúdo (visualizações e cliques).
  *
  * - Insere em `conteudo_eventos` via RLS pública (anon/auth).
- * - Gera/recupera um `sessao_id` anônimo via `sessionStorage` — não-pessoal,
+ * - Gera/recupera um `sessao_id` anônimo via `sessionStorage` - não-pessoal,
  *   apenas para deduplicar visualizações na mesma aba.
  * - Best-effort: erros são silenciosamente ignorados para não quebrar UX.
  */
@@ -37,7 +37,7 @@ async function inserirEvento(payload: TablesInsert<"conteudo_eventos">): Promise
 
 /**
  * Registra uma visualização do artigo. Deduplica por sessão (uma view
- * por artigo por aba). Não bloqueia o render — best-effort.
+ * por artigo por aba). Não bloqueia o render - best-effort.
  */
 export async function registrarViewConteudo(conteudoId: string): Promise<void> {
   if (typeof window === "undefined" || !conteudoId) return;

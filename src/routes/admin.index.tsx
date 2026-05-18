@@ -74,7 +74,7 @@ function AdminDashboard() {
     })();
   }, []);
 
-  const fmt = (n?: number) => (loading ? "—" : String(n ?? 0));
+  const fmt = (n?: number) => (loading ? "-" : String(n ?? 0));
 
   return (
     <div className="space-y-8 max-w-7xl">
@@ -222,7 +222,7 @@ function MetricCard({
 }
 
 function StatusPill({ status }: { status: string | null }) {
-  const s = status ?? "—";
+  const s = status ?? "-";
   const tone =
     s === "ativo"
       ? "bg-[#dcfce7] text-[#15803d]"

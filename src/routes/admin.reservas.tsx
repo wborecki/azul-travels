@@ -67,12 +67,12 @@ export const Route = createFileRoute("/admin/reservas")({
   component: AdminReservas,
 });
 
-// Aliases locais — payloads sempre vêm de `@/lib/queries`.
+// Aliases locais - payloads sempre vêm de `@/lib/queries`.
 type ReservaAdmin = ReservaAdminRow;
 type Auditoria = AuditoriaRow;
 
 /**
- * Filtros derivados do enum `reserva_status` — labels vêm de
+ * Filtros derivados do enum `reserva_status` - labels vêm de
  * `RESERVA_STATUS_LABEL` (exhaustive). Adicionar valor novo no banco
  * inclui o filtro automaticamente.
  */
@@ -267,7 +267,7 @@ function AdminReservas() {
     const { reserva, next } = confirmAction;
     const previous = toReservaStatus(reserva.status, "pendente");
 
-    // Guarda no cliente — espelha a regra do banco e evita ida desnecessária.
+    // Guarda no cliente - espelha a regra do banco e evita ida desnecessária.
     if (!podeTransicionarReserva(previous, next)) {
       const msg =
         mensagemTransicaoInvalida(
@@ -593,11 +593,11 @@ function AdminReservas() {
         "Tipo do estabelecimento",
         "Cidade do estabelecimento",
         "Estado do estabelecimento",
-        "Família — responsável",
-        "Família — e-mail",
-        "Família — telefone",
-        "Família — cidade",
-        "Família — estado",
+        "Família - responsável",
+        "Família - e-mail",
+        "Família - telefone",
+        "Família - cidade",
+        "Família - estado",
         "Perfil sensorial enviado",
       ];
 
@@ -722,7 +722,7 @@ function AdminReservas() {
         })}
       </div>
 
-      {/* Filtros por intervalo de datas — check-in e criação */}
+      {/* Filtros por intervalo de datas - check-in e criação */}
       <div className="rounded-2xl border bg-card p-4 space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
@@ -916,17 +916,17 @@ function AdminReservas() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-medium text-foreground">
-                            {r.estabelecimentos?.nome ?? "—"}
+                            {r.estabelecimentos?.nome ?? "-"}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
                               .filter(Boolean)
-                              .join(" / ") || "—"}
+                              .join(" / ") || "-"}
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-medium text-foreground">
-                            {r.familia_profiles?.nome_responsavel ?? "—"}
+                            {r.familia_profiles?.nome_responsavel ?? "-"}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {r.familia_profiles?.email ?? ""}
@@ -935,7 +935,7 @@ function AdminReservas() {
                         <td className="px-4 py-3 text-foreground/80">
                           {r.data_checkin
                             ? new Date(r.data_checkin).toLocaleDateString("pt-BR")
-                            : "—"}
+                            : "-"}
                         </td>
                         <td className="px-4 py-3 text-foreground/80 whitespace-nowrap">
                           {r.num_adultos ?? 0} adulto(s) · {r.num_autistas ?? 0} autista(s)
@@ -1251,12 +1251,12 @@ function DetalheReserva({
           <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-in">
             {reserva.data_checkin
               ? new Date(reserva.data_checkin).toLocaleDateString("pt-BR")
-              : "—"}
+              : "-"}
           </InfoLine>
           <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-out">
             {reserva.data_checkout
               ? new Date(reserva.data_checkout).toLocaleDateString("pt-BR")
-              : "—"}
+              : "-"}
           </InfoLine>
           <InfoLine icon={<Users className="h-4 w-4" />} label="Pessoas">
             {reserva.num_adultos ?? 0} adulto(s) · {reserva.num_autistas ?? 0} autista(s)
@@ -1268,7 +1268,7 @@ function DetalheReserva({
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Família
           </h3>
-          <div className="font-medium text-foreground">{fam?.nome_responsavel ?? "—"}</div>
+          <div className="font-medium text-foreground">{fam?.nome_responsavel ?? "-"}</div>
           {fam?.email && (
             <InfoLine icon={<Mail className="h-4 w-4" />} label="E-mail">
               <a href={`mailto:${fam.email}`} className="text-primary hover:underline">
@@ -1373,7 +1373,7 @@ function DetalheReserva({
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {log.status_anterior ?? "—"} → {log.status_novo ?? "—"}
+                    {log.status_anterior ?? "-"} → {log.status_novo ?? "-"}
                   </div>
                   {log.ator_email && (
                     <div className="text-xs text-muted-foreground mt-0.5">por {log.ator_email}</div>
@@ -1413,7 +1413,7 @@ function InfoLine({
 
 /**
  * Histórico de auditoria renderizado **inline** na linha expansível
- * da tabela. Compacto, sem cabeçalhos — pensado para complementar a
+ * da tabela. Compacto, sem cabeçalhos - pensado para complementar a
  * visualização rápida sem exigir abrir o drawer de detalhes.
  */
 function InlineAuditoria({
@@ -1452,7 +1452,7 @@ function InlineAuditoria({
               <div className="flex items-center gap-2">
                 <span className="font-medium text-foreground capitalize">{log.acao}</span>
                 <span className="text-xs text-muted-foreground">
-                  {(log.status_anterior ?? "—") + " → " + (log.status_novo ?? "—")}
+                  {(log.status_anterior ?? "-") + " → " + (log.status_novo ?? "-")}
                 </span>
               </div>
               <span className="text-xs text-muted-foreground">
@@ -1490,7 +1490,7 @@ function ReservaStatusBadge({ status }: { status: ReservaStatus | null }) {
     case "concluida":
       return <Badge variant="secondary">Concluída</Badge>;
     default:
-      return <Badge variant="secondary">—</Badge>;
+      return <Badge variant="secondary">-</Badge>;
   }
 }
 

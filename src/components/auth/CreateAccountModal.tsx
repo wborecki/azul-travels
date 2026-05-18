@@ -22,7 +22,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   accountType: AccountType;
   email: string;
-  /** Metadata passed to signUp — consumed by handle_new_user trigger */
+  /** Metadata passed to signUp - consumed by handle_new_user trigger */
   signupMetadata: Record<string, unknown>;
 }
 
