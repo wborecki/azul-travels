@@ -86,35 +86,26 @@ function NossaHistoriaPage() {
           </div>
           <div className="max-w-3xl mx-auto text-center">
             <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3666]">
-                Quem somos
-              </h2>
-              <div className="mt-6 space-y-5 text-[17px] leading-relaxed text-foreground/85">
-                <p>
-                  O Turismo Azul nasceu do encontro entre experiência
-                  profissional, vivência familiar e o desejo genuíno de
-                  transformar o turismo em um espaço mais acessível, acolhedor
-                  e possível para pessoas autistas e suas famílias.
-                </p>
-                <p>
-                  O projeto foi idealizado por <strong>Gisela Antoniucci</strong>{" "}
-                  e <strong>Gustavo Passinato</strong>. Gisela é psicopedagoga,
-                  especialista em autismo, palestrante e mãe atípica, atuando
-                  há anos na formação de professores, equipes
-                  multidisciplinares e instituições voltadas à inclusão. Mais
-                  do que uma especialista, Gisela vive diariamente os desafios
-                  e as necessidades da maternidade atípica. Essa vivência trouxe
-                  um olhar humano, sensível e real sobre as barreiras enfrentadas
-                  pelas famílias em momentos simples da vida — inclusive no lazer
-                  e nas viagens.
-                </p>
-                <p>
-                  Ao lado dela, Gustavo Passinato contribui com sua experiência
-                  em gestão, estruturação de projetos e desenvolvimento
-                  estratégico, ajudando a transformar propósito em ação concreta
-                  e impacto social.
-                </p>
-              </div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3666]">
+              Quem somos
+            </h2>
+            <div className="mt-6 space-y-5 text-[17px] leading-relaxed text-foreground/85">
+              <p>
+                O Turismo Azul Inclusivo nasceu do propósito de transformar o turismo em uma experiência mais acessível, acolhedora e possível para pessoas autistas e suas famílias.
+              </p>
+              <p>
+                O projeto foi idealizado por <strong>Gustavo Passinato</strong>, pai do Arthur, uma criança autista. Ao longo de quase 10 anos enfrentando os desafios que milhares de famílias atípicas encontram ao tentar viajar com segurança, acolhimento e respeito às necessidades do neurodivergente, Gustavo viveu na pele situações de despreparo em hotéis, espaços turísticos e destinos sem acessibilidade sensorial ou compreensão sobre o autismo. Foi dessa vivência real que nasceu a decisão de transformar experiência pessoal em projeto de impacto social — conectando inclusão, capacitação e hospitalidade.
+              </p>
+              <p>
+                O Turismo Azul Inclusivo atua na formação e preparação de hotéis, resorts, pousadas, parques, agências de turismo, guias e toda a cadeia do setor turístico para receber adequadamente famílias atípicas, promovendo ambientes mais seguros, estruturados e acolhedores.
+              </p>
+              <p>
+                A formação técnica e especializada do projeto é conduzida por <strong>Gisela Antoniucci</strong> — psicopedagoga, especialista em autismo, palestrante e mãe atípica do Arthur. Com ampla experiência na formação de professores, equipes multidisciplinares e instituições voltadas à inclusão, Gisela lidera o braço de capacitação do projeto com um olhar técnico, humano e sensível sobre as necessidades reais das pessoas autistas e de suas famílias.
+              </p>
+              <p>
+                Mais do que um projeto de turismo, o Turismo Azul Inclusivo nasce do amor de um pai, da expertise de uma mãe atípica e da certeza de que toda família merece viver momentos de lazer sem medo, julgamento ou exclusão.
+              </p>
+            </div>
             </div>
           </div>
         </div>
