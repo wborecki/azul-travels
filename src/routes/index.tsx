@@ -709,7 +709,7 @@ function PorQueExistimos() {
               Gisela Antoniucci
             </h3>
             <p className="text-sm text-secondary font-semibold mt-1">
-              Co-fundadora · Mãe Atípica
+              Especialista em Formação · Mãe Atípica
             </p>
             <p className="mt-4 text-sm text-foreground/75 leading-relaxed">
               Psicopedagoga especialista em autismo e palestrante. Vive a maternidade
