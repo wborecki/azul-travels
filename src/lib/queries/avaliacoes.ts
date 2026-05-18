@@ -2,7 +2,7 @@
  * Query tipada de avaliações com join para `familia_profiles`.
  *
  * Centraliza o `select` para que toda a aplicação consuma o mesmo
- * payload tipado (sem `any`/`unknown`) — incluindo a página de
+ * payload tipado (sem `any`/`unknown`) - incluindo a página de
  * detalhe do estabelecimento.
  */
 

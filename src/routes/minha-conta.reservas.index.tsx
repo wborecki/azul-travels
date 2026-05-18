@@ -73,7 +73,7 @@ function ReservasList() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-display font-bold text-primary">
-                      {r.estabelecimentos?.nome ?? "—"}
+                      {r.estabelecimentos?.nome ?? "-"}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {[r.estabelecimentos?.cidade, r.estabelecimentos?.estado]
@@ -81,8 +81,8 @@ function ReservasList() {
                         .join(" · ")}
                     </div>
                     <div className="mt-2 text-sm text-foreground/80">
-                      {r.data_checkin ? formatDateBR(r.data_checkin) : "—"} →{" "}
-                      {r.data_checkout ? formatDateBR(r.data_checkout) : "—"}
+                      {r.data_checkin ? formatDateBR(r.data_checkin) : "-"} →{" "}
+                      {r.data_checkout ? formatDateBR(r.data_checkout) : "-"}
                     </div>
                   </div>
                   <span className="text-[11px] uppercase font-semibold px-2 py-1 rounded-full bg-azul-claro text-primary shrink-0">

@@ -426,7 +426,7 @@ function AdminConteudoForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rascunho">📝 Rascunho — apenas no admin</SelectItem>
+                  <SelectItem value="rascunho">📝 Rascunho - apenas no admin</SelectItem>
                   <SelectItem value="agendado">⏰ Agendar publicação</SelectItem>
                   <SelectItem value="publicado">🌐 Publicar agora</SelectItem>
                 </SelectContent>
@@ -477,7 +477,7 @@ function AdminConteudoForm() {
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Sem categoria</SelectItem>
+                  <SelectItem value="none">- Sem categoria</SelectItem>
                   {CONTEUDO_CATEGORIAS.map((c) => (
                     <SelectItem key={c} value={c}>
                       {CONTEUDO_CATEGORIA_LABEL[c]}

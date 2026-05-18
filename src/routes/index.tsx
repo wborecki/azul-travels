@@ -611,7 +611,7 @@ function PorQueExistimos() {
           </span>
         </div>
 
-        {/* Bloco superior — texto corrido, centralizado */}
+        {/* Bloco superior - texto corrido, centralizado */}
         <div className="max-w-[720px] mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-primary leading-tight">
             Não foi uma ideia de negócio. Foi uma necessidade real.
@@ -638,8 +638,8 @@ function PorQueExistimos() {
           </div>
 
           <p className="mt-6 text-lg text-foreground/80">
-            A formação e capacitação dos parceiros é conduzida por Gisela Antoniucci —
-            psicopedagoga especialista em autismo e mãe atípica — que traz um olhar técnico
+            A formação e capacitação dos parceiros é conduzida por Gisela Antoniucci -
+            psicopedagoga especialista em autismo e mãe atípica - que traz um olhar técnico
             e humano sobre as necessidades reais de cada família.
           </p>
 
@@ -649,7 +649,7 @@ function PorQueExistimos() {
           </p>
         </div>
 
-        {/* Bloco inferior — cards dos fundadores lado a lado */}
+        {/* Bloco inferior - cards dos fundadores lado a lado */}
         <div className="grid md:grid-cols-2 gap-6 max-w-[864px] mx-auto mt-14 items-stretch">
           <div className="bg-white rounded-3xl shadow-elegant border border-border p-8 text-center">
             <div

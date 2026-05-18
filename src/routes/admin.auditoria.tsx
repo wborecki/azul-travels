@@ -56,7 +56,7 @@ function AdminAuditoria() {
           Auditoria
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Quem alterou o quê — registros gerados automaticamente a partir das ações dos
+          Quem alterou o quê - registros gerados automaticamente a partir das ações dos
           administradores.
         </p>
       </div>
@@ -196,7 +196,7 @@ function EstabAuditoriaTab() {
                     {format(new Date(r.criado_em), "dd/MM/yy HH:mm", { locale: ptBR })}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {r.ator_email ?? <span className="text-muted-foreground italic">—</span>}
+                    {r.ator_email ?? <span className="text-muted-foreground italic">-</span>}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("font-medium", b.cls)}>
@@ -216,7 +216,7 @@ function EstabAuditoriaTab() {
                     {r.campo ? (
                       <span className="font-medium">{CAMPO_LABEL[r.campo] ?? r.campo}</span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-xs">
@@ -231,7 +231,7 @@ function EstabAuditoriaTab() {
                         </code>
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -372,7 +372,7 @@ function ReservasAuditoriaTab() {
                     {format(new Date(r.criado_em), "dd/MM/yy HH:mm", { locale: ptBR })}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {r.ator_email ?? <span className="text-muted-foreground italic">—</span>}
+                    {r.ator_email ?? <span className="text-muted-foreground italic">-</span>}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("font-medium", b.cls)}>
@@ -382,21 +382,21 @@ function ReservasAuditoriaTab() {
                   <TableCell className="text-xs">
                     {r.status_anterior || r.status_novo ? (
                       <span className="text-muted-foreground">
-                        {r.status_anterior ?? "—"}{" "}
+                        {r.status_anterior ?? "-"}{" "}
                         <span className="text-foreground/40">→</span>{" "}
                         <span className="text-foreground font-medium">
-                          {r.status_novo ?? "—"}
+                          {r.status_novo ?? "-"}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-[11px] text-muted-foreground">
                     {r.reserva_id.slice(0, 8)}…
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground max-w-[260px] truncate">
-                    {r.observacao ?? "—"}
+                    {r.observacao ?? "-"}
                   </TableCell>
                 </TableRow>
               );
@@ -440,7 +440,7 @@ function DateField({
           )}
         >
           <CalendarIcon className="h-4 w-4 mr-2" />
-          {label}: {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "—"}
+          {label}: {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "-"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

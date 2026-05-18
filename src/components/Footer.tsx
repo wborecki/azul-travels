@@ -17,12 +17,12 @@ export function Footer() {
       <div className="border-b border-white/10" style={{ backgroundColor: "rgba(0,180,216,0.12)" }}>
         <div className="container mx-auto px-4 py-3 text-center text-sm font-medium flex items-center justify-center gap-2" style={{ color: "#00b4d8" }}>
           <Construction className="h-4 w-4" />
-          <span>🚧 Plataforma em desenvolvimento — Lançamento previsto para 2026</span>
+          <span>🚧 Plataforma em desenvolvimento - Lançamento previsto para 2026</span>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-        {/* Coluna 1 — Logo + descrição + tagline */}
+        {/* Coluna 1 - Logo + descrição + tagline */}
         <div className="space-y-5">
           <div className="bg-white/5 inline-block rounded-lg px-2 py-1.5">
             <Logo variant="dark" />
@@ -58,7 +58,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Coluna 2 — Links rápidos */}
+        {/* Coluna 2 - Links rápidos */}
         <div>
           <h4 className="font-display font-extrabold uppercase tracking-wide mb-4 text-white text-sm">
             Links rápidos
@@ -72,7 +72,7 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Coluna 3 — Contato + URL */}
+        {/* Coluna 3 - Contato + URL */}
         <div>
           <h4 className="font-display font-extrabold uppercase tracking-wide mb-4 text-white text-sm">
             Contato

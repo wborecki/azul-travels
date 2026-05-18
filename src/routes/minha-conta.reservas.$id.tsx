@@ -103,8 +103,8 @@ function ReservaDetalhe() {
       <div className="bg-white border rounded-2xl p-5 space-y-2">
         <h2 className="font-display font-bold text-primary">Datas</h2>
         <p className="text-sm">
-          {reserva.data_checkin ? formatDateBR(reserva.data_checkin) : "—"} →{" "}
-          {reserva.data_checkout ? formatDateBR(reserva.data_checkout) : "—"}
+          {reserva.data_checkin ? formatDateBR(reserva.data_checkin) : "-"} →{" "}
+          {reserva.data_checkout ? formatDateBR(reserva.data_checkout) : "-"}
         </p>
       </div>
 

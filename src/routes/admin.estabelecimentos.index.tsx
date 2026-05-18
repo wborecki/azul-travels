@@ -98,7 +98,7 @@ function AdminEstabelecimentos() {
     });
 
   /**
-   * Atualiza status com **rollback otimista** — aplica na UI primeiro;
+   * Atualiza status com **rollback otimista** - aplica na UI primeiro;
    * se o Supabase falhar, restaura o valor anterior e mostra erro.
    */
   const handleStatusChange = async (row: Row, next: EstabStatus) => {
@@ -222,7 +222,7 @@ function AdminEstabelecimentos() {
                     </td>
                     <td className="px-4 py-3 capitalize text-foreground/80">{r.tipo}</td>
                     <td className="px-4 py-3 text-foreground/80">
-                      {[r.cidade, r.estado].filter(Boolean).join(" / ") || "—"}
+                      {[r.cidade, r.estado].filter(Boolean).join(" / ") || "-"}
                     </td>
                     <td className="px-4 py-3">
                       <StatusControl
@@ -313,7 +313,7 @@ function AdminEstabelecimentos() {
 }
 
 /**
- * Cores semânticas por status. Exhaustive `Record<EstabStatus, ...>` —
+ * Cores semânticas por status. Exhaustive `Record<EstabStatus, ...>` -
  * adicionar valor novo ao enum quebra o build até ser tratado aqui.
  */
 const STATUS_BADGE: Record<EstabStatus, string> = {
@@ -323,7 +323,7 @@ const STATUS_BADGE: Record<EstabStatus, string> = {
 };
 
 function StatusBadge({ status }: { status: Row["status"] }) {
-  if (!status) return <Badge variant="secondary">—</Badge>;
+  if (!status) return <Badge variant="secondary">-</Badge>;
   return <Badge className={STATUS_BADGE[status]}>{ESTAB_STATUS_LABEL[status]}</Badge>;
 }
 
@@ -408,7 +408,7 @@ function DestaqueControl({
           <Star className="h-3.5 w-3.5 fill-primary" /> Destaque
         </span>
       ) : (
-        <span className="text-xs text-muted-foreground">—</span>
+        <span className="text-xs text-muted-foreground">-</span>
       )}
     </div>
   );

@@ -50,7 +50,7 @@ export const Route = createFileRoute("/admin/estabelecimentos/$id")({
 
 type EstabRow = Tables<"estabelecimentos">;
 type EstabInsert = TablesInsert<"estabelecimentos">;
-// Aliases locais — apontam para os enums centralizados em `@/lib/enums`.
+// Aliases locais - apontam para os enums centralizados em `@/lib/enums`.
 type Tipo = EstabTipo;
 type Status = EstabStatus;
 
@@ -260,7 +260,7 @@ function AdminEstabelecimentoForm() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  // Slug é **derivado automaticamente** do nome — não há mais edição manual.
+  // Slug é **derivado automaticamente** do nome - não há mais edição manual.
   // Travar a UI evita que admins criem variações conflitantes (ex.: "hotel-x"
   // vs "hotel-x-2") sem motivo. A unicidade real é garantida pelo índice
   // único no banco + auto-sufixo aplicado em `ensureUniqueSlug` no submit.
@@ -276,7 +276,7 @@ function AdminEstabelecimentoForm() {
    * incrementa um sufixo `-2`, `-3`, ... até encontrar o primeiro livre.
    *
    * Como a checagem é client-side **e** o índice único cobre o banco, a
-   * pior corrida possível resulta em erro `23505` no insert/update — que
+   * pior corrida possível resulta em erro `23505` no insert/update - que
    * tratamos no `handleSubmit` mostrando uma mensagem clara.
    */
   const ensureUniqueSlug = async (base: string): Promise<string> => {
@@ -304,7 +304,7 @@ function AdminEstabelecimentoForm() {
     e.preventDefault();
     setErrors({});
 
-    // Slug é sempre derivado do nome no submit — protege contra estados
+    // Slug é sempre derivado do nome no submit - protege contra estados
     // intermediários (ex.: form recém-carregado de um registro antigo cujo
     // slug não bate exatamente com `slugify(nome)`).
     const baseSlug = slugify(form.nome);
@@ -373,7 +373,7 @@ function AdminEstabelecimentoForm() {
       longitude: v.longitude,
       // Capa = primeira foto da galeria. Mantemos `foto_capa` no DB por
       // compatibilidade com cards/listagens que ainda leem o campo direto,
-      // mas ele agora é **derivado** — nunca editado manualmente.
+      // mas ele agora é **derivado** - nunca editado manualmente.
       foto_capa: form.fotos[0] ?? null,
       fotos: form.fotos,
       destaque: form.destaque,
@@ -472,7 +472,7 @@ function AdminEstabelecimentoForm() {
           <Field
             label="Slug (gerado automaticamente)"
             error={errors.slug}
-            hint="Derivado do nome — sufixo numérico é adicionado se houver conflito."
+            hint="Derivado do nome - sufixo numérico é adicionado se houver conflito."
           >
             <Input
               value={form.slug}
@@ -578,10 +578,10 @@ function AdminEstabelecimentoForm() {
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">—</SelectItem>
+                <SelectItem value="none">-</SelectItem>
                 {ESTADOS_BR.map((e) => (
                   <SelectItem key={e.sigla} value={e.sigla}>
-                    {e.sigla} — {e.nome}
+                    {e.sigla} - {e.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -704,7 +704,7 @@ function AdminEstabelecimentoForm() {
         <FotosGaleria value={form.fotos} onChange={(v) => set("fotos", v)} />
       </Section>
 
-      {/* Histórico de alterações — só faz sentido para registros existentes */}
+      {/* Histórico de alterações - só faz sentido para registros existentes */}
       {!isNew && (
         <Section
           title="Histórico de alterações"
@@ -958,7 +958,7 @@ async function uploadToBucket(file: File): Promise<string> {
 /**
  * Galeria de fotos com **drag-and-drop** nativo (HTML5 DnD).
  *
- * Modelo unificado: a primeira foto do array é a **capa** — não há
+ * Modelo unificado: a primeira foto do array é a **capa** - não há
  * mais campo `foto_capa` editável. Reordenar arrastando ou clicando em
  * "Tornar capa" muda quem aparece nos cards e na hero do estabelecimento.
  *
@@ -968,7 +968,7 @@ async function uploadToBucket(file: File): Promise<string> {
  *  - Estado de drag isolado em `dragIndex` (apenas o índice da fonte;
  *    o destino é calculado no `onDrop`).
  *  - Acessibilidade: além do mouse, cada tile tem botões "Tornar capa"
- *    e "Remover" — usuários sem mouse continuam funcionais.
+ *    e "Remover" - usuários sem mouse continuam funcionais.
  */
 function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1033,7 +1033,7 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
         </Label>
         {count > 1 && (
           <span className="text-[11px] text-muted-foreground">
-            Arraste as fotos para reordenar — a primeira vira a capa.
+            Arraste as fotos para reordenar - a primeira vira a capa.
           </span>
         )}
       </div>
@@ -1129,7 +1129,7 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
                   className="w-full h-full object-cover pointer-events-none"
                 />
 
-                {/* Handle de drag — visível, indica interatividade */}
+                {/* Handle de drag - visível, indica interatividade */}
                 <div
                   className="absolute top-1.5 left-1.5 rounded-md bg-background/90 px-1 py-1 shadow-sm cursor-grab active:cursor-grabbing"
                   title="Arraste para reordenar"

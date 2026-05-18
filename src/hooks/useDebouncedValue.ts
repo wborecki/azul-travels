@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 /**
- * Retorna `value` defasado por `delay` ms — útil para debounciar
+ * Retorna `value` defasado por `delay` ms - útil para debounciar
  * inputs de busca antes de disparar fetches/queries.
  */
 export function useDebouncedValue<T>(value: T, delay = 300): T {

@@ -4,7 +4,7 @@
  * Centraliza shape e normalização dos campos `fotos` (jsonb), `foto_capa`
  * e `tour_360_url` para que todos os consumidores (página de detalhe, card
  * de listagem, form admin, reservas embed) lidem com o **mesmo payload
- * tipado** — sem `as`, sem `Json`, sem strings vazias falseando guards
+ * tipado** - sem `as`, sem `Json`, sem strings vazias falseando guards
  * `{x && ...}`.
  *
  * Contrato:
@@ -57,12 +57,12 @@ export function normalizeFotos(v: unknown): string[] {
  * Shape padronizado de mídia consumido pela UI.
  *
  * Toda página/componente que renderiza galeria, capa ou Tour 360°
- * recebe este objeto — não acessa `row.fotos`/`row.foto_capa` direto.
+ * recebe este objeto - não acessa `row.fotos`/`row.foto_capa` direto.
  */
 export interface EstabMedia {
   /** Capa principal (string saneada ou `null`). */
   fotoCapa: string | null;
-  /** Galeria adicional — sempre array, eventualmente vazio. */
+  /** Galeria adicional - sempre array, eventualmente vazio. */
   fotos: string[];
   /** URL do Tour 360° (string saneada ou `null`). */
   tour360Url: string | null;

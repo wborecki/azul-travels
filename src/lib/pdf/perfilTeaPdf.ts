@@ -19,25 +19,25 @@ function arr(v: string[] | null | undefined): string {
 function bool(v: boolean | null | undefined): string {
   if (v === true) return "Sim";
   if (v === false) return "Não";
-  return "—";
+  return "-";
 }
 
 function txt(v: string | null | undefined): string {
   const t = (v ?? "").trim();
-  return t.length > 0 ? t : "—";
+  return t.length > 0 ? t : "-";
 }
 
 function num(v: number | null | undefined): string {
-  return v === null || v === undefined ? "—" : String(v);
+  return v === null || v === undefined ? "-" : String(v);
 }
 
 function timeFmt(v: string | null | undefined): string {
-  if (!v) return "—";
+  if (!v) return "-";
   return v.length >= 5 ? v.slice(0, 5) : v;
 }
 
 function dataFmt(v: string | null | undefined): string {
-  if (!v) return "—";
+  if (!v) return "-";
   const [y, m, d] = v.split("-");
   return `${d}/${m}/${y}`;
 }
@@ -147,7 +147,7 @@ export function gerarPerfilTeaPdf({ perfil, reserva, estabelecimento }: PdfOpts)
       {
         rotulo: "Local",
         valor: estabelecimento
-          ? `${estabelecimento.cidade ?? "—"}/${estabelecimento.estado ?? "—"}`
+          ? `${estabelecimento.cidade ?? "-"}/${estabelecimento.estado ?? "-"}`
           : null,
       },
       { rotulo: "Check-in", valor: reserva ? dataFmt(reserva.data_checkin) : null },

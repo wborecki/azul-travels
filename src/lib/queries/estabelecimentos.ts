@@ -6,7 +6,7 @@
  *   - cards (landing, destaques, benefícios)
  *   - detalhe (/estabelecimento/:slug)
  *
- * Mesmo SELECT, mesmo shape — sem duplicação. Para a página de
+ * Mesmo SELECT, mesmo shape - sem duplicação. Para a página de
  * detalhe (que precisa de campos adicionais como descricao,
  * endereco, telefone, etc.), use `EstabelecimentoFull`.
  */
@@ -25,10 +25,10 @@ export type EstabelecimentoFull = Tables<"estabelecimentos">;
  * Garantias adicionais sobre o payload bruto do Supabase:
  *  - `fotos`: sempre `string[]` (nunca `Json`/`null`/objeto). Entradas
  *    inválidas (não-string ou string vazia) são descartadas.
- *  - `tour_360_url`, `foto_capa`, `website`: `string | null` — strings
+ *  - `tour_360_url`, `foto_capa`, `website`: `string | null` - strings
  *    vazias/whitespace viram `null` para simplificar os checks no UI
  *    (`{x && ...}` passa a refletir intenção real).
- *  - `latitude`/`longitude`: `number | null` — qualquer valor inválido
+ *  - `latitude`/`longitude`: `number | null` - qualquer valor inválido
  *    (NaN, infinito, fora de faixa) vira `null` para evitar pin no
  *    meio do oceano.
  *
@@ -58,10 +58,10 @@ function cleanNumber(v: unknown): number | null {
 
 /**
  * Converte uma row crua do Supabase no shape seguro de UI.
- * Idempotente — passar um `EstabelecimentoNormalized` retorna o mesmo shape.
+ * Idempotente - passar um `EstabelecimentoNormalized` retorna o mesmo shape.
  *
  * Usa o helper único de mídia (`@/lib/media`) para `fotos`, `foto_capa`
- * e `tour_360_url` — mesmo contrato consumido no card, no admin e na
+ * e `tour_360_url` - mesmo contrato consumido no card, no admin e na
  * página de detalhe.
  */
 export function normalizeEstabelecimento(row: EstabelecimentoFull): EstabelecimentoNormalized {
@@ -80,7 +80,7 @@ export function normalizeEstabelecimento(row: EstabelecimentoFull): Estabelecime
 /**
  * Extrai o payload de mídia (`EstabMedia`) de uma row de view/embed.
  * Use em cards de listagem ou em embeds de reservas onde `EstabelecimentoView`
- * é suficiente — mesmo shape que `normalizeEstabelecimento(...)` retorna
+ * é suficiente - mesmo shape que `normalizeEstabelecimento(...)` retorna
  * para a página de detalhe.
  */
 export function pickMediaFromView(
@@ -129,7 +129,7 @@ export type EstabelecimentoView = Pick<
   | "destaque"
 >;
 
-/** SELECT compartilhado — fonte única da verdade do payload de view. */
+/** SELECT compartilhado - fonte única da verdade do payload de view. */
 export const ESTAB_VIEW_SELECT = `
   id, slug, nome, tipo, cidade, estado, foto_capa,
   tour_360_url,
@@ -165,15 +165,15 @@ export type RecursoFlag =
  * - Quando paginação está ativa, `limite` é ignorado.
  */
 export interface EstabelecimentosViewFilters {
-  /** Texto livre — busca em nome, cidade e tipo (ilike). */
+  /** Texto livre - busca em nome, cidade e tipo (ilike). */
   busca?: string;
   /** Múltiplos tipos (OR via `in`). Aceita também um único valor. */
   tipos?: ReadonlyArray<EstabelecimentoFull["tipo"]>;
   /** @deprecated use `tipos`. Mantido para compatibilidade. */
   tipo?: EstabelecimentoFull["tipo"];
-  /** Selos exigidos (AND — todos precisam ser true). */
+  /** Selos exigidos (AND - todos precisam ser true). */
   selos?: ReadonlyArray<SeloFlag>;
-  /** Recursos sensoriais exigidos (AND — todos precisam ser true). */
+  /** Recursos sensoriais exigidos (AND - todos precisam ser true). */
   recursos?: ReadonlyArray<RecursoFlag>;
   /** Sigla do estado (UF). */
   estado?: string;
@@ -225,12 +225,12 @@ export function resolvePagination(
 }
 
 /**
- * Helper único de filtros — fonte da verdade para construir queries
+ * Helper único de filtros - fonte da verdade para construir queries
  * sobre `estabelecimentos` no payload View. Reutilizado em landing,
  * /explorar, /beneficios-tea, etc. Evita duplicar `query.eq(...)`
  * espalhado pelas páginas.
  */
-// Tipo aberto do builder do Postgrest — preserva o encadeamento tipado
+// Tipo aberto do builder do Postgrest - preserva o encadeamento tipado
 // no caller, ao mesmo tempo em que evita acoplar o helper a um shape
 // específico de Database/Schema. Definido como interface mínima
 // estrutural (apenas os métodos realmente usados aqui), o que permite
@@ -301,7 +301,7 @@ export async function fetchEstabelecimentosView(
 }
 
 /**
- * Página tipada de estabelecimentos — items + metadados de paginação.
+ * Página tipada de estabelecimentos - items + metadados de paginação.
  * Use `fetchEstabelecimentosViewPaginated` quando precisar do total /
  * número de páginas para renderizar uma paginação visual.
  */
@@ -319,7 +319,7 @@ export interface EstabelecimentosViewPage {
 
 /**
  * Versão paginada de `fetchEstabelecimentosView`. Faz uma única ida
- * ao banco com `count: "exact"` — o total é devolvido junto, evitando
+ * ao banco com `count: "exact"` - o total é devolvido junto, evitando
  * uma segunda query.
  *
  * Sempre paginado: se `pagina`/`tamanhoPagina` não vierem, usa
@@ -361,7 +361,7 @@ export async function fetchEstabelecimentosViewPaginated(
 /**
  * Busca um estabelecimento ativo por slug.
  *
- * Retorna o payload **normalizado** (`EstabelecimentoNormalized`) — campos
+ * Retorna o payload **normalizado** (`EstabelecimentoNormalized`) - campos
  * opcionais como `fotos` e URLs já chegam saneados, dispensando guards e
  * casts (`as string[]`) na UI consumidora.
  */
@@ -389,8 +389,8 @@ export async function fetchEstabelecimentoPorSlug(
  * Garantias:
  *  - `estabelecimento`: `EstabelecimentoNormalized` (`fotos: string[]`, URLs
  *    saneadas, `latitude`/`longitude` numéricos válidos ou `null`).
- *  - `avaliacoes`: `AvaliacaoComFamilia[]` (sempre array — nunca `null`).
- *  - Sem `any`/`unknown` — guards em `types.guard.ts` travam o build se algo
+ *  - `avaliacoes`: `AvaliacaoComFamilia[]` (sempre array - nunca `null`).
+ *  - Sem `any`/`unknown` - guards em `types.guard.ts` travam o build se algo
  *    regredir.
  */
 export interface EstabelecimentoDetalhe {
@@ -406,7 +406,7 @@ export interface EstabelecimentoDetalhe {
  *  2. `avaliacoes` públicas com join `familia_profiles(nome_responsavel)`.
  *
  * Retorna `null` quando o estabelecimento não existe (ou não está ativo).
- * Erros do Supabase são propagados — o caller decide como exibir.
+ * Erros do Supabase são propagados - o caller decide como exibir.
  */
 export async function fetchEstabelecimentoDetalhe(
   slug: string,
@@ -419,7 +419,7 @@ export async function fetchEstabelecimentoDetalhe(
 }
 
 // ──────────────────────────────────────────────────────────────
-// Aliases legados (compatibilidade) — preferir os nomes acima.
+// Aliases legados (compatibilidade) - preferir os nomes acima.
 // ──────────────────────────────────────────────────────────────
 /** @deprecated use `EstabelecimentoFull` */
 export type Estabelecimento = EstabelecimentoFull;

@@ -13,7 +13,7 @@ export type EventoTipo = "view" | "click";
 export interface AnalyticsFiltros {
   desdeISO: string; // inclusivo
   ateISO: string; // inclusivo
-  conteudoId?: string; // opcional — limita a um artigo
+  conteudoId?: string; // opcional - limita a um artigo
 }
 
 export type ConteudoEventoRow = Pick<

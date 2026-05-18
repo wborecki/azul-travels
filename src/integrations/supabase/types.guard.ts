@@ -1,5 +1,5 @@
 /**
- * Type guards de build — falham o `tsc` se a tipagem do Supabase regredir.
+ * Type guards de build - falham o `tsc` se a tipagem do Supabase regredir.
  *
  * Cobre três contratos críticos da página /estabelecimento/:slug:
  *   1. Query de avaliações com join `familia_profiles(nome_responsavel)`
@@ -9,7 +9,7 @@
  *   3. `TablesInsert<"reservas">` precisa aceitar `estabelecimento_id`
  *      vindo de `Tables<"estabelecimentos">["id"]` (mesmo tipo).
  *
- * Este arquivo NÃO exporta runtime — só serve ao typechecker.
+ * Este arquivo NÃO exporta runtime - só serve ao typechecker.
  * Se algo regredir, o build quebra com mensagem clara.
  */
 
@@ -31,7 +31,7 @@ import {
 } from "@/lib/enums";
 
 // (Os checks de exhaustividade de labels estão no fim do arquivo, junto
-// aos demais — precisam dos helpers `AssertEqual` declarados abaixo.)
+// aos demais - precisam dos helpers `AssertEqual` declarados abaixo.)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers de asserção em tempo de compilação
@@ -68,11 +68,11 @@ type AvaliacaoRow = NonNullable<AvaliacoesJoinResult>[number];
 // O payload não pode ser any nem unknown.
 type _CheckRowNotAny = AssertNotAny<
   AvaliacaoRow,
-  "REGRESSION: avaliacoes join row is `any` — Supabase types are broken"
+  "REGRESSION: avaliacoes join row is `any` - Supabase types are broken"
 >;
 type _CheckRowNotUnknown = AssertNotUnknown<
   AvaliacaoRow,
-  "REGRESSION: avaliacoes join row is `unknown` — FK avaliacoes_familia_id_fkey missing?"
+  "REGRESSION: avaliacoes join row is `unknown` - FK avaliacoes_familia_id_fkey missing?"
 >;
 
 // O campo embutido `familia_profiles` precisa existir e expor `nome_responsavel: string | null`.
@@ -97,7 +97,7 @@ type _CheckCriadoEm = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. Estabelecimento — Tour 360°, galeria, capa
+// 2. Estabelecimento - Tour 360°, galeria, capa
 // ─────────────────────────────────────────────────────────────────────────────
 
 type Estab = Tables<"estabelecimentos">;
@@ -112,12 +112,12 @@ type _CheckFotoCapa = AssertEqual<
   string | null,
   "REGRESSION: estabelecimentos.foto_capa deveria ser string | null"
 >;
-// `fotos` é JSONB no banco — não pode ser `any`.
+// `fotos` é JSONB no banco - não pode ser `any`.
 type _CheckFotosNotAny = AssertNotAny<
   Estab["fotos"],
   "REGRESSION: estabelecimentos.fotos virou `any`"
 >;
-// `fotos` precisa permanecer JSONB nullable — qualquer mudança aqui
+// `fotos` precisa permanecer JSONB nullable - qualquer mudança aqui
 // deve fluir conscientemente até `EstabelecimentoNormalized.fotos`
 // (que normaliza para `string[]`).
 type _CheckFotosShape = AssertEqual<
@@ -127,7 +127,7 @@ type _CheckFotosShape = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Reserva — IDs precisam casar em todo o ciclo (Row, Insert, Form, Build)
+// 3. Reserva - IDs precisam casar em todo o ciclo (Row, Insert, Form, Build)
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // Cobre TODA a cadeia onde `estabelecimento_id` e `familia_id` aparecem:
@@ -151,7 +151,7 @@ type EstabId = Estab["id"];
 type FamiliaId = Tables<"familia_profiles">["id"];
 type PerfilSensorialId = Tables<"perfil_sensorial">["id"];
 
-// 3.1 — Insert deve aceitar exatamente o id do estabelecimento/família.
+// 3.1 - Insert deve aceitar exatamente o id do estabelecimento/família.
 type _CheckReservaEstabId = AssertEqual<
   ReservaInsert["estabelecimento_id"],
   EstabId,
@@ -163,7 +163,7 @@ type _CheckReservaFamiliaId = AssertEqual<
   "REGRESSION: reservas.Insert.familia_id divergiu de familia_profiles.id"
 >;
 
-// 3.2 — Row (select) deve devolver exatamente o mesmo tipo de id.
+// 3.2 - Row (select) deve devolver exatamente o mesmo tipo de id.
 // Sem isso, um `data.estabelecimento_id` voltaria como `string` genérico
 // e a comparação com `Estab["id"]` aceitaria qualquer valor.
 type _CheckReservaRowEstabId = AssertEqual<
@@ -182,7 +182,7 @@ type _CheckReservaRowPerfilId = AssertEqual<
   "REGRESSION: reservas.Row.perfil_sensorial_id divergiu de perfil_sensorial.id"
 >;
 
-// 3.3 — IDs obrigatórios não podem virar `null`/optional no Insert.
+// 3.3 - IDs obrigatórios não podem virar `null`/optional no Insert.
 // (família e estabelecimento são `NOT NULL` no banco; perfil sensorial
 // é opcional por design.)
 type _CheckReservaInsertFamiliaRequired = AssertEqual<
@@ -197,7 +197,7 @@ type _CheckReservaInsertEstabRequired = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4. Função pública fetchAvaliacoesPublicasPorEstab — payload tipado
+// 4. Função pública fetchAvaliacoesPublicasPorEstab - payload tipado
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { AvaliacaoComFamilia } from "@/lib/queries/avaliacoes";
@@ -226,7 +226,7 @@ type _CheckFetchEmbed = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. Camada central /lib/queries — cada função pública precisa estar tipada
+// 5. Camada central /lib/queries - cada função pública precisa estar tipada
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type {
@@ -266,7 +266,7 @@ type _CheckEstabShape = AssertEqual<
   EstabelecimentoNormalized,
   "REGRESSION: fetchEstabelecimentoPorSlug divergiu de EstabelecimentoNormalized"
 >;
-// Garantias do shape normalizado — UI não precisa mais lidar com Json/cast.
+// Garantias do shape normalizado - UI não precisa mais lidar com Json/cast.
 type _CheckEstabFotos = AssertEqual<
   EstabReturn["fotos"],
   string[],
@@ -299,7 +299,7 @@ type _CheckEstabIdMatchesFull = AssertEqual<
   "REGRESSION: Normalized.id divergiu de Full.id"
 >;
 
-// Payload View unificado — usado em listagem, cards, destaques, benefícios.
+// Payload View unificado - usado em listagem, cards, destaques, benefícios.
 type _CheckViewNotAny = AssertNotAny<ViewReturn, "REGRESSION: fetchEstabelecimentosView -> any">;
 type _CheckViewShape = AssertEqual<
   ViewReturn,
@@ -324,7 +324,7 @@ type _CheckViewBeneficio = AssertEqual<
   "REGRESSION: View.beneficio_tea_descricao quebrou"
 >;
 type _CheckViewSlug = AssertEqual<ViewReturn["slug"], string, "REGRESSION: View.slug quebrou">;
-// View deve ser estritamente subset de Full — IDs precisam casar.
+// View deve ser estritamente subset de Full - IDs precisam casar.
 type _CheckViewIdMatchesFull = AssertEqual<
   ViewReturn["id"],
   EstabelecimentoFull["id"],
@@ -365,7 +365,7 @@ type _CheckPerfisShape = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. fetchEstabelecimentoDetalhe — payload composto da página de detalhe
+// 6. fetchEstabelecimentoDetalhe - payload composto da página de detalhe
 // ─────────────────────────────────────────────────────────────────────────────
 
 type _CheckDetalheNotAny = AssertNotAny<
@@ -389,7 +389,7 @@ type _CheckDetalheAvaliacoesEmbed = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. buildReservaPayload — ponte form → ReservaInsert sem coerção
+// 7. buildReservaPayload - ponte form → ReservaInsert sem coerção
 // ─────────────────────────────────────────────────────────────────────────────
 
 type BuildReservaArg = Parameters<typeof buildReservaPayload>[0];
@@ -405,7 +405,7 @@ type _CheckBuildReturnShape = AssertEqual<
   TablesInsert<"reservas">,
   "REGRESSION: buildReservaPayload deveria devolver TablesInsert<reservas>"
 >;
-// 7.1 — Form: ids precisam casar com as PKs reais (mesmas usadas em 3.x).
+// 7.1 - Form: ids precisam casar com as PKs reais (mesmas usadas em 3.x).
 type _CheckFormFamiliaId = AssertEqual<
   ReservaFormInput["familia_id"],
   FamiliaId,
@@ -432,8 +432,8 @@ type _CheckFormAutistas = AssertEqual<
   "REGRESSION: ReservaFormInput.num_autistas divergiu da coluna"
 >;
 
-// 7.2 — buildReservaPayload: o objeto retornado precisa preservar
-// EXATAMENTE os ids de família/estabelecimento/perfil — ou seja, o que
+// 7.2 - buildReservaPayload: o objeto retornado precisa preservar
+// EXATAMENTE os ids de família/estabelecimento/perfil - ou seja, o que
 // sai do helper é o que entra no Supabase, sem coerção entre tipos.
 type _CheckBuildReturnFamiliaId = AssertEqual<
   BuildReservaReturn["familia_id"],
@@ -451,7 +451,7 @@ type _CheckBuildReturnPerfilId = AssertEqual<
   "REGRESSION: buildReservaPayload.perfil_sensorial_id divergiu de reservas.Insert.perfil_sensorial_id"
 >;
 
-// 7.3 — criarReserva: o Row devolvido pelo Supabase após o insert
+// 7.3 - criarReserva: o Row devolvido pelo Supabase após o insert
 // deve trazer os mesmos ids fortemente tipados (cadeia fecha aqui).
 type CriarReservaResult = Awaited<ReturnType<typeof criarReserva>>;
 type _CheckCriarReservaFamiliaId = AssertEqual<
@@ -466,7 +466,7 @@ type _CheckCriarReservaEstabId = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. Helper único de mídia (galeria + Tour 360°) — `pickEstabMedia`
+// 8. Helper único de mídia (galeria + Tour 360°) - `pickEstabMedia`
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { pickEstabMedia, type EstabMedia } from "@/lib/media";
@@ -502,16 +502,16 @@ type _CheckNormalizedFeedsMedia = AssertEqual<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. End-to-end de mídia — DB → View → Normalize → pickEstabMedia → UI
+// 9. End-to-end de mídia - DB → View → Normalize → pickEstabMedia → UI
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // Cobre, em ordem do banco para a UI, a cadeia completa:
 //
-//   Tables<"estabelecimentos">       (banco — JSONB cru)
+//   Tables<"estabelecimentos">       (banco - JSONB cru)
 //        ↓ ESTAB_VIEW_SELECT
 //   EstabelecimentoView              (listagem/cards)
 //        ↓ normalizeEstabelecimento
-//   EstabelecimentoNormalized        (detalhe — saneado)
+//   EstabelecimentoNormalized        (detalhe - saneado)
 //        ↓ pickEstabMedia
 //   EstabMedia                       (consumo final na UI)
 //
@@ -522,7 +522,7 @@ type _CheckNormalizedFeedsMedia = AssertEqual<
 import { ESTAB_VIEW_SELECT, normalizeEstabelecimento, pickMediaFromView } from "@/lib/queries";
 import { normalizeFotos, normalizeUrl, type EstabMediaRow } from "@/lib/media";
 
-// 9.1 — Cobertura de SELECT: a View precisa carregar todos os campos
+// 9.1 - Cobertura de SELECT: a View precisa carregar todos os campos
 // de mídia exigidos pela UI (capa + Tour 360°). Galeria fica fora da
 // View por design (carregada só no detalhe), mas se um dia for
 // adicionada, este check vai garantir que o tipo bate.
@@ -539,7 +539,7 @@ type _CheckViewHasTour360 = AssertEqual<
 >;
 
 // O literal do SELECT em runtime tem que mencionar exatamente as
-// colunas de mídia — sem isso o Supabase devolveria `undefined` em
+// colunas de mídia - sem isso o Supabase devolveria `undefined` em
 // produção mesmo com tipos OK.
 type SelectLiteral = typeof ESTAB_VIEW_SELECT;
 type _CheckSelectMentionsCapa = SelectLiteral extends `${string}foto_capa${string}`
@@ -549,7 +549,7 @@ type _CheckSelectMentionsTour = SelectLiteral extends `${string}tour_360_url${st
   ? true
   : "REGRESSION: ESTAB_VIEW_SELECT não inclui tour_360_url";
 
-// 9.2 — Normalize: shape de saída precisa expor mídia já saneada.
+// 9.2 - Normalize: shape de saída precisa expor mídia já saneada.
 type NormalizeReturn = ReturnType<typeof normalizeEstabelecimento>;
 type _CheckNormalizeFotosShape = AssertEqual<
   NormalizeReturn["fotos"],
@@ -574,7 +574,7 @@ type _CheckDetalheUsesNormalize = AssertEqual<
   "REGRESSION: EstabelecimentoDetalhe.estabelecimento divergiu do retorno de normalizeEstabelecimento"
 >;
 
-// 9.3 — Helpers brutos: contratos individuais usados pelo admin form.
+// 9.3 - Helpers brutos: contratos individuais usados pelo admin form.
 type _CheckNormalizeFotosFn = AssertEqual<
   ReturnType<typeof normalizeFotos>,
   string[],
@@ -586,27 +586,27 @@ type _CheckNormalizeUrlFn = AssertEqual<
   "REGRESSION: normalizeUrl deveria devolver string | null"
 >;
 
-// 9.4 — Compatibilidade dos consumidores com o helper único.
+// 9.4 - Compatibilidade dos consumidores com o helper único.
 // Tanto `EstabelecimentoView` (cards/embeds) quanto `EstabelecimentoNormalized`
-// (detalhe) precisam ser aceitos por `pickEstabMedia` — caso contrário a
+// (detalhe) precisam ser aceitos por `pickEstabMedia` - caso contrário a
 // UI volta a acessar `row.fotos`/`row.foto_capa` direto e perde a sanitização.
 type _CheckViewIsMediaRow = EstabelecimentoView extends EstabMediaRow
   ? true
-  : "REGRESSION: EstabelecimentoView não satisfaz EstabMediaRow — pickEstabMedia rejeitaria cards";
+  : "REGRESSION: EstabelecimentoView não satisfaz EstabMediaRow - pickEstabMedia rejeitaria cards";
 type _CheckNormalizedIsMediaRow = EstabelecimentoNormalized extends EstabMediaRow
   ? true
   : "REGRESSION: EstabelecimentoNormalized não satisfaz EstabMediaRow";
 type _CheckFullIsMediaRow =
   Tables<"estabelecimentos"> extends EstabMediaRow
     ? true
-    : "REGRESSION: Tables<estabelecimentos> não satisfaz EstabMediaRow — admin form quebra";
+    : "REGRESSION: Tables<estabelecimentos> não satisfaz EstabMediaRow - admin form quebra";
 
-// 9.5 — `pickMediaFromView` (atalho exportado para cards/embeds) precisa
+// 9.5 - `pickMediaFromView` (atalho exportado para cards/embeds) precisa
 // devolver o mesmo `EstabMedia` que `pickEstabMedia(detalhe)`.
 type _CheckPickFromViewShape = AssertEqual<
   ReturnType<typeof pickMediaFromView>,
   EstabMedia,
-  "REGRESSION: pickMediaFromView divergiu de EstabMedia — cards e detalhe sairiam de sincronia"
+  "REGRESSION: pickMediaFromView divergiu de EstabMedia - cards e detalhe sairiam de sincronia"
 >;
 
 // Marca todas as checagens como "usadas" para silenciar noUnusedLocals/parameters.

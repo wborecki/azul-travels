@@ -1,5 +1,5 @@
 /**
- * Queries tipadas para `perfil_tea` — Perfil TEA permanente da família.
+ * Queries tipadas para `perfil_tea` - Perfil TEA permanente da família.
  * Uma família pode ter múltiplos perfis (um por filho autista).
  */
 

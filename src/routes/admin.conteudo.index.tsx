@@ -299,9 +299,9 @@ function AdminConteudo() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-foreground/80">
-                      {r.categoria ? CONTEUDO_CATEGORIA_LABEL[r.categoria] : "—"}
+                      {r.categoria ? CONTEUDO_CATEGORIA_LABEL[r.categoria] : "-"}
                     </td>
-                    <td className="px-4 py-3 text-foreground/80">{r.autor ?? "—"}</td>
+                    <td className="px-4 py-3 text-foreground/80">{r.autor ?? "-"}</td>
                     <td className="px-4 py-3">
                       {r.publicado ? (
                         <Badge className="bg-success/15 text-success hover:bg-success/15">
@@ -427,7 +427,7 @@ function AdminConteudo() {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Editor rápido — título, categoria e status publicado em popover
+// Editor rápido - título, categoria e status publicado em popover
 // ────────────────────────────────────────────────────────────────────────────
 
 type QuickEditPatch = Partial<Pick<Row, "titulo" | "categoria" | "publicado">>;

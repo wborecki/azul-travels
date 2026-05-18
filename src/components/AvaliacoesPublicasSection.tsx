@@ -1,10 +1,10 @@
 /**
- * Seção tipada de avaliações públicas — usada na página de detalhe do
+ * Seção tipada de avaliações públicas - usada na página de detalhe do
  * estabelecimento (e reutilizável onde mais fizer sentido).
  *
  * Responsabilidades:
  *  - Consumir `useAvaliacoesPublicasPorEstab` (encapsula loading/error/data).
- *  - Mapear cada row em `AvaliacaoVM` via `mapAvaliacoes` — derivações
+ *  - Mapear cada row em `AvaliacaoVM` via `mapAvaliacoes` - derivações
  *    (primeiro nome, data formatada, fallback de nota, comentário trimado)
  *    ficam num só lugar, fora do JSX.
  *  - Renderizar de forma **exaustiva** cada estado possível:
@@ -29,7 +29,7 @@ import {
 } from "@/lib/queries";
 
 interface AvaliacoesPublicasSectionProps {
-  /** ID do estabelecimento — `null`/`undefined` deixa o hook em "pause". */
+  /** ID do estabelecimento - `null`/`undefined` deixa o hook em "pause". */
   estabelecimentoId: string | null | undefined;
   /** Cabeçalho opcional. Default: "Avaliações de famílias TEA". */
   titulo?: string;
@@ -41,7 +41,7 @@ export function AvaliacoesPublicasSection({
 }: AvaliacoesPublicasSectionProps) {
   const { data, loading, error, refetch } = useAvaliacoesPublicasPorEstab(estabelecimentoId);
 
-  // Toast leve só quando aparecer um erro novo — evita spam em refetch.
+  // Toast leve só quando aparecer um erro novo - evita spam em refetch.
   useEffect(() => {
     if (!error) return;
     toast.error("Não foi possível carregar as avaliações", {
@@ -77,7 +77,7 @@ export function AvaliacoesPublicasSection({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Subcomponentes — separados por estado para legibilidade e reuso.
+// Subcomponentes - separados por estado para legibilidade e reuso.
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AvaliacoesSkeleton() {

@@ -1,33 +1,33 @@
 /**
- * Guard dedicado dos **payloads core** — avaliações e mídia.
+ * Guard dedicado dos **payloads core** - avaliações e mídia.
  *
  * Este arquivo existe além de `types.guard.ts` por um motivo prático:
  *
  *   `types.guard.ts` cobre o ecossistema inteiro (enums, reservas, perfis,
  *   form helpers, SELECT literais, etc). Quando a tipagem do Supabase
- *   regride silenciosamente — uma FK some, um cliente é gerado sem o
- *   tipo do schema, um helper passa a devolver `unknown` — o sintoma
+ *   regride silenciosamente - uma FK some, um cliente é gerado sem o
+ *   tipo do schema, um helper passa a devolver `unknown` - o sintoma
  *   final na UI sempre aparece nos **mesmos dois domínios críticos**:
  *
  *     1. Avaliações com join `familia_profiles(nome_responsavel)`.
  *        (cards de avaliação, página de detalhe, listagem pública)
  *
- *     2. Mídia do estabelecimento — galeria, capa, Tour 360°.
+ *     2. Mídia do estabelecimento - galeria, capa, Tour 360°.
  *        (hero, gallery viewer, og:image, admin form)
  *
  *   Centralizar esses checks num arquivo "front door" deixa o sinal
  *   barulhento: se este arquivo quebra, é regressão de payload core,
  *   não ruído de enum ou label.
  *
- * Contrato: este arquivo NÃO emite runtime — só serve ao `tsc`.
+ * Contrato: este arquivo NÃO emite runtime - só serve ao `tsc`.
  *
  * Estratégia de checagem (mais agressiva que em types.guard.ts):
  *   - `AssertNotAny` em CADA subcampo (não só no shape raiz).
  *   - `AssertNotUnknown` em CADA subcampo.
  *   - `AssertEqual` no shape final exposto à UI.
  *
- * Se um campo regredir para `any`/`unknown` — por FK perdida, schema
- * cache desatualizado, ou client genérico sem `Database` — o build
+ * Se um campo regredir para `any`/`unknown` - por FK perdida, schema
+ * cache desatualizado, ou client genérico sem `Database` - o build
  * trava com mensagem dizendo exatamente qual campo quebrou.
  */
 
@@ -50,7 +50,7 @@ import {
 } from "@/lib/queries/estabelecimentos";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helpers de asserção em tempo de compilação (cópia local intencional —
+// Helpers de asserção em tempo de compilação (cópia local intencional -
 // este arquivo não importa de types.guard.ts para que a quebra de um
 // não esconda a do outro).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ type AssertEqual<A, B, Msg extends string> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? A : Msg;
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PARTE 1 — AVALIAÇÕES (avaliacoes + familia_profiles embed)
+// PARTE 1 - AVALIAÇÕES (avaliacoes + familia_profiles embed)
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // Cadeia coberta:
@@ -101,15 +101,15 @@ type RawAvaliacaoRow = NonNullable<RawAvaliacoesData>[number];
 
 type _Av_DataNotAny = AssertNotAny<
   RawAvaliacoesData,
-  "REGRESSION: supabase.from('avaliacoes').select(...).data é `any` — cliente sem Database?"
+  "REGRESSION: supabase.from('avaliacoes').select(...).data é `any` - cliente sem Database?"
 >;
 type _Av_RowNotAny = AssertNotAny<
   RawAvaliacaoRow,
-  "REGRESSION: linha de avaliacoes é `any` — schema cache desatualizado?"
+  "REGRESSION: linha de avaliacoes é `any` - schema cache desatualizado?"
 >;
 type _Av_RowNotUnknown = AssertNotUnknown<
   RawAvaliacaoRow,
-  "REGRESSION: linha de avaliacoes é `unknown` — FK avaliacoes_familia_id_fkey ausente?"
+  "REGRESSION: linha de avaliacoes é `unknown` - FK avaliacoes_familia_id_fkey ausente?"
 >;
 
 // ─── 1.2 Cada coluna escalar precisa permanecer concreta ─────────────────────
@@ -166,14 +166,14 @@ type _Av_CriadoEm = AssertEqual<
 >;
 
 // ─── 1.3 Embed familia_profiles ──────────────────────────────────────────────
-// Esta é a parte historicamente mais frágil — um join sem FK retorna
+// Esta é a parte historicamente mais frágil - um join sem FK retorna
 // `unknown` e a UI volta a precisar de cast.
 
 type FamiliaEmbed = RawAvaliacaoRow["familia_profiles"];
 type _Av_EmbedNotAny = AssertNotAny<FamiliaEmbed, "REGRESSION: familia_profiles embed é `any`">;
 type _Av_EmbedNotUnknown = AssertNotUnknown<
   FamiliaEmbed,
-  "REGRESSION: familia_profiles embed é `unknown` — FK avaliacoes→familia_profiles caiu"
+  "REGRESSION: familia_profiles embed é `unknown` - FK avaliacoes→familia_profiles caiu"
 >;
 type _Av_EmbedNomeNotAny = AssertNotAny<
   NonNullable<FamiliaEmbed>["nome_responsavel"],
@@ -193,7 +193,7 @@ type _Av_PublicShape = AssertEqual<
   "REGRESSION: payload bruto de avaliacoes divergiu de AvaliacaoComFamilia"
 >;
 
-// ─── 1.5 fetchAvaliacoesPublicasPorEstab — entrada final na UI ───────────────
+// ─── 1.5 fetchAvaliacoesPublicasPorEstab - entrada final na UI ───────────────
 
 type FetchAvaliacoesReturn = Awaited<ReturnType<typeof fetchAvaliacoesPublicasPorEstab>>;
 type FetchAvaliacoesRow = FetchAvaliacoesReturn[number];
@@ -222,14 +222,14 @@ type _Av_FetchEmbedNomeShape = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PARTE 2 — MÍDIA (fotos + foto_capa + tour_360_url)
+// PARTE 2 - MÍDIA (fotos + foto_capa + tour_360_url)
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // Cadeia coberta:
 //
-//   Tables<"estabelecimentos">   (banco — fotos: Json | null)
+//   Tables<"estabelecimentos">   (banco - fotos: Json | null)
 //        ↓ pickEstabMedia / normalizeEstabelecimento
-//   EstabMedia / EstabelecimentoNormalized   (UI — fotos: string[])
+//   EstabMedia / EstabelecimentoNormalized   (UI - fotos: string[])
 //        ↓
 //   GalleryViewer / Hero / Tour360Embed
 
@@ -290,7 +290,7 @@ type _Md_NormalizeUrlShape = AssertEqual<
   "REGRESSION: normalizeUrl deveria devolver string | null"
 >;
 
-// ─── 2.3 pickEstabMedia — shape final consumido pela UI ──────────────────────
+// ─── 2.3 pickEstabMedia - shape final consumido pela UI ──────────────────────
 
 type Picked = ReturnType<typeof pickEstabMedia>;
 
@@ -336,7 +336,7 @@ type _Md_PickedTourShape = AssertEqual<
 
 // ─── 2.4 Compatibilidade dos consumidores com EstabMediaRow ──────────────────
 // Se algum dos três shapes (Full/View/Normalized) deixar de satisfazer
-// EstabMediaRow, o consumidor cai em `pickEstabMedia(row as any)` —
+// EstabMediaRow, o consumidor cai em `pickEstabMedia(row as any)` -
 // isto trava o build antes disso acontecer.
 
 type _Md_FullSatisfiesRow = Estab extends EstabMediaRow
@@ -349,7 +349,7 @@ type _Md_NormalizedSatisfiesRow = EstabelecimentoNormalized extends EstabMediaRo
   ? true
   : "REGRESSION: EstabelecimentoNormalized não satisfaz EstabMediaRow (detalhe quebra)";
 
-// ─── 2.5 Normalize end-to-end — saída precisa expor mídia já saneada ─────────
+// ─── 2.5 Normalize end-to-end - saída precisa expor mídia já saneada ─────────
 
 type Normalized = ReturnType<typeof normalizeEstabelecimento>;
 
@@ -373,7 +373,7 @@ type _Md_NormalizedTour = AssertEqual<
   "REGRESSION: Normalized.tour_360_url quebrou"
 >;
 
-// ─── 2.6 pickMediaFromView — atalho para cards/embeds ────────────────────────
+// ─── 2.6 pickMediaFromView - atalho para cards/embeds ────────────────────────
 
 type _Md_PickFromViewShape = AssertEqual<
   ReturnType<typeof pickMediaFromView>,
@@ -382,12 +382,12 @@ type _Md_PickFromViewShape = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PARTE 3 — MAPPERS (Row → ViewModel) consumidos pela UI
+// PARTE 3 - MAPPERS (Row → ViewModel) consumidos pela UI
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // Row da query → mapper → ViewModel renderizado pela página.
 // Se o shape do VM regredir (ex: `nomeExibicao` virar `string | null`),
-// a UI precisa lidar com `null` de novo — esse contrato é travado aqui.
+// a UI precisa lidar com `null` de novo - esse contrato é travado aqui.
 
 import {
   mapAvaliacao,
@@ -460,7 +460,7 @@ type _Vm_ResShape = AssertEqual<ResVM, ReservaVM, "REGRESSION: mapReserva diverg
 type _Vm_ResStatusNotNull = AssertEqual<
   Extract<ResVM["status"], null | undefined>,
   never,
-  "REGRESSION: ReservaVM.status virou nullable — fallback 'pendente' sumiu"
+  "REGRESSION: ReservaVM.status virou nullable - fallback 'pendente' sumiu"
 >;
 type _Vm_ResPeriodo = AssertEqual<
   ResVM["periodoFormatado"],
@@ -469,7 +469,7 @@ type _Vm_ResPeriodo = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PARTE 4 — FETCHERS ADMIN: payloads vêm da camada `/lib/queries/admin`
+// PARTE 4 - FETCHERS ADMIN: payloads vêm da camada `/lib/queries/admin`
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // Cada fetcher público admin precisa expor um shape **nomeado** (não
@@ -477,7 +477,7 @@ type _Vm_ResPeriodo = AssertEqual<
 // trocar o select por algo divergente, o tipo de retorno do fetcher
 // muda e este guard quebra com mensagem clara.
 //
-// Cobertura — exatamente os fetchers exportados em `/lib/queries/admin`:
+// Cobertura - exatamente os fetchers exportados em `/lib/queries/admin`:
 //   fetchEstabelecimentosAdmin       → EstabAdminRow[]
 //   fetchEstabelecimentoAdminPorId   → Tables<"estabelecimentos"> | null
 //   fetchConteudosAdmin              → ConteudoAdminRow[]
@@ -513,7 +513,7 @@ type AuditoriaReturn = Awaited<ReturnType<typeof fetchAuditoriaPorReserva>>;
 type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisSensoriaisDaFamilia>>;
 type CountsReturn = Awaited<ReturnType<typeof fetchAdminCounts>>;
 
-// ─── 4.1 Listagens — array de rows com shape nomeado ─────────────────────────
+// ─── 4.1 Listagens - array de rows com shape nomeado ─────────────────────────
 type _Ad_EstabNotAny = AssertNotAny<
   EstabAdminReturn[number],
   "REGRESSION: fetchEstabelecimentosAdmin retorna `any[]`"
@@ -571,7 +571,7 @@ type _Ad_PerfisShape = AssertEqual<
   "REGRESSION: fetchPerfisSensoriaisDaFamilia divergiu de PerfilSensorialRow"
 >;
 
-// ─── 4.2 Detalhes — single + nullable ────────────────────────────────────────
+// ─── 4.2 Detalhes - single + nullable ────────────────────────────────────────
 type _Ad_EstabByIdNotAny = AssertNotAny<
   EstabAdminByIdReturn,
   "REGRESSION: fetchEstabelecimentoAdminPorId retorna `any`"
@@ -587,7 +587,7 @@ type _Ad_ConteudoByIdShape = AssertEqual<
   "REGRESSION: fetchConteudoAdminPorId não devolve mais Tables<conteudo_tea> | null"
 >;
 
-// ─── 4.3 Counts — shape numérico exato ───────────────────────────────────────
+// ─── 4.3 Counts - shape numérico exato ───────────────────────────────────────
 type _Ad_CountsNotAny = AssertNotAny<CountsReturn, "REGRESSION: fetchAdminCounts retorna `any`">;
 type _Ad_CountsShape = AssertEqual<
   CountsReturn,
@@ -601,18 +601,18 @@ type _Ad_CountsAllNumber = AssertEqual<
 >;
 
 // ═════════════════════════════════════════════════════════════════════════════
-// Registry — agrega todos os checks num tipo "usado", impedindo que
+// Registry - agrega todos os checks num tipo "usado", impedindo que
 // um `noUnusedLocals` futuro silencie acidentalmente as asserções.
 // Se algum dos checks acima virar uma string de erro, este array
 // quebra com a mensagem correspondente.
 // ═════════════════════════════════════════════════════════════════════════════
 
 export type __CorePayloadGuards = readonly [
-  // Avaliações — query bruta
+  // Avaliações - query bruta
   _Av_DataNotAny,
   _Av_RowNotAny,
   _Av_RowNotUnknown,
-  // Avaliações — colunas escalares
+  // Avaliações - colunas escalares
   _Av_Id,
   _Av_EstabId,
   _Av_FamiliaId,
@@ -623,19 +623,19 @@ export type __CorePayloadGuards = readonly [
   _Av_NotaEstrutura,
   _Av_Publica,
   _Av_CriadoEm,
-  // Avaliações — embed
+  // Avaliações - embed
   _Av_EmbedNotAny,
   _Av_EmbedNotUnknown,
   _Av_EmbedNomeNotAny,
   _Av_EmbedNomeShape,
-  // Avaliações — público
+  // Avaliações - público
   _Av_PublicShape,
   _Av_FetchReturnNotAny,
   _Av_FetchRowNotAny,
   _Av_FetchRowNotUnknown,
   _Av_FetchRowShape,
   _Av_FetchEmbedNomeShape,
-  // Mídia — colunas
+  // Mídia - colunas
   _Md_FotosNotAny,
   _Md_FotosNotUnknown,
   _Md_FotosShape,
@@ -643,12 +643,12 @@ export type __CorePayloadGuards = readonly [
   _Md_FotoCapaShape,
   _Md_TourNotAny,
   _Md_TourShape,
-  // Mídia — helpers brutos
+  // Mídia - helpers brutos
   _Md_NormalizeFotosNotAny,
   _Md_NormalizeFotosShape,
   _Md_NormalizeUrlNotAny,
   _Md_NormalizeUrlShape,
-  // Mídia — pickEstabMedia
+  // Mídia - pickEstabMedia
   _Md_PickedNotAny,
   _Md_PickedNotUnknown,
   _Md_PickedShape,
@@ -658,18 +658,18 @@ export type __CorePayloadGuards = readonly [
   _Md_PickedCapaShape,
   _Md_PickedTourNotAny,
   _Md_PickedTourShape,
-  // Mídia — compatibilidade dos consumidores
+  // Mídia - compatibilidade dos consumidores
   _Md_FullSatisfiesRow,
   _Md_ViewSatisfiesRow,
   _Md_NormalizedSatisfiesRow,
-  // Mídia — normalize end-to-end
+  // Mídia - normalize end-to-end
   _Md_NormalizedNotAny,
   _Md_NormalizedFotos,
   _Md_NormalizedCapa,
   _Md_NormalizedTour,
-  // Mídia — pickMediaFromView
+  // Mídia - pickMediaFromView
   _Md_PickFromViewShape,
-  // Mappers — Row → ViewModel
+  // Mappers - Row → ViewModel
   _Vm_AvNotAny,
   _Vm_AvShape,
   _Vm_AvNomeNotNull,
@@ -685,7 +685,7 @@ export type __CorePayloadGuards = readonly [
   _Vm_ResShape,
   _Vm_ResStatusNotNull,
   _Vm_ResPeriodo,
-  // Fetchers admin — payloads vêm da camada `/lib/queries/admin`
+  // Fetchers admin - payloads vêm da camada `/lib/queries/admin`
   _Ad_EstabNotAny,
   _Ad_EstabShape,
   _Ad_ConteudoNotAny,

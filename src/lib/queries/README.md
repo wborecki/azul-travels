@@ -1,7 +1,7 @@
-# `src/lib/queries` — Camada central de payloads tipados
+# `src/lib/queries` - Camada central de payloads tipados
 
 Toda leitura de dados do Supabase passa por aqui. Nenhum componente,
-hook ou rota deve chamar `supabase.from(...).select(...)` diretamente —
+hook ou rota deve chamar `supabase.from(...).select(...)` diretamente -
 o ESLint (`no-restricted-syntax` em `eslint.config.js`) bloqueia.
 
 ```ts
@@ -37,7 +37,7 @@ para `any`/`unknown` ou divergir do shape esperado.
 
 ## 1. Payloads de leitura (Row → UI)
 
-### `AvaliacaoComFamilia` — `avaliacoes.ts`
+### `AvaliacaoComFamilia` - `avaliacoes.ts`
 
 Avaliação pública com `nome_responsavel` da família embutido.
 
@@ -56,7 +56,7 @@ const avaliacoes = await fetchAvaliacoesPublicasPorEstab(estabId);
 
 ---
 
-### `EstabelecimentoView` — `estabelecimentos.ts`
+### `EstabelecimentoView` - `estabelecimentos.ts`
 
 Subset unificado para listagem, cards e detalhe-resumo. Inclui
 identificação, localização, capa, todos os selos, Tour 360°, recursos
@@ -82,7 +82,7 @@ import {
   type EstabelecimentosViewPage,
 } from "@/lib/queries";
 
-// Sem paginação visual — passar pagina/tamanhoPagina ainda funciona
+// Sem paginação visual - passar pagina/tamanhoPagina ainda funciona
 // (mais explícito do que o antigo `limite`).
 const destaques = await fetchEstabelecimentosView({
   apenasDestaque: true,
@@ -90,7 +90,7 @@ const destaques = await fetchEstabelecimentosView({
   tamanhoPagina: 6,
 });
 
-// Com paginação tipada (offset/limit) + total — usado em /explorar.
+// Com paginação tipada (offset/limit) + total - usado em /explorar.
 const page: EstabelecimentosViewPage = await fetchEstabelecimentosViewPaginated({
   busca: "florianopolis",
   tipos: ["hotel", "pousada"],
@@ -102,7 +102,7 @@ const page: EstabelecimentosViewPage = await fetchEstabelecimentosViewPaginated(
 
 ---
 
-### `EstabelecimentoFull` / `EstabelecimentoNormalized` — `estabelecimentos.ts`
+### `EstabelecimentoFull` / `EstabelecimentoNormalized` - `estabelecimentos.ts`
 
 `Full` é a row completa (`Tables<"estabelecimentos">`).
 `Normalized` adiciona garantias de UI:
@@ -124,9 +124,9 @@ const estab = await fetchEstabelecimentoPorSlug("hotel-acolhedor");
 
 ---
 
-### `EstabelecimentoDetalhe` — `estabelecimentos.ts`
+### `EstabelecimentoDetalhe` - `estabelecimentos.ts`
 
-Payload composto para a rota `/estabelecimento/:slug` — estab
+Payload composto para a rota `/estabelecimento/:slug` - estab
 normalizado + avaliações em um único fetch tipado.
 
 ```ts
@@ -145,7 +145,7 @@ if (!detalhe) notFound();
 
 ---
 
-### `ReservaComContexto` — `reservas.ts`
+### `ReservaComContexto` - `reservas.ts`
 
 Reserva com joins leves (estabelecimento + perfil sensorial).
 
@@ -166,7 +166,7 @@ const reservas = await fetchReservasDaFamilia(familiaId);
 
 ---
 
-### `PerfilOption` / `PerfilSensorial` — `perfis.ts`
+### `PerfilOption` / `PerfilSensorial` - `perfis.ts`
 
 `PerfilOption` é o subset enxuto para selects (`id`, `nome_autista`).
 `PerfilSensorial` é a row completa para edição.
@@ -179,7 +179,7 @@ const full = await fetchPerfisCompletos(familiaId);  // PerfilSensorial[]
 
 ---
 
-### Payloads admin — `admin.ts`
+### Payloads admin - `admin.ts`
 
 | Tipo                  | Fetcher                              | Uso                          |
 | --------------------- | ------------------------------------ | ---------------------------- |
@@ -205,8 +205,8 @@ Sem lógica de UI; sem `async`; sem deps externas.
 ```ts
 interface AvaliacaoVM {
   id: string;
-  nomeExibicao: string;       // "Maria" — fallback "Família"
-  dataFormatada: string;      // "15/01/2025" — pt-BR
+  nomeExibicao: string;       // "Maria" - fallback "Família"
+  dataFormatada: string;      // "15/01/2025" - pt-BR
   nota: number;               // 0–5 (nunca null)
   comentario: string | null;  // trimado, vazio→null
 }
@@ -262,23 +262,23 @@ Tipos derivados dos VMs via `Pick`/`Omit`. Garantem que componentes
 nunca recebem campos que não existem no payload.
 
 ### Cards
-- `EstabCardProps` — `{ vm: EstabCardVM; maxRecursos?: number }`
-- `AvaliacaoCardProps` — `{ avaliacao: AvaliacaoVM }`
-- `ReservaCardProps` — `{ reserva: ReservaVM }`
+- `EstabCardProps` - `{ vm: EstabCardVM; maxRecursos?: number }`
+- `AvaliacaoCardProps` - `{ avaliacao: AvaliacaoVM }`
+- `ReservaCardProps` - `{ reserva: ReservaVM }`
 
 ### Banners
-- `EstabBannerProps` — subset de `EstabCardVM` para faixas/heroes
-- `ErrorBannerProps` — `{ title; message; onRetry? }`
-- `EmptyBannerProps` — `{ message; ctaLabel?; onCtaClick? }`
+- `EstabBannerProps` - subset de `EstabCardVM` para faixas/heroes
+- `ErrorBannerProps` - `{ title; message; onRetry? }`
+- `EmptyBannerProps` - `{ message; ctaLabel?; onCtaClick? }`
 
 ### Modais
-- `CancelarReservaModalProps` — `{ open, onOpenChange, reserva, onConfirm }`
-- `AvaliacaoDetalheModalProps` — `{ open, onOpenChange, avaliacao }`
-- `EstabPreviewModalProps` — `{ open, onOpenChange, …subset do card }`
+- `CancelarReservaModalProps` - `{ open, onOpenChange, reserva, onConfirm }`
+- `AvaliacaoDetalheModalProps` - `{ open, onOpenChange, avaliacao }`
+- `EstabPreviewModalProps` - `{ open, onOpenChange, …subset do card }`
 
 ### Mixins
-- `WithRetry` — `{ onRetry?: () => void }`
-- `WithOpenChange` — `{ open: boolean; onOpenChange: (b: boolean) => void }`
+- `WithRetry` - `{ onRetry?: () => void }`
+- `WithOpenChange` - `{ open: boolean; onOpenChange: (b: boolean) => void }`
 
 **Exemplo de extensão:**
 ```ts
@@ -295,13 +295,13 @@ interface MeuCardCustomProps extends EstabCardProps {
 ## Helpers utilitários
 
 ### Mídia (`@/lib/media`, re-exportado daqui)
-- `pickEstabMedia(row)` — extrai `{ fotoCapa, tour360Url, fotos[] }` do estab.
-- `normalizeFotos(json)` — `Json` → `string[]` saneado.
-- `normalizeUrl(s)` — string → `string|null` (vazio/whitespace→null).
+- `pickEstabMedia(row)` - extrai `{ fotoCapa, tour360Url, fotos[] }` do estab.
+- `normalizeFotos(json)` - `Json` → `string[]` saneado.
+- `normalizeUrl(s)` - string → `string|null` (vazio/whitespace→null).
 
 ### Inserts tipados
-- `buildReservaPayload(formInput)` — única função autorizada a montar
-  `TablesInsert<"reservas">`. Use sempre — nunca monte o objeto na mão.
+- `buildReservaPayload(formInput)` - única função autorizada a montar
+  `TablesInsert<"reservas">`. Use sempre - nunca monte o objeto na mão.
 
 ```ts
 import { buildReservaPayload, criarReserva, type ReservaFormInput } from "@/lib/queries";
@@ -321,7 +321,7 @@ await criarReserva(buildReservaPayload(input));
 3. **Componente novo consumindo o VM?** Defina suas props em
    `component-props.ts` (Pick/Omit do VM).
 4. **Build trava?** Provavelmente o guard em `core-payloads.guard.ts`
-   pegou uma regressão — leia a mensagem do `AssertEqual`/`AssertNotAny`
+   pegou uma regressão - leia a mensagem do `AssertEqual`/`AssertNotAny`
    e ajuste o payload em vez de "casitar" o tipo na UI.
 
 ---

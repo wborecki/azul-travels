@@ -255,7 +255,7 @@ function Dashboard({
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Card 1 — Perfil */}
+        {/* Card 1 - Perfil */}
         <div className="bg-white border rounded-2xl p-6 flex flex-col">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
@@ -293,7 +293,7 @@ function Dashboard({
           )}
         </div>
 
-        {/* Card 2 — Selo Azul */}
+        {/* Card 2 - Selo Azul */}
         <div className="bg-white border rounded-2xl p-6 flex flex-col">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">

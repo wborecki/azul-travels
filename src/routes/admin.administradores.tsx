@@ -203,10 +203,10 @@ function AdminAdministradoresPage() {
             <TableBody>
               {admins.map((a) => (
                 <TableRow key={a.user_id}>
-                  <TableCell className="font-medium">{a.nome ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{a.email ?? "—"}</TableCell>
+                  <TableCell className="font-medium">{a.nome ?? "-"}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{a.email ?? "-"}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {a.promoted_by_email ?? <span className="italic">—</span>}
+                    {a.promoted_by_email ?? <span className="italic">-</span>}
                   </TableCell>
                   <TableCell className="text-xs">
                     {new Date(a.criado_em).toLocaleDateString("pt-BR")}

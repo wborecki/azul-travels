@@ -44,16 +44,16 @@ export const CAMPO_LABEL: Record<string, string> = {
 
 /**
  * Converte um valor JSON do log em uma string legível.
- * - null/undefined → "—"
+ * - null/undefined → "-"
  * - boolean → "sim"/"não"
  * - array → "N item(s)" (galerias podem ser longas)
  * - object → JSON compacto
  */
 export function formatAuditValue(v: Json | null | undefined): string {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   if (typeof v === "boolean") return v ? "sim" : "não";
   if (typeof v === "string") {
-    if (v.trim() === "") return "—";
+    if (v.trim() === "") return "-";
     return v.length > 80 ? v.slice(0, 77) + "…" : v;
   }
   if (typeof v === "number") return String(v);

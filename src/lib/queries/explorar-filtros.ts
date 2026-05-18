@@ -1,5 +1,5 @@
 /**
- * Filtros padrão de exploração — preferências persistidas por usuário.
+ * Filtros padrão de exploração - preferências persistidas por usuário.
  *
  * Cada família guarda **um único** conjunto favorito (1:1 com `auth.users`)
  * de tipos / selos / recursos sensoriais. A página `/explorar` reaplica
@@ -7,13 +7,13 @@
  * string relevante).
  *
  * Decisões importantes:
- *  - **Não** salva busca textual, estado, ordenação ou toggles — esses
+ *  - **Não** salva busca textual, estado, ordenação ou toggles - esses
  *    são voláteis e mudam a cada sessão. Salvar capturaria contexto
  *    irrelevante.
  *  - RLS no banco já restringe acesso ao próprio `user_id`; o helper
  *    apenas chama o client autenticado.
  *  - Selos/recursos são `text[]` no banco (não enums), porque os literais
- *    coincidem com as colunas boolean da tabela `estabelecimentos` —
+ *    coincidem com as colunas boolean da tabela `estabelecimentos` -
  *    não há um enum dedicado. A validação de domínio é feita na UI.
  */
 
@@ -24,7 +24,7 @@ import type { EstabelecimentoFull } from "./estabelecimentos";
 export type ExplorarFiltrosPadrao = Tables<"explorar_filtros_padrao">;
 export type ExplorarFiltrosPadraoInsert = TablesInsert<"explorar_filtros_padrao">;
 
-/** Subconjunto exposto para a UI — só o que de fato é reaplicado. */
+/** Subconjunto exposto para a UI - só o que de fato é reaplicado. */
 export interface FiltrosPadraoUI {
   tipos: ReadonlyArray<EstabelecimentoFull["tipo"]>;
   selos: ReadonlyArray<string>;
@@ -53,7 +53,7 @@ export async function fetchFiltrosPadrao(userId: string): Promise<FiltrosPadraoU
 
 /**
  * Cria/atualiza o filtro padrão (upsert por `user_id`).
- * Idempotente — chamar duas vezes com os mesmos valores não duplica.
+ * Idempotente - chamar duas vezes com os mesmos valores não duplica.
  */
 export async function salvarFiltrosPadrao(
   userId: string,

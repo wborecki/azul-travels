@@ -1,5 +1,5 @@
 /**
- * Mapeadores de normalização — `Row do Supabase → View Model tipado da UI`.
+ * Mapeadores de normalização - `Row do Supabase → View Model tipado da UI`.
  *
  * Esta camada existe para garantir que **toda página renderiza o mesmo
  * shape**, independente de quem fez o fetch. As queries continuam
@@ -15,7 +15,7 @@
  *
  * Por que separar de `/lib/queries/*.ts`?
  *   - Queries tocam Supabase (I/O, async, throw). Mappers são puros
- *     (sync, sem deps externas) — fáceis de testar e reusar em SSR.
+ *     (sync, sem deps externas) - fáceis de testar e reusar em SSR.
  *   - Permite que cada componente importe **apenas** o view model que
  *     consome, sem trazer junto o cliente Supabase.
  *
@@ -74,7 +74,7 @@ export function mapAvaliacoes(rows: ReadonlyArray<AvaliacaoComFamilia>): Avaliac
 // 2. EstabelecimentoView (card) → EstabCardVM
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Chaves de recursos sensoriais — mesma ordem do componente Badges. */
+/** Chaves de recursos sensoriais - mesma ordem do componente Badges. */
 const RECURSO_KEYS = [
   "tem_sala_sensorial",
   "tem_concierge_tea",
@@ -99,7 +99,7 @@ export interface EstabCardVM {
   media: EstabMedia;
   /** Recursos sensoriais ativos (apenas as keys com `true` no banco). */
   recursosAtivos: ReadonlyArray<RecursoKey>;
-  /** Booleans de exibição direta — pré-coalescidos (sem `null`). */
+  /** Booleans de exibição direta - pré-coalescidos (sem `null`). */
   temSeloAzul: boolean;
   temBeneficioTea: boolean;
   temTour360: boolean;
@@ -140,11 +140,11 @@ export interface ReservaVM {
   status: ReservaStatus;
   /** Label legível do status (ex: "Pendente"). */
   statusLabel: string;
-  /** Resumo do estabelecimento embutido — `null` se o join falhou. */
+  /** Resumo do estabelecimento embutido - `null` se o join falhou. */
   estabelecimento: {
     slug: string;
     nome: string;
-    /** "Cidade, UF" ou apenas a cidade — `null` se ambos vazios. */
+    /** "Cidade, UF" ou apenas a cidade - `null` se ambos vazios. */
     localidade: string | null;
   } | null;
   /** "10/01/2025 → 14/01/2025", "10/01/2025", ou string vazia. */

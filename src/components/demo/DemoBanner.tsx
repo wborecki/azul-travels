@@ -23,7 +23,7 @@ export function DemoBanner({ ctaTo }: Props) {
     >
       <div className="container mx-auto flex items-center justify-between gap-3">
         <span className="flex-1 text-center truncate">
-          🧪 Modo demonstração — os dados exibidos são exemplos. A plataforma
+          🧪 Modo demonstração - os dados exibidos são exemplos. A plataforma
           real está em construção.
         </span>
         <Link

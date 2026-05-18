@@ -1,4 +1,4 @@
-/* Fonts — must be first */
+/* Fonts - must be first */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&display=swap");
 
 @import "tailwindcss" source(none);
@@ -9,7 +9,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Turismo Azul Design System — alinhado ao flyer oficial.
+ * Turismo Azul Design System - alinhado ao flyer oficial.
  * Paleta: navy #1a3666, azul médio #2176c8, ciano #00b4d8,
  * laranja #f5a623, fundo suave #f7fbff.
  */
@@ -123,7 +123,7 @@
   --roxo-suave: #d8d6f2;
   --roxo-suave-foreground: #3a3673;
 
-  /* Footer escuro — derivado do navy */
+  /* Footer escuro - derivado do navy */
   --footer: #0f2148;
   --footer-foreground: #d6def0;
   --footer-muted: #8a98b6;
@@ -200,7 +200,7 @@
     font-weight: 800;
     text-transform: uppercase;
   }
-  /* Tagline em itálico — Nunito Italic 800 */
+  /* Tagline em itálico - Nunito Italic 800 */
   .tagline-italic {
     font-family: var(--font-sans);
     font-style: italic;

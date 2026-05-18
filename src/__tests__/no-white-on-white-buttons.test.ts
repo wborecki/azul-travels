@@ -145,7 +145,7 @@ function findButtons(file: string, src: string): FoundButton[] {
 /**
  * Tokens reconhecidos como fundo colorido / não-branco. Inclui semântica
  * de design tokens, cores arbitrárias com hex/rgb e variantes do shadcn
- * Button (default | secondary | destructive — todos com fundo colorido).
+ * Button (default | secondary | destructive - todos com fundo colorido).
  *
  * NÃO inclui: bg-white, bg-background, bg-card, bg-popover, bg-transparent,
  * bg-white/X, bg-card/X, etc.
@@ -179,7 +179,7 @@ const COLORED_VARIANT_RE =
 function hasColoredBackground(className: string, tagSrc: string): boolean {
   if (COLORED_BG_PATTERNS.some((re) => re.test(className))) return true;
   if (COLORED_VARIANT_RE.test(tagSrc)) return true;
-  // Hover-only fundo colorido continua deixando o estado padrão branco — não conta.
+  // Hover-only fundo colorido continua deixando o estado padrão branco - não conta.
   return false;
 }
 

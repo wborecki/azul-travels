@@ -4,7 +4,7 @@
  * /minha-conta/reservas e no painel admin.
  *
  * Esta camada é o **único ponto** que monta `TablesInsert<"reservas">`.
- * Componentes nunca devem construir esse payload na mão — devem usar
+ * Componentes nunca devem construir esse payload na mão - devem usar
  * `buildReservaPayload(formInput)` para garantir:
  *   - tipos exatos das colunas (string | null, number | null, enum…)
  *   - sanitização única (trim de mensagem, datas vazias → null)
@@ -86,13 +86,13 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
  *
  * - Campos obrigatórios para a UI virar um insert válido (família,
  *   estabelecimento, perfil sensorial) são `NonNullable`.
- * - Datas vêm como `string` do `<input type="date">` — strings vazias
+ * - Datas vêm como `string` do `<input type="date">` - strings vazias
  *   são tratadas como ausência (→ `null`) por `buildReservaPayload`.
  * - `mensagem` é trimada; vazio também vira `null`.
  *
  * Mantém os tipos das colunas do Supabase (`Reserva["data_checkin"]`,
  * `Reserva["num_adultos"]`…) para que qualquer mudança no schema quebre
- * o build aqui — não dentro de uma rota.
+ * o build aqui - não dentro de uma rota.
  */
 export interface ReservaFormInput {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;

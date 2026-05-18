@@ -357,7 +357,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
             <SelectContent>
               {ESTADOS_BR.map((e) => (
                 <SelectItem key={e.sigla} value={e.sigla}>
-                  {e.sigla} — {e.nome}
+                  {e.sigla} - {e.nome}
                 </SelectItem>
               ))}
             </SelectContent>

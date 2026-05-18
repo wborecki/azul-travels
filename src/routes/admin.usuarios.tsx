@@ -171,8 +171,8 @@ function AdminUsuariosPage() {
                 const busy = acaoEm === r.user_id;
                 return (
                   <TableRow key={`${r.tipo}-${r.user_id}`}>
-                    <TableCell className="font-medium">{r.nome ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{r.email ?? "—"}</TableCell>
+                    <TableCell className="font-medium">{r.nome ?? "-"}</TableCell>
+                    <TableCell className="text-muted-foreground">{r.email ?? "-"}</TableCell>
                     <TableCell>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-azul-claro text-primary">
                         {r.tipo === "familia" ? "Família" : "Estabelecimento"}
@@ -181,7 +181,7 @@ function AdminUsuariosPage() {
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {r.roles.length === 0 ? (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-muted-foreground">-</span>
                         ) : (
                           r.roles.map((role) => (
                             <span
