@@ -24,6 +24,7 @@ function MinhaContaIndex() {
   const [perfilNome, setPerfilNome] = useState<string | null>(null);
   const [perfilExiste, setPerfilExiste] = useState(false);
   const [posicao, setPosicao] = useState<number | null>(null);
+  const [totalFila, setTotalFila] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,11 +49,19 @@ function MinhaContaIndex() {
       setPerfilNome(perfilRes.data?.nome_autista ?? null);
 
       if (meRes.data?.criado_em) {
-        const { count } = await supabase
-          .from("familia_profiles")
-          .select("id", { count: "exact", head: true })
-          .lte("criado_em", meRes.data.criado_em);
-        if (alive) setPosicao(count ?? null);
+        const [{ count: ate }, { count: total }] = await Promise.all([
+          supabase
+            .from("familia_profiles")
+            .select("id", { count: "exact", head: true })
+            .lte("criado_em", meRes.data.criado_em),
+          supabase
+            .from("familia_profiles")
+            .select("id", { count: "exact", head: true }),
+        ]);
+        if (alive) {
+          setPosicao(ate ?? null);
+          setTotalFila(total ?? null);
+        }
       }
       if (alive) setLoading(false);
     });
