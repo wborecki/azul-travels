@@ -8,7 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LogOut, Loader2, Building2, ShieldCheck, Save, ArrowLeft } from "lucide-react";
+import {
+  LogOut,
+  Loader2,
+  Building2,
+  ShieldCheck,
+  Save,
+  ArrowLeft,
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  Award,
+} from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
 
