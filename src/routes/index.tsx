@@ -745,7 +745,7 @@ function ComoFunciona() {
       n: "1",
       emoji: "🎓",
       titulo: "Formação",
-      texto: "Capacitamos equipes de hotéis, pousadas e restaurantes em acolhimento de famílias atípicas.",
+      texto: "Capacitamos equipes de hotéis, pousadas, restaurantes, fazendas, sítios, museus e espaços educativos em acolhimento de famílias atípicas.",
       bg: "#eaf3ff",
       border: "#5b9bf5",
     },
