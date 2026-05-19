@@ -362,6 +362,8 @@ export type Database = {
           mensalidade_ativa: boolean | null
           nome: string
           owner_user_id: string | null
+          quer_selo_azul: boolean
+          quer_selo_azul_em: string | null
           recebe_grupos_escolares_tea: boolean
           selo_azul: boolean | null
           selo_azul_validade: string | null
@@ -404,6 +406,8 @@ export type Database = {
           mensalidade_ativa?: boolean | null
           nome: string
           owner_user_id?: string | null
+          quer_selo_azul?: boolean
+          quer_selo_azul_em?: string | null
           recebe_grupos_escolares_tea?: boolean
           selo_azul?: boolean | null
           selo_azul_validade?: string | null
@@ -446,6 +450,8 @@ export type Database = {
           mensalidade_ativa?: boolean | null
           nome?: string
           owner_user_id?: string | null
+          quer_selo_azul?: boolean
+          quer_selo_azul_em?: string | null
           recebe_grupos_escolares_tea?: boolean
           selo_azul?: boolean | null
           selo_azul_validade?: string | null
