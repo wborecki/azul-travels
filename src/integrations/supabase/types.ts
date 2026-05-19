@@ -20,27 +20,33 @@ export type Database = {
           ator_id: string | null
           criado_em: string
           id: string
+          ip: string | null
           motivo: string | null
           target_email: string | null
           target_user_id: string
+          user_agent: string | null
         }
         Insert: {
           ator_email?: string | null
           ator_id?: string | null
           criado_em?: string
           id?: string
+          ip?: string | null
           motivo?: string | null
           target_email?: string | null
           target_user_id: string
+          user_agent?: string | null
         }
         Update: {
           ator_email?: string | null
           ator_id?: string | null
           criado_em?: string
           id?: string
+          ip?: string | null
           motivo?: string | null
           target_email?: string | null
           target_user_id?: string
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -1387,10 +1393,20 @@ export type Database = {
         }
         Returns: boolean
       }
-      log_admin_password_reset: {
-        Args: { _motivo?: string; _target_user_id: string }
-        Returns: string
-      }
+      log_admin_password_reset:
+        | {
+            Args: { _motivo?: string; _target_user_id: string }
+            Returns: string
+          }
+        | {
+            Args: {
+              _ip?: string
+              _motivo?: string
+              _target_user_id: string
+              _user_agent?: string
+            }
+            Returns: string
+          }
       promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
