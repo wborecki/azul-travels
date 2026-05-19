@@ -22,6 +22,7 @@ type RecentRow = {
 
 function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [leadsFamilias, setLeadsFamilias] = useState<number | null>(null);
   const [recents, setRecents] = useState<RecentRow[]>([]);
   const [loading, setLoading] = useState(true);
 
