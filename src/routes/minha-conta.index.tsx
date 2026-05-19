@@ -167,22 +167,77 @@ function MinhaContaIndex() {
           </div>
 
           {posicao !== null ? (
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="font-display font-bold text-5xl text-primary leading-none">
-                #{posicao}
-              </span>
-              <span className="text-sm text-primary/70 font-medium">na fila</span>
-            </div>
-          ) : (
-            <div className="mt-4 text-sm text-foreground/70">
-              Calculando sua posição…
-            </div>
-          )}
+            (() => {
+              const atras =
+                totalFila !== null ? Math.max(0, totalFila - posicao) : null;
 
-          <p className="mt-3 text-sm text-foreground/75 leading-relaxed flex-1">
-            Quanto antes você completar seu perfil sensorial, mais personalizada
-            será sua experiência no lançamento.
-          </p>
+              // Estimativa de onda de acesso (lotes de 25 famílias)
+              let onda: string;
+              let prazo: string;
+              let cor: string;
+              if (posicao <= 25) {
+                onda = "1ª onda de acesso";
+                prazo = "nas primeiras 2 semanas após o lançamento";
+                cor = "bg-secondary/15 text-secondary border-secondary/30";
+              } else if (posicao <= 75) {
+                onda = "2ª onda de acesso";
+                prazo = "em até ~30 dias após o lançamento";
+                cor = "bg-primary/10 text-primary border-primary/25";
+              } else if (posicao <= 200) {
+                onda = "3ª onda de acesso";
+                prazo = "em até ~60 dias após o lançamento";
+                cor = "bg-roxo-suave/15 text-roxo-suave-foreground border-roxo-suave/40";
+              } else {
+                onda = "Onda estendida";
+                prazo = "em até ~90 dias após o lançamento";
+                cor = "bg-muted text-foreground/80 border-border";
+              }
+
+              return (
+                <>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="font-display font-bold text-5xl text-primary leading-none">
+                      #{posicao}
+                    </span>
+                    <span className="text-sm text-primary/70 font-medium">
+                      {totalFila !== null ? `de ${totalFila}` : "na fila"}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`mt-3 inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full border text-xs font-semibold ${cor}`}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {onda}
+                  </div>
+
+                  <p className="mt-3 text-sm text-foreground/85 leading-relaxed">
+                    Pela sua posição, você deve receber acesso{" "}
+                    <strong>{prazo}</strong>.
+                  </p>
+
+                  {atras !== null && atras > 0 && (
+                    <p className="mt-2 text-xs text-foreground/60">
+                      {atras} {atras === 1 ? "família entrou" : "famílias entraram"} depois de você.
+                    </p>
+                  )}
+
+                  <p className="mt-3 text-xs text-foreground/65 leading-relaxed flex-1">
+                    Famílias com perfil sensorial completo entram primeiro em cada onda.
+                  </p>
+                </>
+              );
+            })()
+          ) : (
+            <>
+              <div className="mt-4 text-sm text-foreground/70">
+                Calculando sua posição…
+              </div>
+              <p className="mt-3 text-sm text-foreground/75 leading-relaxed flex-1">
+                Em instantes mostramos sua previsão de acesso.
+              </p>
+            </>
+          )}
         </div>
 
         {/* CARD 3 — Benefícios */}
