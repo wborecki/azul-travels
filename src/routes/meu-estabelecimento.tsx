@@ -160,6 +160,8 @@ function MeuEstabelecimentoPage() {
           cidade: draft.cidade,
           estado: draft.estado.toUpperCase(),
           website: draft.website || null,
+          recebe_grupos_escolares_tea:
+            draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
         })
         .eq("id", estabId);
     }
