@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Award, Home as HomeIcon, Heart, Check } from "lucide-react";
+import { ShieldCheck, Award, Home as HomeIcon, Heart, Check, MessageCircle } from "lucide-react";
+import seloOficial from "@/assets/selo-turismo-azul.png";
 
 export const Route = createFileRoute("/sobre-os-selos")({
   head: () => ({
@@ -70,9 +71,13 @@ function SobreOsSelosPage() {
     },
   ];
 
+  const whatsappUrl =
+    "https://wa.me/5511947096278?text=" +
+    encodeURIComponent("Olá! Tenho interesse no Selo Azul Turismo Azul Inclusivo.");
+
   return (
     <div className="bg-white">
-      <section className="bg-azul-claro py-16">
+      <section className="bg-azul-claro pt-12 pb-8 md:pt-16 md:pb-10">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <h1 className="text-3xl md:text-4xl font-display font-extrabold text-primary">
             Como auditamos cada estabelecimento
@@ -84,7 +89,24 @@ function SobreOsSelosPage() {
         </div>
       </section>
 
-      <section className="py-16">
+      {/* Selo oficial */}
+      <section className="pt-10 pb-4">
+        <div className="container mx-auto px-4 max-w-3xl flex flex-col items-center text-center">
+          <div className="bg-white rounded-3xl shadow-[0_10px_30px_-12px_rgba(26,42,107,0.25)] p-5 sm:p-6">
+            <img
+              src={seloOficial}
+              alt="Selo Turismo Azul Inclusivo - Certificação Oficial"
+              className="w-[220px] sm:w-[280px] h-auto"
+              loading="lazy"
+            />
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Selo Turismo Azul Inclusivo · Emitido pela Absoluto Educacional
+          </p>
+        </div>
+      </section>
+
+      <section className="pt-6 pb-16">
         <div className="container mx-auto px-4 max-w-4xl space-y-6">
           {selos.map((s) => (
             <div
@@ -112,21 +134,34 @@ function SobreOsSelosPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-primary text-primary-foreground">
+      <section className="py-16 text-white" style={{ backgroundColor: "#1A2A6B" }}>
         <div className="container mx-auto px-4 max-w-2xl text-center">
           <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
-            Quer ver seu estabelecimento certificado?
+            Seu estabelecimento está pronto para dar esse passo?
           </h2>
-          <p className="mt-4 text-white/80">
-            Cadastre-se e nossa equipe entra em contato para iniciar o processo.
+          <p className="mt-4 text-white/85">
+            A formação começa com um cadastro. Nossa equipe entra em contato para iniciar o processo.
           </p>
-          <Button
-            asChild
-            size="lg"
-            className="mt-8 bg-secondary hover:bg-secondary/90 text-white min-h-[52px] px-8 text-base font-semibold"
-          >
-            <Link to="/estabelecimentos">Cadastrar meu estabelecimento</Link>
-          </Button>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              asChild
+              size="lg"
+              className="bg-[#c9a84c] hover:bg-[#b9962e] text-[#1A2A6B] min-h-[52px] px-7 text-base font-semibold"
+            >
+              <Link to="/estabelecimentos">Quero o Selo Azul</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-white text-white hover:bg-white hover:text-[#1A2A6B] min-h-[52px] px-7 text-base font-semibold"
+            >
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="h-5 w-5 mr-2" />
+                Falar com a equipe
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
