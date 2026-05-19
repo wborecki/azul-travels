@@ -1420,6 +1420,11 @@ export type Database = {
     }
     Functions: {
       _mascarar_email: { Args: { _email: string }; Returns: string }
+      expurgar_admin_password_resets: {
+        Args: { _dias?: number }
+        Returns: number
+      }
+      expurgar_auth_audit_log: { Args: { _dias?: number }; Returns: number }
       expurgar_links_curtos_inativos: { Args: never; Returns: number }
       get_dashboard_stats: { Args: never; Returns: Json }
       get_familias_count: { Args: never; Returns: number }
