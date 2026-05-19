@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { KeyRound, Loader2, RefreshCw, X } from "lucide-react";
+import { Download, KeyRound, Loader2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/password-resets")({
@@ -102,6 +102,51 @@ function AdminPasswordResetsPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasFilters = !!(emailAlvo || dataInicio || dataFim);
+  const [exporting, setExporting] = useState(false);
+
+  async function exportarCSV() {
+    setExporting(true);
+    try {
+      let q = supabase
+        .from("admin_password_resets")
+        .select("*")
+        .order("criado_em", { ascending: false });
+
+      if (emailAlvo.trim()) q = q.ilike("target_email", `%${emailAlvo.trim()}%`);
+      if (dataInicio) q = q.gte("criado_em", new Date(dataInicio).toISOString());
+      if (dataFim) {
+        const f = new Date(dataFim);
+        f.setHours(23, 59, 59, 999);
+        q = q.lte("criado_em", f.toISOString());
+      }
+
+      const { data, error } = await q;
+      if (error) throw error;
+
+      const headers = ["criado_em", "target_email", "target_user_id", "ator_email", "ator_id", "motivo", "ip", "user_agent"];
+      const escape = (v: unknown) => {
+        const s = v === null || v === undefined ? "" : String(v);
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const lines = [headers.join(",")];
+      for (const r of (data ?? []) as Reset[]) {
+        lines.push(headers.map((h) => escape((r as Record<string, unknown>)[h])).join(","));
+      }
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `password-resets-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`${data?.length ?? 0} registro(s) exportado(s)`);
+    } catch (err) {
+      toast.error("Erro ao exportar", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
+    setExporting(false);
+  }
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -114,9 +159,15 @@ function AdminPasswordResetsPage() {
             {loading ? "Carregando…" : `${total} registro(s)`}
           </p>
         </div>
-        <Button variant="outline" onClick={() => void carregar()} className="gap-2">
-          <RefreshCw className="h-4 w-4" /> Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => void exportarCSV()} disabled={exporting || total === 0} className="gap-2">
+            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            Exportar CSV
+          </Button>
+          <Button variant="outline" onClick={() => void carregar()} className="gap-2">
+            <RefreshCw className="h-4 w-4" /> Atualizar
+          </Button>
+        </div>
       </header>
 
       <div className="bg-white border rounded-2xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
