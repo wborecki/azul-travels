@@ -187,6 +187,20 @@ function AdminEstabelecimentos() {
               className="pl-9"
             />
           </div>
+          <Button
+            type="button"
+            variant={apenasQuerSeloAzul ? "default" : "outline"}
+            className="gap-2"
+            onClick={() =>
+              navigate({ search: { quer_selo_azul: apenasQuerSeloAzul ? undefined : 1 } })
+            }
+            title="Mostrar apenas estabelecimentos que pediram contato para o Selo Azul"
+          >
+            <Star className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {apenasQuerSeloAzul ? "Selo Azul: pendentes" : "Quer Selo Azul"}
+            </span>
+          </Button>
           <Button asChild className="gap-2">
             <Link to="/admin/estabelecimentos/$id" params={{ id: "novo" }}>
               <Plus className="h-4 w-4" /> Novo
