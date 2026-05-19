@@ -79,9 +79,9 @@ export function Footer() {
             Contato
           </h4>
           <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-2 text-white/75">
+            <li className="flex items-start gap-2 text-white/75 min-w-0">
               <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: "#00b4d8" }} />
-              <a href="mailto:contato@turismoazulinclusivo.com.br" className={linkClass}>
+              <a href="mailto:contato@turismoazulinclusivo.com.br" className={`${linkClass} break-all min-w-0`}>
                 contato@turismoazulinclusivo.com.br
               </a>
             </li>
@@ -94,7 +94,7 @@ export function Footer() {
           </ul>
 
           <div
-            className="mt-6 p-4 rounded-xl flex items-center gap-3"
+            className="mt-6 p-4 rounded-xl flex items-center gap-3 min-w-0"
             style={{
               backgroundColor: "rgba(0,180,216,0.12)",
               border: "1px solid rgba(0,180,216,0.4)",
@@ -105,7 +105,7 @@ export function Footer() {
               href="https://www.turismoazulinclusivo.com.br"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-display font-extrabold uppercase text-sm tracking-wide hover:text-[#00b4d8] transition-colors"
+              className="font-display font-extrabold uppercase text-sm tracking-wide hover:text-[#00b4d8] transition-colors break-all min-w-0"
               style={{ color: "white" }}
             >
               www.turismoazulinclusivo.com.br

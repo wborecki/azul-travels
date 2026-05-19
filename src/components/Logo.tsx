@@ -43,16 +43,16 @@ export function Logo({
         </g>
       </svg>
 
-      <div className="flex flex-col leading-tight">
-        <span className={`text-[10px] uppercase tracking-[0.22em] font-bold ${subColor}`}>
+      <div className="flex flex-col leading-tight min-w-0">
+        <span className={`text-[10px] uppercase tracking-[0.22em] font-bold ${subColor} whitespace-nowrap`}>
           Marketplace Inclusivo
         </span>
-        <span className="flex items-baseline gap-1.5">
+        <span className="flex items-baseline gap-1.5 whitespace-nowrap">
           <span className={`font-display font-extrabold text-xl tracking-wide ${titleColor}`}>
             TURISMO AZUL
           </span>
           {showTagline && (
-            <span className="tagline-italic text-sm text-[#f0c25a]">inclusivo</span>
+            <span className="tagline-italic text-sm text-[#f0c25a] hidden sm:inline">inclusivo</span>
           )}
         </span>
       </div>
