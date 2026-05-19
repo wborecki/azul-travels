@@ -46,20 +46,7 @@ function FamiliasPage() {
     },
   ];
 
-  const [count, setCount] = useState<number | null>(null);
 
-  async function loadCount() {
-    try {
-      const { data, error } = await supabase.rpc("get_familias_count");
-      if (!error) setCount(typeof data === "number" ? data : 0);
-    } catch {
-      /* ignore */
-    }
-  }
-
-  useEffect(() => {
-    void loadCount();
-  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] -mt-16 pt-16 bg-white">
