@@ -496,3 +496,86 @@ function BoolGrid({
     </div>
   );
 }
+
+type SectionStatus = { key: string; label: string; done: boolean };
+
+function computeSectionStatus(
+  d: Draft,
+  csv: { restricoesCsv: string; gatilhosCsv: string; interessesCsv: string },
+): SectionStatus[] {
+  const anyBool = (...keys: Array<keyof Draft>) => keys.some((k) => !!d[k]);
+  const anyText = (...vals: Array<string | null | undefined>) =>
+    vals.some((v) => !!(v && String(v).trim()));
+
+  return [
+    {
+      key: "basico",
+      label: "Dados básicos",
+      done: !!d.nome_autista && !!d.idade && !!d.nivel_tea,
+    },
+    {
+      key: "comunicacao",
+      label: "Comunicação",
+      done: anyBool("comunicacao_verbal", "usa_caa", "usa_libras"),
+    },
+    {
+      key: "apoio",
+      label: "Apoio diário",
+      done: anyBool(
+        "apoio_higiene",
+        "apoio_alimentacao",
+        "apoio_mobilidade",
+        "apoio_seguranca",
+      ),
+    },
+    {
+      key: "rotina",
+      label: "Rotina",
+      done: anyText(d.rotina_horario_acordar, d.rotina_horario_dormir, d.rotina_observacoes),
+    },
+    {
+      key: "alimentacao",
+      label: "Alimentação",
+      done:
+        anyBool("alimentacao_seletiva", "precisa_cardapio_visual") ||
+        anyText(csv.restricoesCsv, d.alimentacao_observacoes),
+    },
+    {
+      key: "sensorial",
+      label: "Sensorial",
+      done: anyBool(
+        "sensivel_sons",
+        "sensivel_luz",
+        "sensivel_texturas",
+        "sensivel_cheiros",
+        "sensivel_multidao",
+      ),
+    },
+    {
+      key: "emocional",
+      label: "Regulação",
+      done:
+        anyText(csv.gatilhosCsv, d.estrategias_acalmar, d.sinais_sobrecarga),
+    },
+    {
+      key: "quarto",
+      label: "Quarto",
+      done:
+        anyBool(
+          "quarto_andar_baixo",
+          "quarto_longe_elevador",
+          "quarto_blackout",
+          "quarto_sem_estampas",
+          "quarto_cama_extra",
+        ) || anyText(d.quarto_observacoes),
+    },
+    {
+      key: "interesses",
+      label: "Interesses",
+      done:
+        anyBool("gosta_atividades_agua", "gosta_natureza", "gosta_animais") ||
+        anyText(csv.interessesCsv, d.estrategias_que_funcionam),
+    },
+  ];
+}
+
