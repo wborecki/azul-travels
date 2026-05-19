@@ -158,16 +158,8 @@ function FamiliasPage() {
               Leva menos de 2 minutos. Você pode sair da lista quando quiser.
             </p>
 
-            {count !== null && (
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-3xl font-display font-bold text-secondary">
-                  {count.toLocaleString("pt-BR")}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  famílias já cadastradas
-                </span>
-              </div>
-            )}
+
+
 
             <div className="mt-6">
               <LeadFamiliasForm
