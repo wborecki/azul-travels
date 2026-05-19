@@ -46,20 +46,6 @@ function EstabelecimentosPage() {
     },
   ];
 
-  const [count, setCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const { count: c, error } = await supabase
-          .from("leads_estabelecimentos")
-          .select("*", { count: "exact", head: true });
-        if (!error) setCount(c ?? 0);
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] -mt-16 pt-16 bg-white">
