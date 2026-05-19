@@ -79,9 +79,9 @@ export function Footer() {
             Contato
           </h4>
           <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-2 text-white/75">
+            <li className="flex items-start gap-2 text-white/75 min-w-0">
               <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: "#00b4d8" }} />
-              <a href="mailto:contato@turismoazulinclusivo.com.br" className={linkClass}>
+              <a href="mailto:contato@turismoazulinclusivo.com.br" className={`${linkClass} break-all min-w-0`}>
                 contato@turismoazulinclusivo.com.br
               </a>
             </li>
