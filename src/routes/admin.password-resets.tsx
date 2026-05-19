@@ -27,6 +27,8 @@ type Reset = {
   ator_id: string | null;
   ator_email: string | null;
   motivo: string | null;
+  ip: string | null;
+  user_agent: string | null;
 };
 
 const PAGE_SIZE = 20;
