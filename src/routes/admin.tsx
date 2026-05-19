@@ -123,6 +123,7 @@ function AdminLayout() {
             <NavItem to="/admin/conteudo" icon={<FileText className="h-4 w-4" />} label="Conteúdo TEA" />
             <NavItem to="/admin/usuarios" icon={<Settings className="h-4 w-4" />} label="Configurações" />
             <NavItem to="/admin/auditoria" icon={<History className="h-4 w-4" />} label="Auditoria" />
+            <NavItem to="/admin/password-resets" icon={<KeyRound className="h-4 w-4" />} label="Resets de senha" />
           </div>
         </nav>
         <div className="px-4 py-3 text-[10px] text-white/30 border-t border-white/5">
