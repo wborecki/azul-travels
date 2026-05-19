@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft, ArrowRight, Building2, HeartHandshake, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({ meta: [{ title: "Criar conta · Turismo Azul" }] }),
@@ -181,7 +182,7 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
     }
     setBusy(true);
     const destino = accountType === "estabelecimento" ? "/meu-estabelecimento" : "/minha-conta";
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -197,9 +198,19 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
     });
     setBusy(false);
     if (error) {
+      void logAuthEvent("signup_failure", {
+        sucesso: false,
+        email,
+        metadata: { account_type: accountType, reason: error.message },
+      });
       toast.error(error.message);
       return;
     }
+    void logAuthEvent("signup_success", {
+      userId: data.user?.id ?? null,
+      email,
+      metadata: { account_type: accountType },
+    });
     toast.success("Conta criada! Verifique seu e-mail para confirmar.");
   }
 

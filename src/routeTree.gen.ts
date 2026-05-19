@@ -43,6 +43,7 @@ import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
 import { Route as AdminPasswordResetsRouteImport } from './routes/admin.password-resets'
 import { Route as AdminFamiliasRouteImport } from './routes/admin.familias'
+import { Route as AdminAuditoriaAuthRouteImport } from './routes/admin.auditoria-auth'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin.administradores'
 import { Route as MinhaContaReservasIndexRouteImport } from './routes/minha-conta.reservas.index'
@@ -226,6 +227,11 @@ const AdminFamiliasRoute = AdminFamiliasRouteImport.update({
   path: '/familias',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditoriaAuthRoute = AdminAuditoriaAuthRouteImport.update({
+  id: '/auditoria-auth',
+  path: '/auditoria-auth',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
@@ -359,6 +366,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
@@ -408,6 +416,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/auditoria-auth'
     | '/admin/familias'
     | '/admin/password-resets'
     | '/admin/reservas'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/auditoria-auth'
     | '/admin/familias'
     | '/admin/password-resets'
     | '/admin/reservas'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/admin/administradores'
     | '/admin/auditoria'
+    | '/admin/auditoria-auth'
     | '/admin/familias'
     | '/admin/password-resets'
     | '/admin/reservas'
@@ -846,6 +858,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFamiliasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/auditoria-auth': {
+      id: '/admin/auditoria-auth'
+      path: '/auditoria-auth'
+      fullPath: '/admin/auditoria-auth'
+      preLoaderRoute: typeof AdminAuditoriaAuthRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auditoria': {
       id: '/admin/auditoria'
       path: '/auditoria'
@@ -950,6 +969,7 @@ const AdminEstabelecimentosIdRouteWithChildren =
 interface AdminRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
+  AdminAuditoriaAuthRoute: typeof AdminAuditoriaAuthRoute
   AdminFamiliasRoute: typeof AdminFamiliasRoute
   AdminPasswordResetsRoute: typeof AdminPasswordResetsRoute
   AdminReservasRoute: typeof AdminReservasRoute
@@ -965,6 +985,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminAuditoriaRoute: AdminAuditoriaRoute,
+  AdminAuditoriaAuthRoute: AdminAuditoriaAuthRoute,
   AdminFamiliasRoute: AdminFamiliasRoute,
   AdminPasswordResetsRoute: AdminPasswordResetsRoute,
   AdminReservasRoute: AdminReservasRoute,

@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_audit_log: {
+        Row: {
+          criado_em: string
+          email_mascarado: string | null
+          evento: string
+          id: string
+          ip: string | null
+          metadata: Json
+          sucesso: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string
+          email_mascarado?: string | null
+          evento: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          sucesso?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string
+          email_mascarado?: string | null
+          evento?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          sucesso?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       avaliacoes: {
         Row: {
           comentario: string | null
@@ -1383,6 +1419,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _mascarar_email: { Args: { _email: string }; Returns: string }
       expurgar_links_curtos_inativos: { Args: never; Returns: number }
       get_dashboard_stats: { Args: never; Returns: Json }
       get_familias_count: { Args: never; Returns: number }
@@ -1407,6 +1444,18 @@ export type Database = {
             }
             Returns: string
           }
+      log_auth_event: {
+        Args: {
+          _email?: string
+          _evento: string
+          _ip?: string
+          _metadata?: Json
+          _sucesso?: boolean
+          _user_agent?: string
+          _user_id?: string
+        }
+        Returns: string
+      }
       promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }

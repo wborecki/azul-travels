@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/lib/enums";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 interface AuthCtx {
   session: Session | null;
@@ -66,7 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    const uid = session?.user?.id ?? null;
+    const email = session?.user?.email ?? null;
     await supabase.auth.signOut();
+    void logAuthEvent("logout", { userId: uid, email });
   };
 
   return (

@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   KeyRound,
+  ShieldCheck,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -31,6 +32,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/usuarios": "Configurações",
   "/admin/auditoria": "Auditoria",
   "/admin/password-resets": "Resets de senha",
+  "/admin/auditoria-auth": "Auditoria de autenticação",
 };
 
 function AdminLayout() {
@@ -124,6 +126,7 @@ function AdminLayout() {
             <NavItem to="/admin/usuarios" icon={<Settings className="h-4 w-4" />} label="Configurações" />
             <NavItem to="/admin/auditoria" icon={<History className="h-4 w-4" />} label="Auditoria" />
             <NavItem to="/admin/password-resets" icon={<KeyRound className="h-4 w-4" />} label="Resets de senha" />
+            <NavItem to="/admin/auditoria-auth" icon={<ShieldCheck className="h-4 w-4" />} label="Auditoria de auth" />
           </div>
         </nav>
         <div className="px-4 py-3 text-[10px] text-white/30 border-t border-white/5">

@@ -53,6 +53,7 @@ const TABELAS_SENSIVEIS_SOMENTE_ADMIN = [
   "reservas_auditoria",
   "estabelecimentos_auditoria",
   "pre_checkins",
+  "auth_audit_log",
 ] as const;
 
 describe("RLS — leitura anônima bloqueada em tabelas sensíveis", () => {
@@ -164,6 +165,16 @@ describe("RLS — RPCs administrativas exigem autenticação/role", () => {
       _target_user_id: "00000000-0000-0000-0000-000000000000",
     });
     expect(error).not.toBeNull();
+  });
+
+  it("anon PODE chamar log_auth_event (auditoria pública de eventos)", async () => {
+    const { error } = await anon.rpc("log_auth_event", {
+      _evento: "login_failure",
+      _sucesso: false,
+      _email: "teste@example.com",
+      _metadata: { test: true, password: "DEVE_SER_REMOVIDO" },
+    });
+    expect(error).toBeNull();
   });
 });
 
