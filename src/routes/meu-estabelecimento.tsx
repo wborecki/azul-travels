@@ -8,7 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LogOut, Loader2, Building2, ShieldCheck, Save, ArrowLeft } from "lucide-react";
+import {
+  LogOut,
+  Loader2,
+  Building2,
+  ShieldCheck,
+  Save,
+  ArrowLeft,
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  Award,
+} from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
 
@@ -79,6 +91,10 @@ function MeuEstabelecimentoPage() {
   const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [estabId, setEstabId] = useState<string | null>(null);
   const [nomeResp, setNomeResp] = useState<string | null>(null);
+  const [seloAzul, setSeloAzul] = useState(false);
+  const [querSelo, setQuerSelo] = useState(false);
+  const [querSeloEm, setQuerSeloEm] = useState<string | null>(null);
+  const [solicitandoSelo, setSolicitandoSelo] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -100,6 +116,9 @@ function MeuEstabelecimentoPage() {
       setEstabId(estab?.id ?? null);
       setNomeResp(prof?.nome_responsavel ?? null);
       setPerfilCompleto(prof?.perfil_completo ?? false);
+      setSeloAzul(!!estab?.selo_azul);
+      setQuerSelo(!!estab?.quer_selo_azul);
+      setQuerSeloEm(estab?.quer_selo_azul_em ?? null);
       setDraft({
         nome: estab?.nome ?? "",
         tipo: (estab?.tipo as string) ?? prof?.tipo ?? "",
@@ -118,6 +137,25 @@ function MeuEstabelecimentoPage() {
       setCarregando(false);
     })();
   }, [user, loading, role, pathname, navigate]);
+
+  async function solicitarSeloAzul() {
+    if (!estabId || querSelo) return;
+    setSolicitandoSelo(true);
+    const agora = new Date().toISOString();
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ quer_selo_azul: true, quer_selo_azul_em: agora })
+      .eq("id", estabId);
+    setSolicitandoSelo(false);
+    if (error) {
+      toast.error("Não foi possível registrar a solicitação", { description: error.message });
+      return;
+    }
+    setQuerSelo(true);
+    setQuerSeloEm(agora);
+    toast.success("Interesse registrado! Nossa equipe entrará em contato.");
+  }
+
 
   function set<K extends keyof PerfilDraft>(k: K, v: PerfilDraft[K]) {
     setDraft((d) => ({ ...d, [k]: v }));
@@ -232,7 +270,13 @@ function MeuEstabelecimentoPage() {
         ) : (
           <Dashboard
             perfilCompleto={perfilCompleto}
+            draft={draft}
+            seloAzul={seloAzul}
+            querSelo={querSelo}
+            querSeloEm={querSeloEm}
+            solicitandoSelo={solicitandoSelo}
             onCompletar={() => setEditando(true)}
+            onSolicitarSelo={() => void solicitarSeloAzul()}
           />
         )}
       </main>
@@ -243,83 +287,245 @@ function MeuEstabelecimentoPage() {
 
 function Dashboard({
   perfilCompleto,
+  draft,
+  seloAzul,
+  querSelo,
+  querSeloEm,
+  solicitandoSelo,
   onCompletar,
+  onSolicitarSelo,
 }: {
   perfilCompleto: boolean;
+  draft: PerfilDraft;
+  seloAzul: boolean;
+  querSelo: boolean;
+  querSeloEm: string | null;
+  solicitandoSelo: boolean;
   onCompletar: () => void;
+  onSolicitarSelo: () => void;
 }) {
+  // Cálculo de progresso do perfil (campos chave)
+  const camposChave: Array<[string, boolean]> = [
+    ["Nome", !!draft.nome],
+    ["Tipo", !!draft.tipo],
+    ["Endereço", !!draft.endereco],
+    ["Cidade", !!draft.cidade],
+    ["Estado", !!draft.estado],
+    ["Website", !!draft.website],
+    ["Contato preferido", !!draft.contato_preferido],
+    ["Iniciativa atual", !!draft.iniciativa_atual],
+  ];
+  const preenchidos = camposChave.filter(([, v]) => v).length;
+  const progresso = Math.round((preenchidos / camposChave.length) * 100);
+
+  const dataSolicitacao = querSeloEm
+    ? new Date(querSeloEm).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white p-6 sm:p-8 shadow-sm">
-        <h1 className="font-display font-bold text-2xl sm:text-3xl">
-          Seu cadastro está em análise 💙
-        </h1>
-        <p className="mt-2 text-white/90 max-w-2xl">
-          Em breve nossa equipe entrará em contato.
-        </p>
+      {/* Banner compacto */}
+      <div className="rounded-2xl bg-gradient-to-br from-[#1a2f5e] via-primary to-[#1a2f5e] text-white p-6 sm:p-8 shadow-md">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl">
+              Bem-vindo ao seu painel 💙
+            </h1>
+            <p className="mt-2 text-white/90 max-w-2xl text-sm sm:text-base">
+              Acompanhe o status do seu cadastro, complete seu perfil e avance rumo ao Selo Azul.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm border border-white/20">
+            <Clock className="h-4 w-4 text-[#c9a84c]" />
+            Cadastro em análise
+          </div>
+        </div>
+
+        {/* Barra de progresso */}
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
+            <span>Progresso do perfil</span>
+            <span className="font-semibold text-[#c9a84c]">{progresso}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-[#c9a84c] to-[#e6c97a] transition-all"
+              style={{ width: `${progresso}%` }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      {/* Grid de 3 cards principais */}
+      <div className="grid md:grid-cols-3 gap-4">
         {/* Card 1 - Perfil */}
-        <div className="bg-white border rounded-2xl p-6 flex flex-col">
+        <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
-              <Building2 className="h-6 w-6" />
+            <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
+              <Building2 className="h-5 w-5" />
             </div>
-            <h2 className="font-display font-bold text-lg text-primary">
-              {perfilCompleto ? "Perfil completo ✓" : "Complete o perfil do seu local"}
+            <h2 className="font-display font-bold text-base text-primary">
+              Perfil do local
             </h2>
           </div>
           {perfilCompleto ? (
             <>
-              <p className="mt-3 text-sm text-foreground/80 flex-1">
-                Suas informações foram salvas e estão disponíveis para a equipe de auditoria.
+              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+                <CheckCircle2 className="h-4 w-4" /> Completo
+              </div>
+              <p className="mt-2 text-xs text-foreground/70 flex-1">
+                Dados salvos e disponíveis para auditoria.
               </p>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={onCompletar}
-                className="mt-4 self-start border-primary text-primary hover:bg-azul-claro"
+                className="mt-3 self-start border-primary text-primary hover:bg-azul-claro"
               >
-                Ver ou editar →
+                Ver ou editar
               </Button>
             </>
           ) : (
             <>
-              <p className="mt-3 text-sm text-foreground/80 flex-1">
-                Quanto mais informações, mais rápido passamos pela auditoria.
+              <p className="mt-3 text-xs text-foreground/70 flex-1">
+                Faltam {camposChave.length - preenchidos} de {camposChave.length} campos-chave.
               </p>
               <Button
+                size="sm"
                 onClick={onCompletar}
-                className="mt-4 self-start bg-secondary hover:bg-secondary/90 text-white"
+                className="mt-3 self-start bg-secondary hover:bg-secondary/90 text-white"
               >
-                Completar perfil →
+                Completar perfil <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </>
           )}
         </div>
 
-        {/* Card 2 - Selo Azul */}
-        <div className="bg-white border rounded-2xl p-6 flex flex-col">
+        {/* Card 2 - Selo Azul (status atual) */}
+        <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
-              <ShieldCheck className="h-6 w-6" />
+            <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
+              <ShieldCheck className="h-5 w-5" />
             </div>
-            <h2 className="font-display font-bold text-lg text-primary">
-              Certificação Selo Azul
+            <h2 className="font-display font-bold text-base text-primary">
+              Selo Azul
             </h2>
           </div>
-          <p className="mt-3 text-sm text-foreground/80 flex-1">
-            Nossa equipe avaliará seu estabelecimento e entrará em contato sobre o processo
-            de certificação.
-          </p>
-          <span className="mt-4 self-start inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-azul-claro text-primary">
-            Aguardando contato
-          </span>
+          {seloAzul ? (
+            <>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+                <Award className="h-4 w-4" /> Certificado
+              </div>
+              <p className="mt-2 text-xs text-foreground/70 flex-1">
+                Seu local já exibe o Selo Azul nas buscas.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 text-xs text-foreground/70 flex-1">
+                Local ainda não certificado. Demonstre interesse e nossa equipe avalia o processo.
+              </p>
+              <span className="mt-3 self-start inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-azul-claro text-primary">
+                Não certificado
+              </span>
+            </>
+          )}
         </div>
+
+        {/* Card 3 - Quero o Selo Azul */}
+        <div
+          className={`relative border rounded-2xl p-5 flex flex-col shadow-sm transition overflow-hidden ${
+            querSelo
+              ? "bg-gradient-to-br from-[#fff8e6] to-white border-[#c9a84c]/40"
+              : "bg-gradient-to-br from-[#1a2f5e] to-primary text-white border-transparent hover:shadow-lg"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`h-10 w-10 rounded-xl flex items-center justify-center ${
+                querSelo ? "bg-[#c9a84c]/15 text-[#8a7028]" : "bg-white/15 text-[#c9a84c]"
+              }`}
+            >
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <h2
+              className={`font-display font-bold text-base ${
+                querSelo ? "text-[#8a7028]" : "text-white"
+              }`}
+            >
+              {querSelo ? "Interesse registrado" : "Quero o Selo Azul"}
+            </h2>
+          </div>
+          {querSelo ? (
+            <>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+                <CheckCircle2 className="h-4 w-4" /> Solicitação enviada
+              </div>
+              <p className="mt-2 text-xs text-foreground/70 flex-1">
+                {dataSolicitacao
+                  ? `Recebemos seu interesse em ${dataSolicitacao}.`
+                  : "Recebemos seu interesse."}{" "}
+                Nossa equipe entrará em contato em breve.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 text-xs text-white/85 flex-1">
+                Sinalize seu interesse para iniciarmos a avaliação do processo de certificação.
+              </p>
+              <Button
+                size="sm"
+                onClick={onSolicitarSelo}
+                disabled={solicitandoSelo || seloAzul}
+                className="mt-3 self-start bg-[#c9a84c] hover:bg-[#b9962e] text-[#1a2f5e] font-semibold"
+              >
+                {solicitandoSelo ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Enviando...
+                  </>
+                ) : (
+                  <>
+                    Quero participar <ArrowRight className="h-4 w-4 ml-1" />
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Seção informativa */}
+      <div className="bg-slate-50 border rounded-2xl p-6">
+        <h3 className="font-display font-bold text-lg text-primary mb-3">
+          Próximos passos
+        </h3>
+        <ol className="space-y-2 text-sm text-foreground/80">
+          <li className="flex gap-2">
+            <span className="font-bold text-[#c9a84c]">1.</span>
+            Complete o perfil do seu estabelecimento com o máximo de informações.
+          </li>
+          <li className="flex gap-2">
+            <span className="font-bold text-[#c9a84c]">2.</span>
+            Manifeste interesse no Selo Azul - é gratuito sinalizar.
+          </li>
+          <li className="flex gap-2">
+            <span className="font-bold text-[#c9a84c]">3.</span>
+            Nossa equipe entra em contato para auditoria e capacitação.
+          </li>
+          <li className="flex gap-2">
+            <span className="font-bold text-[#c9a84c]">4.</span>
+            Após aprovação, seu local recebe o Selo Azul e ganha destaque nas buscas das famílias TEA.
+          </li>
+        </ol>
       </div>
     </div>
   );
 }
+
 
 function FormularioPerfil({
   draft,

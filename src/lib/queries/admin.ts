@@ -60,18 +60,25 @@ import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 export type EstabelecimentoAdminView = EstabelecimentoView &
   Pick<
     Tables<"estabelecimentos">,
-    "status" | "criado_em" | "mensalidade_ativa" | "listagem_basica"
+    | "status"
+    | "criado_em"
+    | "mensalidade_ativa"
+    | "listagem_basica"
+    | "quer_selo_azul"
+    | "quer_selo_azul_em"
   >;
 
 /**
- * SELECT do payload admin = SELECT da view + 4 campos administrativos.
+ * SELECT do payload admin = SELECT da view + campos administrativos.
  * Mantido como template literal para reaproveitar `ESTAB_VIEW_SELECT`
  * - fonte única, impossível divergir do shape público.
  */
 export const ESTAB_ADMIN_VIEW_SELECT = `
   ${ESTAB_VIEW_SELECT},
-  status, criado_em, mensalidade_ativa, listagem_basica
+  status, criado_em, mensalidade_ativa, listagem_basica,
+  quer_selo_azul, quer_selo_azul_em
 ` as const;
+
 
 /**
  * Subset legado/enxuto da tabela `/admin/estabelecimentos`.
