@@ -66,7 +66,7 @@ export function Footer() {
           <ul className="space-y-3 text-sm">
             <li><Link to="/" hash="como-funciona" className={linkClass}>Como Funciona</Link></li>
             <li><Link to="/familias" className={linkClass}>Para Famílias</Link></li>
-            <li><Link to="/estabelecimentos" className={linkClass}>Para Parceiros</Link></li>
+            <li><Link to="/estabelecimentos" className={linkClass}>Para Estabelecimentos</Link></li>
             <li><Link to="/sobre-os-selos" className={linkClass}>Selo Azul</Link></li>
             <li><a href="mailto:contato@turismoazulinclusivo.com.br" className={linkClass}>Contato</a></li>
           </ul>
