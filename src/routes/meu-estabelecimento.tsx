@@ -270,7 +270,13 @@ function MeuEstabelecimentoPage() {
         ) : (
           <Dashboard
             perfilCompleto={perfilCompleto}
+            draft={draft}
+            seloAzul={seloAzul}
+            querSelo={querSelo}
+            querSeloEm={querSeloEm}
+            solicitandoSelo={solicitandoSelo}
             onCompletar={() => setEditando(true)}
+            onSolicitarSelo={() => void solicitarSeloAzul()}
           />
         )}
       </main>
