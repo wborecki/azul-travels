@@ -108,6 +108,7 @@ function MeuEstabelecimentoPage() {
         estado: estab?.estado ?? prof?.estado ?? "",
         website: estab?.website ?? prof?.website ?? "",
         num_colaboradores: prof?.num_colaboradores ?? "",
+        recebe_grupos_escolares_tea: !!estab?.recebe_grupos_escolares_tea,
         estrutura: (prof?.estrutura as Estrutura) ?? {},
         iniciativa_atual: prof?.iniciativa_atual ?? "",
         num_capacitacao: prof?.num_capacitacao ?? "",
