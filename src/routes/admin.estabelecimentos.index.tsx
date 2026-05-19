@@ -217,7 +217,21 @@ function AdminEstabelecimentos() {
                 filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-muted/30">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{r.nome}</div>
+                      <div className="font-medium text-foreground flex items-center gap-2 flex-wrap">
+                        {r.nome}
+                        {r.quer_selo_azul && !r.selo_azul && (
+                          <span
+                            title={
+                              r.quer_selo_azul_em
+                                ? `Solicitado em ${new Date(r.quer_selo_azul_em).toLocaleDateString("pt-BR")}`
+                                : "Interesse no Selo Azul"
+                            }
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#c9a84c]/15 text-[#8a7028] border border-[#c9a84c]/40"
+                          >
+                            ✨ Quer Selo
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground">/{r.slug}</div>
                     </td>
                     <td className="px-4 py-3 capitalize text-foreground/80">{r.tipo}</td>
