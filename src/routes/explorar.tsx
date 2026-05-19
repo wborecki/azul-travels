@@ -131,8 +131,34 @@ function ExplorarPage() {
             )}
           </div>
 
+          {/* Categorias rápidas */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {categoriasRapidas.map((c) => {
+              const ativo = tipo === c.key;
+              return (
+                <button
+                  key={c.key || "tudo"}
+                  type="button"
+                  onClick={() => {
+                    setTipo(c.key);
+                    if (c.key !== "passeio_educativo") setSubtipoEdu("");
+                  }}
+                  className={
+                    "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition " +
+                    (ativo
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-white text-foreground/80 border-border hover:border-primary/40 hover:text-primary")
+                  }
+                >
+                  <span aria-hidden>{c.icon}</span>
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Filtros */}
-          <div className="mt-6 grid sm:grid-cols-3 gap-3 bg-white border rounded-xl p-4">
+          <div className="mt-4 grid sm:grid-cols-3 gap-3 bg-white border rounded-xl p-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase">
                 Estado
@@ -156,12 +182,17 @@ function ExplorarPage() {
               </label>
               <select
                 value={tipo}
-                onChange={(e) => setTipo(e.target.value as EstabTipo | "")}
+                onChange={(e) => {
+                  const v = e.target.value as EstabTipo | "";
+                  setTipo(v);
+                  if (v !== "passeio_educativo") setSubtipoEdu("");
+                }}
                 className="mt-1 w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"
               >
                 <option value="">Todos</option>
                 {ESTAB_TIPOS.map((t) => (
                   <option key={t} value={t}>
+                    {t === "passeio_educativo" ? "🎒 " : ""}
                     {ESTAB_TIPO_LABEL[t]}
                   </option>
                 ))}
@@ -176,6 +207,33 @@ function ExplorarPage() {
               />
               Mostrar só com Selo Azul
             </label>
+
+            {tipo === "passeio_educativo" && (
+              <div className="sm:col-span-3">
+                <label className="text-xs font-semibold text-muted-foreground uppercase">
+                  Subcategoria de passeio educativo
+                </label>
+                <select
+                  value={subtipoEdu}
+                  onChange={(e) =>
+                    setSubtipoEdu(
+                      e.target.value as SubtipoEducativo | "fazenda_sitio" | "",
+                    )
+                  }
+                  className="mt-1 w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"
+                >
+                  <option value="">Todas</option>
+                  <option value="fazenda_sitio">Fazenda / Sítio</option>
+                  <option value="museu">{SUBTIPO_EDUCATIVO_LABEL.museu}</option>
+                  <option value="parque_tematico">
+                    {SUBTIPO_EDUCATIVO_LABEL.parque_tematico}
+                  </option>
+                  <option value="espaco_cultural">
+                    {SUBTIPO_EDUCATIVO_LABEL.espaco_cultural}
+                  </option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Resultados */}
