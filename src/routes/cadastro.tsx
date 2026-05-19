@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft, ArrowRight, Building2, HeartHandshake, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({ meta: [{ title: "Criar conta · Turismo Azul" }] }),
