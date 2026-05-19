@@ -24,6 +24,7 @@ import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as EstabelecimentosRouteImport } from './routes/estabelecimentos'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as ComoFuncionaOSeloAzulRouteImport } from './routes/como-funciona-o-selo-azul'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BeneficiosTeaRouteImport } from './routes/beneficios-tea'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -128,6 +129,11 @@ const DemoRoute = DemoRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaOSeloAzulRoute = ComoFuncionaOSeloAzulRouteImport.update({
+  id: '/como-funciona-o-selo-azul',
+  path: '/como-funciona-o-selo-azul',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/como-funciona-o-selo-azul': typeof ComoFuncionaOSeloAzulRoute
   '/contato': typeof ContatoRoute
   '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/como-funciona-o-selo-azul': typeof ComoFuncionaOSeloAzulRoute
   '/contato': typeof ContatoRoute
   '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
@@ -382,6 +390,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/beneficios-tea': typeof BeneficiosTeaRoute
   '/cadastro': typeof CadastroRoute
+  '/como-funciona-o-selo-azul': typeof ComoFuncionaOSeloAzulRoute
   '/contato': typeof ContatoRoute
   '/demo': typeof DemoRouteWithChildren
   '/estabelecimentos': typeof EstabelecimentosRoute
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/como-funciona-o-selo-azul'
     | '/contato'
     | '/demo'
     | '/estabelecimentos'
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/como-funciona-o-selo-azul'
     | '/contato'
     | '/demo'
     | '/estabelecimentos'
@@ -523,6 +534,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/beneficios-tea'
     | '/cadastro'
+    | '/como-funciona-o-selo-azul'
     | '/contato'
     | '/demo'
     | '/estabelecimentos'
@@ -571,6 +583,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosTeaRoute: typeof BeneficiosTeaRoute
   CadastroRoute: typeof CadastroRoute
+  ComoFuncionaOSeloAzulRoute: typeof ComoFuncionaOSeloAzulRoute
   ContatoRoute: typeof ContatoRoute
   DemoRoute: typeof DemoRouteWithChildren
   EstabelecimentosRoute: typeof EstabelecimentosRoute
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona-o-selo-azul': {
+      id: '/como-funciona-o-selo-azul'
+      path: '/como-funciona-o-selo-azul'
+      fullPath: '/como-funciona-o-selo-azul'
+      preLoaderRoute: typeof ComoFuncionaOSeloAzulRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -997,6 +1017,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BeneficiosTeaRoute: BeneficiosTeaRoute,
   CadastroRoute: CadastroRoute,
+  ComoFuncionaOSeloAzulRoute: ComoFuncionaOSeloAzulRoute,
   ContatoRoute: ContatoRoute,
   DemoRoute: DemoRouteWithChildren,
   EstabelecimentosRoute: EstabelecimentosRoute,
