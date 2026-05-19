@@ -233,6 +233,10 @@ function AdminEstabelecimentoForm() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [seloInteresse, setSeloInteresse] = useState<{
+    quer: boolean;
+    quando: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (isNew) return;
@@ -246,6 +250,10 @@ function AdminEstabelecimentoForm() {
           return;
         }
         setForm(rowToForm(data));
+        setSeloInteresse({
+          quer: !!data.quer_selo_azul,
+          quando: data.quer_selo_azul_em ?? null,
+        });
       } catch (err) {
         toast.error("Erro ao carregar", {
           description: err instanceof Error ? err.message : undefined,
@@ -636,6 +644,25 @@ function AdminEstabelecimentoForm() {
             />
           ))}
         </div>
+        {seloInteresse?.quer && (
+          <div className="mt-4 rounded-xl border border-[#c9a84c]/40 bg-[#c9a84c]/10 px-4 py-3 text-sm">
+            <div className="font-medium text-[#7a5c00]">
+              ✨ Estabelecimento solicitou o Selo Azul
+            </div>
+            <div className="text-muted-foreground mt-1">
+              Interesse declarado em{" "}
+              {seloInteresse.quando
+                ? new Date(seloInteresse.quando).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "data não registrada"}
+            </div>
+          </div>
+        )}
         <div className="grid sm:grid-cols-2 gap-4 mt-4">
           <Field
             label="Nome do selo privado"
