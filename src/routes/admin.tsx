@@ -102,9 +102,9 @@ function AdminLayout() {
   };
 
   return (
-    <div className="flex flex-1 bg-[#f8fafc]">
+    <div className="flex flex-1 bg-[#f8fafc] isolate">
       <aside
-        className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen"
+        className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen z-30"
         style={{ width: 220 }}
       >
         <div className="px-6 py-6 flex justify-center">
@@ -136,7 +136,7 @@ function AdminLayout() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         <header
-          className="bg-white border-b border-[#e5e7eb] flex items-center justify-between px-6 sticky top-0 z-10"
+          className="bg-white border-b border-[#e5e7eb] flex items-center justify-between px-6 sticky top-0 z-30"
           style={{ height: 48 }}
         >
           <h1 className="text-sm font-bold text-[#1a2f5e]">{pageTitle}</h1>
