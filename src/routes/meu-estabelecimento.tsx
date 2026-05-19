@@ -556,7 +556,7 @@ function FormularioPerfil({
                 <option value="">Selecione…</option>
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {ESTAB_TIPO_LABEL[t]}
                   </option>
                 ))}
               </select>
