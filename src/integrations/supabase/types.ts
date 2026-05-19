@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_password_resets: {
+        Row: {
+          ator_email: string | null
+          ator_id: string | null
+          criado_em: string
+          id: string
+          motivo: string | null
+          target_email: string | null
+          target_user_id: string
+        }
+        Insert: {
+          ator_email?: string | null
+          ator_id?: string | null
+          criado_em?: string
+          id?: string
+          motivo?: string | null
+          target_email?: string | null
+          target_user_id: string
+        }
+        Update: {
+          ator_email?: string | null
+          ator_id?: string | null
+          criado_em?: string
+          id?: string
+          motivo?: string | null
+          target_email?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       avaliacoes: {
         Row: {
           comentario: string | null
@@ -1350,6 +1380,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_admin_password_reset: {
+        Args: { _motivo?: string; _target_user_id: string }
+        Returns: string
       }
       promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }
