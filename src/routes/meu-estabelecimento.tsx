@@ -59,6 +59,7 @@ const EMPTY: PerfilDraft = {
   estado: "",
   website: "",
   num_colaboradores: "",
+  recebe_grupos_escolares_tea: false,
   estrutura: {},
   iniciativa_atual: "",
   num_capacitacao: "",
