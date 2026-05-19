@@ -52,7 +52,7 @@ function FamiliasPage() {
   async function loadCount() {
     try {
       const { count: c, error } = await supabase
-        .from("leads_familias")
+        .from("familia_profiles")
         .select("*", { count: "exact", head: true });
       if (!error) setCount(c ?? 0);
     } catch {
