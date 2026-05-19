@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/lib/enums";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 interface AuthCtx {
   session: Session | null;
