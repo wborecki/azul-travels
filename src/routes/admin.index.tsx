@@ -29,7 +29,7 @@ function AdminDashboard() {
   useEffect(() => {
     void (async () => {
       try {
-        const [s, fams, ests] = await Promise.all([
+        const [s, fams, ests, leads] = await Promise.all([
           fetchDashboardStats(),
           supabase
             .from("familia_profiles")
@@ -41,8 +41,10 @@ function AdminDashboard() {
             .select("id, nome_responsavel, cidade, estado, criado_em, status")
             .order("criado_em", { ascending: false })
             .limit(10),
+          supabase.from("leads_familias").select("id", { count: "exact", head: true }),
         ]);
         setStats(s);
+        setLeadsFamilias(leads.count ?? 0);
         const merged: RecentRow[] = [
           ...(fams.data ?? []).map((f) => ({
             id: f.id,
