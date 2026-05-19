@@ -92,7 +92,7 @@ function AdminEstabelecimentos() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedQ, pagina, tamanhoPagina]);
+  }, [debouncedQ, pagina, tamanhoPagina, apenasQuerSeloAzul]);
 
   const filtered = useMemo(() => rows, [rows]);
 
