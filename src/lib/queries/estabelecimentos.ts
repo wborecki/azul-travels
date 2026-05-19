@@ -184,6 +184,8 @@ export interface EstabelecimentosViewFilters {
   apenasDestaque?: boolean;
   apenasComBeneficio?: boolean;
   apenasComTour360?: boolean;
+  /** Filtra estabelecimentos que solicitaram contato para o Selo Azul e ainda não o possuem. */
+  apenasQuerSeloAzul?: boolean;
   /** Limita o número total de itens. Ignorado quando há paginação. */
   limite?: number;
   /** Página 1-indexada. Use junto com `tamanhoPagina`. */
@@ -276,6 +278,10 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
   if (filters.apenasDestaque) q = q.eq("destaque", true) as Q;
   if (filters.apenasComBeneficio) q = q.eq("tem_beneficio_tea", true) as Q;
   if (filters.apenasComTour360) q = q.not("tour_360_url", "is", null) as Q;
+  if (filters.apenasQuerSeloAzul) {
+    q = q.eq("quer_selo_azul", true) as Q;
+    q = q.eq("selo_azul", false) as Q;
+  }
 
   for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
   for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;

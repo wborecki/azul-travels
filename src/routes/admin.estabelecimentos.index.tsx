@@ -34,12 +34,19 @@ import {
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    quer_selo_azul: search.quer_selo_azul === "1" || search.quer_selo_azul === 1 ? 1 : undefined,
+  }),
   component: AdminEstabelecimentos,
 });
 
 type Row = EstabelecimentoAdminView;
 
 function AdminEstabelecimentos() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const apenasQuerSeloAzul = search.quer_selo_azul === 1;
+
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
@@ -53,10 +60,10 @@ function AdminEstabelecimentos() {
   /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  // Reset pra página 1 sempre que busca/tamanho mudarem.
+  // Reset pra página 1 sempre que busca/tamanho/filtros mudarem.
   useEffect(() => {
     setPagina(1);
-  }, [debouncedQ, tamanhoPagina]);
+  }, [debouncedQ, tamanhoPagina, apenasQuerSeloAzul]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +72,7 @@ function AdminEstabelecimentos() {
       try {
         const page = await fetchEstabelecimentosAdminViewPaginated({
           busca: debouncedQ.trim() || undefined,
+          apenasQuerSeloAzul: apenasQuerSeloAzul || undefined,
           pagina,
           tamanhoPagina,
         });
@@ -84,7 +92,7 @@ function AdminEstabelecimentos() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedQ, pagina, tamanhoPagina]);
+  }, [debouncedQ, pagina, tamanhoPagina, apenasQuerSeloAzul]);
 
   const filtered = useMemo(() => rows, [rows]);
 
@@ -186,6 +194,24 @@ function AdminEstabelecimentos() {
           </Button>
         </div>
       </header>
+
+      {apenasQuerSeloAzul && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-[#c9a84c]/40 bg-[#fff8e6] px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Star className="h-4 w-4 text-[#b8852a]" />
+            <span className="text-foreground/90">
+              Mostrando apenas estabelecimentos que <strong>solicitaram contato para o Selo Azul</strong>.
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate({ search: { quer_selo_azul: undefined } })}
+          >
+            Limpar filtro
+          </Button>
+        </div>
+      )}
 
       <div className="bg-card border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
