@@ -431,7 +431,7 @@ function QuickAction({ to, label }: { to: string; label: string }) {
 }
 
 function EmptyCell() {
-  return <span className="text-xs italic text-muted-foreground">—</span>;
+  return <span className="text-xs italic text-muted-foreground">-</span>;
 }
 
 function MetricCard({
