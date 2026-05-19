@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Award, Home as HomeIcon, Heart, Check, MessageCircle } from "lucide-react";
-import seloOficial from "@/assets/selo-turismo-azul.png";
+const seloOficial = "https://ausjcarxquthyvtqgjmu.supabase.co/storage/v1/object/public/conteudo-capas/selos/selo-turismo-azul.png";
 
 export const Route = createFileRoute("/sobre-os-selos")({
   head: () => ({

@@ -14,7 +14,7 @@ import {
   Building2,
   HeartHandshake,
 } from "lucide-react";
-import seloOficial from "@/assets/selo-turismo-azul.png";
+const seloOficial = "https://ausjcarxquthyvtqgjmu.supabase.co/storage/v1/object/public/conteudo-capas/selos/selo-turismo-azul.png";
 
 export const Route = createFileRoute("/como-funciona-o-selo-azul")({
   head: () => ({
