@@ -104,6 +104,7 @@ export type EstabelecimentoView = Pick<
   | "slug"
   | "nome"
   | "tipo"
+  | "subtipo_educativo"
   | "cidade"
   | "estado"
   | "foto_capa"
@@ -131,7 +132,7 @@ export type EstabelecimentoView = Pick<
 
 /** SELECT compartilhado - fonte única da verdade do payload de view. */
 export const ESTAB_VIEW_SELECT = `
-  id, slug, nome, tipo, cidade, estado, foto_capa,
+  id, slug, nome, tipo, subtipo_educativo, cidade, estado, foto_capa,
   tour_360_url,
   selo_azul, selo_azul_validade, selo_governamental,
   selo_privado, selo_privado_nome,
