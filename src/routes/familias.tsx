@@ -148,11 +148,9 @@ function FamiliasPage() {
 
 
             <div className="mt-6">
-              <LeadFamiliasForm
-                origem="pagina_familias"
-                onSuccess={loadCount}
-              />
+              <LeadFamiliasForm origem="pagina_familias" />
             </div>
+
           </div>
         </main>
       </div>
