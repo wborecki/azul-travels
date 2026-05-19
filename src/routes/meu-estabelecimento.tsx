@@ -411,6 +411,21 @@ function FormularioPerfil({
               maxLength={200}
             />
           </Field>
+          {draft.tipo === "passeio_educativo" && (
+            <label className="flex items-start gap-3 p-3 border rounded-lg bg-azul-claro/20 cursor-pointer hover:bg-azul-claro/30">
+              <Checkbox
+                checked={draft.recebe_grupos_escolares_tea}
+                onCheckedChange={(v) => set("recebe_grupos_escolares_tea", v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm">
+                <span className="font-medium">Recebe grupos escolares com alunos TEA</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  Se marcado, exibimos um selo discreto na sua ficha pública para famílias e escolas.
+                </span>
+              </span>
+            </label>
+          )}
         </Secao>
 
         {/* Seção 2 */}
