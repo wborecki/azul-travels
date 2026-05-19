@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { resolvePostLoginPath } from "@/lib/postLoginRedirect";
 import { Logo } from "@/components/Logo";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
