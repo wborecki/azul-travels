@@ -195,6 +195,24 @@ function AdminEstabelecimentos() {
         </div>
       </header>
 
+      {apenasQuerSeloAzul && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-[#c9a84c]/40 bg-[#fff8e6] px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Star className="h-4 w-4 text-[#b8852a]" />
+            <span className="text-foreground/90">
+              Mostrando apenas estabelecimentos que <strong>solicitaram contato para o Selo Azul</strong>.
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate({ search: { quer_selo_azul: undefined } })}
+          >
+            Limpar filtro
+          </Button>
+        </div>
+      )}
+
       <div className="bg-card border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
