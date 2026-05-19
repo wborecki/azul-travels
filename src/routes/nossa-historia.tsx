@@ -76,7 +76,7 @@ function NossaHistoriaPage() {
               <img
                 src={giselaArthur1}
                 alt="Gisela Antoniucci e seu filho Arthur"
-                className="w-full h-auto rounded-2xl shadow-lg object-cover aspect-[4/5]"
+                className="w-full h-auto rounded-2xl shadow-lg object-cover object-top aspect-[4/5]"
                 loading="lazy"
               />
               <figcaption className="mt-3 text-center text-sm font-medium text-foreground/70">
