@@ -41,6 +41,7 @@ interface PerfilDraft {
   estado: string;
   website: string;
   num_colaboradores: string;
+  recebe_grupos_escolares_tea: boolean;
   // section 2
   estrutura: Estrutura;
   // section 3
@@ -58,6 +59,7 @@ const EMPTY: PerfilDraft = {
   estado: "",
   website: "",
   num_colaboradores: "",
+  recebe_grupos_escolares_tea: false,
   estrutura: {},
   iniciativa_atual: "",
   num_capacitacao: "",
@@ -106,6 +108,7 @@ function MeuEstabelecimentoPage() {
         estado: estab?.estado ?? prof?.estado ?? "",
         website: estab?.website ?? prof?.website ?? "",
         num_colaboradores: prof?.num_colaboradores ?? "",
+        recebe_grupos_escolares_tea: !!estab?.recebe_grupos_escolares_tea,
         estrutura: (prof?.estrutura as Estrutura) ?? {},
         iniciativa_atual: prof?.iniciativa_atual ?? "",
         num_capacitacao: prof?.num_capacitacao ?? "",
@@ -157,6 +160,8 @@ function MeuEstabelecimentoPage() {
           cidade: draft.cidade,
           estado: draft.estado.toUpperCase(),
           website: draft.website || null,
+          recebe_grupos_escolares_tea:
+            draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
         })
         .eq("id", estabId);
     }
@@ -406,6 +411,21 @@ function FormularioPerfil({
               maxLength={200}
             />
           </Field>
+          {draft.tipo === "passeio_educativo" && (
+            <label className="flex items-start gap-3 p-3 border rounded-lg bg-azul-claro/20 cursor-pointer hover:bg-azul-claro/30">
+              <Checkbox
+                checked={draft.recebe_grupos_escolares_tea}
+                onCheckedChange={(v) => set("recebe_grupos_escolares_tea", v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm">
+                <span className="font-medium">Recebe grupos escolares com alunos TEA</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  Se marcado, exibimos um selo discreto na sua ficha pública para famílias e escolas.
+                </span>
+              </span>
+            </label>
+          )}
         </Secao>
 
         {/* Seção 2 */}

@@ -128,6 +128,8 @@ export type EstabelecimentoView = Pick<
   | "tem_caa"
   // Curadoria
   | "destaque"
+  // Passeios educativos
+  | "recebe_grupos_escolares_tea"
 >;
 
 /** SELECT compartilhado - fonte única da verdade do payload de view. */
@@ -139,7 +141,8 @@ export const ESTAB_VIEW_SELECT = `
   tem_beneficio_tea, beneficio_tea_descricao,
   tem_sala_sensorial, tem_concierge_tea, tem_checkin_antecipado,
   tem_fila_prioritaria, tem_cardapio_visual, tem_caa,
-  destaque
+  destaque,
+  recebe_grupos_escolares_tea
 ` as const;
 
 /** Chaves boolean de selo aplicáveis como filtro `eq(true)`. */
