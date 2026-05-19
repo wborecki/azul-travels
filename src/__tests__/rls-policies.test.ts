@@ -53,6 +53,7 @@ const TABELAS_SENSIVEIS_SOMENTE_ADMIN = [
   "reservas_auditoria",
   "estabelecimentos_auditoria",
   "pre_checkins",
+  "auth_audit_log",
 ] as const;
 
 describe("RLS — leitura anônima bloqueada em tabelas sensíveis", () => {
