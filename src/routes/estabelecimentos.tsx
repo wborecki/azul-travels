@@ -130,24 +130,8 @@ function EstabelecimentosPage() {
               Espaços educativos como fazendas, sítios e museus recebem grupos escolares com crianças autistas sem nenhum preparo específico. Com o Selo Azul, seu espaço passa a ser encontrado pelas famílias e escolas que mais precisam de você.
             </p>
 
-            {count !== null && (
-              <div className="mt-4 flex items-baseline gap-2">
-                {count > 0 ? (
-                  <>
-                    <span className="text-3xl font-display font-bold text-secondary">
-                      {count.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      estabelecimentos já cadastrados
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-base font-semibold text-secondary">
-                    Seja um dos primeiros parceiros
-                  </span>
-                )}
-              </div>
-            )}
+
+
 
             <div className="mt-6">
               <LeadEstabelecimentosForm origem="pagina_estabelecimentos" />
