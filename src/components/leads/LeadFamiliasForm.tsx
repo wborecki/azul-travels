@@ -44,7 +44,7 @@ const schema = z.object({
 
 type FormErrors = Partial<Record<keyof z.infer<typeof schema>, string>>;
 
-const SHARE_URL = "https://azul-travels.lovable.app";
+const SHARE_URL = "https://turismoazulinclusivo.com.br";
 const SHARE_TEXT =
   "Conheci o Turismo Azul, a primeira plataforma de turismo para famílias com autismo no Brasil. Estou na lista de espera pra quando lançar: " +
   SHARE_URL;

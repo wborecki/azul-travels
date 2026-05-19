@@ -63,7 +63,7 @@ export const Route = createFileRoute("/")({
           "Seja um dos primeiros a entrar quando a plataforma abrir. Lista de espera gratuita.",
       },
       { property: "og:image", content: OG_IMAGE },
-      { property: "og:url", content: "https://azul-travels.lovable.app" },
+      { property: "og:url", content: "https://turismoazulinclusivo.com.br" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE },
     ],
