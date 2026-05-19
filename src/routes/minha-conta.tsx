@@ -61,7 +61,7 @@ function MinhaContaLayout() {
   const primeiroNome = nome?.split(" ")[0] ?? "";
 
   return (
-    <div className="min-h-screen flex flex-col bg-azul-claro/20">
+    <div className="flex flex-1 flex-col bg-azul-claro/20">
       <header className="bg-white border-b sticky top-0 z-30">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <Link to="/minha-conta" className="flex items-center gap-3">

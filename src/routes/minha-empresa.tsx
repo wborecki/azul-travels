@@ -92,7 +92,7 @@ function MinhaEmpresaPage() {
 
   if (loading || carregando) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-1 flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
@@ -104,7 +104,7 @@ function MinhaEmpresaPage() {
 
   if (!estab) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-1 flex-col">
         <Header />
         <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
           <div className="max-w-2xl mx-auto bg-white border rounded-2xl p-8 text-center">
@@ -123,7 +123,7 @@ function MinhaEmpresaPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-azul-claro/20">
+    <div className="flex flex-1 flex-col bg-azul-claro/20">
       <Header />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-3xl mx-auto">

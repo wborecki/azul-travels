@@ -102,7 +102,7 @@ function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc]">
+    <div className="flex flex-1 bg-[#f8fafc]">
       <aside
         className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen"
         style={{ width: 220 }}
