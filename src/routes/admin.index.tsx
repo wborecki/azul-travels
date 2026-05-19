@@ -45,6 +45,7 @@ const PAGE_SIZE = 5;
 function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [leadsFamiliasCount, setLeadsFamiliasCount] = useState<number | null>(null);
+  const [seloAzulPendentes, setSeloAzulPendentes] = useState<number | null>(null);
   const [recents, setRecents] = useState<RecentRow[]>([]);
   const [leadsRecent, setLeadsRecent] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(true);
