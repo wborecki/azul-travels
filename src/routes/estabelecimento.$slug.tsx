@@ -349,6 +349,13 @@ function EstabPage() {
             <Pill {...SELO_BADGES.selo_privado} label={e.selo_privado_nome || "Selo Privado"} />
           )}
           {e.tem_beneficio_tea && <Pill {...SELO_BADGES.beneficio_tea} />}
+          {e.tipo === "passeio_educativo" && e.recebe_grupos_escolares_tea && (
+            <Pill
+              icon={null}
+              label="✓ Grupos escolares TEA"
+              className="bg-azul-claro text-primary"
+            />
+          )}
         </div>
         {/* Botão Tour 360° */}
         {tour360Url && (
