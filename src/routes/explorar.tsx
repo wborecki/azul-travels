@@ -49,6 +49,7 @@ function ExplorarPage() {
   const [loading, setLoading] = useState(true);
   const [estado, setEstado] = useState("");
   const [tipo, setTipo] = useState<EstabTipo | "">("");
+  const [subtipoEdu, setSubtipoEdu] = useState<SubtipoEducativo | "fazenda_sitio" | "">("");
   const [apenasSeloAzul, setApenasSeloAzul] = useState(false);
 
   useEffect(() => {
@@ -74,10 +75,31 @@ function ExplorarPage() {
     return items.filter((e) => {
       if (estado && e.estado !== estado) return false;
       if (tipo && e.tipo !== tipo) return false;
+      if (tipo === "passeio_educativo" && subtipoEdu) {
+        const sub = e.subtipo_educativo ?? "";
+        if (subtipoEdu === "fazenda_sitio") {
+          if (sub !== "fazenda" && sub !== "sitio") return false;
+        } else if (sub !== subtipoEdu) {
+          return false;
+        }
+      }
       if (apenasSeloAzul && !e.selo_azul) return false;
       return true;
     });
-  }, [items, estado, tipo, apenasSeloAzul]);
+  }, [items, estado, tipo, subtipoEdu, apenasSeloAzul]);
+
+  const categoriasRapidas: Array<{
+    key: EstabTipo | "";
+    label: string;
+    icon: string;
+  }> = [
+    { key: "", label: "Tudo", icon: "✨" },
+    { key: "hotel", label: "Hotéis", icon: "🏨" },
+    { key: "pousada", label: "Pousadas", icon: "🏡" },
+    { key: "restaurante", label: "Restaurantes", icon: "🍽️" },
+    { key: "parque", label: "Parques", icon: "🎢" },
+    { key: "passeio_educativo", label: "Passeios Educativos", icon: "🎒" },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
