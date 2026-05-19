@@ -997,7 +997,10 @@ function ParaQuemEhSection() {
             <h3 className="font-display font-extrabold uppercase text-xl md:text-2xl tracking-wide" style={{ color: "#1a3666" }}>
               <span aria-hidden>🤝</span> Para hotéis e parceiros
             </h3>
-            <ul className="mt-6 space-y-4 flex-1">
+            <p className="mt-4 text-[14px] leading-relaxed text-foreground/80">
+              Hotéis, pousadas, restaurantes, parques, atrações, fazendas, sítios, museus e espaços educativos.
+            </p>
+            <ul className="mt-5 space-y-4 flex-1">
               {parceiros.map((t) => (
                 <li key={t} className="flex items-start gap-3 text-[15px] leading-relaxed text-foreground">
                   <Check color="#3ec46d" />
@@ -1005,6 +1008,9 @@ function ParaQuemEhSection() {
                 </li>
               ))}
             </ul>
+            <p className="mt-6 text-[14px] leading-relaxed text-foreground">
+              Espaços educativos como fazendas, sítios e museus recebem grupos escolares com crianças autistas sem nenhum preparo específico. Com o Selo Azul, seu espaço passa a ser encontrado pelas famílias e escolas que mais precisam de você.
+            </p>
           </div>
         </div>
       </div>
