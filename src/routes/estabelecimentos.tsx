@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { LeadEstabelecimentosForm } from "@/components/leads/LeadEstabelecimentosForm";
+
 
 export const Route = createFileRoute("/estabelecimentos")({
   head: () => ({
@@ -47,20 +46,6 @@ function EstabelecimentosPage() {
     },
   ];
 
-  const [count, setCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const { count: c, error } = await supabase
-          .from("leads_estabelecimentos")
-          .select("*", { count: "exact", head: true });
-        if (!error) setCount(c ?? 0);
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] -mt-16 pt-16 bg-white">
@@ -145,24 +130,8 @@ function EstabelecimentosPage() {
               Espaços educativos como fazendas, sítios e museus recebem grupos escolares com crianças autistas sem nenhum preparo específico. Com o Selo Azul, seu espaço passa a ser encontrado pelas famílias e escolas que mais precisam de você.
             </p>
 
-            {count !== null && (
-              <div className="mt-4 flex items-baseline gap-2">
-                {count > 0 ? (
-                  <>
-                    <span className="text-3xl font-display font-bold text-secondary">
-                      {count.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      estabelecimentos já cadastrados
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-base font-semibold text-secondary">
-                    Seja um dos primeiros parceiros
-                  </span>
-                )}
-              </div>
-            )}
+
+
 
             <div className="mt-6">
               <LeadEstabelecimentosForm origem="pagina_estabelecimentos" />
