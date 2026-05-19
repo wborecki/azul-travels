@@ -18,6 +18,7 @@ function MinhaContaLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [nome, setNome] = useState<string | null>(null);
+  const [perfilCompleto, setPerfilCompleto] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -41,7 +42,13 @@ function MinhaContaLayout() {
             null,
         );
       });
-  }, [user]);
+    supabase
+      .from("perfil_sensorial")
+      .select("id")
+      .eq("familia_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setPerfilCompleto(!!data));
+  }, [user, pathname]);
 
   if (loading || !user) {
     return (
