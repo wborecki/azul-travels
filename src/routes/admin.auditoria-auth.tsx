@@ -336,9 +336,30 @@ function AuditoriaAuthPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${busy ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
-          <Button variant="outline" size="sm" onClick={() => void exportCsv()} disabled={busy || total === 0}>
-            <Download className="h-4 w-4 mr-2" /> CSV ({total})
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={busy || total === 0}>
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuLabel>Página atual ({rows.length})</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => void exportar("csv", "pagina")}>
+                CSV - página atual
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void exportar("json", "pagina")}>
+                JSON - página atual
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Todos os filtrados ({total})</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => void exportar("csv", "todos")}>
+                CSV - todos filtrados
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void exportar("json", "todos")}>
+                JSON - todos filtrados
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
