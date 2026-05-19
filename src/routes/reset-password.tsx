@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { logAuthEvent } from "@/lib/logAuthEvent";
+import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
