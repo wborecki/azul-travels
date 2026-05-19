@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { KeyRound, Loader2, RefreshCw, X } from "lucide-react";
+import { Download, KeyRound, Loader2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/password-resets")({
