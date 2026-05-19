@@ -43,6 +43,10 @@ export const Route = createFileRoute("/admin/estabelecimentos/")({
 type Row = EstabelecimentoAdminView;
 
 function AdminEstabelecimentos() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const apenasQuerSeloAzul = search.quer_selo_azul === 1;
+
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(1);
@@ -56,10 +60,10 @@ function AdminEstabelecimentos() {
   /** Ids em mutação (para mostrar spinner inline e desabilitar controles). */
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
-  // Reset pra página 1 sempre que busca/tamanho mudarem.
+  // Reset pra página 1 sempre que busca/tamanho/filtros mudarem.
   useEffect(() => {
     setPagina(1);
-  }, [debouncedQ, tamanhoPagina]);
+  }, [debouncedQ, tamanhoPagina, apenasQuerSeloAzul]);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +72,7 @@ function AdminEstabelecimentos() {
       try {
         const page = await fetchEstabelecimentosAdminViewPaginated({
           busca: debouncedQ.trim() || undefined,
+          apenasQuerSeloAzul: apenasQuerSeloAzul || undefined,
           pagina,
           tamanhoPagina,
         });
