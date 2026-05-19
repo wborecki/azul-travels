@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { LeadFamiliasForm } from "@/components/leads/LeadFamiliasForm";
+
 
 export const Route = createFileRoute("/familias")({
   head: () => ({
@@ -47,20 +46,7 @@ function FamiliasPage() {
     },
   ];
 
-  const [count, setCount] = useState<number | null>(null);
 
-  async function loadCount() {
-    try {
-      const { data, error } = await supabase.rpc("get_familias_count");
-      if (!error) setCount(typeof data === "number" ? data : 0);
-    } catch {
-      /* ignore */
-    }
-  }
-
-  useEffect(() => {
-    void loadCount();
-  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] -mt-16 pt-16 bg-white">
@@ -158,23 +144,13 @@ function FamiliasPage() {
               Leva menos de 2 minutos. Você pode sair da lista quando quiser.
             </p>
 
-            {count !== null && (
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-3xl font-display font-bold text-secondary">
-                  {count.toLocaleString("pt-BR")}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  famílias já cadastradas
-                </span>
-              </div>
-            )}
+
+
 
             <div className="mt-6">
-              <LeadFamiliasForm
-                origem="pagina_familias"
-                onSuccess={loadCount}
-              />
+              <LeadFamiliasForm origem="pagina_familias" />
             </div>
+
           </div>
         </main>
       </div>
