@@ -58,7 +58,7 @@ export function Header() {
     { label: "Como Funciona", href: "/#como-funciona", type: "anchor" as const },
     { label: "Nossa História", to: "/nossa-historia", type: "route" as const },
     { label: "Para Famílias", to: "/familias", type: "route" as const },
-    { label: "Para Parceiros", to: "/estabelecimentos", type: "route" as const },
+    { label: "Para Estabelecimentos", to: "/estabelecimentos", type: "route" as const },
     { label: "Selo Azul", to: "/sobre-os-selos", type: "route" as const },
   ];
 
