@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { LeadEstabelecimentosForm } from "@/components/leads/LeadEstabelecimentosForm";
+
 
 export const Route = createFileRoute("/estabelecimentos")({
   head: () => ({
