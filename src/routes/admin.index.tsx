@@ -204,7 +204,40 @@ function AdminDashboard() {
         />
       </div>
 
-      {/* Conteúdo em duas colunas */}
+      {/* Alerta: estabelecimentos aguardando contato para o Selo Azul */}
+      {!loading && (seloAzulPendentes ?? 0) > 0 && (
+        <div
+          className="rounded-xl border-l-4 shadow-sm bg-white p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
+          style={{ borderLeftColor: GOLD, borderColor: "#f1e3b3", background: "#fffaec" }}
+        >
+          <div
+            className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "#fff4dc", color: GOLD }}
+          >
+            <Star className="h-6 w-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm sm:text-base" style={{ color: NAVY }}>
+              {seloAzulPendentes}{" "}
+              {seloAzulPendentes === 1
+                ? "estabelecimento aguardando contato para o Selo Azul"
+                : "estabelecimentos aguardando contato para o Selo Azul"}
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Solicitaram a certificação na área logada. Entre em contato para iniciar a capacitação.
+            </p>
+          </div>
+          <Link
+            to="/admin/estabelecimentos"
+            search={{ quer_selo_azul: 1 }}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-opacity shrink-0"
+            style={{ background: NAVY }}
+          >
+            Ver lista
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
       <div className="grid lg:grid-cols-5 gap-4">
         {/* Cadastros recentes (60%) */}
         <section className="lg:col-span-3 bg-white border border-[#e5e7eb] rounded-xl shadow-sm overflow-hidden flex flex-col">
