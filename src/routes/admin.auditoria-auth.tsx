@@ -554,7 +554,7 @@ function AuditoriaAuthPage() {
                       {r.email_mascarado}
                     </button>
                   ) : (
-                    "—"
+                    "-"
                   )}
                 </td>
                 <td className="px-3 py-2 text-xs">
@@ -568,11 +568,11 @@ function AuditoriaAuthPage() {
                       {r.ip}
                     </button>
                   ) : (
-                    "—"
+                    "-"
                   )}
                 </td>
                 <td className="px-3 py-2 text-xs max-w-[260px] truncate" title={r.user_agent ?? ""}>
-                  {r.user_agent ?? "—"}
+                  {r.user_agent ?? "-"}
                 </td>
                 <td className="px-3 py-2 text-xs font-mono">
                   {r.user_id ? (
@@ -585,7 +585,7 @@ function AuditoriaAuthPage() {
                       {r.user_id.slice(0, 8)}…
                     </button>
                   ) : (
-                    "—"
+                    "-"
                   )}
                 </td>
               </tr>
