@@ -88,13 +88,20 @@ function AdminDashboard() {
         </p>
       </header>
 
-      <div className="grid sm:grid-cols-2 gap-5">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <MetricCard
           icon={<Users className="h-5 w-5" />}
-          label="Famílias cadastradas"
+          label="Famílias com conta ativa"
           value={fmt(stats?.total_familias)}
           iconBg="#dbeafe"
           iconColor="#2563eb"
+        />
+        <MetricCard
+          icon={<Hourglass className="h-5 w-5" />}
+          label="Leads na lista de espera"
+          value={loading ? "-" : String(leadsFamilias ?? 0)}
+          iconBg="#ffedd5"
+          iconColor="#c2410c"
         />
         <MetricCard
           icon={<Building2 className="h-5 w-5" />}
@@ -118,6 +125,7 @@ function AdminDashboard() {
           iconColor="#be185d"
         />
       </div>
+
 
       <section className="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-[#e5e7eb] flex items-center justify-between">
