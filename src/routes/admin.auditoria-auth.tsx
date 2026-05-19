@@ -11,7 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ShieldCheck, Download, RefreshCw } from "lucide-react";
+import {
+  Loader2,
+  ShieldCheck,
+  Download,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/auditoria-auth")({
   component: AuditoriaAuthPage,
@@ -59,46 +67,168 @@ const EVENTO_LABEL: Record<string, string> = {
   oauth_callback: "OAuth retorno",
 };
 
+const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
+
+type Filtros = {
+  evento: string;
+  sucesso: string;
+  email: string;
+  ip: string;
+  userId: string;
+  de: string; // yyyy-mm-dd
+  ate: string;
+  pageSize: number;
+};
+
+const FILTROS_PADRAO: Filtros = {
+  evento: "todos",
+  sucesso: "todos",
+  email: "",
+  ip: "",
+  userId: "",
+  de: "",
+  ate: "",
+  pageSize: 50,
+};
+
 function AuditoriaAuthPage() {
   const { isAdmin, loading } = useAuth();
   const [rows, setRows] = useState<AuditRow[]>([]);
+  const [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [filtroEvento, setFiltroEvento] = useState<string>("todos");
-  const [filtroSucesso, setFiltroSucesso] = useState<string>("todos");
-  const [busca, setBusca] = useState("");
+  const [pagina, setPagina] = useState(0); // zero-based
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_PADRAO);
+  const [filtrosAplicados, setFiltrosAplicados] = useState<Filtros>(FILTROS_PADRAO);
+  const [erro, setErro] = useState<string | null>(null);
+
+  function aplicarQueryFiltros(query: ReturnType<typeof baseQuery>) {
+    const f = filtrosAplicados;
+    let q = query;
+    if (f.evento !== "todos") q = q.eq("evento", f.evento);
+    if (f.sucesso !== "todos") q = q.eq("sucesso", f.sucesso === "sim");
+    if (f.email.trim())
+      q = q.ilike("email_mascarado", `%${f.email.trim().toLowerCase()}%`);
+    if (f.ip.trim()) q = q.ilike("ip", `%${f.ip.trim()}%`);
+    if (f.userId.trim()) q = q.eq("user_id", f.userId.trim());
+    if (f.de) q = q.gte("criado_em", new Date(`${f.de}T00:00:00`).toISOString());
+    if (f.ate) q = q.lte("criado_em", new Date(`${f.ate}T23:59:59`).toISOString());
+    return q;
+  }
+
+  function baseQuery() {
+    return supabase.from("auth_audit_log").select("*", { count: "exact" });
+  }
 
   async function load() {
     setBusy(true);
-    let q = supabase
-      .from("auth_audit_log")
-      .select("*")
+    setErro(null);
+    const desde = pagina * filtrosAplicados.pageSize;
+    const ate = desde + filtrosAplicados.pageSize - 1;
+    const q = aplicarQueryFiltros(baseQuery())
       .order("criado_em", { ascending: false })
-      .limit(500);
-    if (filtroEvento !== "todos") q = q.eq("evento", filtroEvento);
-    if (filtroSucesso !== "todos") q = q.eq("sucesso", filtroSucesso === "sim");
-    const { data } = await q;
-    setRows((data ?? []) as AuditRow[]);
+      .range(desde, ate);
+    const { data, error, count } = await q;
+    if (error) {
+      setErro(error.message);
+      setRows([]);
+      setTotal(0);
+    } else {
+      setRows((data ?? []) as AuditRow[]);
+      setTotal(count ?? 0);
+    }
     setBusy(false);
   }
 
   useEffect(() => {
     if (!loading && isAdmin) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isAdmin, filtroEvento, filtroSucesso]);
+  }, [loading, isAdmin, filtrosAplicados, pagina]);
 
-  const filtradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return rows;
-    return rows.filter(
-      (r) =>
-        (r.email_mascarado ?? "").toLowerCase().includes(termo) ||
-        (r.ip ?? "").toLowerCase().includes(termo) ||
-        (r.user_id ?? "").toLowerCase().includes(termo) ||
-        r.evento.toLowerCase().includes(termo),
-    );
-  }, [rows, busca]);
+  function aplicar() {
+    setPagina(0);
+    setFiltrosAplicados(filtros);
+  }
 
-  function exportCsv() {
+  function limpar() {
+    setFiltros(FILTROS_PADRAO);
+    setFiltrosAplicados(FILTROS_PADRAO);
+    setPagina(0);
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(total / filtrosAplicados.pageSize));
+
+  const filtrosAtivos = useMemo(() => {
+    const a = filtrosAplicados;
+    const tags: { k: string; label: string; onClear: () => void }[] = [];
+    if (a.evento !== "todos")
+      tags.push({
+        k: "evento",
+        label: `Evento: ${EVENTO_LABEL[a.evento] ?? a.evento}`,
+        onClear: () => aplicarPatch({ evento: "todos" }),
+      });
+    if (a.sucesso !== "todos")
+      tags.push({
+        k: "sucesso",
+        label: `Resultado: ${a.sucesso === "sim" ? "Sucesso" : "Falha"}`,
+        onClear: () => aplicarPatch({ sucesso: "todos" }),
+      });
+    if (a.email)
+      tags.push({
+        k: "email",
+        label: `E-mail: ${a.email}`,
+        onClear: () => aplicarPatch({ email: "" }),
+      });
+    if (a.ip)
+      tags.push({
+        k: "ip",
+        label: `IP: ${a.ip}`,
+        onClear: () => aplicarPatch({ ip: "" }),
+      });
+    if (a.userId)
+      tags.push({
+        k: "userId",
+        label: `User ID: ${a.userId.slice(0, 8)}…`,
+        onClear: () => aplicarPatch({ userId: "" }),
+      });
+    if (a.de)
+      tags.push({
+        k: "de",
+        label: `De: ${a.de}`,
+        onClear: () => aplicarPatch({ de: "" }),
+      });
+    if (a.ate)
+      tags.push({
+        k: "ate",
+        label: `Até: ${a.ate}`,
+        onClear: () => aplicarPatch({ ate: "" }),
+      });
+    return tags;
+  }, [filtrosAplicados]);
+
+  function aplicarPatch(patch: Partial<Filtros>) {
+    const novo = { ...filtrosAplicados, ...patch };
+    setFiltros(novo);
+    setFiltrosAplicados(novo);
+    setPagina(0);
+  }
+
+  async function exportCsv() {
+    setBusy(true);
+    // Exporta TODOS os registros filtrados, em páginas de 1000.
+    const tamLote = 1000;
+    let inicio = 0;
+    const linhasTotal: AuditRow[] = [];
+    // Primeiro descobrimos o count atual.
+    const { count } = await aplicarQueryFiltros(baseQuery()).range(0, 0);
+    const totalExp = count ?? 0;
+    while (inicio < totalExp) {
+      const { data } = await aplicarQueryFiltros(baseQuery())
+        .order("criado_em", { ascending: false })
+        .range(inicio, inicio + tamLote - 1);
+      if (!data || data.length === 0) break;
+      linhasTotal.push(...(data as AuditRow[]));
+      inicio += tamLote;
+    }
     const header = [
       "criado_em",
       "evento",
@@ -107,9 +237,10 @@ function AuditoriaAuthPage() {
       "user_id",
       "ip",
       "user_agent",
+      "metadata",
     ];
-    const lines = [header.join(",")];
-    for (const r of filtradas) {
+    const lines = ["\uFEFF" + header.join(",")];
+    for (const r of linhasTotal) {
       lines.push(
         [
           r.criado_em,
@@ -118,7 +249,8 @@ function AuditoriaAuthPage() {
           r.email_mascarado ?? "",
           r.user_id ?? "",
           r.ip ?? "",
-          (r.user_agent ?? "").replace(/[",\n]/g, " "),
+          (r.user_agent ?? "").replace(/[\r\n]/g, " "),
+          JSON.stringify(r.metadata ?? {}),
         ]
           .map((v) => `"${String(v).replace(/"/g, '""')}"`)
           .join(","),
@@ -130,6 +262,7 @@ function AuditoriaAuthPage() {
     a.download = `auditoria-auth-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
+    setBusy(false);
   }
 
   if (loading) {
@@ -140,6 +273,9 @@ function AuditoriaAuthPage() {
     );
   }
 
+  const inicioMostrando = total === 0 ? 0 : pagina * filtrosAplicados.pageSize + 1;
+  const fimMostrando = Math.min(total, (pagina + 1) * filtrosAplicados.pageSize);
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <header className="flex items-center justify-between gap-4 flex-wrap">
@@ -148,8 +284,8 @@ function AuditoriaAuthPage() {
             <ShieldCheck className="h-5 w-5" /> Auditoria de autenticação
           </h2>
           <p className="text-sm text-muted-foreground">
-            Registro dos eventos de login, cadastro e redefinição de senha. E-mails são
-            mascarados, e nenhuma senha ou token é armazenado.
+            Investigue eventos de login, cadastro e redefinição de senha. E-mails são
+            mascarados e nenhuma senha/token é armazenado.
           </p>
         </div>
         <div className="flex gap-2">
@@ -157,51 +293,153 @@ function AuditoriaAuthPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${busy ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
-          <Button variant="outline" size="sm" onClick={exportCsv} disabled={!filtradas.length}>
-            <Download className="h-4 w-4 mr-2" /> CSV
+          <Button variant="outline" size="sm" onClick={() => void exportCsv()} disabled={busy || total === 0}>
+            <Download className="h-4 w-4 mr-2" /> CSV ({total})
           </Button>
         </div>
       </header>
 
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap items-end gap-3">
-        <div className="flex-1 min-w-[220px]">
-          <label className="text-xs text-muted-foreground">Buscar</label>
-          <Input
-            placeholder="email, IP, user_id ou evento"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
+      <div className="bg-white border rounded-xl p-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div>
+            <label className="text-xs text-muted-foreground">Evento</label>
+            <Select
+              value={filtros.evento}
+              onValueChange={(v) => setFiltros((f) => ({ ...f, evento: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {EVENTOS.map((e) => (
+                  <SelectItem key={e} value={e}>
+                    {EVENTO_LABEL[e] ?? e}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Resultado</label>
+            <Select
+              value={filtros.sucesso}
+              onValueChange={(v) => setFiltros((f) => ({ ...f, sucesso: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="sim">Sucesso</SelectItem>
+                <SelectItem value="nao">Falha</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">E-mail (mascarado)</label>
+            <Input
+              placeholder="ex: ma***@dominio.com"
+              value={filtros.email}
+              onChange={(e) => setFiltros((f) => ({ ...f, email: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && aplicar()}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">IP</label>
+            <Input
+              placeholder="ex: 177.220"
+              value={filtros.ip}
+              onChange={(e) => setFiltros((f) => ({ ...f, ip: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && aplicar()}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">User ID (uuid exato)</label>
+            <Input
+              placeholder="00000000-0000-…"
+              value={filtros.userId}
+              onChange={(e) => setFiltros((f) => ({ ...f, userId: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && aplicar()}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">De</label>
+            <Input
+              type="date"
+              value={filtros.de}
+              onChange={(e) => setFiltros((f) => ({ ...f, de: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Até</label>
+            <Input
+              type="date"
+              value={filtros.ate}
+              onChange={(e) => setFiltros((f) => ({ ...f, ate: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Por página</label>
+            <Select
+              value={String(filtros.pageSize)}
+              onValueChange={(v) =>
+                setFiltros((f) => ({ ...f, pageSize: Number(v) }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="w-56">
-          <label className="text-xs text-muted-foreground">Evento</label>
-          <Select value={filtroEvento} onValueChange={setFiltroEvento}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              {EVENTOS.map((e) => (
-                <SelectItem key={e} value={e}>
-                  {EVENTO_LABEL[e] ?? e}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="w-44">
-          <label className="text-xs text-muted-foreground">Resultado</label>
-          <Select value={filtroSucesso} onValueChange={setFiltroSucesso}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="sim">Sucesso</SelectItem>
-              <SelectItem value="nao">Falha</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex flex-wrap gap-1">
+            {filtrosAtivos.map((t) => (
+              <span
+                key={t.k}
+                className="inline-flex items-center gap-1 bg-[#eef2ff] text-[#1a2f5e] text-[11px] px-2 py-0.5 rounded-full"
+              >
+                {t.label}
+                <button
+                  type="button"
+                  onClick={t.onClear}
+                  className="hover:text-rose-600"
+                  aria-label="Remover filtro"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            {filtrosAtivos.length === 0 && (
+              <span className="text-xs text-muted-foreground">
+                Nenhum filtro ativo.
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={limpar} disabled={busy}>
+              Limpar
+            </Button>
+            <Button size="sm" onClick={aplicar} disabled={busy}>
+              Aplicar filtros
+            </Button>
+          </div>
         </div>
       </div>
+
+      {erro && (
+        <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">
+          {erro}
+        </div>
+      )}
 
       <div className="bg-white border rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
@@ -213,18 +451,19 @@ function AuditoriaAuthPage() {
               <th className="text-left px-3 py-2 font-semibold">E-mail</th>
               <th className="text-left px-3 py-2 font-semibold">IP</th>
               <th className="text-left px-3 py-2 font-semibold">User-Agent</th>
+              <th className="text-left px-3 py-2 font-semibold">User ID</th>
             </tr>
           </thead>
           <tbody>
-            {filtradas.length === 0 && (
+            {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
-                  {busy ? "Carregando…" : "Sem registros."}
+                <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
+                  {busy ? "Carregando…" : "Sem registros para os filtros atuais."}
                 </td>
               </tr>
             )}
-            {filtradas.map((r) => (
-              <tr key={r.id} className="border-t hover:bg-[#f8fafc]/50">
+            {rows.map((r) => (
+              <tr key={r.id} className="border-t hover:bg-[#f8fafc]/50 align-top">
                 <td className="px-3 py-2 whitespace-nowrap text-xs">
                   {new Date(r.criado_em).toLocaleString("pt-BR")}
                 </td>
@@ -240,10 +479,50 @@ function AuditoriaAuthPage() {
                     {r.sucesso ? "Sucesso" : "Falha"}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs">{r.email_mascarado ?? "—"}</td>
-                <td className="px-3 py-2 text-xs">{r.ip ?? "—"}</td>
-                <td className="px-3 py-2 text-xs max-w-[280px] truncate" title={r.user_agent ?? ""}>
+                <td className="px-3 py-2 text-xs">
+                  {r.email_mascarado ? (
+                    <button
+                      type="button"
+                      className="underline-offset-2 hover:underline"
+                      onClick={() => aplicarPatch({ email: r.email_mascarado ?? "" })}
+                      title="Filtrar por este e-mail"
+                    >
+                      {r.email_mascarado}
+                    </button>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="px-3 py-2 text-xs">
+                  {r.ip ? (
+                    <button
+                      type="button"
+                      className="underline-offset-2 hover:underline"
+                      onClick={() => aplicarPatch({ ip: r.ip ?? "" })}
+                      title="Filtrar por este IP"
+                    >
+                      {r.ip}
+                    </button>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="px-3 py-2 text-xs max-w-[260px] truncate" title={r.user_agent ?? ""}>
                   {r.user_agent ?? "—"}
+                </td>
+                <td className="px-3 py-2 text-xs font-mono">
+                  {r.user_id ? (
+                    <button
+                      type="button"
+                      className="underline-offset-2 hover:underline"
+                      onClick={() => aplicarPatch({ userId: r.user_id ?? "" })}
+                      title="Filtrar por este usuário"
+                    >
+                      {r.user_id.slice(0, 8)}…
+                    </button>
+                  ) : (
+                    "—"
+                  )}
                 </td>
               </tr>
             ))}
@@ -251,10 +530,34 @@ function AuditoriaAuthPage() {
         </table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Mostrando {filtradas.length} de até 500 registros mais recentes. Para histórico completo,
-        exporte em CSV.
-      </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <p className="text-xs text-muted-foreground">
+          {total === 0
+            ? "0 resultados"
+            : `Mostrando ${inicioMostrando}-${fimMostrando} de ${total}`}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPagina((p) => Math.max(0, p - 1))}
+            disabled={busy || pagina === 0}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            Página {pagina + 1} de {totalPaginas}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPagina((p) => Math.min(totalPaginas - 1, p + 1))}
+            disabled={busy || pagina + 1 >= totalPaginas}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
