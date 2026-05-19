@@ -1160,7 +1160,7 @@ function OQuePlataformaTera() {
       Icon: Map,
       titulo: "Destinos verificados em todo o Brasil",
       texto:
-        "Hotéis, restaurantes, parques e atrações auditados pela nossa equipe. Nenhum dado não verificado entra na plataforma.",
+        "Hotéis, restaurantes, parques, atrações e passeios educativos auditados pela nossa equipe. Nenhum dado não verificado entra na plataforma.",
     },
     {
       Icon: Puzzle,
