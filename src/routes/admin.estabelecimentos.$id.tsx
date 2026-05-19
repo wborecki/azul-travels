@@ -233,6 +233,10 @@ function AdminEstabelecimentoForm() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [seloInteresse, setSeloInteresse] = useState<{
+    quer: boolean;
+    quando: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (isNew) return;
