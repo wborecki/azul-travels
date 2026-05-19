@@ -166,6 +166,16 @@ describe("RLS — RPCs administrativas exigem autenticação/role", () => {
     });
     expect(error).not.toBeNull();
   });
+
+  it("anon PODE chamar log_auth_event (auditoria pública de eventos)", async () => {
+    const { error } = await anon.rpc("log_auth_event", {
+      _evento: "login_failure",
+      _sucesso: false,
+      _email: "teste@example.com",
+      _metadata: { test: true, password: "DEVE_SER_REMOVIDO" },
+    });
+    expect(error).toBeNull();
+  });
 });
 
 describe("RLS — leituras públicas permitidas continuam funcionando", () => {
