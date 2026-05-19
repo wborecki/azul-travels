@@ -23,13 +23,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
+import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 
 export const Route = createFileRoute("/meu-estabelecimento")({
   head: () => ({ meta: [{ title: "Meu estabelecimento · Turismo Azul" }] }),
   component: MeuEstabelecimentoPage,
 });
 
-const TIPOS = ["Hotel", "Pousada", "Resort", "Restaurante", "Parque", "Outro"];
+const TIPOS = ESTAB_TIPOS;
 const COLAB_OPTS = ["1-5", "6-15", "16-30", "31-50", "50+"];
 const ESTRUTURA_ITEMS: Array<[string, string]> = [
   ["quartos_silenciosos", "Quartos silenciosos disponíveis"],
@@ -555,7 +556,7 @@ function FormularioPerfil({
                 <option value="">Selecione…</option>
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {ESTAB_TIPO_LABEL[t]}
                   </option>
                 ))}
               </select>

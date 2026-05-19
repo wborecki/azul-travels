@@ -72,17 +72,14 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
   };
 
   async function checkDuplicate(value: string) {
+    // RLS bloqueia SELECT anônimo nas tabelas de lead. Confiamos no índice
+    // único (lower(email)) e tratamos o erro 23505 no submit.
     const v = value.trim().toLowerCase();
     if (!v || !z.string().email().safeParse(v).success) {
       setEmailDup(false);
       return;
     }
-    const { data } = await supabase
-      .from("leads_familias")
-      .select("id")
-      .ilike("email", v)
-      .maybeSingle();
-    setEmailDup(!!data);
+    setEmailDup(false);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -107,10 +104,6 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
       setErrors(errs);
       return;
     }
-    if (emailDup) {
-      setErrors({ email: "Este e-mail já está na lista." });
-      return;
-    }
     setErrors({});
     setEnviando(true);
 
@@ -130,6 +123,11 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
 
     setEnviando(false);
     if (insertError) {
+      if (insertError.code === "23505") {
+        setEmailDup(true);
+        setErrors({ email: "Este e-mail já está na nossa lista de espera." });
+        return;
+      }
       toast.error("Erro ao enviar. Tente novamente.");
       return;
     }

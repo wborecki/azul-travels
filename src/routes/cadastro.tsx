@@ -163,6 +163,7 @@ function TypeCard({
 }
 
 function StepData({ accountType, onBack }: { accountType: AccountType; onBack: () => void }) {
+  const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -181,18 +182,19 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
       return;
     }
     setBusy(true);
+    const emailNorm = email.trim().toLowerCase();
     const destino = accountType === "estabelecimento" ? "/meu-estabelecimento" : "/minha-conta";
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: emailNorm,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}${destino}`,
         data: {
           account_type: accountType,
-          nome_responsavel: nome,
-          whatsapp,
-          telefone: whatsapp,
-          origem: accountType === "estabelecimento" ? "cadastro_site" : "cadastro_site",
+          nome_responsavel: nome.trim(),
+          whatsapp: whatsapp.trim(),
+          telefone: whatsapp.trim(),
+          origem: "cadastro_site",
         },
       },
     });
@@ -200,18 +202,29 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
     if (error) {
       void logAuthEvent("signup_failure", {
         sucesso: false,
-        email,
+        email: emailNorm,
         metadata: { account_type: accountType, reason: error.message },
       });
-      toast.error(error.message);
+      const msg = /already|registered|exists/i.test(error.message)
+        ? "Este e-mail já tem uma conta. Tente entrar."
+        : error.message;
+      toast.error(msg);
       return;
     }
     void logAuthEvent("signup_success", {
       userId: data.user?.id ?? null,
-      email,
+      email: emailNorm,
       metadata: { account_type: accountType },
     });
-    toast.success("Conta criada! Verifique seu e-mail para confirmar.");
+    // Se a sessão já vem ativa (confirm-email desligado), o useEffect redireciona.
+    // Caso contrário, mostramos confirmação clara.
+    if (data.session) {
+      toast.success("Conta criada! Redirecionando…");
+      navigate({ to: destino });
+    } else {
+      toast.success("Conta criada! Confirme seu e-mail para entrar.");
+      navigate({ to: "/login" });
+    }
   }
 
   return (
