@@ -139,7 +139,10 @@ function EstabelecimentosPage() {
               Cadastre seu estabelecimento
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Hotéis, restaurantes, parques e atrações. Onboarding gratuito para os primeiros.
+              Hotéis, pousadas, restaurantes, parques, atrações, fazendas, sítios, museus e espaços educativos. Onboarding gratuito para os primeiros.
+            </p>
+            <p className="mt-3 text-sm text-foreground leading-relaxed">
+              Espaços educativos como fazendas, sítios e museus recebem grupos escolares com crianças autistas sem nenhum preparo específico. Com o Selo Azul, seu espaço passa a ser encontrado pelas famílias e escolas que mais precisam de você.
             </p>
 
             {count !== null && (
