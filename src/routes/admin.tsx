@@ -32,6 +32,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/usuarios": "Configurações",
   "/admin/auditoria": "Auditoria",
   "/admin/password-resets": "Resets de senha",
+  "/admin/auditoria-auth": "Auditoria de autenticação",
 };
 
 function AdminLayout() {
