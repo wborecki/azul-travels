@@ -67,7 +67,40 @@ export const ESTAB_TIPO_LABEL: Record<EstabTipo, string> = {
   agencia: "Agência",
   transporte: "Transporte",
   excursao: "Excursão guiada",
+  passeio_educativo: "Passeio educativo",
 };
+
+/**
+ * Subtipos para passeios educativos. Campo livre no banco
+ * (`estabelecimentos.subtipo_educativo text`), mas a UI usa esta lista
+ * canônica em selects/filtros.
+ */
+export const SUBTIPOS_EDUCATIVOS = [
+  "fazenda",
+  "sitio",
+  "museu",
+  "parque_tematico",
+  "aquario",
+  "zoologico",
+  "espaco_cultural",
+] as const;
+
+export type SubtipoEducativo = (typeof SUBTIPOS_EDUCATIVOS)[number];
+
+export const SUBTIPO_EDUCATIVO_LABEL: Record<SubtipoEducativo, string> = {
+  fazenda: "Fazenda",
+  sitio: "Sítio",
+  museu: "Museu",
+  parque_tematico: "Parque temático",
+  aquario: "Aquário",
+  zoologico: "Zoológico",
+  espaco_cultural: "Espaço cultural",
+};
+
+export const SUBTIPO_EDUCATIVO_OPTIONS = SUBTIPOS_EDUCATIVOS.map((v) => ({
+  value: v,
+  label: SUBTIPO_EDUCATIVO_LABEL[v],
+}));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Categorias (agrupadores de tipos para a UI da home + filtro de /explorar)
@@ -107,6 +140,7 @@ export const TIPO_PARA_CATEGORIA: Record<EstabTipo, EstabCategoria> = {
   restaurante: "gastronomia",
   transporte: "transporte",
   agencia: "planejamento",
+  passeio_educativo: "passeios",
 };
 
 /** Inverso: categoria → todos os tipos que a compõem (ordem do enum). */
