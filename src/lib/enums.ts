@@ -140,6 +140,7 @@ export const TIPO_PARA_CATEGORIA: Record<EstabTipo, EstabCategoria> = {
   restaurante: "gastronomia",
   transporte: "transporte",
   agencia: "planejamento",
+  passeio_educativo: "passeios",
 };
 
 /** Inverso: categoria → todos os tipos que a compõem (ordem do enum). */
