@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchDashboardStats, type DashboardStats } from "@/lib/queries";
-import { Users, Building2, ClipboardList, Sparkles } from "lucide-react";
+import { Users, Building2, ClipboardList, Sparkles, Hourglass } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 
