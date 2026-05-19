@@ -498,30 +498,12 @@ function Dashboard({
         </div>
       </div>
 
-      {/* Seção informativa */}
-      <div className="bg-slate-50 border rounded-2xl p-6">
-        <h3 className="font-display font-bold text-lg text-primary mb-3">
-          Próximos passos
-        </h3>
-        <ol className="space-y-2 text-sm text-foreground/80">
-          <li className="flex gap-2">
-            <span className="font-bold text-[#c9a84c]">1.</span>
-            Complete o perfil do seu estabelecimento com o máximo de informações.
-          </li>
-          <li className="flex gap-2">
-            <span className="font-bold text-[#c9a84c]">2.</span>
-            Manifeste interesse no Selo Azul - é gratuito sinalizar.
-          </li>
-          <li className="flex gap-2">
-            <span className="font-bold text-[#c9a84c]">3.</span>
-            Nossa equipe entra em contato para auditoria e capacitação.
-          </li>
-          <li className="flex gap-2">
-            <span className="font-bold text-[#c9a84c]">4.</span>
-            Após aprovação, seu local recebe o Selo Azul e ganha destaque nas buscas das famílias TEA.
-          </li>
-        </ol>
-      </div>
+      {/* Timeline horizontal - O que vem pela frente */}
+      <TimelineFluxo
+        perfilCompleto={perfilCompleto}
+        querSelo={querSelo}
+        seloAzul={seloAzul}
+      />
     </div>
   );
 }
