@@ -41,6 +41,7 @@ interface PerfilDraft {
   estado: string;
   website: string;
   num_colaboradores: string;
+  recebe_grupos_escolares_tea: boolean;
   // section 2
   estrutura: Estrutura;
   // section 3
