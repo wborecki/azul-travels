@@ -162,6 +162,8 @@ function AdminPasswordResetsPage() {
                 <TableHead>Data</TableHead>
                 <TableHead>Usuário-alvo</TableHead>
                 <TableHead>Executado por</TableHead>
+                <TableHead>IP</TableHead>
+                <TableHead>Navegador</TableHead>
                 <TableHead>Motivo</TableHead>
               </TableRow>
             </TableHeader>
@@ -176,7 +178,11 @@ function AdminPasswordResetsPage() {
                     <div className="text-[10px] text-muted-foreground font-mono">{r.target_user_id}</div>
                   </TableCell>
                   <TableCell className="text-xs">{r.ator_email ?? <span className="italic text-muted-foreground">-</span>}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground max-w-[280px] truncate">
+                  <TableCell className="text-xs font-mono">{r.ip ?? <span className="italic text-muted-foreground">-</span>}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={r.user_agent ?? undefined}>
+                    {r.user_agent ?? <span className="italic">-</span>}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={r.motivo ?? undefined}>
                     {r.motivo ?? <span className="italic">-</span>}
                   </TableCell>
                 </TableRow>
