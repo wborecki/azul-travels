@@ -163,6 +163,7 @@ function TypeCard({
 }
 
 function StepData({ accountType, onBack }: { accountType: AccountType; onBack: () => void }) {
+  const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
