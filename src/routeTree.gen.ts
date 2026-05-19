@@ -40,6 +40,7 @@ import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
 import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
+import { Route as AdminPasswordResetsRouteImport } from './routes/admin.password-resets'
 import { Route as AdminFamiliasRouteImport } from './routes/admin.familias'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin.administradores'
@@ -209,6 +210,11 @@ const AdminReservasRoute = AdminReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPasswordResetsRoute = AdminPasswordResetsRouteImport.update({
+  id: '/password-resets',
+  path: '/password-resets',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFamiliasRoute = AdminFamiliasRouteImport.update({
   id: '/familias',
   path: '/familias',
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/conteudo/$slug': typeof ConteudoSlugRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/auditoria'
     | '/admin/familias'
+    | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/auditoria'
     | '/admin/familias'
+    | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -530,6 +541,7 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/auditoria'
     | '/admin/familias'
+    | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
     | '/conteudo/$slug'
@@ -800,6 +812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReservasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/password-resets': {
+      id: '/admin/password-resets'
+      path: '/password-resets'
+      fullPath: '/admin/password-resets'
+      preLoaderRoute: typeof AdminPasswordResetsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/familias': {
       id: '/admin/familias'
       path: '/familias'
@@ -912,6 +931,7 @@ interface AdminRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminFamiliasRoute: typeof AdminFamiliasRoute
+  AdminPasswordResetsRoute: typeof AdminPasswordResetsRoute
   AdminReservasRoute: typeof AdminReservasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -926,6 +946,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminFamiliasRoute: AdminFamiliasRoute,
+  AdminPasswordResetsRoute: AdminPasswordResetsRoute,
   AdminReservasRoute: AdminReservasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,

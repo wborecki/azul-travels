@@ -13,6 +13,7 @@ import {
   Crown,
   Settings,
   LogOut,
+  KeyRound,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
