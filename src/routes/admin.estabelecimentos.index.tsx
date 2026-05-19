@@ -34,6 +34,9 @@ import {
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    quer_selo_azul: search.quer_selo_azul === "1" || search.quer_selo_azul === 1 ? 1 : undefined,
+  }),
   component: AdminEstabelecimentos,
 });
 
