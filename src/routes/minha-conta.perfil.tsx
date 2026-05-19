@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/minha-conta/perfil")({
@@ -127,6 +127,15 @@ function PerfilTeaPage() {
     );
   }
 
+  const sectionStatus = computeSectionStatus(draft, {
+    restricoesCsv,
+    gatilhosCsv,
+    interessesCsv,
+  });
+  const completas = sectionStatus.filter((s) => s.done).length;
+  const total = sectionStatus.length;
+  const pct = Math.round((completas / total) * 100);
+
   return (
     <div className="space-y-6">
       <header>
@@ -135,6 +144,59 @@ function PerfilTeaPage() {
           Salvo uma vez, reaproveitado em todas as reservas. Edite quando algo mudar.
         </p>
       </header>
+
+      <div className="bg-white border rounded-2xl p-5 sticky top-16 z-20 shadow-sm">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div>
+            <p className="text-sm font-display font-bold text-primary">
+              Progresso do perfil
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {completas} de {total} seções preenchidas
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-display font-bold text-secondary leading-none">
+              {pct}%
+            </p>
+            {pct === 100 && (
+              <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                ✓ Perfil completo
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="h-2 w-full bg-azul-claro rounded-full overflow-hidden">
+          <div
+            className="h-full bg-secondary transition-all duration-500 ease-out"
+            style={{ width: `${pct}%` }}
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
+        </div>
+        <ul className="mt-3 flex flex-wrap gap-1.5">
+          {sectionStatus.map((s) => (
+            <li
+              key={s.key}
+              className={`inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border ${
+                s.done
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  : "bg-muted/40 border-border text-muted-foreground"
+              }`}
+            >
+              {s.done ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : (
+                <Circle className="h-3 w-3" />
+              )}
+              {s.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+
 
       <div className="bg-white border rounded-2xl p-6 space-y-5">
         <div className="grid sm:grid-cols-[1fr_140px_1fr] gap-3">
@@ -434,3 +496,86 @@ function BoolGrid({
     </div>
   );
 }
+
+type SectionStatus = { key: string; label: string; done: boolean };
+
+function computeSectionStatus(
+  d: Draft,
+  csv: { restricoesCsv: string; gatilhosCsv: string; interessesCsv: string },
+): SectionStatus[] {
+  const anyBool = (...keys: Array<keyof Draft>) => keys.some((k) => !!d[k]);
+  const anyText = (...vals: Array<string | null | undefined>) =>
+    vals.some((v) => !!(v && String(v).trim()));
+
+  return [
+    {
+      key: "basico",
+      label: "Dados básicos",
+      done: !!d.nome_autista && !!d.idade && !!d.nivel_tea,
+    },
+    {
+      key: "comunicacao",
+      label: "Comunicação",
+      done: anyBool("comunicacao_verbal", "usa_caa", "usa_libras"),
+    },
+    {
+      key: "apoio",
+      label: "Apoio diário",
+      done: anyBool(
+        "apoio_higiene",
+        "apoio_alimentacao",
+        "apoio_mobilidade",
+        "apoio_seguranca",
+      ),
+    },
+    {
+      key: "rotina",
+      label: "Rotina",
+      done: anyText(d.rotina_horario_acordar, d.rotina_horario_dormir, d.rotina_observacoes),
+    },
+    {
+      key: "alimentacao",
+      label: "Alimentação",
+      done:
+        anyBool("alimentacao_seletiva", "precisa_cardapio_visual") ||
+        anyText(csv.restricoesCsv, d.alimentacao_observacoes),
+    },
+    {
+      key: "sensorial",
+      label: "Sensorial",
+      done: anyBool(
+        "sensivel_sons",
+        "sensivel_luz",
+        "sensivel_texturas",
+        "sensivel_cheiros",
+        "sensivel_multidao",
+      ),
+    },
+    {
+      key: "emocional",
+      label: "Regulação",
+      done:
+        anyText(csv.gatilhosCsv, d.estrategias_acalmar, d.sinais_sobrecarga),
+    },
+    {
+      key: "quarto",
+      label: "Quarto",
+      done:
+        anyBool(
+          "quarto_andar_baixo",
+          "quarto_longe_elevador",
+          "quarto_blackout",
+          "quarto_sem_estampas",
+          "quarto_cama_extra",
+        ) || anyText(d.quarto_observacoes),
+    },
+    {
+      key: "interesses",
+      label: "Interesses",
+      done:
+        anyBool("gosta_atividades_agua", "gosta_natureza", "gosta_animais") ||
+        anyText(csv.interessesCsv, d.estrategias_que_funcionam),
+    },
+  ];
+}
+
