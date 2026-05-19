@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/minha-conta/perfil")({
