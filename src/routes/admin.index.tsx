@@ -54,7 +54,7 @@ function AdminDashboard() {
   useEffect(() => {
     void (async () => {
       try {
-        const [s, fams, ests, leadsCount, leadsList] = await Promise.all([
+        const [s, fams, ests, leadsCount, leadsList, seloPendentes] = await Promise.all([
           fetchDashboardStats(),
           supabase
             .from("familia_profiles")
@@ -72,9 +72,15 @@ function AdminDashboard() {
             .select("id, nome, email, criado_em")
             .order("criado_em", { ascending: false })
             .limit(5),
+          supabase
+            .from("estabelecimentos")
+            .select("id", { count: "exact", head: true })
+            .eq("quer_selo_azul", true)
+            .eq("selo_azul", false),
         ]);
         setStats(s);
         setLeadsFamiliasCount(leadsCount.count ?? 0);
+        setSeloAzulPendentes(seloPendentes.count ?? 0);
         setLeadsRecent((leadsList.data ?? []) as LeadRow[]);
         const merged: RecentRow[] = [
           ...(fams.data ?? []).map((f) => ({
