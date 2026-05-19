@@ -91,6 +91,10 @@ function MeuEstabelecimentoPage() {
   const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [estabId, setEstabId] = useState<string | null>(null);
   const [nomeResp, setNomeResp] = useState<string | null>(null);
+  const [seloAzul, setSeloAzul] = useState(false);
+  const [querSelo, setQuerSelo] = useState(false);
+  const [querSeloEm, setQuerSeloEm] = useState<string | null>(null);
+  const [solicitandoSelo, setSolicitandoSelo] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -112,6 +116,9 @@ function MeuEstabelecimentoPage() {
       setEstabId(estab?.id ?? null);
       setNomeResp(prof?.nome_responsavel ?? null);
       setPerfilCompleto(prof?.perfil_completo ?? false);
+      setSeloAzul(!!estab?.selo_azul);
+      setQuerSelo(!!estab?.quer_selo_azul);
+      setQuerSeloEm(estab?.quer_selo_azul_em ?? null);
       setDraft({
         nome: estab?.nome ?? "",
         tipo: (estab?.tipo as string) ?? prof?.tipo ?? "",
@@ -130,6 +137,25 @@ function MeuEstabelecimentoPage() {
       setCarregando(false);
     })();
   }, [user, loading, role, pathname, navigate]);
+
+  async function solicitarSeloAzul() {
+    if (!estabId || querSelo) return;
+    setSolicitandoSelo(true);
+    const agora = new Date().toISOString();
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ quer_selo_azul: true, quer_selo_azul_em: agora })
+      .eq("id", estabId);
+    setSolicitandoSelo(false);
+    if (error) {
+      toast.error("Não foi possível registrar a solicitação", { description: error.message });
+      return;
+    }
+    setQuerSelo(true);
+    setQuerSeloEm(agora);
+    toast.success("Interesse registrado! Nossa equipe entrará em contato.");
+  }
+
 
   function set<K extends keyof PerfilDraft>(k: K, v: PerfilDraft[K]) {
     setDraft((d) => ({ ...d, [k]: v }));
