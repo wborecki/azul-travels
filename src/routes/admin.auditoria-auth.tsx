@@ -212,13 +212,11 @@ function AuditoriaAuthPage() {
     setPagina(0);
   }
 
-  async function exportCsv() {
-    setBusy(true);
-    // Exporta TODOS os registros filtrados, em páginas de 1000.
+  async function buscarRegistros(escopo: "pagina" | "todos"): Promise<AuditRow[]> {
+    if (escopo === "pagina") return rows;
     const tamLote = 1000;
     let inicio = 0;
     const linhasTotal: AuditRow[] = [];
-    // Primeiro descobrimos o count atual.
     const { count } = await aplicarQueryFiltros(baseQuery()).range(0, 0);
     const totalExp = count ?? 0;
     while (inicio < totalExp) {
@@ -229,6 +227,19 @@ function AuditoriaAuthPage() {
       linhasTotal.push(...(data as AuditRow[]));
       inicio += tamLote;
     }
+    return linhasTotal;
+  }
+
+  function baixarArquivo(nome: string, conteudo: string, mime: string) {
+    const blob = new Blob([conteudo], { type: `${mime};charset=utf-8` });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nome;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function montarCsv(linhas: AuditRow[]): string {
     const header = [
       "criado_em",
       "evento",
@@ -239,9 +250,9 @@ function AuditoriaAuthPage() {
       "user_agent",
       "metadata",
     ];
-    const lines = ["\uFEFF" + header.join(",")];
-    for (const r of linhasTotal) {
-      lines.push(
+    const out = ["\uFEFF" + header.join(",")];
+    for (const r of linhas) {
+      out.push(
         [
           r.criado_em,
           r.evento,
@@ -256,13 +267,37 @@ function AuditoriaAuthPage() {
           .join(","),
       );
     }
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `auditoria-auth-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    setBusy(false);
+    return out.join("\n");
+  }
+
+  function montarJson(linhas: AuditRow[]): string {
+    return JSON.stringify(
+      {
+        gerado_em: new Date().toISOString(),
+        filtros: filtrosAplicados,
+        total: linhas.length,
+        registros: linhas,
+      },
+      null,
+      2,
+    );
+  }
+
+  async function exportar(formato: "csv" | "json", escopo: "pagina" | "todos") {
+    setBusy(true);
+    try {
+      const linhas = await buscarRegistros(escopo);
+      const stamp = new Date().toISOString().slice(0, 10);
+      const sufixo = escopo === "pagina" ? `pagina-${pagina + 1}` : "filtrado";
+      const nome = `auditoria-auth-${stamp}-${sufixo}.${formato}`;
+      if (formato === "csv") {
+        baixarArquivo(nome, montarCsv(linhas), "text/csv");
+      } else {
+        baixarArquivo(nome, montarJson(linhas), "application/json");
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (loading) {
