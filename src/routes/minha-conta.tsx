@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, HeartPulse, ArrowRight } from "lucide-react";
 import logo from "@/assets/logo-turismo-azul.svg";
 
 export const Route = createFileRoute("/minha-conta")({
@@ -18,6 +18,7 @@ function MinhaContaLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [nome, setNome] = useState<string | null>(null);
+  const [perfilCompleto, setPerfilCompleto] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -41,7 +42,13 @@ function MinhaContaLayout() {
             null,
         );
       });
-  }, [user]);
+    supabase
+      .from("perfil_sensorial")
+      .select("id")
+      .eq("familia_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setPerfilCompleto(!!data));
+  }, [user, pathname]);
 
   if (loading || !user) {
     return (
@@ -75,6 +82,26 @@ function MinhaContaLayout() {
           </nav>
         </div>
       </header>
+      {perfilCompleto === false && !pathname.startsWith("/minha-conta/perfil") && (
+        <div className="bg-secondary/10 border-b border-secondary/30">
+          <div className="container mx-auto px-4 py-3 max-w-5xl flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="h-9 w-9 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                <HeartPulse className="h-5 w-5" />
+              </div>
+              <p className="text-foreground/80">
+                <strong className="text-primary">Complete o perfil sensorial</strong> do seu filho para receber recomendações personalizadas.
+              </p>
+            </div>
+            <Link
+              to="/minha-conta/perfil"
+              className="inline-flex items-center gap-1.5 bg-secondary hover:bg-secondary/90 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shrink-0"
+            >
+              Completar agora <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      )}
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         <Outlet />
       </main>
