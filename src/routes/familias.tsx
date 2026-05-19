@@ -51,10 +51,8 @@ function FamiliasPage() {
 
   async function loadCount() {
     try {
-      const { count: c, error } = await supabase
-        .from("leads_familias")
-        .select("*", { count: "exact", head: true });
-      if (!error) setCount(c ?? 0);
+      const { data, error } = await supabase.rpc("get_familias_count");
+      if (!error) setCount(typeof data === "number" ? data : 0);
     } catch {
       /* ignore */
     }
