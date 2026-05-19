@@ -250,6 +250,10 @@ function AdminEstabelecimentoForm() {
           return;
         }
         setForm(rowToForm(data));
+        setSeloInteresse({
+          quer: !!data.quer_selo_azul,
+          quando: data.quer_selo_azul_em ?? null,
+        });
       } catch (err) {
         toast.error("Erro ao carregar", {
           description: err instanceof Error ? err.message : undefined,
