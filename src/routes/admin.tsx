@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   KeyRound,
+  ShieldCheck,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
