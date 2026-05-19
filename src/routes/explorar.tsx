@@ -10,7 +10,13 @@ import {
   fetchEstabelecimentosView,
   type EstabelecimentoView,
 } from "@/lib/queries/estabelecimentos";
-import { ESTAB_TIPO_LABEL, ESTAB_TIPOS, type EstabTipo } from "@/lib/enums";
+import {
+  ESTAB_TIPO_LABEL,
+  ESTAB_TIPOS,
+  SUBTIPO_EDUCATIVO_LABEL,
+  type EstabTipo,
+  type SubtipoEducativo,
+} from "@/lib/enums";
 import { ESTADOS_BR } from "@/lib/brazil";
 import {
   VolumeX,
