@@ -86,8 +86,8 @@ export function Footer() {
             </li>
             <li className="flex items-start gap-2 text-white/75">
               <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: "#00b4d8" }} />
-              <a href="https://wa.me/5511947096278" target="_blank" rel="noopener noreferrer" className={linkClass}>
-                +55 11 94709-6278
+              <a href="https://wa.me/5511947150632" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                +55 11 94715-0632
               </a>
             </li>
           </ul>
