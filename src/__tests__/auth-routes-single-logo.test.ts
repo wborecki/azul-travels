@@ -66,12 +66,16 @@ describe("__root.tsx skips global chrome for authenticated areas", () => {
   });
 });
 
-describe("each authenticated route layout renders exactly one logo chrome", () => {
-  // Files that own a full layout for an authenticated area.
-  // Each must contain exactly ONE source of the brand logo:
-  //   - either render <Header /> (which itself renders <Logo />), OR
-  //   - render <Logo /> directly (e.g. inside an in-page sidebar),
-  // but never both, and never twice.
+describe("authenticated route layouts never mix two logo sources", () => {
+  // Files that own a full layout for an authenticated area. The only logo
+  // source allowed is ONE of:
+  //   - <Header /> (the public header, which itself renders <Logo />), used
+  //     possibly across multiple mutually-exclusive render branches
+  //     (loading / empty / normal), OR
+  //   - <Logo /> rendered directly (e.g. inside an in-page sidebar), at most
+  //     once per file.
+  // Mixing the two, or rendering <Logo /> twice in the same file, is what
+  // produced the duplicated-logo regression.
   const LAYOUTS = [
     "src/routes/admin.tsx",
     "src/routes/minha-conta.tsx",
@@ -80,16 +84,21 @@ describe("each authenticated route layout renders exactly one logo chrome", () =
   ];
 
   for (const path of LAYOUTS) {
-    it(`${path}: <Header /> + <Logo /> combined occurrences === 1`, () => {
+    it(`${path}: does not mix <Header /> and <Logo /> and renders <Logo /> at most once`, () => {
       const src = stripComments(read(path));
       const headers = countJsxOpen(src, "Header");
       const logos = countJsxOpen(src, "Logo");
-      const total = headers + logos;
+
       expect(
-        total,
-        `expected exactly 1 logo-bearing chrome in ${path}, got ${total} ` +
-          `(<Header /> x${headers}, <Logo /> x${logos})`,
-      ).toBe(1);
+        headers === 0 || logos === 0,
+        `${path} renders both <Header /> (x${headers}) and <Logo /> (x${logos}) — ` +
+          `<Header /> already contains the brand logo, so adding <Logo /> duplicates it.`,
+      ).toBe(true);
+
+      expect(
+        logos,
+        `${path} renders <Logo /> ${logos} times; the brand logo must appear at most once per layout.`,
+      ).toBeLessThanOrEqual(1);
     });
   }
 });
