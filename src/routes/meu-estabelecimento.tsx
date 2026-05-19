@@ -772,3 +772,170 @@ function RadioList({
     </div>
   );
 }
+
+function TimelineFluxo({
+  perfilCompleto,
+  querSelo,
+  seloAzul,
+}: {
+  perfilCompleto: boolean;
+  querSelo: boolean;
+  seloAzul: boolean;
+}) {
+  const steps = [
+    {
+      title: "Cadastro criado",
+      desc: "Sua conta está ativa na plataforma.",
+      done: true,
+    },
+    {
+      title: "Perfil completo",
+      desc: "Preencha as informações do estabelecimento.",
+      done: perfilCompleto,
+    },
+    {
+      title: "Interesse no Selo Azul",
+      desc: "Sinalize que quer participar do programa.",
+      done: querSelo || seloAzul,
+    },
+    {
+      title: "Auditoria e capacitação",
+      desc: "Nossa equipe entra em contato e treina sua equipe.",
+      done: seloAzul,
+    },
+    {
+      title: "Selo Azul concedido",
+      desc: "Destaque nas buscas das famílias TEA.",
+      done: seloAzul,
+    },
+  ];
+
+  // current step = first not done; if all done → last
+  const currentIdx = steps.findIndex((s) => !s.done);
+  const activeIdx = currentIdx === -1 ? steps.length - 1 : currentIdx;
+
+  return (
+    <div className="bg-white border rounded-2xl p-6 md:p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="font-display font-bold text-lg text-primary">
+          O que vem pela frente
+        </h3>
+        <span className="text-xs text-foreground/60">
+          Etapa {activeIdx + 1} de {steps.length}
+        </span>
+      </div>
+
+      {/* Desktop: horizontal */}
+      <div className="hidden md:block">
+        <div className="relative">
+          {/* Linha de fundo */}
+          <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200" />
+          {/* Linha de progresso */}
+          <div
+            className="absolute top-5 left-0 h-0.5 bg-[#c9a84c] transition-all"
+            style={{
+              width: `${(activeIdx / (steps.length - 1)) * 100}%`,
+            }}
+          />
+          <ol className="relative grid grid-cols-5 gap-2">
+            {steps.map((s, i) => {
+              const isDone = s.done;
+              const isActive = i === activeIdx && !isDone;
+              return (
+                <li key={s.title} className="flex flex-col items-center text-center px-1">
+                  <div
+                    className={[
+                      "w-10 h-10 rounded-full flex items-center justify-center border-2 bg-white z-10 transition-colors",
+                      isDone
+                        ? "border-[#c9a84c] bg-[#c9a84c] text-white"
+                        : isActive
+                          ? "border-primary text-primary ring-4 ring-primary/15"
+                          : "border-slate-300 text-slate-400",
+                    ].join(" ")}
+                  >
+                    {isDone ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : isActive ? (
+                      <Clock className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm font-bold">{i + 1}</span>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <div
+                      className={[
+                        "text-sm font-semibold",
+                        isActive ? "text-primary" : isDone ? "text-foreground" : "text-foreground/60",
+                      ].join(" ")}
+                    >
+                      {s.title}
+                    </div>
+                    <div className="text-xs text-foreground/60 mt-1 leading-snug">
+                      {s.desc}
+                    </div>
+                    {isActive && (
+                      <span className="inline-block mt-2 text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        Etapa atual
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
+
+      {/* Mobile: vertical */}
+      <ol className="md:hidden space-y-4">
+        {steps.map((s, i) => {
+          const isDone = s.done;
+          const isActive = i === activeIdx && !isDone;
+          return (
+            <li key={s.title} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <div
+                  className={[
+                    "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors",
+                    isDone
+                      ? "border-[#c9a84c] bg-[#c9a84c] text-white"
+                      : isActive
+                        ? "border-primary text-primary ring-4 ring-primary/15"
+                        : "border-slate-300 text-slate-400 bg-white",
+                  ].join(" ")}
+                >
+                  {isDone ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : isActive ? (
+                    <Clock className="h-5 w-5" />
+                  ) : (
+                    <span className="text-sm font-bold">{i + 1}</span>
+                  )}
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={`w-0.5 flex-1 mt-1 ${isDone ? "bg-[#c9a84c]" : "bg-slate-200"}`} />
+                )}
+              </div>
+              <div className="pb-2">
+                <div
+                  className={[
+                    "text-sm font-semibold",
+                    isActive ? "text-primary" : isDone ? "text-foreground" : "text-foreground/60",
+                  ].join(" ")}
+                >
+                  {s.title}
+                  {isActive && (
+                    <span className="ml-2 text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      Atual
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-foreground/60 mt-1">{s.desc}</div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
