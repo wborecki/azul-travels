@@ -40,9 +40,14 @@ function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) {
+      void logAuthEvent("login_failure", {
+        sucesso: false,
+        email,
+        metadata: { reason: error.message },
+      });
       toast.error(
         error.message === "Invalid login credentials"
           ? "E-mail ou senha incorretos."
@@ -50,6 +55,10 @@ function LoginPage() {
       );
       return;
     }
+    void logAuthEvent("login_success", {
+      userId: data.user?.id ?? null,
+      email,
+    });
     toast.success("Bem-vindo de volta!");
   }
 
@@ -60,6 +69,11 @@ function LoginPage() {
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
+    });
+    void logAuthEvent("password_reset_request", {
+      sucesso: !error,
+      email,
+      metadata: error ? { reason: error.message } : {},
     });
     if (error) toast.error(error.message);
     else toast.success("Enviamos um link de redefinição para o seu e-mail.");
