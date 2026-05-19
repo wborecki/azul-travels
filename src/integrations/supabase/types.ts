@@ -1343,6 +1343,7 @@ export type Database = {
     Functions: {
       expurgar_links_curtos_inativos: { Args: never; Returns: number }
       get_dashboard_stats: { Args: never; Returns: Json }
+      get_familias_count: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
