@@ -73,7 +73,12 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
   const isAuthFlow = pathname === "/login" || pathname === "/cadastro" || pathname === "/selecionar-perfil" || pathname === "/reset-password" || pathname === "/forgot-password";
-  if (isAdmin || isAuthFlow) {
+  const hasOwnChrome =
+    pathname === "/minha-conta" || pathname.startsWith("/minha-conta/") ||
+    pathname === "/meu-estabelecimento" || pathname.startsWith("/meu-estabelecimento/") ||
+    pathname === "/minha-empresa" || pathname.startsWith("/minha-empresa/");
+  if (isAdmin || isAuthFlow || hasOwnChrome) {
+
     return (
       <AuthProvider>
         <Outlet />
