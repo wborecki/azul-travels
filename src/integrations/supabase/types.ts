@@ -339,6 +339,7 @@ export type Database = {
           selo_privado_nome: string | null
           slug: string
           status: Database["public"]["Enums"]["estab_status"] | null
+          subtipo_educativo: string | null
           telefone: string | null
           tem_beneficio_tea: boolean | null
           tem_caa: boolean | null
@@ -379,6 +380,7 @@ export type Database = {
           selo_privado_nome?: string | null
           slug: string
           status?: Database["public"]["Enums"]["estab_status"] | null
+          subtipo_educativo?: string | null
           telefone?: string | null
           tem_beneficio_tea?: boolean | null
           tem_caa?: boolean | null
@@ -419,6 +421,7 @@ export type Database = {
           selo_privado_nome?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["estab_status"] | null
+          subtipo_educativo?: string | null
           telefone?: string | null
           tem_beneficio_tea?: boolean | null
           tem_caa?: boolean | null
@@ -1367,6 +1370,7 @@ export type Database = {
         | "agencia"
         | "transporte"
         | "excursao"
+        | "passeio_educativo"
       reserva_status: "pendente" | "confirmada" | "cancelada" | "concluida"
       tea_nivel: "leve" | "moderado" | "severo"
     }
@@ -1515,6 +1519,7 @@ export const Constants = {
         "agencia",
         "transporte",
         "excursao",
+        "passeio_educativo",
       ],
       reserva_status: ["pendente", "confirmada", "cancelada", "concluida"],
       tea_nivel: ["leve", "moderado", "severo"],
