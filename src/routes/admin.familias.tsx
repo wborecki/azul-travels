@@ -173,6 +173,22 @@ function AdminFamiliasPage() {
     setPromover(null);
   }
 
+  async function toggleDemo(row: Row) {
+    const novo = !row.is_demo;
+    setBusy(row.id);
+    const { error } = await supabase
+      .from("familia_profiles")
+      .update({ is_demo: novo } as never)
+      .eq("id", row.id);
+    setBusy(null);
+    if (error) {
+      toast.error("Erro ao atualizar marcação", { description: error.message });
+      return;
+    }
+    toast.success(novo ? "Marcado como demo." : "Marcado como real.");
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: novo } : r)));
+  }
+
   return (
     <div className="space-y-6 max-w-7xl">
       <header>
