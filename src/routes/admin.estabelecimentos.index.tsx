@@ -277,6 +277,7 @@ function AdminEstabelecimentos() {
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground flex items-center gap-2 flex-wrap">
                         {r.nome}
+                        {r.is_demo && <DemoBadge />}
                         {r.quer_selo_azul && !r.selo_azul && (
                           <span
                             title={
