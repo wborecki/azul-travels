@@ -93,6 +93,7 @@ function AdminDashboard() {
             estado: f.estado,
             criado_em: f.criado_em,
             status: f.status,
+            is_demo: (f as { is_demo?: boolean }).is_demo ?? false,
           })),
           ...(ests.data ?? []).map((e) => ({
             id: e.id,
@@ -102,6 +103,7 @@ function AdminDashboard() {
             estado: e.estado,
             criado_em: e.criado_em,
             status: e.status,
+            is_demo: (e as { is_demo?: boolean }).is_demo ?? false,
           })),
         ].sort((a, b) => b.criado_em.localeCompare(a.criado_em));
         setRecents(merged);
