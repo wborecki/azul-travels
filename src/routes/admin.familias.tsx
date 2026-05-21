@@ -319,6 +319,9 @@ function AdminFamiliasPage() {
                           </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => void toggleDemo(r)}>
+                          {r.is_demo ? "Desmarcar como demo" : "Marcar como demo"}
+                        </DropdownMenuItem>
                         {!r.is_admin && (
                           <DropdownMenuItem onSelect={() => setPromover(r)}>
                             Promover a admin
