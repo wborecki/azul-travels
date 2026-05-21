@@ -89,7 +89,7 @@ function AdminFamiliasPage() {
       const [fams, perfis, roles] = await Promise.all([
         supabase
           .from("familia_profiles")
-          .select("id, nome_responsavel, email, telefone, cidade, estado, criado_em, status")
+          .select("id, nome_responsavel, email, telefone, cidade, estado, criado_em, status, is_demo")
           .order("criado_em", { ascending: false }),
         supabase.from("perfil_tea").select("user_id"),
         supabase.from("user_roles").select("user_id, role"),
@@ -108,6 +108,7 @@ function AdminFamiliasPage() {
           status: f.status ?? "ativo",
           tem_perfil_tea: comPerfil.has(f.id),
           is_admin: adminSet.has(f.id),
+          is_demo: (f as { is_demo?: boolean }).is_demo ?? false,
         })),
       );
     } catch (err) {
