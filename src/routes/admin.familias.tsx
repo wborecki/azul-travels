@@ -263,12 +263,15 @@ function AdminFamiliasPage() {
               {filtrados.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">
-                    {r.nome_responsavel ?? "-"}
-                    {r.is_admin && (
-                      <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
-                        ADMIN
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                      {r.nome_responsavel ?? "-"}
+                      {r.is_admin && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                          ADMIN
+                        </span>
+                      )}
+                      {r.is_demo && <DemoBadge />}
+                    </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">{r.email ?? "-"}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{r.telefone ?? "-"}</TableCell>
