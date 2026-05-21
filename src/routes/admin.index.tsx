@@ -29,6 +29,7 @@ type RecentRow = {
   estado: string | null;
   criado_em: string;
   status: string | null;
+  is_demo: boolean;
 };
 
 type LeadRow = {
@@ -36,6 +37,7 @@ type LeadRow = {
   nome: string;
   email: string;
   criado_em: string;
+  is_demo: boolean;
 };
 
 const NAVY = "#1a2f5e";
