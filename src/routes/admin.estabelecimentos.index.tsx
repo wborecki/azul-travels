@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
   validateSearch: (search: Record<string, unknown>) => ({
