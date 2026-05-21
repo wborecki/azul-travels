@@ -169,6 +169,23 @@ function AdminEstabelecimentos() {
     if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
+  const handleToggleDemo = async (row: Row) => {
+    const next = !row.is_demo;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: next } : r)));
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ is_demo: next })
+      .eq("id", row.id);
+    markSaving(row.id, false);
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: row.is_demo } : r)));
+      toast.error("Não foi possível atualizar a marcação", { description: error.message });
+      return;
+    }
+    toast.success(next ? `"${row.nome}" marcado como demo` : `"${row.nome}" marcado como real`);
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex items-end justify-between gap-4 flex-wrap">
