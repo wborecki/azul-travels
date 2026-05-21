@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -168,6 +169,23 @@ function AdminEstabelecimentos() {
     if (rows.length === 1 && pagina > 1) setPagina((p) => p - 1);
   };
 
+  const handleToggleDemo = async (row: Row) => {
+    const next = !row.is_demo;
+    markSaving(row.id, true);
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: next } : r)));
+    const { error } = await supabase
+      .from("estabelecimentos")
+      .update({ is_demo: next })
+      .eq("id", row.id);
+    markSaving(row.id, false);
+    if (error) {
+      setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: row.is_demo } : r)));
+      toast.error("Não foi possível atualizar a marcação", { description: error.message });
+      return;
+    }
+    toast.success(next ? `"${row.nome}" marcado como demo` : `"${row.nome}" marcado como real`);
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex items-end justify-between gap-4 flex-wrap">
@@ -259,6 +277,7 @@ function AdminEstabelecimentos() {
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground flex items-center gap-2 flex-wrap">
                         {r.nome}
+                        {r.is_demo && <DemoBadge />}
                         {r.quer_selo_azul && !r.selo_azul && (
                           <span
                             title={
@@ -294,6 +313,19 @@ function AdminEstabelecimentos() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2"
+                          onClick={() => void handleToggleDemo(r)}
+                          disabled={savingIds.has(r.id)}
+                          aria-label={r.is_demo ? `Desmarcar ${r.nome} como demo` : `Marcar ${r.nome} como demo`}
+                          title={r.is_demo ? "Desmarcar como demo" : "Marcar como demo"}
+                        >
+                          <span className={`text-[10px] font-semibold ${r.is_demo ? "text-orange-700" : "text-muted-foreground"}`}>
+                            {r.is_demo ? "DEMO ✓" : "Demo?"}
+                          </span>
+                        </Button>
                         <Button asChild size="sm" variant="ghost" className="h-8 px-2">
                           <Link
                             to="/admin/estabelecimentos/$id/preview"

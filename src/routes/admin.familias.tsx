@@ -47,6 +47,7 @@ import {
 import { Search, MoreHorizontal, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 
 export const Route = createFileRoute("/admin/familias")({
   component: AdminFamiliasPage,
@@ -67,6 +68,7 @@ type Row = {
   status: string;
   tem_perfil_tea: boolean;
   is_admin: boolean;
+  is_demo: boolean;
 };
 
 function AdminFamiliasPage() {
@@ -87,7 +89,7 @@ function AdminFamiliasPage() {
       const [fams, perfis, roles] = await Promise.all([
         supabase
           .from("familia_profiles")
-          .select("id, nome_responsavel, email, telefone, cidade, estado, criado_em, status")
+          .select("id, nome_responsavel, email, telefone, cidade, estado, criado_em, status, is_demo")
           .order("criado_em", { ascending: false }),
         supabase.from("perfil_tea").select("user_id"),
         supabase.from("user_roles").select("user_id, role"),
@@ -106,6 +108,7 @@ function AdminFamiliasPage() {
           status: f.status ?? "ativo",
           tem_perfil_tea: comPerfil.has(f.id),
           is_admin: adminSet.has(f.id),
+          is_demo: (f as { is_demo?: boolean }).is_demo ?? false,
         })),
       );
     } catch (err) {
@@ -168,6 +171,22 @@ function AdminFamiliasPage() {
     toast.success(`${promover.nome_responsavel ?? "Usuário"} promovido a administrador.`);
     setRows((rs) => rs.map((r) => (r.id === promover.id ? { ...r, is_admin: true } : r)));
     setPromover(null);
+  }
+
+  async function toggleDemo(row: Row) {
+    const novo = !row.is_demo;
+    setBusy(row.id);
+    const { error } = await supabase
+      .from("familia_profiles")
+      .update({ is_demo: novo } as never)
+      .eq("id", row.id);
+    setBusy(null);
+    if (error) {
+      toast.error("Erro ao atualizar marcação", { description: error.message });
+      return;
+    }
+    toast.success(novo ? "Marcado como demo." : "Marcado como real.");
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, is_demo: novo } : r)));
   }
 
   return (
@@ -244,12 +263,15 @@ function AdminFamiliasPage() {
               {filtrados.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">
-                    {r.nome_responsavel ?? "-"}
-                    {r.is_admin && (
-                      <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
-                        ADMIN
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                      {r.nome_responsavel ?? "-"}
+                      {r.is_admin && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                          ADMIN
+                        </span>
+                      )}
+                      {r.is_demo && <DemoBadge />}
+                    </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">{r.email ?? "-"}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{r.telefone ?? "-"}</TableCell>
@@ -297,6 +319,9 @@ function AdminFamiliasPage() {
                           </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => void toggleDemo(r)}>
+                          {r.is_demo ? "Desmarcar como demo" : "Marcar como demo"}
+                        </DropdownMenuItem>
                         {!r.is_admin && (
                           <DropdownMenuItem onSelect={() => setPromover(r)}>
                             Promover a admin
