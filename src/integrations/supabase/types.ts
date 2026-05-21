@@ -315,6 +315,7 @@ export type Database = {
           estrutura: Json
           id: string
           iniciativa_atual: string | null
+          is_demo: boolean
           last_seen_at: string | null
           nome_responsavel: string | null
           notes: string | null
@@ -341,6 +342,7 @@ export type Database = {
           estrutura?: Json
           id: string
           iniciativa_atual?: string | null
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
@@ -367,6 +369,7 @@ export type Database = {
           estrutura?: Json
           id?: string
           iniciativa_atual?: string | null
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
