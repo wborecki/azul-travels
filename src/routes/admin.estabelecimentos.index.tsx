@@ -313,6 +313,19 @@ function AdminEstabelecimentos() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2"
+                          onClick={() => void handleToggleDemo(r)}
+                          disabled={savingIds.has(r.id)}
+                          aria-label={r.is_demo ? `Desmarcar ${r.nome} como demo` : `Marcar ${r.nome} como demo`}
+                          title={r.is_demo ? "Desmarcar como demo" : "Marcar como demo"}
+                        >
+                          <span className={`text-[10px] font-semibold ${r.is_demo ? "text-orange-700" : "text-muted-foreground"}`}>
+                            {r.is_demo ? "DEMO ✓" : "Demo?"}
+                          </span>
+                        </Button>
                         <Button asChild size="sm" variant="ghost" className="h-8 px-2">
                           <Link
                             to="/admin/estabelecimentos/$id/preview"
