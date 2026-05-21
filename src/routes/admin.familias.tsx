@@ -68,6 +68,7 @@ type Row = {
   status: string;
   tem_perfil_tea: boolean;
   is_admin: boolean;
+  is_demo: boolean;
 };
 
 function AdminFamiliasPage() {
