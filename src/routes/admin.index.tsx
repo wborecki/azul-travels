@@ -60,18 +60,18 @@ function AdminDashboard() {
           fetchDashboardStats(),
           supabase
             .from("familia_profiles")
-            .select("id, nome_responsavel, cidade, estado, criado_em, status")
+            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo")
             .order("criado_em", { ascending: false })
             .limit(20),
           supabase
             .from("estabelecimento_profiles")
-            .select("id, nome_responsavel, cidade, estado, criado_em, status")
+            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo:id")
             .order("criado_em", { ascending: false })
             .limit(20),
           supabase.from("leads_familias").select("id", { count: "exact", head: true }),
           supabase
             .from("leads_familias")
-            .select("id, nome, email, criado_em")
+            .select("id, nome, email, criado_em, is_demo")
             .order("criado_em", { ascending: false })
             .limit(5),
           supabase
