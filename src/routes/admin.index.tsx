@@ -289,7 +289,10 @@ function AdminDashboard() {
                       className="hover:bg-[#f8fafc] transition-colors"
                     >
                       <TableCell className="font-medium py-2 text-sm">
-                        {r.nome ?? <EmptyCell />}
+                        <span className="inline-flex items-center gap-1.5 flex-wrap">
+                          {r.nome ?? <EmptyCell />}
+                          {r.is_demo && <DemoBadge />}
+                        </span>
                       </TableCell>
                       <TableCell className="py-2">
                         <span
