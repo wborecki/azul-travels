@@ -66,6 +66,7 @@ export type EstabelecimentoAdminView = EstabelecimentoView &
     | "listagem_basica"
     | "quer_selo_azul"
     | "quer_selo_azul_em"
+    | "is_demo"
   >;
 
 /**
@@ -76,7 +77,7 @@ export type EstabelecimentoAdminView = EstabelecimentoView &
 export const ESTAB_ADMIN_VIEW_SELECT = `
   ${ESTAB_VIEW_SELECT},
   status, criado_em, mensalidade_ativa, listagem_basica,
-  quer_selo_azul, quer_selo_azul_em
+  quer_selo_azul, quer_selo_azul_em, is_demo
 ` as const;
 
 
