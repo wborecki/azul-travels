@@ -65,7 +65,7 @@ function AdminDashboard() {
             .limit(20),
           supabase
             .from("estabelecimento_profiles")
-            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo:id")
+            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo")
             .order("criado_em", { ascending: false })
             .limit(20),
           supabase.from("leads_familias").select("id", { count: "exact", head: true }),
