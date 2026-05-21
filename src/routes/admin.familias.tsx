@@ -47,6 +47,7 @@ import {
 import { Search, MoreHorizontal, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 
 export const Route = createFileRoute("/admin/familias")({
   component: AdminFamiliasPage,
