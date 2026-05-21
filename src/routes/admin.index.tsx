@@ -15,6 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
