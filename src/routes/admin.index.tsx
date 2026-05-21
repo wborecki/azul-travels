@@ -381,8 +381,9 @@ function AdminDashboard() {
                   <li key={l.id} className="px-5 py-2.5 hover:bg-[#f8fafc] transition-colors">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate" style={{ color: NAVY }}>
-                          {l.nome}
+                        <p className="text-sm font-medium truncate flex items-center gap-1.5" style={{ color: NAVY }}>
+                          <span className="truncate">{l.nome}</span>
+                          {l.is_demo && <DemoBadge className="shrink-0" />}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">{l.email}</p>
                       </div>
