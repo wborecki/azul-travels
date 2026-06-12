@@ -43,6 +43,7 @@ import { Route as ConteudoSlugRouteImport } from './routes/conteudo.$slug'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminReservasRouteImport } from './routes/admin.reservas'
 import { Route as AdminPasswordResetsRouteImport } from './routes/admin.password-resets'
+import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminFamiliasRouteImport } from './routes/admin.familias'
 import { Route as AdminAuditoriaAuthRouteImport } from './routes/admin.auditoria-auth'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
@@ -228,6 +229,11 @@ const AdminPasswordResetsRoute = AdminPasswordResetsRouteImport.update({
   path: '/password-resets',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFamiliasRoute = AdminFamiliasRouteImport.update({
   id: '/familias',
   path: '/familias',
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
@@ -427,6 +435,7 @@ export interface FileRoutesById {
   '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/auditoria-auth': typeof AdminAuditoriaAuthRoute
   '/admin/familias': typeof AdminFamiliasRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/password-resets': typeof AdminPasswordResetsRoute
   '/admin/reservas': typeof AdminReservasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/auditoria-auth'
     | '/admin/familias'
+    | '/admin/leads'
     | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
@@ -527,6 +537,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/auditoria-auth'
     | '/admin/familias'
+    | '/admin/leads'
     | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
@@ -577,6 +588,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/auditoria-auth'
     | '/admin/familias'
+    | '/admin/leads'
     | '/admin/password-resets'
     | '/admin/reservas'
     | '/admin/usuarios'
@@ -871,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPasswordResetsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/familias': {
       id: '/admin/familias'
       path: '/familias'
@@ -991,6 +1010,7 @@ interface AdminRouteChildren {
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminAuditoriaAuthRoute: typeof AdminAuditoriaAuthRoute
   AdminFamiliasRoute: typeof AdminFamiliasRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
   AdminPasswordResetsRoute: typeof AdminPasswordResetsRoute
   AdminReservasRoute: typeof AdminReservasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
@@ -1007,6 +1027,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminAuditoriaAuthRoute: AdminAuditoriaAuthRoute,
   AdminFamiliasRoute: AdminFamiliasRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
   AdminPasswordResetsRoute: AdminPasswordResetsRoute,
   AdminReservasRoute: AdminReservasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
@@ -1084,3 +1105,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

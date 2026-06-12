@@ -15,6 +15,7 @@ import {
   LogOut,
   KeyRound,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -26,6 +27,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/familias": "Famílias TEA",
   "/admin/estabelecimentos": "Estabelecimentos",
+  "/admin/leads": "Leads",
   "/admin/administradores": "Administradores",
   "/admin/reservas": "Reservas",
   "/admin/conteudo": "Conteúdo TEA",
@@ -115,6 +117,7 @@ function AdminLayout() {
           <NavItem to="/admin" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" exact />
           <NavItem to="/admin/familias" icon={<Users className="h-4 w-4" />} label="Famílias TEA" />
           <NavItem to="/admin/estabelecimentos" icon={<Building2 className="h-4 w-4" />} label="Estabelecimentos" />
+          <NavItem to="/admin/leads" icon={<Sparkles className="h-4 w-4" />} label="Leads" />
           <NavItem to="/admin/administradores" icon={<Crown className="h-4 w-4" />} label="Administradores" />
 
           <div className="pt-5 mt-3">
