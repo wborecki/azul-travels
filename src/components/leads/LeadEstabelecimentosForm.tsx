@@ -175,9 +175,14 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       toast.error("Erro ao enviar. Tente novamente.");
       return;
     }
+    alert("ok");
+
     setEnviado(true);
     void loadCount();
-    if (typeof window !== "undefined" && typeof (window as { gtag?: unknown }).gtag === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof (window as { gtag?: unknown }).gtag === "function"
+    ) {
       (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
         "event",
         "lead_estabelecimento",
@@ -201,9 +206,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
           <h2 className="mt-6 text-2xl md:text-3xl font-display font-bold text-primary">
             Cadastro recebido 💙
           </h2>
-          <p className="mt-3 text-foreground/80">
-            Você está na nossa lista. Para agilizar:
-          </p>
+          <p className="mt-3 text-foreground/80">Você está na nossa lista. Para agilizar:</p>
 
           <div className="mt-6 rounded-2xl border-2 border-secondary/40 bg-gradient-to-br from-azul-claro/40 to-white p-6 text-left shadow-sm">
             <div className="flex items-start gap-4">
@@ -215,8 +218,8 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
                   Criar minha conta agora
                 </h3>
                 <p className="mt-1 text-sm text-foreground/80">
-                  Com uma conta você já pode preencher o perfil do seu estabelecimento e agilizar
-                  o processo de certificação.
+                  Com uma conta você já pode preencher o perfil do seu estabelecimento e agilizar o
+                  processo de certificação.
                 </p>
                 <Button
                   onClick={() => setShowAuthModal(true)}
@@ -273,7 +276,10 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
   }
 
   return (
-    <form onSubmit={onSubmit} className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-3">
+    <form
+      onSubmit={onSubmit}
+      className="bg-white rounded-2xl border p-6 md:p-8 shadow-sm space-y-3"
+    >
       {!loadingCount && count !== null && (
         <div className="flex items-center gap-2 text-sm text-secondary font-semibold">
           <Building2 className="h-4 w-4" />
@@ -432,9 +438,7 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
           Concordo em receber comunicações do Turismo Azul sobre o lançamento da plataforma.
         </span>
       </label>
-      {errors.consentimento && (
-        <p className="text-sm text-destructive">{errors.consentimento}</p>
-      )}
+      {errors.consentimento && <p className="text-sm text-destructive">{errors.consentimento}</p>}
 
       <Button
         type="submit"

@@ -1,4 +1,10 @@
-import { Outlet, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
+import {
+  Outlet,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
@@ -46,6 +52,7 @@ export const Route = createRootRoute({
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
     ],
@@ -72,13 +79,20 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
-  const isAuthFlow = pathname === "/login" || pathname === "/cadastro" || pathname === "/selecionar-perfil" || pathname === "/reset-password" || pathname === "/forgot-password";
+  const isAuthFlow =
+    pathname === "/login" ||
+    pathname === "/cadastro" ||
+    pathname === "/selecionar-perfil" ||
+    pathname === "/reset-password" ||
+    pathname === "/forgot-password";
   const hasOwnChrome =
-    pathname === "/minha-conta" || pathname.startsWith("/minha-conta/") ||
-    pathname === "/meu-estabelecimento" || pathname.startsWith("/meu-estabelecimento/") ||
-    pathname === "/minha-empresa" || pathname.startsWith("/minha-empresa/");
+    pathname === "/minha-conta" ||
+    pathname.startsWith("/minha-conta/") ||
+    pathname === "/meu-estabelecimento" ||
+    pathname.startsWith("/meu-estabelecimento/") ||
+    pathname === "/minha-empresa" ||
+    pathname.startsWith("/minha-empresa/");
   if (isAdmin || isAuthFlow || hasOwnChrome) {
-
     return (
       <AuthProvider>
         <Outlet />

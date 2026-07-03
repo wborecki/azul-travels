@@ -1080,7 +1080,7 @@ function SelosImportantes() {
       cor: "bg-primary text-primary-foreground",
       nome: "Selo Azul",
       descricao:
-        "Emitido pela Absoluto Educacional. Exige que no mínimo 70% da equipe seja treinada em TEA/ABA com metodologia validada. O mais rigoroso do mercado.",
+        "Emitido pelo Turismo Azul Inclusivo. Exige que no mínimo 70% da equipe seja treinada em TEA/ABA com metodologia validada. O mais rigoroso do mercado.",
     },
     {
       Icon: Award,
@@ -1178,7 +1178,7 @@ function OQuePlataformaTera() {
       Icon: CircleDot,
       titulo: "Selo Azul em destaque",
       texto:
-        "Estabelecimentos certificados pela Absoluto Educacional aparecem com badge de destaque nos resultados.",
+        "Estabelecimentos certificados pelo Turismo Azul Inclusivo aparecem com badge de destaque nos resultados.",
     },
   ];
   return (

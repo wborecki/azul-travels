@@ -25,7 +25,7 @@ function SobrePage() {
   return (
     <PaginaPlaceholder
       titulo="Sobre o Turismo Azul"
-      descricao="Esta seção está em construção. Em breve: nossa missão, nosso time e a parceria com a Absoluto Educacional que tornou o Selo Azul possível."
+      descricao="Esta seção está em construção. Em breve: nossa missão, nosso time e a história por trás do Selo Azul."
     />
   );
 }
