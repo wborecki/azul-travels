@@ -26,9 +26,8 @@ function PrivacidadePage() {
 
       <h2>1. Quem somos</h2>
       <p>
-        O Turismo Azul é um produto da <strong>Solutions in BI Consulting LTDA</strong>{" "}
-        (CNPJ 59.668.668/0001-54), em parceria com a <strong>Absoluto Educacional</strong>{" "}
-        (CNPJ 18.536.766/0001-50). Somos os controladores dos dados pessoais coletados pela
+        O Turismo Azul é um produto da <strong>Turismo Azul Inclusivo LTDA</strong>{" "}
+        (CNPJ 65.648.345/0001-00). Somos os controladores dos dados pessoais coletados pela
         plataforma.
       </p>
 

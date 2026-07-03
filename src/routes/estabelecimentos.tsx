@@ -37,7 +37,7 @@ function EstabelecimentosPage() {
     {
       titulo: "Selo Azul como diferencial real",
       texto:
-        "Capacitação pela Absoluto Educacional. Um certificado que a concorrência ainda não tem.",
+        "Capacitação pelo Turismo Azul Inclusivo. Um certificado que a concorrência ainda não tem.",
     },
     {
       titulo: "Fila prioritária de parceiros",

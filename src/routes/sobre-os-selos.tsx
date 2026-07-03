@@ -30,7 +30,7 @@ function SobreOsSelosPage() {
       cor: "bg-primary text-primary-foreground",
       nome: "Selo Azul",
       criterios: [
-        "No mínimo 70% da equipe treinada em TEA/ABA pela Absoluto Educacional",
+        "No mínimo 70% da equipe treinada em TEA/ABA pelo Turismo Azul Inclusivo",
         "Capacitação validada com avaliação prática e certificado individual",
         "Renovação anual obrigatória com reciclagem de conteúdo",
         "Auditoria presencial pela equipe Turismo Azul",
@@ -101,7 +101,7 @@ function SobreOsSelosPage() {
             />
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Selo Turismo Azul Inclusivo · Emitido pela Absoluto Educacional
+            Selo Turismo Azul Inclusivo · Certificação Oficial
           </p>
         </div>
       </section>

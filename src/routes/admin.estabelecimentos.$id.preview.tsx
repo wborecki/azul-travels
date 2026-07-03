@@ -262,7 +262,7 @@ function AdminEstabelecimentoPreview() {
               <ul className="space-y-2 text-sm">
                 {e.selo_azul && (
                   <li className="flex justify-between py-2 border-b">
-                    <span className="font-semibold">Selo Azul (Absoluto Educacional)</span>
+                    <span className="font-semibold">Selo Azul</span>
                     {e.selo_azul_validade && (
                       <span className="text-muted-foreground">
                         Válido até {formatDateBR(e.selo_azul_validade)}

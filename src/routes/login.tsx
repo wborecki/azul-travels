@@ -31,9 +31,7 @@ function LoginPage() {
   useEffect(() => {
     if (loading) return;
     if (user) {
-      void resolvePostLoginPath(user.id, redirect ?? null).then((path) =>
-        navigate({ to: path }),
-      );
+      void resolvePostLoginPath(user.id, redirect ?? null).then((path) => navigate({ to: path }));
     }
   }, [user, loading, redirect, navigate]);
 
@@ -87,7 +85,7 @@ function LoginPage() {
         style={{ background: "#1a3666" }}
       >
         <div className="max-w-sm text-center flex flex-col items-center">
-          <div className="flex justify-center" style={{ height: 48 }}>
+          <div className="flex justify-center" style={{ height: 96 }}>
             <Logo variant="dark" showTagline={false} />
           </div>
           <div
@@ -126,13 +124,13 @@ function LoginPage() {
           <h2 className="font-display font-bold" style={{ fontSize: 24, color: "#1a3666" }}>
             Entrar na sua conta
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Use seu e-mail e senha cadastrados.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Use seu e-mail e senha cadastrados.</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>
-              <Label className="text-xs font-bold" style={{ color: "#1a3666" }}>E-mail</Label>
+              <Label className="text-xs font-bold" style={{ color: "#1a3666" }}>
+                E-mail
+              </Label>
               <Input
                 type="email"
                 required
@@ -144,7 +142,9 @@ function LoginPage() {
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-bold" style={{ color: "#1a3666" }}>Senha</Label>
+                <Label className="text-xs font-bold" style={{ color: "#1a3666" }}>
+                  Senha
+                </Label>
                 <button
                   type="button"
                   onClick={handleForgotPassword}
@@ -169,14 +169,21 @@ function LoginPage() {
               style={{ background: "#f5a623" }}
             >
               {busy ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Entrando…</>
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Entrando…
+                </>
               ) : (
-                <>Entrar <ArrowRight className="h-4 w-4 ml-1" /></>
+                <>
+                  Entrar <ArrowRight className="h-4 w-4 ml-1" />
+                </>
               )}
             </Button>
           </form>
 
-          <div className="flex items-center gap-3 text-xs text-muted-foreground" style={{ marginTop: 20, marginBottom: 20 }}>
+          <div
+            className="flex items-center gap-3 text-xs text-muted-foreground"
+            style={{ marginTop: 20, marginBottom: 20 }}
+          >
             <div className="flex-1 h-px bg-border" />
             <span>ou</span>
             <div className="flex-1 h-px bg-border" />
@@ -184,14 +191,21 @@ function LoginPage() {
 
           <p className="text-sm text-center text-muted-foreground">
             Ainda não tem conta?{" "}
-            <Link to="/cadastro" className="font-bold no-underline hover:underline" style={{ color: "#2563eb" }}>
+            <Link
+              to="/cadastro"
+              className="font-bold no-underline hover:underline"
+              style={{ color: "#2563eb" }}
+            >
               Cadastre-se
             </Link>
           </p>
 
           <div style={{ marginTop: 32 }}>
             <div className="h-px bg-border" />
-            <p className="text-center text-muted-foreground" style={{ fontSize: 11, marginTop: 12 }}>
+            <p
+              className="text-center text-muted-foreground"
+              style={{ fontSize: 11, marginTop: 12 }}
+            >
               🔒 Seus dados estão protegidos com criptografia.
             </p>
           </div>

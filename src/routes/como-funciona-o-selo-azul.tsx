@@ -48,7 +48,7 @@ function ComoFuncionaSeloAzulPage() {
       Icon: GraduationCap,
       titulo: "2. Capacitação da equipe",
       descricao:
-        "No mínimo 70% da equipe operacional passa pelo treinamento em TEA/ABA conduzido pela Absoluto Educacional, com avaliação prática e emissão de certificado individual.",
+        "No mínimo 70% da equipe operacional passa pelo treinamento em TEA/ABA conduzido pelo Turismo Azul Inclusivo, com avaliação prática e emissão de certificado individual.",
     },
     {
       Icon: Building2,
@@ -144,7 +144,7 @@ function ComoFuncionaSeloAzulPage() {
             />
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Emitido em parceria com a Absoluto Educacional
+            Emitido pelo Turismo Azul Inclusivo
           </p>
         </div>
       </section>

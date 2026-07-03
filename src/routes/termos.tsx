@@ -54,8 +54,8 @@ function TermosPage() {
 
       <h2>5. Propriedade intelectual</h2>
       <p>
-        Todo conteúdo (textos, imagens, marca, código) é de propriedade da Solutions in BI
-        Consulting LTDA ou usado sob licença. A reprodução sem autorização é proibida.
+        Todo conteúdo (textos, imagens, marca, código) é de propriedade da Turismo Azul
+        Inclusivo LTDA ou usado sob licença. A reprodução sem autorização é proibida.
       </p>
 
       <h2>6. Limitação de responsabilidade</h2>

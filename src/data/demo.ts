@@ -49,7 +49,7 @@ export const DEMO_ESTABELECIMENTOS: DemoEstabelecimento[] = [
     ],
     descricao: "Resort à beira-mar com estrutura completa para famílias.",
     descricao_tea:
-      "Nossa equipe passou por treinamento intensivo em TEA/ABA pela Absoluto Educacional. Temos sala sensorial disponível 24h, cardápio visual em todos os restaurantes, check-in silencioso sem fila e concierge especializado em autismo presente todos os dias das 8h às 20h.",
+      "Nossa equipe passou por treinamento intensivo em TEA/ABA pelo Turismo Azul Inclusivo. Temos sala sensorial disponível 24h, cardápio visual em todos os restaurantes, check-in silencioso sem fila e concierge especializado em autismo presente todos os dias das 8h às 20h.",
     selo_azul: true,
     selo_azul_validade: "2026-12-01",
     tem_sala_sensorial: true,
