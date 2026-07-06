@@ -81,6 +81,7 @@ export {
   fetchReservasDoEstabelecimento,
   fetchReservaDoEstabelecimentoPorId,
   atualizarStatusReservaEstabelecimento,
+  registrarAuditoriaReservaEstabelecimento,
   type ReservaEstabelecimentoRow,
 } from "./reservas-estabelecimento";
 

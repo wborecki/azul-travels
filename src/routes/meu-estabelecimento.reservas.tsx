@@ -13,6 +13,18 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
   LogOut,
   Loader2,
   Calendar,
@@ -25,14 +37,26 @@ import {
   Search,
   List,
   CalendarDays,
+  Check,
+  X,
+  CheckCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import logo from "@/assets/logo-turismo-azul.svg";
-import { RESERVA_STATUS, RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
+import {
+  RESERVA_STATUS,
+  RESERVA_STATUS_LABEL,
+  podeTransicionarReserva,
+  mensagemTransicaoInvalida,
+  toReservaStatus,
+  type ReservaStatus,
+} from "@/lib/enums";
 import {
   fetchEstabelecimentoDoOwner,
   fetchReservasDoEstabelecimento,
+  atualizarStatusReservaEstabelecimento,
+  registrarAuditoriaReservaEstabelecimento,
   type EstabelecimentoDoOwner,
   type ReservaEstabelecimentoRow,
 } from "@/lib/queries";
@@ -81,6 +105,12 @@ function MeuEstabelecimentoReservasPage() {
   const [busca, setBusca] = useState("");
   const [visualizacao, setVisualizacao] = useState<"lista" | "calendario">("lista");
   const [selected, setSelected] = useState<ReservaEstabelecimentoRow | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    reserva: ReservaEstabelecimentoRow;
+    next: ReservaStatus;
+  } | null>(null);
+  const [observacao, setObservacao] = useState("");
+  const [savingAction, setSavingAction] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -136,6 +166,72 @@ function MeuEstabelecimentoReservasPage() {
     if (filtro === "todas") return reservasComBusca;
     return reservasComBusca.filter((r) => r.status === filtro);
   }, [reservasComBusca, filtro]);
+
+  const askAction = (reserva: ReservaEstabelecimentoRow, next: ReservaStatus) => {
+    setObservacao("");
+    setConfirmAction({ reserva, next });
+  };
+
+  const applyAction = async () => {
+    if (!confirmAction || !user) return;
+    const { reserva, next } = confirmAction;
+    const previous = toReservaStatus(reserva.status, "pendente");
+
+    if (next === "cancelada" && !observacao.trim()) return;
+
+    // Guarda no cliente - espelha a regra do banco e evita ida desnecessária.
+    if (!podeTransicionarReserva(previous, next)) {
+      const msg =
+        mensagemTransicaoInvalida({ message: "INVALID_STATUS_TRANSITION" }, previous, next) ??
+        "Transição de status inválida.";
+      toast.error("Transição não permitida", { description: msg });
+      return;
+    }
+
+    setSavingAction(true);
+    try {
+      await atualizarStatusReservaEstabelecimento(reserva.id, next);
+    } catch (err) {
+      setSavingAction(false);
+      const errObj = err as { message?: string; hint?: string; details?: string } | null;
+      const friendly = mensagemTransicaoInvalida(errObj, previous, next);
+      toast.error(friendly ? "Transição não permitida" : "Não foi possível atualizar", {
+        description: friendly ?? errObj?.message ?? undefined,
+      });
+      return;
+    }
+
+    const acaoLabel =
+      next === "confirmada"
+        ? "confirmar"
+        : next === "cancelada"
+          ? "recusar"
+          : next === "concluida"
+            ? "concluir"
+            : "atualizar";
+
+    try {
+      await registrarAuditoriaReservaEstabelecimento({
+        reservaId: reserva.id,
+        atorId: user.id,
+        atorEmail: user.email ?? null,
+        acao: acaoLabel,
+        statusAnterior: previous,
+        statusNovo: next,
+        observacao: observacao.trim() || null,
+      });
+      toast.success(`Reserva ${RESERVA_STATUS_LABEL[next].toLowerCase()}`);
+    } catch (err) {
+      toast.warning("Status atualizado, mas o log falhou", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
+
+    setSavingAction(false);
+    setReservas((rs) => rs.map((r) => (r.id === reserva.id ? { ...r, status: next } : r)));
+    setSelected((s) => (s && s.id === reserva.id ? { ...s, status: next } : s));
+    setConfirmAction(null);
+  };
 
   if (loading || carregando) {
     return (
@@ -291,19 +387,103 @@ function MeuEstabelecimentoReservasPage() {
 
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          {selected && <DetalheReserva reserva={selected} estab={estab} />}
+          {selected && (
+            <DetalheReserva
+              reserva={selected}
+              estab={estab}
+              onAction={(next) => askAction(selected, next)}
+            />
+          )}
         </SheetContent>
       </Sheet>
+
+      <AlertDialog
+        open={!!confirmAction}
+        onOpenChange={(o) => !o && !savingAction && setConfirmAction(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction ? `${verboLabel(confirmAction.next)} reserva?` : "Confirmar ação"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction && (
+                <>
+                  Esta ação atualizará o status para{" "}
+                  <strong>{RESERVA_STATUS_LABEL[confirmAction.next]}</strong> e ficará registrada no
+                  histórico da reserva.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="obs" className="text-sm">
+              {confirmAction?.next === "cancelada"
+                ? "Motivo da recusa (obrigatório)"
+                : "Observação (opcional)"}
+            </Label>
+            <Textarea
+              id="obs"
+              rows={3}
+              placeholder={
+                confirmAction?.next === "cancelada"
+                  ? "Explique à família por que não será possível receber a visita…"
+                  : "Ex: confirmado por telefone com a família…"
+              }
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={savingAction}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void applyAction();
+              }}
+              disabled={savingAction || (confirmAction?.next === "cancelada" && !observacao.trim())}
+              className={
+                confirmAction?.next === "cancelada"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+            >
+              {savingAction ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> Aplicando…
+                </>
+              ) : (
+                confirmAction && verboLabel(confirmAction.next)
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
+}
+
+function verboLabel(s: ReservaStatus) {
+  switch (s) {
+    case "confirmada":
+      return "Confirmar";
+    case "cancelada":
+      return "Recusar";
+    case "concluida":
+      return "Concluir";
+    default:
+      return "Atualizar";
+  }
 }
 
 function DetalheReserva({
   reserva,
   estab,
+  onAction,
 }: {
   reserva: ReservaEstabelecimentoRow;
   estab: EstabelecimentoDoOwner | null;
+  onAction: (next: ReservaStatus) => void;
 }) {
   const fam = reserva.familia_profiles;
   const perfilTea = reserva.perfil_tea;
@@ -329,7 +509,57 @@ function DetalheReserva({
       </SheetHeader>
 
       <div className="mt-6 space-y-5">
-        <section className="space-y-2">
+        {(reserva.status === "pendente" || reserva.status === "confirmada") && (
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Ações
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {reserva.status === "pendente" && (
+                <>
+                  <Button
+                    size="sm"
+                    className="bg-success text-success-foreground hover:bg-success/90"
+                    onClick={() => onAction("confirmada")}
+                  >
+                    <Check className="h-4 w-4 mr-1" /> Confirmar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive border-destructive/40 hover:bg-destructive/10"
+                    onClick={() => onAction("cancelada")}
+                  >
+                    <X className="h-4 w-4 mr-1" /> Recusar
+                  </Button>
+                </>
+              )}
+              {reserva.status === "confirmada" && (
+                <>
+                  <Button size="sm" onClick={() => onAction("concluida")}>
+                    <CheckCheck className="h-4 w-4 mr-1" /> Marcar como concluída
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive border-destructive/40 hover:bg-destructive/10"
+                    onClick={() => onAction("cancelada")}
+                  >
+                    <X className="h-4 w-4 mr-1" /> Recusar
+                  </Button>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+
+        <section
+          className={
+            reserva.status === "pendente" || reserva.status === "confirmada"
+              ? "space-y-2 border-t pt-4"
+              : "space-y-2"
+          }
+        >
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Estadia
           </h3>

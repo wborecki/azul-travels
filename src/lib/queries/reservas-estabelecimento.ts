@@ -60,3 +60,30 @@ export async function atualizarStatusReservaEstabelecimento(
   if (error) throw error;
   return data;
 }
+
+/**
+ * Registra a ação do dono do estabelecimento em `reservas_auditoria`.
+ * `ator_role` não é enviado - é recalculado por trigger a partir de
+ * fatos do banco (nunca confia no client).
+ */
+export async function registrarAuditoriaReservaEstabelecimento(params: {
+  reservaId: string;
+  atorId: string;
+  atorEmail: string | null;
+  acao: string;
+  statusAnterior: ReservaStatus;
+  statusNovo: ReservaStatus;
+  observacao: string | null;
+}): Promise<void> {
+  const { error } = await supabase.from("reservas_auditoria").insert({
+    reserva_id: params.reservaId,
+    ator_id: params.atorId,
+    ator_email: params.atorEmail,
+    acao: params.acao,
+    status_anterior: params.statusAnterior,
+    status_novo: params.statusNovo,
+    observacao: params.observacao,
+  });
+
+  if (error) throw error;
+}
