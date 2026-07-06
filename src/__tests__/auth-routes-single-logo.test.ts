@@ -79,7 +79,7 @@ describe("authenticated route layouts never mix two logo sources", () => {
   const LAYOUTS = [
     "src/routes/admin.tsx",
     "src/routes/minha-conta.tsx",
-    "src/routes/meu-estabelecimento.tsx",
+    "src/routes/meu-estabelecimento.index.tsx",
     "src/routes/minha-empresa.tsx",
   ];
 

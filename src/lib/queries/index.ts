@@ -22,6 +22,7 @@ export { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./ava
 export {
   fetchEstabelecimentoPorSlug,
   fetchEstabelecimentoDetalhe,
+  fetchEstabelecimentoDoOwner,
   fetchEstabelecimentosView,
   fetchEstabelecimentosViewPaginated,
   fetchEstabelecimentosCards, // deprecated alias
@@ -35,6 +36,7 @@ export {
   type EstabelecimentoFull,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
+  type EstabelecimentoDoOwner,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
   type EstabelecimentosViewPage,

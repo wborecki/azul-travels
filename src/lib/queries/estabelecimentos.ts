@@ -389,6 +389,26 @@ export async function fetchEstabelecimentoPorSlug(
   return data ? normalizeEstabelecimento(data) : null;
 }
 
+/** Campos mínimos que `/meu-estabelecimento` precisa do próprio local do dono. */
+export type EstabelecimentoDoOwner = Pick<
+  EstabelecimentoFull,
+  "id" | "nome" | "cidade" | "estado" | "selo_azul" | "status"
+>;
+
+/** Busca o estabelecimento vinculado ao dono logado (`owner_user_id`). */
+export async function fetchEstabelecimentoDoOwner(
+  ownerId: string,
+): Promise<EstabelecimentoDoOwner | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("id, nome, cidade, estado, selo_azul, status")
+    .eq("owner_user_id", ownerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 /**
  * Payload composto para a página de detalhe.
  *

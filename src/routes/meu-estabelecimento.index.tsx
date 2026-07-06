@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 
-export const Route = createFileRoute("/meu-estabelecimento")({
+export const Route = createFileRoute("/meu-estabelecimento/")({
   head: () => ({ meta: [{ title: "Meu estabelecimento · Turismo Azul" }] }),
   component: MeuEstabelecimentoPage,
 });
@@ -93,6 +93,7 @@ function MeuEstabelecimentoPage() {
   const [estabId, setEstabId] = useState<string | null>(null);
   const [nomeResp, setNomeResp] = useState<string | null>(null);
   const [seloAzul, setSeloAzul] = useState(false);
+  const [estabAtivo, setEstabAtivo] = useState(false);
   const [querSelo, setQuerSelo] = useState(false);
   const [querSeloEm, setQuerSeloEm] = useState<string | null>(null);
   const [solicitandoSelo, setSolicitandoSelo] = useState(false);
@@ -118,6 +119,7 @@ function MeuEstabelecimentoPage() {
       setNomeResp(prof?.nome_responsavel ?? null);
       setPerfilCompleto(prof?.perfil_completo ?? false);
       setSeloAzul(!!estab?.selo_azul);
+      setEstabAtivo(estab?.status === "ativo");
       setQuerSelo(!!estab?.quer_selo_azul);
       setQuerSeloEm(estab?.quer_selo_azul_em ?? null);
       setDraft({
@@ -248,6 +250,14 @@ function MeuEstabelecimentoPage() {
             >
               Meu Estabelecimento
             </button>
+            {seloAzul && estabAtivo && (
+              <Link
+                to="/meu-estabelecimento/reservas"
+                className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+              >
+                Reservas
+              </Link>
+            )}
             <button
               onClick={() => void signOut().then(() => navigate({ to: "/" }))}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
