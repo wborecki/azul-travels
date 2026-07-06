@@ -295,9 +295,7 @@ function AdminEstabelecimentoForm() {
       .like("slug", `${base}%`);
     if (error) throw error;
     const taken = new Set(
-      (data ?? [])
-        .filter((r) => (isNew ? true : r.id !== id))
-        .map((r) => r.slug),
+      (data ?? []).filter((r) => (isNew ? true : r.id !== id)).map((r) => r.slug),
     );
     if (!taken.has(base)) return base;
     for (let i = 2; i < 1000; i++) {
@@ -306,7 +304,6 @@ function AdminEstabelecimentoForm() {
     }
     return `${base}-${Date.now()}`;
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -816,16 +813,14 @@ function ToggleCard({
   badge: { icon: React.ReactNode; label: string; className: string };
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+    <label
+      className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition cursor-pointer ${
         checked ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"
       }`}
     >
       <Pill icon={badge.icon} label={badge.label} className={badge.className} />
       <Switch checked={checked} onCheckedChange={onChange} />
-    </button>
+    </label>
   );
 }
 
@@ -901,7 +896,7 @@ function GeocodeButton({
 }) {
   const [loading, setLoading] = useState(false);
 
-  const canSearch = (endereco?.trim() || cidade?.trim() || cep?.trim()) ? true : false;
+  const canSearch = endereco?.trim() || cidade?.trim() || cep?.trim() ? true : false;
 
   const handleSearch = async () => {
     if (!canSearch) {
@@ -950,8 +945,8 @@ function GeocodeButton({
   return (
     <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-2.5">
       <div className="text-xs text-muted-foreground">
-        Use os campos de endereço acima para buscar automaticamente a latitude e longitude.
-        Depois confira o pino no mapa.
+        Use os campos de endereço acima para buscar automaticamente a latitude e longitude. Depois
+        confira o pino no mapa.
       </div>
       <Button
         type="button"
@@ -1146,9 +1141,7 @@ function FotosGaleria({ value, onChange }: { value: string[]; onChange: (v: stri
                 }}
                 className={`relative group aspect-square rounded-xl overflow-hidden border bg-muted transition ${
                   isCapa ? "ring-2 ring-amarelo ring-offset-2 ring-offset-background" : ""
-                } ${isDragging ? "opacity-40" : ""} ${
-                  isOver ? "scale-[1.02] border-primary" : ""
-                }`}
+                } ${isDragging ? "opacity-40" : ""} ${isOver ? "scale-[1.02] border-primary" : ""}`}
               >
                 <img
                   src={url}

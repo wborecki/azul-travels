@@ -157,7 +157,6 @@ function MeuEstabelecimentoPage() {
     toast.success("Interesse registrado! Nossa equipe entrará em contato.");
   }
 
-
   function set<K extends keyof PerfilDraft>(k: K, v: PerfilDraft[K]) {
     setDraft((d) => ({ ...d, [k]: v }));
   }
@@ -369,9 +368,7 @@ function Dashboard({
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
               <Building2 className="h-5 w-5" />
             </div>
-            <h2 className="font-display font-bold text-base text-primary">
-              Perfil do local
-            </h2>
+            <h2 className="font-display font-bold text-base text-primary">Perfil do local</h2>
           </div>
           {perfilCompleto ? (
             <>
@@ -412,9 +409,7 @@ function Dashboard({
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <h2 className="font-display font-bold text-base text-primary">
-              Selo Azul
-            </h2>
+            <h2 className="font-display font-bold text-base text-primary">Selo Azul</h2>
           </div>
           {seloAzul ? (
             <>
@@ -500,15 +495,10 @@ function Dashboard({
       </div>
 
       {/* Timeline horizontal - O que vem pela frente */}
-      <TimelineFluxo
-        perfilCompleto={perfilCompleto}
-        querSelo={querSelo}
-        seloAzul={seloAzul}
-      />
+      <TimelineFluxo perfilCompleto={perfilCompleto} querSelo={querSelo} seloAzul={seloAzul} />
     </div>
   );
 }
-
 
 function FormularioPerfil({
   draft,
@@ -537,14 +527,16 @@ function FormularioPerfil({
       </button>
 
       <div className="bg-white border rounded-2xl p-6 md:p-8 space-y-6">
-        <h1 className="text-2xl font-display font-bold text-primary">
-          Perfil do estabelecimento
-        </h1>
+        <h1 className="text-2xl font-display font-bold text-primary">Perfil do estabelecimento</h1>
 
         {/* Seção 1 */}
         <Secao titulo="1. Informações básicas">
           <Field label="Nome do estabelecimento" required>
-            <Input value={draft.nome} onChange={(e) => set("nome", e.target.value)} maxLength={120} />
+            <Input
+              value={draft.nome}
+              onChange={(e) => set("nome", e.target.value)}
+              maxLength={120}
+            />
           </Field>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Tipo" required>
@@ -577,11 +569,19 @@ function FormularioPerfil({
             </Field>
           </div>
           <Field label="Endereço completo">
-            <Input value={draft.endereco} onChange={(e) => set("endereco", e.target.value)} maxLength={200} />
+            <Input
+              value={draft.endereco}
+              onChange={(e) => set("endereco", e.target.value)}
+              maxLength={200}
+            />
           </Field>
           <div className="grid sm:grid-cols-[1fr_120px] gap-4">
             <Field label="Cidade" required>
-              <Input value={draft.cidade} onChange={(e) => set("cidade", e.target.value)} maxLength={80} />
+              <Input
+                value={draft.cidade}
+                onChange={(e) => set("cidade", e.target.value)}
+                maxLength={80}
+              />
             </Field>
             <Field label="Estado (UF)" required>
               <Input
@@ -610,7 +610,8 @@ function FormularioPerfil({
               <span className="text-sm">
                 <span className="font-medium">Recebe grupos escolares com alunos TEA</span>
                 <span className="block text-xs text-muted-foreground mt-0.5">
-                  Se marcado, exibimos um selo discreto na sua ficha pública para famílias e escolas.
+                  Se marcado, exibimos um selo discreto na sua ficha pública para famílias e
+                  escolas.
                 </span>
               </span>
             </label>
@@ -626,10 +627,7 @@ function FormularioPerfil({
                 key={k}
                 className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm cursor-pointer hover:bg-azul-claro/30"
               >
-                <Checkbox
-                  checked={!!draft.estrutura[k]}
-                  onCheckedChange={() => togEstrutura(k)}
-                />
+                <Checkbox checked={!!draft.estrutura[k]} onCheckedChange={() => togEstrutura(k)} />
                 <span>{label}</span>
               </label>
             ))}
@@ -818,9 +816,7 @@ function TimelineFluxo({
   return (
     <div className="bg-white border rounded-2xl p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="font-display font-bold text-lg text-primary">
-          O que vem pela frente
-        </h3>
+        <h3 className="font-display font-bold text-lg text-primary">O que vem pela frente</h3>
         <span className="text-xs text-foreground/60">
           Etapa {activeIdx + 1} de {steps.length}
         </span>
@@ -866,14 +862,16 @@ function TimelineFluxo({
                     <div
                       className={[
                         "text-sm font-semibold",
-                        isActive ? "text-primary" : isDone ? "text-foreground" : "text-foreground/60",
+                        isActive
+                          ? "text-primary"
+                          : isDone
+                            ? "text-foreground"
+                            : "text-foreground/60",
                       ].join(" ")}
                     >
                       {s.title}
                     </div>
-                    <div className="text-xs text-foreground/60 mt-1 leading-snug">
-                      {s.desc}
-                    </div>
+                    <div className="text-xs text-foreground/60 mt-1 leading-snug">{s.desc}</div>
                     {isActive && (
                       <span className="inline-block mt-2 text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                         Etapa atual
@@ -914,7 +912,9 @@ function TimelineFluxo({
                   )}
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={`w-0.5 flex-1 mt-1 ${isDone ? "bg-[#c9a84c]" : "bg-slate-200"}`} />
+                  <div
+                    className={`w-0.5 flex-1 mt-1 ${isDone ? "bg-[#c9a84c]" : "bg-slate-200"}`}
+                  />
                 )}
               </div>
               <div className="pb-2">
