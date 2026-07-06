@@ -74,6 +74,14 @@ export {
   type PerfilOption,
 } from "./perfis";
 
+// Camada do estabelecimento - reservas recebidas pelo local (dono).
+export {
+  fetchReservasDoEstabelecimento,
+  fetchReservaDoEstabelecimentoPorId,
+  atualizarStatusReservaEstabelecimento,
+  type ReservaEstabelecimentoRow,
+} from "./reservas-estabelecimento";
+
 // Mapeadores Row → ViewModel - fonte única de derivações para a UI.
 export {
   mapAvaliacao,
