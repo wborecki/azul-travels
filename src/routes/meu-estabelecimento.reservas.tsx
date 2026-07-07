@@ -248,7 +248,7 @@ function MeuEstabelecimentoReservasPage() {
     setConfirmAction(null);
   };
 
-  if (loading || carregando) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
@@ -296,6 +296,12 @@ function MeuEstabelecimentoReservasPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl space-y-6">
+       {carregando ? (
+        <div className="flex items-center justify-center py-24 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+        </div>
+       ) : (
+        <>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display font-bold text-2xl text-primary">Reservas recebidas</h1>
@@ -409,6 +415,8 @@ function MeuEstabelecimentoReservasPage() {
             )}
           </>
         )}
+        </>
+       )}
       </main>
       <Footer />
 

@@ -217,7 +217,7 @@ function MeuEstabelecimentoPage() {
     toast.success("Perfil salvo!");
   }
 
-  if (loading || carregando) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
@@ -239,18 +239,9 @@ function MeuEstabelecimentoPage() {
             </span>
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2 text-sm">
-            <button
-              onClick={() => setEditando(false)}
-              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              Meu Perfil
-            </button>
-            <button
-              onClick={() => setEditando(true)}
-              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
+            <span className="px-3 py-2 rounded-lg font-semibold text-primary bg-azul-claro">
               Meu Estabelecimento
-            </button>
+            </span>
             {seloAzul && estabAtivo && (
               <>
                 <Link
@@ -284,7 +275,11 @@ function MeuEstabelecimentoPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        {editando ? (
+        {carregando ? (
+          <div className="flex items-center justify-center py-24 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+          </div>
+        ) : editando ? (
           <FormularioPerfil
             draft={draft}
             set={set}

@@ -43,7 +43,7 @@ function NovoItemPage() {
     })();
   }, [user, loading, role, pathname, navigate]);
 
-  if (loading || carregando || !estab) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
@@ -55,7 +55,13 @@ function NovoItemPage() {
     <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
       <EstabelecimentoHeader ativa="itens" />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} />
+        {carregando || !estab ? (
+          <div className="flex items-center justify-center py-24 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+          </div>
+        ) : (
+          <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} />
+        )}
       </main>
       <Footer />
     </div>

@@ -66,21 +66,10 @@ function EditarItemPage() {
     })();
   }, [user, loading, role, pathname, navigate, id]);
 
-  if (loading || carregando || !estab) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
-      </div>
-    );
-  }
-
-  if (!item) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground">
-        <p>Quarto não encontrado.</p>
-        <Button asChild>
-          <Link to="/meu-estabelecimento/itens">Voltar</Link>
-        </Button>
       </div>
     );
   }
@@ -89,7 +78,20 @@ function EditarItemPage() {
     <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
       <EstabelecimentoHeader ativa="itens" />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} itemExistente={item} />
+        {carregando || !estab ? (
+          <div className="flex items-center justify-center py-24 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+          </div>
+        ) : !item ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-24 text-muted-foreground">
+            <p>Quarto não encontrado.</p>
+            <Button asChild>
+              <Link to="/meu-estabelecimento/itens">Voltar</Link>
+            </Button>
+          </div>
+        ) : (
+          <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} itemExistente={item} />
+        )}
       </main>
       <Footer />
     </div>

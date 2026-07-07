@@ -187,7 +187,7 @@ function MeuEstabelecimentoMensagensPage() {
     [reservas, selectedId],
   );
 
-  if (loading || carregando) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
@@ -234,6 +234,11 @@ function MeuEstabelecimentoMensagensPage() {
         </div>
       </header>
 
+      {carregando ? (
+        <div className="flex-1 min-h-0 flex items-center justify-center text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+        </div>
+      ) : (
       <div className="flex-1 min-h-0 flex">
         <aside
           className={cn(
@@ -454,6 +459,7 @@ function MeuEstabelecimentoMensagensPage() {
           </aside>
         )}
       </div>
+      )}
     </div>
   );
 }
