@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
+import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
 
 export const Route = createFileRoute("/meu-estabelecimento/")({
   head: () => ({ meta: [{ title: "Meu estabelecimento · Turismo Azul" }] }),
@@ -285,6 +286,8 @@ function MeuEstabelecimentoPage() {
             onSave={salvar}
             salvando={salvando}
           />
+        ) : seloAzul && estabAtivo && estabId ? (
+          <PainelOperacional estabId={estabId} />
         ) : (
           <Dashboard
             perfilCompleto={perfilCompleto}

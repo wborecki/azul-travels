@@ -41,11 +41,19 @@ import {
 import { StatusBadge, STATUS_DOT_CLASS } from "@/components/estabelecimento/StatusBadge";
 import { ReservaChat } from "@/components/ReservaChat";
 
+type Filtro = "todas" | "nao_lidas" | "nao_respondidas";
+
+const FILTROS_VALIDOS = new Set<Filtro>(["todas", "nao_lidas", "nao_respondidas"]);
+
 export const Route = createFileRoute("/meu-estabelecimento/mensagens")({
   head: () => ({ meta: [{ title: "Mensagens · Turismo Azul" }] }),
-  validateSearch: (s: Record<string, unknown>): { reserva?: string } => {
+  validateSearch: (s: Record<string, unknown>): { reserva?: string; aba?: Filtro } => {
     const reserva = typeof s.reserva === "string" ? s.reserva : undefined;
-    return reserva ? { reserva } : {};
+    const aba =
+      typeof s.aba === "string" && FILTROS_VALIDOS.has(s.aba as Filtro)
+        ? (s.aba as Filtro)
+        : undefined;
+    return { ...(reserva ? { reserva } : {}), ...(aba ? { aba } : {}) };
   },
   component: MeuEstabelecimentoMensagensPage,
 });
@@ -68,7 +76,7 @@ function MeuEstabelecimentoMensagensPage() {
   const { user, loading, signOut, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { reserva: reservaIdBusca } = Route.useSearch();
+  const { reserva: reservaIdBusca, aba } = Route.useSearch();
 
   const [carregando, setCarregando] = useState(true);
   const [reservas, setReservas] = useState<ReservaEstabelecimentoRow[]>([]);
@@ -77,7 +85,7 @@ function MeuEstabelecimentoMensagensPage() {
   );
   const [naoLidas, setNaoLidas] = useState<Map<string, number>>(new Map());
   const [busca, setBusca] = useState("");
-  const [apenasNaoLidas, setApenasNaoLidas] = useState(false);
+  const [filtro, setFiltro] = useState<Filtro>(aba ?? "todas");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preSelecionou, setPreSelecionou] = useState(false);
   const selectedIdRef = useRef(selectedId);
@@ -157,14 +165,22 @@ function MeuEstabelecimentoMensagensPage() {
       .filter((r) =>
         termo ? (r.familia_profiles?.nome_responsavel ?? "").toLowerCase().includes(termo) : true,
       )
-      .filter((r) => (apenasNaoLidas ? (naoLidas.get(r.id) ?? 0) > 0 : true))
+      .filter((r) => {
+        if (filtro === "nao_lidas") return (naoLidas.get(r.id) ?? 0) > 0;
+        if (filtro === "nao_respondidas") {
+          return (
+            !ENCERRADA.has(r.status ?? "") && ultimasMensagens.get(r.id)?.autor_role === "user"
+          );
+        }
+        return true;
+      })
       .slice()
       .sort((a, b) => {
         const ta = ultimasMensagens.get(a.id)?.criado_em ?? a.criado_em;
         const tb = ultimasMensagens.get(b.id)?.criado_em ?? b.criado_em;
         return new Date(tb).getTime() - new Date(ta).getTime();
       });
-  }, [reservas, busca, apenasNaoLidas, naoLidas, ultimasMensagens]);
+  }, [reservas, busca, filtro, naoLidas, ultimasMensagens]);
 
   const selected = useMemo(
     () => reservas.find((r) => r.id === selectedId) ?? null,
@@ -230,12 +246,12 @@ function MeuEstabelecimentoMensagensPage() {
                 className="pl-9 h-9 bg-muted/40 border-transparent"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setApenasNaoLidas(false)}
+                onClick={() => setFiltro("todas")}
                 className={cn(
                   "px-3 py-1 rounded-full text-xs font-medium transition",
-                  !apenasNaoLidas
+                  filtro === "todas"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground/60 hover:bg-muted/70",
                 )}
@@ -243,15 +259,26 @@ function MeuEstabelecimentoMensagensPage() {
                 Todas
               </button>
               <button
-                onClick={() => setApenasNaoLidas(true)}
+                onClick={() => setFiltro("nao_lidas")}
                 className={cn(
                   "px-3 py-1 rounded-full text-xs font-medium transition",
-                  apenasNaoLidas
+                  filtro === "nao_lidas"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground/60 hover:bg-muted/70",
                 )}
               >
                 Não lidas
+              </button>
+              <button
+                onClick={() => setFiltro("nao_respondidas")}
+                className={cn(
+                  "px-3 py-1 rounded-full text-xs font-medium transition",
+                  filtro === "nao_respondidas"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground/60 hover:bg-muted/70",
+                )}
+              >
+                Não respondidas
               </button>
             </div>
           </div>
