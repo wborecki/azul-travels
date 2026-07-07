@@ -85,26 +85,26 @@ export {
   type ReservaEstabelecimentoRow,
 } from "./reservas-estabelecimento";
 
-// Opções de reserva do estabelecimento (quarto de hotel) - Fase 1.
+// Itens reserváveis do estabelecimento (quarto de hotel) - Fase 1.
 export {
-  fetchOpcoesDoEstabelecimento,
-  fetchOpcaoReservaPorId,
-  criarOpcaoReserva,
-  atualizarOpcaoReserva,
-  excluirOpcaoReserva,
-  type OpcaoReserva,
-  type OpcaoReservaInsert,
-  type OpcaoReservaUpdate,
-} from "./opcoes-reserva";
+  fetchItensDoEstabelecimento,
+  fetchItemReservavelPorId,
+  criarItemReservavel,
+  atualizarItemReservavel,
+  excluirItemReservavel,
+  type ItemReservavel,
+  type ItemReservavelInsert,
+  type ItemReservavelUpdate,
+} from "./itens-reservaveis";
 
-// Períodos em que uma opção fica manualmente indisponível (manutenção etc.).
+// Períodos em que um item reservável fica manualmente indisponível (manutenção etc.).
 export {
-  fetchBloqueiosDaOpcao,
-  criarOpcaoBloqueio,
-  excluirOpcaoBloqueio,
-  type OpcaoBloqueio,
-  type OpcaoBloqueioInsert,
-} from "./opcao-bloqueios";
+  fetchBloqueiosDoItem,
+  criarItemReservavelBloqueio,
+  excluirItemReservavelBloqueio,
+  type ItemReservavelBloqueio,
+  type ItemReservavelBloqueioInsert,
+} from "./item-reservavel-bloqueios";
 
 // Thread de mensagens por reserva (estabelecimento ↔ família) - Fase 3.
 export {

@@ -7,19 +7,19 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchEstabelecimentoDoOwner,
-  fetchOpcaoReservaPorId,
+  fetchItemReservavelPorId,
   type EstabelecimentoDoOwner,
-  type OpcaoReserva,
+  type ItemReservavel,
 } from "@/lib/queries";
 import { EstabelecimentoHeader } from "@/components/estabelecimento/EstabelecimentoHeader";
-import { OpcaoReservaFormulario } from "@/components/estabelecimento/OpcaoReservaFormulario";
+import { ItemReservavelFormulario } from "@/components/estabelecimento/ItemReservavelFormulario";
 
-export const Route = createFileRoute("/meu-estabelecimento/opcoes/$id")({
+export const Route = createFileRoute("/meu-estabelecimento/itens/$id")({
   head: () => ({ meta: [{ title: "Editar quarto · Turismo Azul" }] }),
-  component: EditarOpcaoPage,
+  component: EditarItemPage,
 });
 
-function EditarOpcaoPage() {
+function EditarItemPage() {
   const { id } = Route.useParams();
   const { user, loading, role } = useAuth();
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ function EditarOpcaoPage() {
 
   const [carregando, setCarregando] = useState(true);
   const [estab, setEstab] = useState<EstabelecimentoDoOwner | null>(null);
-  const [opcao, setOpcao] = useState<OpcaoReserva | null>(null);
+  const [item, setItem] = useState<ItemReservavel | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -49,13 +49,13 @@ function EditarOpcaoPage() {
       setEstab(estabRow);
 
       try {
-        const data = await fetchOpcaoReservaPorId(id);
+        const data = await fetchItemReservavelPorId(id);
         if (!data || data.estabelecimento_id !== estabRow.id) {
           toast.error("Quarto não encontrado.");
-          navigate({ to: "/meu-estabelecimento/opcoes" });
+          navigate({ to: "/meu-estabelecimento/itens" });
           return;
         }
-        setOpcao(data);
+        setItem(data);
       } catch (err) {
         toast.error("Erro ao carregar quarto", {
           description: err instanceof Error ? err.message : undefined,
@@ -74,12 +74,12 @@ function EditarOpcaoPage() {
     );
   }
 
-  if (!opcao) {
+  if (!item) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground">
         <p>Quarto não encontrado.</p>
         <Button asChild>
-          <Link to="/meu-estabelecimento/opcoes">Voltar</Link>
+          <Link to="/meu-estabelecimento/itens">Voltar</Link>
         </Button>
       </div>
     );
@@ -87,9 +87,9 @@ function EditarOpcaoPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
-      <EstabelecimentoHeader ativa="opcoes" />
+      <EstabelecimentoHeader ativa="itens" />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        <OpcaoReservaFormulario estabId={estab.id} estabEndereco={estab} opcaoExistente={opcao} />
+        <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} itemExistente={item} />
       </main>
       <Footer />
     </div>

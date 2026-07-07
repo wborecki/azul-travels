@@ -1,4 +1,4 @@
-ALTER TABLE public.opcoes_reserva
+ALTER TABLE public.itens_reservaveis
   ADD COLUMN usa_endereco_proprio boolean NOT NULL DEFAULT false,
   ADD COLUMN endereco text,
   ADD COLUMN cidade text,

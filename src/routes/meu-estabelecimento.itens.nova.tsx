@@ -6,14 +6,14 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchEstabelecimentoDoOwner, type EstabelecimentoDoOwner } from "@/lib/queries";
 import { EstabelecimentoHeader } from "@/components/estabelecimento/EstabelecimentoHeader";
-import { OpcaoReservaFormulario } from "@/components/estabelecimento/OpcaoReservaFormulario";
+import { ItemReservavelFormulario } from "@/components/estabelecimento/ItemReservavelFormulario";
 
-export const Route = createFileRoute("/meu-estabelecimento/opcoes/nova")({
+export const Route = createFileRoute("/meu-estabelecimento/itens/nova")({
   head: () => ({ meta: [{ title: "Novo quarto · Turismo Azul" }] }),
-  component: NovaOpcaoPage,
+  component: NovoItemPage,
 });
 
-function NovaOpcaoPage() {
+function NovoItemPage() {
   const { user, loading, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -53,9 +53,9 @@ function NovaOpcaoPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
-      <EstabelecimentoHeader ativa="opcoes" />
+      <EstabelecimentoHeader ativa="itens" />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        <OpcaoReservaFormulario estabId={estab.id} estabEndereco={estab} />
+        <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} />
       </main>
       <Footer />
     </div>

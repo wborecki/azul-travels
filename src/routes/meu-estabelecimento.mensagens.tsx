@@ -219,7 +219,7 @@ function MeuEstabelecimentoMensagensPage() {
               Mensagens
             </span>
             <Link
-              to="/meu-estabelecimento/opcoes"
+              to="/meu-estabelecimento/itens"
               className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
             >
               Quartos

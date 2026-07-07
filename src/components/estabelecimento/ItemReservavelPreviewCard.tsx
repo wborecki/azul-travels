@@ -1,8 +1,8 @@
 import { ImageOff, Users, Baby, MapPin, BedDouble, Clock } from "lucide-react";
 import { MarkdownView } from "@/components/MarkdownView";
-import { COMODIDADE_POR_KEY } from "@/lib/opcoes-comodidades";
+import { COMODIDADE_POR_KEY } from "@/lib/itens-comodidades";
 
-interface OpcaoPreviewCardProps {
+interface ItemReservavelPreviewCardProps {
   nome: string;
   descricao: string;
   preco: number | null;
@@ -23,7 +23,7 @@ function formatPreco(preco: number | null): string {
   return `${preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} / noite`;
 }
 
-export function OpcaoPreviewCard({
+export function ItemReservavelPreviewCard({
   nome,
   descricao,
   preco,
@@ -37,7 +37,7 @@ export function OpcaoPreviewCard({
   checkOutPadrao,
   imagens,
   localResumo,
-}: OpcaoPreviewCardProps) {
+}: ItemReservavelPreviewCardProps) {
   const capa = imagens[0];
   const miniaturas = imagens.slice(1, 5);
   const temDetalhePorCategoria = capacidadeAdultos !== null || capacidadeCriancas !== null;

@@ -3,12 +3,12 @@ import { LogOut } from "lucide-react";
 import logo from "@/assets/logo-turismo-azul.svg";
 import { useAuth } from "@/hooks/useAuth";
 
-type Aba = "reservas" | "mensagens" | "opcoes";
+type Aba = "reservas" | "mensagens" | "itens";
 
 const ITENS: ReadonlyArray<{ key: Aba; label: string; to: string }> = [
   { key: "reservas", label: "Reservas", to: "/meu-estabelecimento/reservas" },
   { key: "mensagens", label: "Mensagens", to: "/meu-estabelecimento/mensagens" },
-  { key: "opcoes", label: "Quartos", to: "/meu-estabelecimento/opcoes" },
+  { key: "itens", label: "Quartos", to: "/meu-estabelecimento/itens" },
 ];
 
 export function EstabelecimentoHeader({ ativa }: { ativa: Aba }) {

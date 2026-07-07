@@ -757,39 +757,39 @@ export type Database = {
         }
         Relationships: []
       }
-      opcao_bloqueios: {
+      item_reservavel_bloqueios: {
         Row: {
           criado_em: string
           fim: string
           id: string
           inicio: string
-          opcao_reserva_id: string
+          item_reservavel_id: string
         }
         Insert: {
           criado_em?: string
           fim: string
           id?: string
           inicio: string
-          opcao_reserva_id: string
+          item_reservavel_id: string
         }
         Update: {
           criado_em?: string
           fim?: string
           id?: string
           inicio?: string
-          opcao_reserva_id?: string
+          item_reservavel_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "opcao_bloqueios_opcao_reserva_id_fkey"
-            columns: ["opcao_reserva_id"]
+            foreignKeyName: "item_reservavel_bloqueios_item_reservavel_id_fkey"
+            columns: ["item_reservavel_id"]
             isOneToOne: false
-            referencedRelation: "opcoes_reserva"
+            referencedRelation: "itens_reservaveis"
             referencedColumns: ["id"]
           },
         ]
       }
-      opcoes_reserva: {
+      itens_reservaveis: {
         Row: {
           ativo: boolean
           capacidade_adultos: number | null
@@ -864,7 +864,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "opcoes_reserva_estabelecimento_id_fkey"
+            foreignKeyName: "itens_reservaveis_estabelecimento_id_fkey"
             columns: ["estabelecimento_id"]
             isOneToOne: false
             referencedRelation: "estabelecimentos"
@@ -1413,7 +1413,7 @@ export type Database = {
           num_autistas: number | null
           objetivo: string | null
           objetivo_viagem: string[]
-          opcao_reserva_id: string
+          item_reservavel_id: string
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
           perfil_tea_id: string | null
@@ -1438,7 +1438,7 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
-          opcao_reserva_id: string
+          item_reservavel_id: string
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           perfil_tea_id?: string | null
@@ -1463,7 +1463,7 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
-          opcao_reserva_id?: string
+          item_reservavel_id?: string
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           perfil_tea_id?: string | null
@@ -1487,10 +1487,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reservas_opcao_reserva_id_fkey"
-            columns: ["opcao_reserva_id"]
+            foreignKeyName: "reservas_item_reservavel_id_fkey"
+            columns: ["item_reservavel_id"]
             isOneToOne: false
-            referencedRelation: "opcoes_reserva"
+            referencedRelation: "itens_reservaveis"
             referencedColumns: ["id"]
           },
           {

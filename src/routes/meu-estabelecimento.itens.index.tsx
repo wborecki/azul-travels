@@ -18,16 +18,16 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   fetchEstabelecimentoDoOwner,
-  fetchOpcoesDoEstabelecimento,
-  atualizarOpcaoReserva,
-  excluirOpcaoReserva,
-  type OpcaoReserva,
+  fetchItensDoEstabelecimento,
+  atualizarItemReservavel,
+  excluirItemReservavel,
+  type ItemReservavel,
 } from "@/lib/queries";
 import { EstabelecimentoHeader } from "@/components/estabelecimento/EstabelecimentoHeader";
 
-export const Route = createFileRoute("/meu-estabelecimento/opcoes/")({
+export const Route = createFileRoute("/meu-estabelecimento/itens/")({
   head: () => ({ meta: [{ title: "Quartos · Turismo Azul" }] }),
-  component: MeuEstabelecimentoOpcoesPage,
+  component: MeuEstabelecimentoItensPage,
 });
 
 function formatPreco(preco: number): string {
@@ -36,20 +36,20 @@ function formatPreco(preco: number): string {
 
 function mensagemErroExclusao(err: unknown): string | undefined {
   const blob = err instanceof Error ? err.message : "";
-  if (blob.includes("OPCAO_COM_RESERVAS_ATIVAS")) {
+  if (blob.includes("ITEM_COM_RESERVAS_ATIVAS")) {
     return "Este quarto tem reservas em andamento - pause em vez de excluir.";
   }
   return err instanceof Error ? err.message : undefined;
 }
 
-function MeuEstabelecimentoOpcoesPage() {
+function MeuEstabelecimentoItensPage() {
   const { user, loading, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const [carregando, setCarregando] = useState(true);
-  const [opcoes, setOpcoes] = useState<OpcaoReserva[]>([]);
-  const [excluir, setExcluir] = useState<OpcaoReserva | null>(null);
+  const [itens, setItens] = useState<ItemReservavel[]>([]);
+  const [excluir, setExcluir] = useState<ItemReservavel | null>(null);
   const [excluindo, setExcluindo] = useState(false);
   const [pausandoId, setPausandoId] = useState<string | null>(null);
 
@@ -73,8 +73,8 @@ function MeuEstabelecimentoOpcoesPage() {
       }
 
       try {
-        const data = await fetchOpcoesDoEstabelecimento(estabRow.id);
-        setOpcoes(data);
+        const data = await fetchItensDoEstabelecimento(estabRow.id);
+        setItens(data);
       } catch (err) {
         toast.error("Erro ao carregar quartos", {
           description: err instanceof Error ? err.message : undefined,
@@ -85,12 +85,12 @@ function MeuEstabelecimentoOpcoesPage() {
     })();
   }, [user, loading, role, pathname, navigate]);
 
-  const alternarAtivo = async (opcao: OpcaoReserva) => {
-    setPausandoId(opcao.id);
+  const alternarAtivo = async (item: ItemReservavel) => {
+    setPausandoId(item.id);
     try {
-      const atualizada = await atualizarOpcaoReserva(opcao.id, { ativo: !opcao.ativo });
-      setOpcoes((ops) => ops.map((o) => (o.id === atualizada.id ? atualizada : o)));
-      toast.success(atualizada.ativo ? "Quarto reativado" : "Quarto pausado");
+      const atualizado = await atualizarItemReservavel(item.id, { ativo: !item.ativo });
+      setItens((its) => its.map((i) => (i.id === atualizado.id ? atualizado : i)));
+      toast.success(atualizado.ativo ? "Quarto reativado" : "Quarto pausado");
     } catch (err) {
       toast.error("Não foi possível atualizar", {
         description: err instanceof Error ? err.message : undefined,
@@ -104,8 +104,8 @@ function MeuEstabelecimentoOpcoesPage() {
     if (!excluir) return;
     setExcluindo(true);
     try {
-      await excluirOpcaoReserva(excluir.id);
-      setOpcoes((ops) => ops.filter((o) => o.id !== excluir.id));
+      await excluirItemReservavel(excluir.id);
+      setItens((its) => its.filter((i) => i.id !== excluir.id));
       toast.success("Quarto excluído");
       setExcluir(null);
     } catch (err) {
@@ -115,9 +115,9 @@ function MeuEstabelecimentoOpcoesPage() {
     }
   };
 
-  const ordenadas = useMemo(
-    () => opcoes.slice().sort((a, b) => Number(b.ativo) - Number(a.ativo)),
-    [opcoes],
+  const ordenados = useMemo(
+    () => itens.slice().sort((a, b) => Number(b.ativo) - Number(a.ativo)),
+    [itens],
   );
 
   if (loading || carregando) {
@@ -130,7 +130,7 @@ function MeuEstabelecimentoOpcoesPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
-      <EstabelecimentoHeader ativa="opcoes" />
+      <EstabelecimentoHeader ativa="itens" />
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -142,74 +142,74 @@ function MeuEstabelecimentoOpcoesPage() {
             </p>
           </div>
           <Button asChild className="bg-secondary hover:bg-secondary/90 text-white">
-            <Link to="/meu-estabelecimento/opcoes/nova">
+            <Link to="/meu-estabelecimento/itens/nova">
               <Plus className="h-4 w-4 mr-1.5" /> Novo quarto
             </Link>
           </Button>
         </div>
 
-        {ordenadas.length === 0 ? (
+        {ordenados.length === 0 ? (
           <div className="bg-white border rounded-2xl p-8 text-center text-foreground/60">
             Nenhum quarto cadastrado ainda. Crie o primeiro para começar a receber reservas.
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ordenadas.map((opcao) => {
-              const capa = Array.isArray(opcao.imagens) ? (opcao.imagens as string[])[0] : null;
+            {ordenados.map((item) => {
+              const capa = Array.isArray(item.imagens) ? (item.imagens as string[])[0] : null;
               return (
                 <div
-                  key={opcao.id}
+                  key={item.id}
                   className={cn(
                     "bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col",
-                    !opcao.ativo && "opacity-60",
+                    !item.ativo && "opacity-60",
                   )}
                 >
                   <div className="h-36 bg-muted flex items-center justify-center">
                     {capa ? (
-                      <img src={capa} alt={opcao.nome} className="w-full h-full object-cover" />
+                      <img src={capa} alt={item.nome} className="w-full h-full object-cover" />
                     ) : (
                       <ImageOff className="h-8 w-8 text-foreground/30" />
                     )}
                   </div>
                   <div className="p-4 flex flex-col gap-2 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display font-bold text-foreground">{opcao.nome}</h3>
+                      <h3 className="font-display font-bold text-foreground">{item.nome}</h3>
                       <span
                         className={cn(
                           "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",
-                          opcao.ativo
+                          item.ativo
                             ? "bg-success/15 text-success"
                             : "bg-muted text-muted-foreground",
                         )}
                       >
-                        {opcao.ativo ? "Ativa" : "Pausada"}
+                        {item.ativo ? "Ativa" : "Pausada"}
                       </span>
                     </div>
-                    {opcao.descricao && (
-                      <p className="text-xs text-foreground/60 line-clamp-2">{opcao.descricao}</p>
+                    {item.descricao && (
+                      <p className="text-xs text-foreground/60 line-clamp-2">{item.descricao}</p>
                     )}
                     <div className="mt-1 flex items-center justify-between text-sm">
-                      <span className="font-semibold text-primary">{formatPreco(opcao.preco)}</span>
+                      <span className="font-semibold text-primary">{formatPreco(item.preco)}</span>
                       <span className="inline-flex items-center gap-1 text-foreground/60">
-                        <Users className="h-3.5 w-3.5" /> {opcao.quantidade}
+                        <Users className="h-3.5 w-3.5" /> {item.quantidade}
                       </span>
                     </div>
                     <div className="mt-auto pt-3 flex items-center gap-2">
                       <Button asChild size="sm" variant="outline" className="flex-1">
-                        <Link to="/meu-estabelecimento/opcoes/$id" params={{ id: opcao.id }}>
+                        <Link to="/meu-estabelecimento/itens/$id" params={{ id: item.id }}>
                           <Pencil className="h-3.5 w-3.5 mr-1" /> Editar
                         </Link>
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => void alternarAtivo(opcao)}
-                        disabled={pausandoId === opcao.id}
-                        aria-label={opcao.ativo ? "Pausar quarto" : "Reativar quarto"}
+                        onClick={() => void alternarAtivo(item)}
+                        disabled={pausandoId === item.id}
+                        aria-label={item.ativo ? "Pausar quarto" : "Reativar quarto"}
                       >
-                        {pausandoId === opcao.id ? (
+                        {pausandoId === item.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : opcao.ativo ? (
+                        ) : item.ativo ? (
                           <Pause className="h-3.5 w-3.5" />
                         ) : (
                           <Play className="h-3.5 w-3.5" />
@@ -219,7 +219,7 @@ function MeuEstabelecimentoOpcoesPage() {
                         size="sm"
                         variant="outline"
                         className="text-destructive border-destructive/40 hover:bg-destructive/10"
-                        onClick={() => setExcluir(opcao)}
+                        onClick={() => setExcluir(item)}
                         aria-label="Excluir quarto"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
