@@ -251,12 +251,20 @@ function MeuEstabelecimentoPage() {
               Meu Estabelecimento
             </button>
             {seloAzul && estabAtivo && (
-              <Link
-                to="/meu-estabelecimento/reservas"
-                className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-              >
-                Reservas
-              </Link>
+              <>
+                <Link
+                  to="/meu-estabelecimento/reservas"
+                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+                >
+                  Reservas
+                </Link>
+                <Link
+                  to="/meu-estabelecimento/mensagens"
+                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+                >
+                  Mensagens
+                </Link>
+              </>
             )}
             <button
               onClick={() => void signOut().then(() => navigate({ to: "/" }))}

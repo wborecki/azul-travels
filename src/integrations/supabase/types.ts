@@ -1242,6 +1242,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reserva_mensagens: {
+        Row: {
+          autor_id: string
+          autor_role: Database["public"]["Enums"]["app_role"] | null
+          corpo: string
+          criado_em: string
+          id: string
+          lida_em: string | null
+          reserva_id: string
+        }
+        Insert: {
+          autor_id: string
+          autor_role?: Database["public"]["Enums"]["app_role"] | null
+          corpo: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          reserva_id: string
+        }
+        Update: {
+          autor_id?: string
+          autor_role?: Database["public"]["Enums"]["app_role"] | null
+          corpo?: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_mensagens_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservas: {
         Row: {
           acompanhantes: Json | null

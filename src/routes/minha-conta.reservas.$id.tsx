@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquare } from "lucide-react";
 import { formatDateBR } from "@/lib/brazil";
 import { RESERVA_STATUS_LABEL } from "@/lib/enums";
 
@@ -156,6 +156,16 @@ function ReservaDetalhe() {
           </Link>
         </div>
       )}
+
+      <div className="bg-white border rounded-2xl p-5">
+        <Link
+          to="/minha-conta/mensagens"
+          search={{ reserva: reserva.id }}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+        >
+          <MessageSquare className="h-4 w-4" /> Ver conversa com o estabelecimento
+        </Link>
+      </div>
     </div>
   );
 }

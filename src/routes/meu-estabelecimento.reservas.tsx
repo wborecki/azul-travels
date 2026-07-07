@@ -40,6 +40,7 @@ import {
   Check,
   X,
   CheckCheck,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
@@ -71,6 +72,10 @@ const ReservasCalendario = lazy(() =>
 
 export const Route = createFileRoute("/meu-estabelecimento/reservas")({
   head: () => ({ meta: [{ title: "Reservas · Turismo Azul" }] }),
+  validateSearch: (s: Record<string, unknown>): { reserva?: string } => {
+    const reserva = typeof s.reserva === "string" ? s.reserva : undefined;
+    return reserva ? { reserva } : {};
+  },
   component: MeuEstabelecimentoReservasPage,
 });
 
@@ -97,6 +102,7 @@ function MeuEstabelecimentoReservasPage() {
   const { user, loading, signOut, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { reserva: reservaIdBusca } = Route.useSearch();
 
   const [carregando, setCarregando] = useState(true);
   const [estab, setEstab] = useState<EstabelecimentoDoOwner | null>(null);
@@ -105,6 +111,7 @@ function MeuEstabelecimentoReservasPage() {
   const [busca, setBusca] = useState("");
   const [visualizacao, setVisualizacao] = useState<"lista" | "calendario">("lista");
   const [selected, setSelected] = useState<ReservaEstabelecimentoRow | null>(null);
+  const [preSelecionou, setPreSelecionou] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     reserva: ReservaEstabelecimentoRow;
     next: ReservaStatus;
@@ -144,6 +151,14 @@ function MeuEstabelecimentoReservasPage() {
       }
     })();
   }, [user, loading, role, pathname, navigate]);
+
+  // Deep link (?reserva=id) vindo da tela de Mensagens - abre o detalhe direto.
+  useEffect(() => {
+    if (preSelecionou || carregando || !reservaIdBusca) return;
+    const alvo = reservas.find((r) => r.id === reservaIdBusca);
+    if (alvo) setSelected(alvo);
+    setPreSelecionou(true);
+  }, [preSelecionou, carregando, reservaIdBusca, reservas]);
 
   const reservasComBusca = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -258,6 +273,12 @@ function MeuEstabelecimentoReservasPage() {
             <span className="px-3 py-2 rounded-lg font-semibold text-primary bg-azul-claro">
               Reservas
             </span>
+            <Link
+              to="/meu-estabelecimento/mensagens"
+              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+            >
+              Mensagens
+            </Link>
             <button
               onClick={() => void signOut().then(() => navigate({ to: "/" }))}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
@@ -694,6 +715,16 @@ function DetalheReserva({
               Nenhum perfil sensorial vinculado a esta reserva.
             </p>
           )}
+        </section>
+
+        <section className="border-t pt-4">
+          <Link
+            to="/meu-estabelecimento/mensagens"
+            search={{ reserva: reserva.id }}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+          >
+            <MessageSquare className="h-4 w-4" /> Ver conversa com a família
+          </Link>
         </section>
       </div>
     </>

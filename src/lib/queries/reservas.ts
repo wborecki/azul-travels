@@ -24,14 +24,14 @@ export type ReservaInsert = TablesInsert<"reservas">;
 export type ReservaComContexto = Reserva & {
   estabelecimentos: Pick<
     Tables<"estabelecimentos">,
-    "id" | "slug" | "nome" | "cidade" | "estado" | "foto_capa" | "tipo"
+    "id" | "slug" | "nome" | "cidade" | "estado" | "foto_capa" | "tipo" | "endereco" | "telefone"
   > | null;
   perfil_sensorial: Pick<Tables<"perfil_sensorial">, "id" | "nome_autista" | "nivel_tea"> | null;
 };
 
 const SELECT = `
   *,
-  estabelecimentos(id, slug, nome, cidade, estado, foto_capa, tipo),
+  estabelecimentos(id, slug, nome, cidade, estado, foto_capa, tipo, endereco, telefone),
   perfil_sensorial(id, nome_autista, nivel_tea)
 ` as const;
 
@@ -67,6 +67,23 @@ export async function fetchReservasDaFamiliaPorEstabelecimento(
 
   if (error) throw error;
   return data ?? [];
+}
+
+/** Uma reserva específica da família logada (dono), ou `null` se não encontrada. */
+export async function fetchReservaDaFamiliaPorId(
+  reservaId: string,
+  familiaId: string,
+): Promise<ReservaComContexto | null> {
+  const { data, error } = await supabase
+    .from("reservas")
+    .select(SELECT)
+    .eq("id", reservaId)
+    .eq("familia_id", familiaId)
+    .maybeSingle()
+    .returns<ReservaComContexto | null>();
+
+  if (error) throw error;
+  return data;
 }
 
 /** Cria uma nova reserva (payload tipado). */

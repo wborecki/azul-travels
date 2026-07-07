@@ -85,6 +85,16 @@ export {
   type ReservaEstabelecimentoRow,
 } from "./reservas-estabelecimento";
 
+// Thread de mensagens por reserva (estabelecimento ↔ família) - Fase 3.
+export {
+  fetchMensagensDaReserva,
+  enviarMensagemReserva,
+  marcarMensagensComoLidas,
+  fetchContagemNaoLidasPorReservas,
+  fetchUltimasMensagensPorReservas,
+  type ReservaMensagemRow,
+} from "./reserva-mensagens";
+
 // Mapeadores Row → ViewModel - fonte única de derivações para a UI.
 export {
   mapAvaliacao,

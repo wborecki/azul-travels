@@ -73,6 +73,7 @@ function MinhaContaLayout() {
           <nav className="flex items-center gap-1 sm:gap-2 text-sm">
             <NavLink to="/minha-conta" exact label="Meu Perfil" />
             <NavLink to="/minha-conta/perfil" label="Perfil do Meu Filho" />
+            <NavLink to="/minha-conta/mensagens" label="Conversas" />
             <button
               onClick={() => void signOut().then(() => navigate({ to: "/" }))}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
