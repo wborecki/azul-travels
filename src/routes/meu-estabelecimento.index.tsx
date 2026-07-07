@@ -265,6 +265,12 @@ function MeuEstabelecimentoPage() {
                 >
                   Mensagens
                 </Link>
+                <Link
+                  to="/meu-estabelecimento/opcoes"
+                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+                >
+                  Quartos
+                </Link>
               </>
             )}
             <button

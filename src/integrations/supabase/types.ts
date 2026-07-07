@@ -757,39 +757,110 @@ export type Database = {
         }
         Relationships: []
       }
+      opcao_bloqueios: {
+        Row: {
+          criado_em: string
+          fim: string
+          id: string
+          inicio: string
+          opcao_reserva_id: string
+        }
+        Insert: {
+          criado_em?: string
+          fim: string
+          id?: string
+          inicio: string
+          opcao_reserva_id: string
+        }
+        Update: {
+          criado_em?: string
+          fim?: string
+          id?: string
+          inicio?: string
+          opcao_reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opcao_bloqueios_opcao_reserva_id_fkey"
+            columns: ["opcao_reserva_id"]
+            isOneToOne: false
+            referencedRelation: "opcoes_reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opcoes_reserva: {
         Row: {
           ativo: boolean
+          capacidade_adultos: number | null
+          capacidade_criancas: number | null
+          capacidade_total: number
+          check_in_padrao: string | null
+          check_out_padrao: string | null
+          cidade: string | null
+          comodidades: string[]
           criado_em: string
           descricao: string | null
+          endereco: string | null
           estabelecimento_id: string
+          estado: string | null
           id: string
           imagens: Json
+          latitude: number | null
+          longitude: number | null
           nome: string
-          preco: number | null
+          preco: number
           quantidade: number
+          quantidade_camas: number
+          usa_endereco_proprio: boolean
         }
         Insert: {
           ativo?: boolean
+          capacidade_adultos?: number | null
+          capacidade_criancas?: number | null
+          capacidade_total?: number
+          check_in_padrao?: string | null
+          check_out_padrao?: string | null
+          cidade?: string | null
+          comodidades?: string[]
           criado_em?: string
           descricao?: string | null
+          endereco?: string | null
           estabelecimento_id: string
+          estado?: string | null
           id?: string
           imagens?: Json
+          latitude?: number | null
+          longitude?: number | null
           nome: string
-          preco?: number | null
+          preco: number
           quantidade?: number
+          quantidade_camas?: number
+          usa_endereco_proprio?: boolean
         }
         Update: {
           ativo?: boolean
+          capacidade_adultos?: number | null
+          capacidade_criancas?: number | null
+          capacidade_total?: number
+          check_in_padrao?: string | null
+          check_out_padrao?: string | null
+          cidade?: string | null
+          comodidades?: string[]
           criado_em?: string
           descricao?: string | null
+          endereco?: string | null
           estabelecimento_id?: string
+          estado?: string | null
           id?: string
           imagens?: Json
+          latitude?: number | null
+          longitude?: number | null
           nome?: string
-          preco?: number | null
+          preco?: number
           quantidade?: number
+          quantidade_camas?: number
+          usa_endereco_proprio?: boolean
         }
         Relationships: [
           {

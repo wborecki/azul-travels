@@ -85,6 +85,27 @@ export {
   type ReservaEstabelecimentoRow,
 } from "./reservas-estabelecimento";
 
+// Opções de reserva do estabelecimento (quarto de hotel) - Fase 1.
+export {
+  fetchOpcoesDoEstabelecimento,
+  fetchOpcaoReservaPorId,
+  criarOpcaoReserva,
+  atualizarOpcaoReserva,
+  excluirOpcaoReserva,
+  type OpcaoReserva,
+  type OpcaoReservaInsert,
+  type OpcaoReservaUpdate,
+} from "./opcoes-reserva";
+
+// Períodos em que uma opção fica manualmente indisponível (manutenção etc.).
+export {
+  fetchBloqueiosDaOpcao,
+  criarOpcaoBloqueio,
+  excluirOpcaoBloqueio,
+  type OpcaoBloqueio,
+  type OpcaoBloqueioInsert,
+} from "./opcao-bloqueios";
+
 // Thread de mensagens por reserva (estabelecimento ↔ família) - Fase 3.
 export {
   fetchMensagensDaReserva,
@@ -180,8 +201,4 @@ export {
 } from "./explorar-filtros";
 
 // Encurtador de URLs do /explorar.
-export {
-  obterOuCriarLinkCurto,
-  resolverLinkCurto,
-  type LinkCurto,
-} from "./links-curtos";
+export { obterOuCriarLinkCurto, resolverLinkCurto, type LinkCurto } from "./links-curtos";

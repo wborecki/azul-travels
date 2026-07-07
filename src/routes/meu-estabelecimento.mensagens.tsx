@@ -218,6 +218,12 @@ function MeuEstabelecimentoMensagensPage() {
             <span className="px-3 py-2 rounded-lg font-semibold text-primary bg-azul-claro">
               Mensagens
             </span>
+            <Link
+              to="/meu-estabelecimento/opcoes"
+              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+            >
+              Quartos
+            </Link>
             <button
               onClick={() => void signOut().then(() => navigate({ to: "/" }))}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"

@@ -1,0 +1,97 @@
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Footer } from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  fetchEstabelecimentoDoOwner,
+  fetchOpcaoReservaPorId,
+  type EstabelecimentoDoOwner,
+  type OpcaoReserva,
+} from "@/lib/queries";
+import { EstabelecimentoHeader } from "@/components/estabelecimento/EstabelecimentoHeader";
+import { OpcaoReservaFormulario } from "@/components/estabelecimento/OpcaoReservaFormulario";
+
+export const Route = createFileRoute("/meu-estabelecimento/opcoes/$id")({
+  head: () => ({ meta: [{ title: "Editar quarto · Turismo Azul" }] }),
+  component: EditarOpcaoPage,
+});
+
+function EditarOpcaoPage() {
+  const { id } = Route.useParams();
+  const { user, loading, role } = useAuth();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const [carregando, setCarregando] = useState(true);
+  const [estab, setEstab] = useState<EstabelecimentoDoOwner | null>(null);
+  const [opcao, setOpcao] = useState<OpcaoReserva | null>(null);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate({ to: "/login", search: { redirect: pathname } });
+      return;
+    }
+    if (role && role !== "estabelecimento" && role !== "admin") {
+      navigate({ to: "/minha-conta" });
+      return;
+    }
+    void (async () => {
+      const estabRow = await fetchEstabelecimentoDoOwner(user.id);
+      if (!estabRow || !estabRow.selo_azul || estabRow.status !== "ativo") {
+        toast.error("Os quartos ficam disponíveis para locais com Selo Azul ativo.");
+        navigate({ to: "/meu-estabelecimento" });
+        return;
+      }
+      setEstab(estabRow);
+
+      try {
+        const data = await fetchOpcaoReservaPorId(id);
+        if (!data || data.estabelecimento_id !== estabRow.id) {
+          toast.error("Quarto não encontrado.");
+          navigate({ to: "/meu-estabelecimento/opcoes" });
+          return;
+        }
+        setOpcao(data);
+      } catch (err) {
+        toast.error("Erro ao carregar quarto", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        setCarregando(false);
+      }
+    })();
+  }, [user, loading, role, pathname, navigate, id]);
+
+  if (loading || carregando || !estab) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+      </div>
+    );
+  }
+
+  if (!opcao) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground">
+        <p>Quarto não encontrado.</p>
+        <Button asChild>
+          <Link to="/meu-estabelecimento/opcoes">Voltar</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
+      <EstabelecimentoHeader ativa="opcoes" />
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+        <OpcaoReservaFormulario estabId={estab.id} estabEndereco={estab} opcaoExistente={opcao} />
+      </main>
+      <Footer />
+    </div>
+  );
+}
