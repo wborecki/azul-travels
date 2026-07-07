@@ -110,14 +110,6 @@ function EstabPage() {
   const [naoEncontrado, setNaoEncontrado] = useState(false);
   const [perfis, setPerfis] = useState<PerfilOption[]>([]);
   const [perfilSel, setPerfilSel] = useState<string>("");
-  const [checkin, setCheckin] = useState<string>("");
-  const [checkout, setCheckout] = useState<string>("");
-  const [adultos, setAdultos] = useState(2);
-  const [autistas, setAutistas] = useState(1);
-  const [mensagem, setMensagem] = useState("");
-  const [autoriza, setAutoriza] = useState(false);
-  const [enviando, setEnviando] = useState(false);
-  const [reservaEnviada, setReservaEnviada] = useState(false);
   const [reservasFamilia, setReservasFamilia] = useState<ReservaComContexto[]>([]);
   const [reservaRecemCriadaId, setReservaRecemCriadaId] = useState<string | null>(null);
 
@@ -276,56 +268,6 @@ function EstabPage() {
     setPerfilSel(data.id);
     setPerfilModalOpen(false);
     setNovoPerfil(DEFAULT_PERFIL_DRAFT);
-  };
-
-  const enviarReserva = async () => {
-    if (!user) {
-      navigate({ to: "/login" });
-      return;
-    }
-    if (!perfilSel) {
-      toast.error("Selecione ou crie um perfil sensorial antes.");
-      return;
-    }
-    if (!checkin || !checkout) {
-      toast.error("Selecione as datas de chegada e saída.");
-      return;
-    }
-    if (new Date(checkout) <= new Date(checkin)) {
-      toast.error("A data de saída deve ser depois da chegada.");
-      return;
-    }
-    if (!autoriza) {
-      toast.error("É preciso autorizar o envio do perfil sensorial.");
-      return;
-    }
-    const formInput: ReservaFormInput = {
-      familia_id: user.id,
-      estabelecimento_id: e.id,
-      perfil_sensorial_id: perfilSel,
-      data_checkin: checkin,
-      data_checkout: checkout,
-      num_adultos: adultos,
-      num_autistas: autistas,
-      mensagem,
-      perfil_enviado_ao_estabelecimento: true,
-    };
-    setEnviando(true);
-    try {
-      const created = await criarReserva(buildReservaPayload(formInput));
-      toast.success(
-        "Reserva solicitada. O estabelecimento vai retornar por e-mail em até 48 horas.",
-      );
-      setReservaRecemCriadaId(created.id);
-      setReservaEnviada(true);
-      await recarregarReservasFamilia(e.id);
-    } catch (err) {
-      toast.error("Erro ao enviar reserva", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    } finally {
-      setEnviando(false);
-    }
   };
 
   return (
@@ -701,125 +643,6 @@ const STATUS_ICON: Record<ReservaStatus, typeof Clock> = {
   cancelada: XCircle,
   concluida: CalendarCheck,
 };
-
-function ConfirmacaoReservaCard({
-  reserva,
-  estabNome,
-  onNovaReserva,
-}: {
-  reserva: ReservaComContexto | null;
-  estabNome: string;
-  onNovaReserva: () => void;
-}) {
-  const status: ReservaStatus = reserva?.status ?? "pendente";
-  const StatusIcon = STATUS_ICON[status];
-
-  return (
-    <div className="bg-card rounded-2xl border-2 border-success/30 shadow-lg overflow-hidden">
-      {/* Cabeçalho de sucesso */}
-      <div className="bg-success/10 p-5 text-center border-b border-success/20">
-        <div className="mx-auto h-14 w-14 rounded-full bg-success/20 grid place-items-center mb-3">
-          <CheckCircle2 className="h-8 w-8 text-success" />
-        </div>
-        <h3 className="text-lg font-bold text-primary">Solicitação enviada!</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Sua reserva em <strong className="text-foreground">{estabNome}</strong> foi registrada.
-        </p>
-      </div>
-
-      <div className="p-5 space-y-4">
-        {/* Status atual */}
-        <div className="rounded-xl bg-muted/40 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Status
-            </span>
-            <span
-              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${STATUS_BADGE_CLASS[status]}`}
-            >
-              <StatusIcon className="h-3 w-3" />
-              {RESERVA_STATUS_LABEL[status]}
-            </span>
-          </div>
-
-          {reserva && (
-            <dl className="text-xs space-y-1.5 text-foreground/80">
-              {(reserva.data_checkin || reserva.data_checkout) && (
-                <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Datas</dt>
-                  <dd className="font-medium text-right">
-                    {formatDateBR(reserva.data_checkin)} → {formatDateBR(reserva.data_checkout)}
-                  </dd>
-                </div>
-              )}
-              <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground">Pessoas</dt>
-                <dd className="font-medium text-right">
-                  {reserva.num_adultos ?? 1} adulto(s)
-                  {(reserva.num_autistas ?? 0) > 0 &&
-                    ` · ${reserva.num_autistas} criança(s) autista(s)`}
-                </dd>
-              </div>
-              {reserva.perfil_sensorial?.nome_autista && (
-                <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Perfil enviado</dt>
-                  <dd className="font-medium text-right">
-                    {reserva.perfil_sensorial.nome_autista} ✓
-                  </dd>
-                </div>
-              )}
-              <div className="flex justify-between gap-2">
-                <dt className="text-muted-foreground">Solicitada em</dt>
-                <dd className="font-medium text-right">{formatDateBR(reserva.criado_em)}</dd>
-              </div>
-            </dl>
-          )}
-        </div>
-
-        {/* Próximos passos */}
-        <div>
-          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide mb-2">
-            Próximos passos
-          </h4>
-          <ol className="space-y-2 text-xs text-foreground/80">
-            <li className="flex gap-2">
-              <Mail className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
-              <span>
-                O estabelecimento recebeu o perfil sensorial e vai retornar por e-mail em até{" "}
-                <strong>48 horas</strong>.
-              </span>
-            </li>
-            <li className="flex gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
-              <span>
-                Quando confirmarem, o status muda para <strong>Confirmada</strong> aqui e você
-                recebe um e-mail.
-              </span>
-            </li>
-            <li className="flex gap-2">
-              <Gift className="h-3.5 w-3.5 mt-0.5 text-secondary shrink-0" />
-              <span>O pagamento é feito diretamente com o estabelecimento.</span>
-            </li>
-          </ol>
-        </div>
-
-        {/* CTAs */}
-        <div className="space-y-2 pt-1">
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/">Voltar à home</Link>
-          </Button>
-          <button
-            type="button"
-            onClick={onNovaReserva}
-            className="w-full text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-          >
-            Solicitar outra reserva neste local
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function HistoricoReservasCard({
   reservas,

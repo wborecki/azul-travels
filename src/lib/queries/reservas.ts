@@ -114,6 +114,7 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
 export interface ReservaFormInput {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
+  opcao_reserva_id: NonNullable<ReservaInsert["opcao_reserva_id"]>;
   /** Vínculo ao Perfil TEA permanente da família (preferencial). */
   perfil_tea_id?: ReservaInsert["perfil_tea_id"];
   /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
@@ -148,6 +149,7 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
   return {
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
+    opcao_reserva_id: input.opcao_reserva_id,
     perfil_tea_id: input.perfil_tea_id ?? null,
     perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
@@ -158,16 +160,10 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
     status: "pendente",
     perfil_enviado_ao_estabelecimento: input.perfil_enviado_ao_estabelecimento,
     num_acompanhantes: input.num_acompanhantes ?? null,
-    pessoa_referencia: input.pessoa_referencia
-      ? emptyToNull(input.pessoa_referencia)
-      : null,
+    pessoa_referencia: input.pessoa_referencia ? emptyToNull(input.pessoa_referencia) : null,
     objetivo_viagem: input.objetivo_viagem ?? [],
-    notas_especificas: input.notas_especificas
-      ? emptyToNull(input.notas_especificas)
-      : null,
-    historico_negativo: input.historico_negativo
-      ? emptyToNull(input.historico_negativo)
-      : null,
+    notas_especificas: input.notas_especificas ? emptyToNull(input.notas_especificas) : null,
+    historico_negativo: input.historico_negativo ? emptyToNull(input.historico_negativo) : null,
     recomendacoes_adicionais: input.recomendacoes_adicionais
       ? emptyToNull(input.recomendacoes_adicionais)
       : null,
