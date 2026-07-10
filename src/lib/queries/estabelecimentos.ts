@@ -220,10 +220,7 @@ export function resolvePagination(
   if (filters.pagina === undefined && filters.tamanhoPagina === undefined) return null;
 
   const tamanhoBruto = filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT;
-  const tamanhoPagina = Math.min(
-    ESTAB_PAGE_SIZE_MAX,
-    Math.max(1, Math.floor(tamanhoBruto)),
-  );
+  const tamanhoPagina = Math.min(ESTAB_PAGE_SIZE_MAX, Math.max(1, Math.floor(tamanhoBruto)));
   const pagina = Math.max(1, Math.floor(filters.pagina ?? 1));
   const from = (pagina - 1) * tamanhoPagina;
   const to = from + tamanhoPagina - 1;
@@ -417,6 +414,50 @@ export async function fetchEstabelecimentoDoOwner(
   const { data, error } = await supabase
     .from("estabelecimentos")
     .select("id, nome, cidade, estado, endereco, selo_azul, status")
+    .eq("owner_user_id", ownerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Nome do responsável cadastrado em `estabelecimento_profiles` (ou `null`). */
+export async function fetchNomeResponsavelDoEstabelecimento(
+  userId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("estabelecimento_profiles")
+    .select("nome_responsavel")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.nome_responsavel ?? null;
+}
+
+/** Row completa de `estabelecimento_profiles` do usuário logado. */
+export type EstabelecimentoProfile = Tables<"estabelecimento_profiles">;
+
+export async function fetchEstabelecimentoProfile(
+  userId: string,
+): Promise<EstabelecimentoProfile | null> {
+  const { data, error } = await supabase
+    .from("estabelecimento_profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Row completa do estabelecimento do dono logado (para o painel/formulário). */
+export async function fetchEstabelecimentoFullDoOwner(
+  ownerId: string,
+): Promise<EstabelecimentoFull | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("*")
     .eq("owner_user_id", ownerId)
     .maybeSingle();
 

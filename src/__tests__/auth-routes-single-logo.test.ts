@@ -1,19 +1,16 @@
 /**
- * Regression test: each authenticated layout must render exactly one logo/header chrome.
+ * Regression test: every screen must render exactly one logo/header chrome.
  *
- * Background: the global <Header /> in src/routes/__root.tsx used to render alongside
- * the route-internal header on /admin, /minha-conta, /meu-estabelecimento and
- * /minha-empresa, producing two logos on screen. The fix was to skip the global
- * chrome (hasOwnChrome / isAdmin branches) for these path prefixes.
+ * Architecture: the global <Header /> in src/routes/__root.tsx renders for ALL
+ * routes (public pages, /minha-conta, /meu-estabelecimento and /admin) except
+ * the auth flows (login/cadastro/selecionar-perfil/reset-password) and the
+ * legacy /minha-empresa page, which render their own chrome. The authenticated
+ * layouts therefore must NOT render <Header /> or <Logo /> themselves — doing
+ * so would put two logos on screen.
  *
  * Without a browser-test runtime in this project (no Playwright/RTL/jsdom), we
  * enforce the invariant statically by parsing __root.tsx and each authenticated
- * route file. This catches the regression patterns that produce a duplicated logo:
- *
- *   1. __root.tsx stops excluding one of the authenticated path prefixes.
- *   2. An authenticated route layout starts rendering more than one
- *      logo-bearing chrome (either <Header /> + <Logo />, or two <Header />,
- *      or two <Logo />).
+ * route file.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -26,8 +23,8 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 function stripComments(src: string): string {
   return src
     .replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "") // {/* ... */}
-    .replace(/\/\*[\s\S]*?\*\//g, "")           // /* ... */
-    .replace(/(^|[^:])\/\/[^\n]*/g, "$1");      // // ... (skip http://)
+    .replace(/\/\*[\s\S]*?\*\//g, "") // /* ... */
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1"); // // ... (skip http://)
 }
 
 // Count opening JSX tags `<Name` (component or lowercase element).
@@ -36,69 +33,54 @@ function countJsxOpen(src: string, name: string): number {
   return (src.match(re) ?? []).length;
 }
 
-const AUTH_PREFIXES = [
-  "/admin",
-  "/minha-conta",
-  "/meu-estabelecimento",
-  "/minha-empresa",
-];
-
-describe("__root.tsx skips global chrome for authenticated areas", () => {
+describe("__root.tsx skips global chrome only for self-chromed routes", () => {
   const root = stripComments(read("src/routes/__root.tsx"));
 
-  for (const prefix of AUTH_PREFIXES) {
-    it(`mentions ${prefix} in the hasOwnChrome/isAdmin/isAuthFlow guard`, () => {
-      // The path prefix must appear in one of the guard expressions so the
-      // RootComponent branches into the variant that does NOT render <Header />.
+  for (const prefix of ["/minha-empresa", "/login", "/cadastro", "/selecionar-perfil"]) {
+    it(`mentions ${prefix} in the isAuthFlow/hasOwnChrome guard`, () => {
       expect(root).toContain(`"${prefix}"`);
     });
   }
 
   it("has a branch that renders <Outlet /> without the global <Header />", () => {
-    // The early-return branch must exist and must NOT render <Header />.
     const branchMatch = root.match(
-      /if\s*\([^)]*?(isAdmin|isAuthFlow|hasOwnChrome)[^)]*?\)\s*\{[\s\S]*?return\s*\(([\s\S]*?)\)\s*;[\s\S]*?\}/,
+      /if\s*\([^)]*?(isAuthFlow|hasOwnChrome)[^)]*?\)\s*\{[\s\S]*?return\s*\(([\s\S]*?)\)\s*;[\s\S]*?\}/,
     );
-    expect(branchMatch, "early-return branch for authenticated paths").not.toBeNull();
+    expect(branchMatch, "early-return branch for self-chromed paths").not.toBeNull();
     const branchJsx = branchMatch![2];
     expect(branchJsx).not.toMatch(/<Header(\s|\/|>)/);
     expect(branchJsx).toMatch(/<Outlet(\s|\/|>)/);
   });
 });
 
-describe("authenticated route layouts never mix two logo sources", () => {
-  // Files that own a full layout for an authenticated area. The only logo
-  // source allowed is ONE of:
-  //   - <Header /> (the public header, which itself renders <Logo />), used
-  //     possibly across multiple mutually-exclusive render branches
-  //     (loading / empty / normal), OR
-  //   - <Logo /> rendered directly (e.g. inside an in-page sidebar), at most
-  //     once per file.
-  // Mixing the two, or rendering <Logo /> twice in the same file, is what
-  // produced the duplicated-logo regression.
+describe("authenticated layouts rely on the global chrome (no own logo/header)", () => {
+  // These files render inside the root layout, which already provides the
+  // global <Header /> (and its logo). Rendering <Header /> or <Logo /> here
+  // duplicates the brand chrome.
   const LAYOUTS = [
     "src/routes/admin.tsx",
     "src/routes/minha-conta.tsx",
+    "src/routes/meu-estabelecimento.tsx",
     "src/routes/meu-estabelecimento.index.tsx",
-    "src/routes/minha-empresa.tsx",
+    "src/components/PainelSubNav.tsx",
   ];
 
   for (const path of LAYOUTS) {
-    it(`${path}: does not mix <Header /> and <Logo /> and renders <Logo /> at most once`, () => {
+    it(`${path}: renders neither <Header /> nor <Logo />`, () => {
       const src = stripComments(read(path));
-      const headers = countJsxOpen(src, "Header");
-      const logos = countJsxOpen(src, "Logo");
-
-      expect(
-        headers === 0 || logos === 0,
-        `${path} renders both <Header /> (x${headers}) and <Logo /> (x${logos}) — ` +
-          `<Header /> already contains the brand logo, so adding <Logo /> duplicates it.`,
-      ).toBe(true);
-
-      expect(
-        logos,
-        `${path} renders <Logo /> ${logos} times; the brand logo must appear at most once per layout.`,
-      ).toBeLessThanOrEqual(1);
+      expect(countJsxOpen(src, "Header"), `${path} must not render <Header />`).toBe(0);
+      expect(countJsxOpen(src, "Logo"), `${path} must not render <Logo />`).toBe(0);
     });
   }
+
+  it("src/routes/minha-empresa.tsx: renders its own chrome with a single logo source", () => {
+    const src = stripComments(read("src/routes/minha-empresa.tsx"));
+    const headers = countJsxOpen(src, "Header");
+    const logos = countJsxOpen(src, "Logo");
+    expect(
+      headers === 0 || logos === 0,
+      "minha-empresa mixes <Header /> and <Logo />, duplicating the brand logo",
+    ).toBe(true);
+    expect(logos).toBeLessThanOrEqual(1);
+  });
 });

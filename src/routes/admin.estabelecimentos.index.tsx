@@ -34,7 +34,7 @@ import {
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export const Route = createFileRoute("/admin/estabelecimentos/")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { quer_selo_azul?: 1 } => ({
     quer_selo_azul: search.quer_selo_azul === "1" || search.quer_selo_azul === 1 ? 1 : undefined,
   }),
   component: AdminEstabelecimentos,
@@ -95,7 +95,6 @@ function AdminEstabelecimentos() {
   }, [debouncedQ, pagina, tamanhoPagina, apenasQuerSeloAzul]);
 
   const filtered = useMemo(() => rows, [rows]);
-
 
   const markSaving = (id: string, on: boolean) =>
     setSavingIds((prev) => {
@@ -214,7 +213,8 @@ function AdminEstabelecimentos() {
           <div className="flex items-center gap-2 text-sm">
             <Star className="h-4 w-4 text-[#b8852a]" />
             <span className="text-foreground/90">
-              Mostrando apenas estabelecimentos que <strong>solicitaram contato para o Selo Azul</strong>.
+              Mostrando apenas estabelecimentos que{" "}
+              <strong>solicitaram contato para o Selo Azul</strong>.
             </span>
           </div>
           <Button

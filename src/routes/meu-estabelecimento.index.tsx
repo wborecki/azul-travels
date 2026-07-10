@@ -1,6 +1,5 @@
-import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  LogOut,
   Loader2,
   Building2,
   ShieldCheck,
@@ -22,7 +20,7 @@ import {
   Award,
 } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo-turismo-azul.svg";
+import { fetchEstabelecimentoProfile, fetchEstabelecimentoFullDoOwner } from "@/lib/queries";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 import { ESTRUTURA_ITEMS } from "@/lib/estrutura-tea";
 import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
@@ -73,7 +71,7 @@ const EMPTY: PerfilDraft = {
 };
 
 function MeuEstabelecimentoPage() {
-  const { user, loading, signOut, role } = useAuth();
+  const { user, loading, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -83,7 +81,6 @@ function MeuEstabelecimentoPage() {
   const [draft, setDraft] = useState<PerfilDraft>(EMPTY);
   const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [estabId, setEstabId] = useState<string | null>(null);
-  const [nomeResp, setNomeResp] = useState<string | null>(null);
   const [seloAzul, setSeloAzul] = useState(false);
   const [estabAtivo, setEstabAtivo] = useState(false);
   const [querSelo, setQuerSelo] = useState(false);
@@ -101,14 +98,16 @@ function MeuEstabelecimentoPage() {
       return;
     }
     void (async () => {
-      const [profRes, estabRes] = await Promise.all([
-        supabase.from("estabelecimento_profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("estabelecimentos").select("*").eq("owner_user_id", user.id).maybeSingle(),
-      ]);
-      const prof = profRes.data;
-      const estab = estabRes.data;
+      const [prof, estab] = await Promise.all([
+        fetchEstabelecimentoProfile(user.id),
+        fetchEstabelecimentoFullDoOwner(user.id),
+      ]).catch((err: unknown) => {
+        toast.error("Erro ao carregar seus dados", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+        return [null, null] as const;
+      });
       setEstabId(estab?.id ?? null);
-      setNomeResp(prof?.nome_responsavel ?? null);
       setPerfilCompleto(prof?.perfil_completo ?? false);
       setSeloAzul(!!estab?.selo_azul);
       setEstabAtivo(estab?.status === "ativo");
@@ -217,91 +216,45 @@ function MeuEstabelecimentoPage() {
     );
   }
 
-  const primeiroNome = (nomeResp ?? user?.email?.split("@")[0] ?? "").split(" ")[0];
-
   return (
-    <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
-      {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link to="/meu-estabelecimento" className="flex items-center gap-3">
-            <img src={logo} alt="Turismo Azul" className="h-8 w-auto" />
-            <span className="hidden sm:inline text-sm text-foreground/80">
-              Olá, <strong className="text-primary">{primeiroNome || "parceiro"}</strong>
-            </span>
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2 text-sm">
-            <span className="px-3 py-2 rounded-lg font-semibold text-primary bg-azul-claro">
-              Meu Estabelecimento
-            </span>
-            {seloAzul && estabAtivo && (
-              <>
-                <Link
-                  to="/meu-estabelecimento/reservas"
-                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-                >
-                  Reservas
-                </Link>
-                <Link
-                  to="/meu-estabelecimento/mensagens"
-                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-                >
-                  Mensagens
-                </Link>
-                <Link
-                  to="/meu-estabelecimento/itens"
-                  className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-                >
-                  Quartos
-                </Link>
-                <button
-                  onClick={() => setEditando(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-                >
-                  <Building2 className="h-4 w-4" /> Editar perfil
-                </button>
-              </>
-            )}
-            <button
-              onClick={() => void signOut().then(() => navigate({ to: "/" }))}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              <LogOut className="h-4 w-4" /> Sair
-            </button>
-          </nav>
+    <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+      {carregando ? (
+        <div className="flex items-center justify-center py-24 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
         </div>
-      </header>
-
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        {carregando ? (
-          <div className="flex items-center justify-center py-24 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+      ) : editando ? (
+        <FormularioPerfil
+          draft={draft}
+          set={set}
+          onCancel={() => setEditando(false)}
+          onSave={salvar}
+          salvando={salvando}
+        />
+      ) : seloAzul && estabAtivo && estabId ? (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              onClick={() => setEditando(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-white border text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+            >
+              <Building2 className="h-4 w-4" /> Editar perfil
+            </button>
           </div>
-        ) : editando ? (
-          <FormularioPerfil
-            draft={draft}
-            set={set}
-            onCancel={() => setEditando(false)}
-            onSave={salvar}
-            salvando={salvando}
-          />
-        ) : seloAzul && estabAtivo && estabId ? (
           <PainelOperacional estabId={estabId} />
-        ) : (
-          <Dashboard
-            perfilCompleto={perfilCompleto}
-            draft={draft}
-            seloAzul={seloAzul}
-            querSelo={querSelo}
-            querSeloEm={querSeloEm}
-            solicitandoSelo={solicitandoSelo}
-            onCompletar={() => setEditando(true)}
-            onSolicitarSelo={() => void solicitarSeloAzul()}
-          />
-        )}
-      </main>
-      <Footer />
-    </div>
+        </div>
+      ) : (
+        <Dashboard
+          perfilCompleto={perfilCompleto}
+          draft={draft}
+          seloAzul={seloAzul}
+          querSelo={querSelo}
+          querSeloEm={querSeloEm}
+          solicitandoSelo={solicitandoSelo}
+          onCompletar={() => setEditando(true)}
+          onSolicitarSelo={() => void solicitarSeloAzul()}
+        />
+      )}
+    </main>
   );
 }
 

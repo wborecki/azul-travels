@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Footer } from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -11,7 +10,6 @@ import {
   type EstabelecimentoDoOwner,
   type ItemReservavel,
 } from "@/lib/queries";
-import { EstabelecimentoHeader } from "@/components/estabelecimento/EstabelecimentoHeader";
 import { ItemReservavelFormulario } from "@/components/estabelecimento/ItemReservavelFormulario";
 
 export const Route = createFileRoute("/meu-estabelecimento/itens/$id")({
@@ -75,25 +73,21 @@ function EditarItemPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-azul-claro/20 isolate">
-      <EstabelecimentoHeader ativa="itens" />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        {carregando || !estab ? (
-          <div className="flex items-center justify-center py-24 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
-          </div>
-        ) : !item ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-24 text-muted-foreground">
-            <p>Quarto não encontrado.</p>
-            <Button asChild>
-              <Link to="/meu-estabelecimento/itens">Voltar</Link>
-            </Button>
-          </div>
-        ) : (
-          <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} itemExistente={item} />
-        )}
-      </main>
-      <Footer />
-    </div>
+    <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+      {carregando || !estab ? (
+        <div className="flex items-center justify-center py-24 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
+        </div>
+      ) : !item ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-24 text-muted-foreground">
+          <p>Quarto não encontrado.</p>
+          <Button asChild>
+            <Link to="/meu-estabelecimento/itens">Voltar</Link>
+          </Button>
+        </div>
+      ) : (
+        <ItemReservavelFormulario estabId={estab.id} estabEndereco={estab} itemExistente={item} />
+      )}
+    </main>
   );
 }

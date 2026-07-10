@@ -85,14 +85,8 @@ function RootComponent() {
     pathname === "/selecionar-perfil" ||
     pathname === "/reset-password" ||
     pathname === "/forgot-password";
-  const hasOwnChrome =
-    pathname === "/minha-conta" ||
-    pathname.startsWith("/minha-conta/") ||
-    pathname === "/meu-estabelecimento" ||
-    pathname.startsWith("/meu-estabelecimento/") ||
-    pathname === "/minha-empresa" ||
-    pathname.startsWith("/minha-empresa/");
-  if (isAdmin || isAuthFlow || hasOwnChrome) {
+  const hasOwnChrome = pathname === "/minha-empresa" || pathname.startsWith("/minha-empresa/");
+  if (isAuthFlow || hasOwnChrome) {
     return (
       <AuthProvider>
         <Outlet />
@@ -104,10 +98,10 @@ function RootComponent() {
     <AuthProvider>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 pt-20">
+        <main className="flex-1 pt-20 flex flex-col">
           <Outlet />
         </main>
-        <Footer />
+        {!isAdmin && <Footer />}
       </div>
       <Toaster richColors position="top-right" />
     </AuthProvider>

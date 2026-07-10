@@ -24,6 +24,9 @@ export {
   fetchEstabelecimentoPorId,
   fetchEstabelecimentoDetalhe,
   fetchEstabelecimentoDoOwner,
+  fetchNomeResponsavelDoEstabelecimento,
+  fetchEstabelecimentoProfile,
+  fetchEstabelecimentoFullDoOwner,
   fetchEstabelecimentosView,
   fetchEstabelecimentosViewPaginated,
   fetchEstabelecimentosCards, // deprecated alias
@@ -72,6 +75,8 @@ export {
 export {
   fetchPerfisDaFamilia,
   fetchPerfisCompletos,
+  fetchNomeResponsavelDaFamilia,
+  fetchTemPerfilSensorial,
   type PerfilSensorial,
   type PerfilSensorialInsert,
   type PerfilOption,

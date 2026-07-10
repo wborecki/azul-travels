@@ -35,3 +35,27 @@ export async function fetchPerfisCompletos(familiaId: string): Promise<PerfilSen
   if (error) throw error;
   return data ?? [];
 }
+
+/** Nome do responsável em `familia_profiles` (ou `null` se não cadastrado). */
+export async function fetchNomeResponsavelDaFamilia(familiaId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("familia_profiles")
+    .select("nome_responsavel")
+    .eq("id", familiaId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.nome_responsavel ?? null;
+}
+
+/** Indica se a família já preencheu ao menos um perfil sensorial. */
+export async function fetchTemPerfilSensorial(familiaId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("perfil_sensorial")
+    .select("id")
+    .eq("familia_id", familiaId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!data;
+}

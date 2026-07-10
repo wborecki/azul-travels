@@ -12,12 +12,10 @@ import {
   Users,
   Crown,
   Settings,
-  LogOut,
   KeyRound,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -38,7 +36,7 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 function AdminLayout() {
-  const { user, loading, isAdmin, signOut } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [adminName, setAdminName] = useState<string>("");
@@ -98,38 +96,66 @@ function AdminLayout() {
 
   const initial = (adminName || user.email || "?").trim().charAt(0).toUpperCase();
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate({ to: "/" });
-  };
-
   return (
     <div className="flex flex-1 bg-[#f8fafc] isolate">
       <aside
-        className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-0 h-screen z-30"
+        className="shrink-0 bg-[#1a2f5e] text-white flex flex-col sticky top-20 h-[calc(100vh-5rem)] z-30"
         style={{ width: 220 }}
       >
-        <div className="px-6 py-6 flex justify-center">
-          <Logo variant="dark" showTagline={false} />
-        </div>
-        <div className="border-t border-white/10 mx-4" />
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <NavItem to="/admin" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" exact />
+          <NavItem
+            to="/admin"
+            icon={<LayoutDashboard className="h-4 w-4" />}
+            label="Dashboard"
+            exact
+          />
           <NavItem to="/admin/familias" icon={<Users className="h-4 w-4" />} label="Famílias TEA" />
-          <NavItem to="/admin/estabelecimentos" icon={<Building2 className="h-4 w-4" />} label="Estabelecimentos" />
+          <NavItem
+            to="/admin/estabelecimentos"
+            icon={<Building2 className="h-4 w-4" />}
+            label="Estabelecimentos"
+          />
           <NavItem to="/admin/leads" icon={<Sparkles className="h-4 w-4" />} label="Leads" />
-          <NavItem to="/admin/administradores" icon={<Crown className="h-4 w-4" />} label="Administradores" />
+          <NavItem
+            to="/admin/administradores"
+            icon={<Crown className="h-4 w-4" />}
+            label="Administradores"
+          />
 
           <div className="pt-5 mt-3">
             <div className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
               Operação
             </div>
-            <NavItem to="/admin/reservas" icon={<CalendarCheck className="h-4 w-4" />} label="Reservas" />
-            <NavItem to="/admin/conteudo" icon={<FileText className="h-4 w-4" />} label="Conteúdo TEA" />
-            <NavItem to="/admin/usuarios" icon={<Settings className="h-4 w-4" />} label="Configurações" />
-            <NavItem to="/admin/auditoria" icon={<History className="h-4 w-4" />} label="Auditoria" />
-            <NavItem to="/admin/password-resets" icon={<KeyRound className="h-4 w-4" />} label="Resets de senha" />
-            <NavItem to="/admin/auditoria-auth" icon={<ShieldCheck className="h-4 w-4" />} label="Auditoria de auth" />
+            <NavItem
+              to="/admin/reservas"
+              icon={<CalendarCheck className="h-4 w-4" />}
+              label="Reservas"
+            />
+            <NavItem
+              to="/admin/conteudo"
+              icon={<FileText className="h-4 w-4" />}
+              label="Conteúdo TEA"
+            />
+            <NavItem
+              to="/admin/usuarios"
+              icon={<Settings className="h-4 w-4" />}
+              label="Configurações"
+            />
+            <NavItem
+              to="/admin/auditoria"
+              icon={<History className="h-4 w-4" />}
+              label="Auditoria"
+            />
+            <NavItem
+              to="/admin/password-resets"
+              icon={<KeyRound className="h-4 w-4" />}
+              label="Resets de senha"
+            />
+            <NavItem
+              to="/admin/auditoria-auth"
+              icon={<ShieldCheck className="h-4 w-4" />}
+              label="Auditoria de auth"
+            />
           </div>
         </nav>
         <div className="px-4 py-3 text-[10px] text-white/30 border-t border-white/5">
@@ -139,7 +165,7 @@ function AdminLayout() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         <header
-          className="bg-white border-b border-[#e5e7eb] flex items-center justify-between px-6 sticky top-0 z-30"
+          className="bg-white border-b border-[#e5e7eb] flex items-center justify-between px-6 sticky top-20 z-30"
           style={{ height: 48 }}
         >
           <h1 className="text-sm font-bold text-[#1a2f5e]">{pageTitle}</h1>
@@ -148,12 +174,6 @@ function AdminLayout() {
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a2f5e] text-white text-xs font-semibold">
               {initial}
             </span>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground/70 hover:text-foreground border border-[#e5e7eb] rounded-md px-2.5 py-1.5 hover:bg-[#f8fafc] transition"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sair
-            </button>
           </div>
         </header>
         <main className="flex-1 p-8">

@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LogOut,
   Loader2,
   Calendar,
   Users,
@@ -28,7 +27,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
-import logo from "@/assets/logo-turismo-azul.svg";
 import { cn } from "@/lib/utils";
 import {
   fetchEstabelecimentoDoOwner,
@@ -73,7 +71,7 @@ function iniciais(nome: string | null | undefined): string {
 }
 
 function MeuEstabelecimentoMensagensPage() {
-  const { user, loading, signOut, role } = useAuth();
+  const { user, loading, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { reserva: reservaIdBusca, aba } = Route.useSearch();
@@ -196,269 +194,232 @@ function MeuEstabelecimentoMensagensPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white isolate">
-      <header className="bg-white border-b shrink-0 z-30">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link to="/meu-estabelecimento" className="flex items-center gap-3">
-            <img src={logo} alt="Turismo Azul" className="h-8 w-auto" />
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2 text-sm">
-            <Link
-              to="/meu-estabelecimento"
-              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              Meu Estabelecimento
-            </Link>
-            <Link
-              to="/meu-estabelecimento/reservas"
-              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              Reservas
-            </Link>
-            <span className="px-3 py-2 rounded-lg font-semibold text-primary bg-azul-claro">
-              Mensagens
-            </span>
-            <Link
-              to="/meu-estabelecimento/itens"
-              className="px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              Quartos
-            </Link>
-            <button
-              onClick={() => void signOut().then(() => navigate({ to: "/" }))}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
-            >
-              <LogOut className="h-4 w-4" /> Sair
-            </button>
-          </nav>
-        </div>
-      </header>
-
+    <div className="fixed inset-x-0 top-32 bottom-0 z-20 flex flex-col bg-white">
       {carregando ? (
         <div className="flex-1 min-h-0 flex items-center justify-center text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
         </div>
       ) : (
-      <div className="flex-1 min-h-0 flex">
-        <aside
-          className={cn(
-            "w-full md:w-[320px] shrink-0 border-r flex flex-col min-h-0",
-            selected && "hidden md:flex",
-          )}
-        >
-          <div className="p-4 space-y-3 border-b shrink-0">
-            <h1 className="font-display font-bold text-xl text-primary">Conversas</h1>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
-              <Input
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar por família…"
-                className="pl-9 h-9 bg-muted/40 border-transparent"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setFiltro("todas")}
-                className={cn(
-                  "px-3 py-1 rounded-full text-xs font-medium transition",
-                  filtro === "todas"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground/60 hover:bg-muted/70",
-                )}
-              >
-                Todas
-              </button>
-              <button
-                onClick={() => setFiltro("nao_lidas")}
-                className={cn(
-                  "px-3 py-1 rounded-full text-xs font-medium transition",
-                  filtro === "nao_lidas"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground/60 hover:bg-muted/70",
-                )}
-              >
-                Não lidas
-              </button>
-              <button
-                onClick={() => setFiltro("nao_respondidas")}
-                className={cn(
-                  "px-3 py-1 rounded-full text-xs font-medium transition",
-                  filtro === "nao_respondidas"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground/60 hover:bg-muted/70",
-                )}
-              >
-                Não respondidas
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {conversas.length === 0 ? (
-              <p className="text-sm text-foreground/50 text-center p-6">
-                Nenhuma conversa por aqui ainda.
-              </p>
-            ) : (
-              <ul>
-                {conversas.map((r) => {
-                  const ultima = ultimasMensagens.get(r.id);
-                  const naoLidasCount = naoLidas.get(r.id) ?? 0;
-                  const nome = r.familia_profiles?.nome_responsavel ?? "Família não identificada";
-                  const status = r.status ?? "pendente";
-                  return (
-                    <li key={r.id}>
-                      <button
-                        onClick={() => setSelectedId(r.id)}
-                        className={cn(
-                          "w-full text-left px-4 py-3 flex items-start gap-3 border-b border-border/60 transition",
-                          selectedId === r.id ? "bg-azul-claro/50" : "hover:bg-muted/40",
-                        )}
-                      >
-                        <Avatar className="h-11 w-11 shrink-0">
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                            {iniciais(nome)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={cn(
-                                "truncate text-sm",
-                                naoLidasCount > 0
-                                  ? "font-bold text-foreground"
-                                  : "font-medium text-foreground/90",
-                              )}
-                            >
-                              {nome}
-                            </span>
-                            <span className="text-[11px] text-foreground/40 shrink-0">
-                              {new Date(ultima?.criado_em ?? r.criado_em).toLocaleDateString(
-                                "pt-BR",
-                                {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                },
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-2 mt-0.5">
-                            <p
-                              className={cn(
-                                "truncate text-xs",
-                                naoLidasCount > 0 ? "text-foreground/80" : "text-foreground/50",
-                              )}
-                            >
-                              {ultima ? ultima.corpo : "Nenhuma mensagem ainda"}
-                            </p>
-                            {naoLidasCount > 0 && (
-                              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white bg-secondary shrink-0">
-                                {naoLidasCount}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <span
-                              className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT_CLASS[status])}
-                            />
-                            <span className="text-[10px] uppercase tracking-wide text-foreground/40">
-                              {status}
-                            </span>
-                          </div>
-                        </div>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+        <div className="flex-1 min-h-0 flex">
+          <aside
+            className={cn(
+              "w-full md:w-[320px] shrink-0 border-r flex flex-col min-h-0",
+              selected && "hidden md:flex",
             )}
-          </div>
-        </aside>
-
-        <section
-          className={cn(
-            "flex-1 min-w-0 flex-col min-h-0 bg-white",
-            selected ? "flex" : "hidden md:flex",
-          )}
-        >
-          {!selected ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-foreground/40 gap-2">
-              <MessagesSquare className="h-10 w-10" />
-              <p className="text-sm">Selecione uma conversa para começar</p>
-            </div>
-          ) : (
-            <>
-              <header className="shrink-0 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <button
-                    onClick={() => setSelectedId(null)}
-                    className="md:hidden text-foreground/60 hover:text-primary shrink-0"
-                    aria-label="Voltar para conversas"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                  </button>
-                  <Avatar className="h-9 w-9 shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                      {iniciais(selected.familia_profiles?.nome_responsavel)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <h2 className="font-display font-bold text-foreground truncate">
-                      {selected.familia_profiles?.nome_responsavel ?? "Família"}
-                    </h2>
-                  </div>
-                  <StatusBadge status={selected.status} />
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="text-foreground/50 hover:text-primary hover:bg-muted rounded-full p-2 transition shrink-0"
-                      aria-label="Opções da conversa"
-                    >
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link to="/meu-estabelecimento/reservas" search={{ reserva: selected.id }}>
-                        <ExternalLink className="h-4 w-4 mr-2" /> Ver reserva completa
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </header>
-
-              <div className="flex-1 min-h-0">
-                {user && (
-                  <ReservaChat
-                    key={selected.id}
-                    reservaId={selected.id}
-                    currentUserId={user.id}
-                    encerrada={ENCERRADA.has(selected.status ?? "")}
-                    onNovaMensagem={(msg) =>
-                      setUltimasMensagens((m) => new Map(m).set(selected.id, msg))
-                    }
-                    onMarcadasComoLidas={() =>
-                      setNaoLidas((m) => {
-                        if (!m.has(selected.id)) return m;
-                        const n = new Map(m);
-                        n.delete(selected.id);
-                        return n;
-                      })
-                    }
-                  />
-                )}
+          >
+            <div className="p-4 space-y-3 border-b shrink-0">
+              <h1 className="font-display font-bold text-xl text-primary">Conversas</h1>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+                <Input
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder="Buscar por família…"
+                  className="pl-9 h-9 bg-muted/40 border-transparent"
+                />
               </div>
-            </>
-          )}
-        </section>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFiltro("todas")}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-xs font-medium transition",
+                    filtro === "todas"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground/60 hover:bg-muted/70",
+                  )}
+                >
+                  Todas
+                </button>
+                <button
+                  onClick={() => setFiltro("nao_lidas")}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-xs font-medium transition",
+                    filtro === "nao_lidas"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground/60 hover:bg-muted/70",
+                  )}
+                >
+                  Não lidas
+                </button>
+                <button
+                  onClick={() => setFiltro("nao_respondidas")}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-xs font-medium transition",
+                    filtro === "nao_respondidas"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground/60 hover:bg-muted/70",
+                  )}
+                >
+                  Não respondidas
+                </button>
+              </div>
+            </div>
 
-        {selected && (
-          <aside className="hidden xl:flex xl:w-[320px] shrink-0 border-l flex-col overflow-y-auto bg-muted/20">
-            <ReservaInfoPainel reserva={selected} />
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {conversas.length === 0 ? (
+                <p className="text-sm text-foreground/50 text-center p-6">
+                  Nenhuma conversa por aqui ainda.
+                </p>
+              ) : (
+                <ul>
+                  {conversas.map((r) => {
+                    const ultima = ultimasMensagens.get(r.id);
+                    const naoLidasCount = naoLidas.get(r.id) ?? 0;
+                    const nome = r.familia_profiles?.nome_responsavel ?? "Família não identificada";
+                    const status = r.status ?? "pendente";
+                    return (
+                      <li key={r.id}>
+                        <button
+                          onClick={() => setSelectedId(r.id)}
+                          className={cn(
+                            "w-full text-left px-4 py-3 flex items-start gap-3 border-b border-border/60 transition",
+                            selectedId === r.id ? "bg-azul-claro/50" : "hover:bg-muted/40",
+                          )}
+                        >
+                          <Avatar className="h-11 w-11 shrink-0">
+                            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+                              {iniciais(nome)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span
+                                className={cn(
+                                  "truncate text-sm",
+                                  naoLidasCount > 0
+                                    ? "font-bold text-foreground"
+                                    : "font-medium text-foreground/90",
+                                )}
+                              >
+                                {nome}
+                              </span>
+                              <span className="text-[11px] text-foreground/40 shrink-0">
+                                {new Date(ultima?.criado_em ?? r.criado_em).toLocaleDateString(
+                                  "pt-BR",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                  },
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                              <p
+                                className={cn(
+                                  "truncate text-xs",
+                                  naoLidasCount > 0 ? "text-foreground/80" : "text-foreground/50",
+                                )}
+                              >
+                                {ultima ? ultima.corpo : "Nenhuma mensagem ainda"}
+                              </p>
+                              {naoLidasCount > 0 && (
+                                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white bg-secondary shrink-0">
+                                  {naoLidasCount}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <span
+                                className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT_CLASS[status])}
+                              />
+                              <span className="text-[10px] uppercase tracking-wide text-foreground/40">
+                                {status}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </aside>
-        )}
-      </div>
+
+          <section
+            className={cn(
+              "flex-1 min-w-0 flex-col min-h-0 bg-white",
+              selected ? "flex" : "hidden md:flex",
+            )}
+          >
+            {!selected ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-foreground/40 gap-2">
+                <MessagesSquare className="h-10 w-10" />
+                <p className="text-sm">Selecione uma conversa para começar</p>
+              </div>
+            ) : (
+              <>
+                <header className="shrink-0 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <button
+                      onClick={() => setSelectedId(null)}
+                      className="md:hidden text-foreground/60 hover:text-primary shrink-0"
+                      aria-label="Voltar para conversas"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <Avatar className="h-9 w-9 shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+                        {iniciais(selected.familia_profiles?.nome_responsavel)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <h2 className="font-display font-bold text-foreground truncate">
+                        {selected.familia_profiles?.nome_responsavel ?? "Família"}
+                      </h2>
+                    </div>
+                    <StatusBadge status={selected.status} />
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="text-foreground/50 hover:text-primary hover:bg-muted rounded-full p-2 transition shrink-0"
+                        aria-label="Opções da conversa"
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/meu-estabelecimento/reservas" search={{ reserva: selected.id }}>
+                          <ExternalLink className="h-4 w-4 mr-2" /> Ver reserva completa
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </header>
+
+                <div className="flex-1 min-h-0">
+                  {user && (
+                    <ReservaChat
+                      key={selected.id}
+                      reservaId={selected.id}
+                      currentUserId={user.id}
+                      encerrada={ENCERRADA.has(selected.status ?? "")}
+                      onNovaMensagem={(msg) =>
+                        setUltimasMensagens((m) => new Map(m).set(selected.id, msg))
+                      }
+                      onMarcadasComoLidas={() =>
+                        setNaoLidas((m) => {
+                          if (!m.has(selected.id)) return m;
+                          const n = new Map(m);
+                          n.delete(selected.id);
+                          return n;
+                        })
+                      }
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </section>
+
+          {selected && (
+            <aside className="hidden xl:flex xl:w-[320px] shrink-0 border-l flex-col overflow-y-auto bg-muted/20">
+              <ReservaInfoPainel reserva={selected} />
+            </aside>
+          )}
+        </div>
       )}
     </div>
   );

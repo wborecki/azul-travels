@@ -19,6 +19,7 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
 import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
+import { Route as MeuEstabelecimentoRouteImport } from './routes/meu-estabelecimento'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FamiliasRouteImport } from './routes/familias'
 import { Route as ExplorarRouteImport } from './routes/explorar'
@@ -119,6 +120,11 @@ const MinhaContaRoute = MinhaContaRouteImport.update({
   path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeuEstabelecimentoRoute = MeuEstabelecimentoRouteImport.update({
+  id: '/meu-estabelecimento',
+  path: '/meu-estabelecimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -185,9 +191,9 @@ const MinhaContaIndexRoute = MinhaContaIndexRouteImport.update({
   getParentRoute: () => MinhaContaRoute,
 } as any)
 const MeuEstabelecimentoIndexRoute = MeuEstabelecimentoIndexRouteImport.update({
-  id: '/meu-estabelecimento/',
-  path: '/meu-estabelecimento/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => MeuEstabelecimentoRoute,
 } as any)
 const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
@@ -216,20 +222,20 @@ const MinhaContaPerfilRoute = MinhaContaPerfilRouteImport.update({
 } as any)
 const MeuEstabelecimentoReservasRoute =
   MeuEstabelecimentoReservasRouteImport.update({
-    id: '/meu-estabelecimento/reservas',
-    path: '/meu-estabelecimento/reservas',
-    getParentRoute: () => rootRouteImport,
+    id: '/reservas',
+    path: '/reservas',
+    getParentRoute: () => MeuEstabelecimentoRoute,
   } as any)
 const MeuEstabelecimentoMensagensRoute =
   MeuEstabelecimentoMensagensRouteImport.update({
-    id: '/meu-estabelecimento/mensagens',
-    path: '/meu-estabelecimento/mensagens',
-    getParentRoute: () => rootRouteImport,
+    id: '/mensagens',
+    path: '/mensagens',
+    getParentRoute: () => MeuEstabelecimentoRoute,
   } as any)
 const MeuEstabelecimentoItensRoute = MeuEstabelecimentoItensRouteImport.update({
-  id: '/meu-estabelecimento/itens',
-  path: '/meu-estabelecimento/itens',
-  getParentRoute: () => rootRouteImport,
+  id: '/itens',
+  path: '/itens',
+  getParentRoute: () => MeuEstabelecimentoRoute,
 } as any)
 const LSlugRoute = LSlugRouteImport.update({
   id: '/l/$slug',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/meu-estabelecimento': typeof MeuEstabelecimentoRouteWithChildren
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
@@ -506,6 +513,7 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
+  '/meu-estabelecimento': typeof MeuEstabelecimentoRouteWithChildren
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
@@ -569,6 +577,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/meu-estabelecimento'
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
@@ -688,6 +697,7 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
+    | '/meu-estabelecimento'
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
@@ -750,6 +760,7 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
+  MeuEstabelecimentoRoute: typeof MeuEstabelecimentoRouteWithChildren
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
   MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
@@ -763,13 +774,9 @@ export interface RootRouteChildren {
   ConteudoSlugRoute: typeof ConteudoSlugRoute
   EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
   LSlugRoute: typeof LSlugRoute
-  MeuEstabelecimentoItensRoute: typeof MeuEstabelecimentoItensRouteWithChildren
-  MeuEstabelecimentoMensagensRoute: typeof MeuEstabelecimentoMensagensRoute
-  MeuEstabelecimentoReservasRoute: typeof MeuEstabelecimentoReservasRoute
   PreCheckinSlugRoute: typeof PreCheckinSlugRoute
   QuartosIdRoute: typeof QuartosIdRoute
   ConteudoIndexRoute: typeof ConteudoIndexRoute
-  MeuEstabelecimentoIndexRoute: typeof MeuEstabelecimentoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -842,6 +849,13 @@ declare module '@tanstack/react-router' {
       path: '/minha-conta'
       fullPath: '/minha-conta'
       preLoaderRoute: typeof MinhaContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meu-estabelecimento': {
+      id: '/meu-estabelecimento'
+      path: '/meu-estabelecimento'
+      fullPath: '/meu-estabelecimento'
+      preLoaderRoute: typeof MeuEstabelecimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -937,10 +951,10 @@ declare module '@tanstack/react-router' {
     }
     '/meu-estabelecimento/': {
       id: '/meu-estabelecimento/'
-      path: '/meu-estabelecimento'
+      path: '/'
       fullPath: '/meu-estabelecimento/'
       preLoaderRoute: typeof MeuEstabelecimentoIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
     }
     '/conteudo/': {
       id: '/conteudo/'
@@ -979,24 +993,24 @@ declare module '@tanstack/react-router' {
     }
     '/meu-estabelecimento/reservas': {
       id: '/meu-estabelecimento/reservas'
-      path: '/meu-estabelecimento/reservas'
+      path: '/reservas'
       fullPath: '/meu-estabelecimento/reservas'
       preLoaderRoute: typeof MeuEstabelecimentoReservasRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
     }
     '/meu-estabelecimento/mensagens': {
       id: '/meu-estabelecimento/mensagens'
-      path: '/meu-estabelecimento/mensagens'
+      path: '/mensagens'
       fullPath: '/meu-estabelecimento/mensagens'
       preLoaderRoute: typeof MeuEstabelecimentoMensagensRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
     }
     '/meu-estabelecimento/itens': {
       id: '/meu-estabelecimento/itens'
-      path: '/meu-estabelecimento/itens'
+      path: '/itens'
       fullPath: '/meu-estabelecimento/itens'
       preLoaderRoute: typeof MeuEstabelecimentoItensRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
     }
     '/l/$slug': {
       id: '/l/$slug'
@@ -1252,6 +1266,41 @@ const DemoRouteChildren: DemoRouteChildren = {
 
 const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
 
+interface MeuEstabelecimentoItensRouteChildren {
+  MeuEstabelecimentoItensIdRoute: typeof MeuEstabelecimentoItensIdRoute
+  MeuEstabelecimentoItensNovaRoute: typeof MeuEstabelecimentoItensNovaRoute
+  MeuEstabelecimentoItensIndexRoute: typeof MeuEstabelecimentoItensIndexRoute
+}
+
+const MeuEstabelecimentoItensRouteChildren: MeuEstabelecimentoItensRouteChildren =
+  {
+    MeuEstabelecimentoItensIdRoute: MeuEstabelecimentoItensIdRoute,
+    MeuEstabelecimentoItensNovaRoute: MeuEstabelecimentoItensNovaRoute,
+    MeuEstabelecimentoItensIndexRoute: MeuEstabelecimentoItensIndexRoute,
+  }
+
+const MeuEstabelecimentoItensRouteWithChildren =
+  MeuEstabelecimentoItensRoute._addFileChildren(
+    MeuEstabelecimentoItensRouteChildren,
+  )
+
+interface MeuEstabelecimentoRouteChildren {
+  MeuEstabelecimentoItensRoute: typeof MeuEstabelecimentoItensRouteWithChildren
+  MeuEstabelecimentoMensagensRoute: typeof MeuEstabelecimentoMensagensRoute
+  MeuEstabelecimentoReservasRoute: typeof MeuEstabelecimentoReservasRoute
+  MeuEstabelecimentoIndexRoute: typeof MeuEstabelecimentoIndexRoute
+}
+
+const MeuEstabelecimentoRouteChildren: MeuEstabelecimentoRouteChildren = {
+  MeuEstabelecimentoItensRoute: MeuEstabelecimentoItensRouteWithChildren,
+  MeuEstabelecimentoMensagensRoute: MeuEstabelecimentoMensagensRoute,
+  MeuEstabelecimentoReservasRoute: MeuEstabelecimentoReservasRoute,
+  MeuEstabelecimentoIndexRoute: MeuEstabelecimentoIndexRoute,
+}
+
+const MeuEstabelecimentoRouteWithChildren =
+  MeuEstabelecimentoRoute._addFileChildren(MeuEstabelecimentoRouteChildren)
+
 interface MinhaContaRouteChildren {
   MinhaContaPerfilRoute: typeof MinhaContaPerfilRoute
   MinhaContaIndexRoute: typeof MinhaContaIndexRoute
@@ -1276,24 +1325,6 @@ const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
   MinhaContaRouteChildren,
 )
 
-interface MeuEstabelecimentoItensRouteChildren {
-  MeuEstabelecimentoItensIdRoute: typeof MeuEstabelecimentoItensIdRoute
-  MeuEstabelecimentoItensNovaRoute: typeof MeuEstabelecimentoItensNovaRoute
-  MeuEstabelecimentoItensIndexRoute: typeof MeuEstabelecimentoItensIndexRoute
-}
-
-const MeuEstabelecimentoItensRouteChildren: MeuEstabelecimentoItensRouteChildren =
-  {
-    MeuEstabelecimentoItensIdRoute: MeuEstabelecimentoItensIdRoute,
-    MeuEstabelecimentoItensNovaRoute: MeuEstabelecimentoItensNovaRoute,
-    MeuEstabelecimentoItensIndexRoute: MeuEstabelecimentoItensIndexRoute,
-  }
-
-const MeuEstabelecimentoItensRouteWithChildren =
-  MeuEstabelecimentoItensRoute._addFileChildren(
-    MeuEstabelecimentoItensRouteChildren,
-  )
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
@@ -1307,6 +1338,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
+  MeuEstabelecimentoRoute: MeuEstabelecimentoRouteWithChildren,
   MinhaContaRoute: MinhaContaRouteWithChildren,
   MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
@@ -1320,13 +1352,9 @@ const rootRouteChildren: RootRouteChildren = {
   ConteudoSlugRoute: ConteudoSlugRoute,
   EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
   LSlugRoute: LSlugRoute,
-  MeuEstabelecimentoItensRoute: MeuEstabelecimentoItensRouteWithChildren,
-  MeuEstabelecimentoMensagensRoute: MeuEstabelecimentoMensagensRoute,
-  MeuEstabelecimentoReservasRoute: MeuEstabelecimentoReservasRoute,
   PreCheckinSlugRoute: PreCheckinSlugRoute,
   QuartosIdRoute: QuartosIdRoute,
   ConteudoIndexRoute: ConteudoIndexRoute,
-  MeuEstabelecimentoIndexRoute: MeuEstabelecimentoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

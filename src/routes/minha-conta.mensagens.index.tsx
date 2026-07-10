@@ -139,7 +139,7 @@ function MensagensWorkspace() {
   };
 
   return (
-    <div className="fixed inset-x-0 top-16 bottom-0 z-20 flex bg-white">
+    <div className="fixed inset-x-0 top-32 bottom-0 z-20 flex bg-white">
       <aside
         className={cn(
           "w-full md:w-[320px] shrink-0 border-r flex flex-col min-h-0",
