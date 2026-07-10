@@ -18,6 +18,21 @@ export async function fetchItensDoEstabelecimento(
   return data ?? [];
 }
 
+/** Itens ativos de um estabelecimento, para a vitrine pública - mais baratos primeiro. */
+export async function fetchItensAtivosDoEstabelecimento(
+  estabelecimentoId: string,
+): Promise<ItemReservavel[]> {
+  const { data, error } = await supabase
+    .from("itens_reservaveis")
+    .select("*")
+    .eq("estabelecimento_id", estabelecimentoId)
+    .eq("ativo", true)
+    .order("preco", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function fetchItemReservavelPorId(id: string): Promise<ItemReservavel | null> {
   const { data, error } = await supabase
     .from("itens_reservaveis")

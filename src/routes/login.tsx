@@ -193,6 +193,7 @@ function LoginPage() {
             Ainda não tem conta?{" "}
             <Link
               to="/cadastro"
+              search={redirect ? { redirect } : {}}
               className="font-bold no-underline hover:underline"
               style={{ color: "#2563eb" }}
             >

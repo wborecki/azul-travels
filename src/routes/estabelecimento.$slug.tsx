@@ -4,6 +4,7 @@ import {
   fetchEstabelecimentoDetalhe,
   fetchPerfisDaFamilia,
   fetchReservasDaFamiliaPorEstabelecimento,
+  fetchItensAtivosDoEstabelecimento,
   criarReserva,
   buildReservaPayload,
   pickEstabMedia,
@@ -12,7 +13,9 @@ import {
   type PerfilOption,
   type ReservaComContexto,
   type ReservaFormInput,
+  type ItemReservavel,
 } from "@/lib/queries";
+import { QuartoCard } from "@/components/estabelecimento/QuartoCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -112,6 +115,8 @@ function EstabPage() {
   const [perfilSel, setPerfilSel] = useState<string>("");
   const [reservasFamilia, setReservasFamilia] = useState<ReservaComContexto[]>([]);
   const [reservaRecemCriadaId, setReservaRecemCriadaId] = useState<string | null>(null);
+  const [quartos, setQuartos] = useState<ItemReservavel[]>([]);
+  const [quartosCarregando, setQuartosCarregando] = useState(true);
 
   // Modal "Adicionar novo perfil"
   const [perfilModalOpen, setPerfilModalOpen] = useState(false);
@@ -142,6 +147,23 @@ function EstabPage() {
       }
     })();
   }, [slug, navigate]);
+
+  useEffect(() => {
+    if (!detalhe?.estabelecimento.id) return;
+    setQuartosCarregando(true);
+    void (async () => {
+      try {
+        const data = await fetchItensAtivosDoEstabelecimento(detalhe.estabelecimento.id);
+        setQuartos(data);
+      } catch (err) {
+        toast.error("Erro ao carregar quartos disponíveis", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        setQuartosCarregando(false);
+      }
+    })();
+  }, [detalhe?.estabelecimento.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -352,6 +374,27 @@ function EstabPage() {
         <div className="grid lg:grid-cols-[1fr_400px] gap-8">
           {/* COLUNA ESQUERDA · conteúdo */}
           <div className="space-y-10 min-w-0">
+            {/* Quartos disponíveis */}
+            <section id="quartos" className="scroll-mt-24">
+              <h2 className="text-xl font-bold text-primary mb-3">Quartos disponíveis</h2>
+              {quartosCarregando ? (
+                <div className="space-y-3">
+                  <div className="h-32 bg-muted animate-pulse rounded-2xl" />
+                  <div className="h-32 bg-muted animate-pulse rounded-2xl" />
+                </div>
+              ) : quartos.length === 0 ? (
+                <p className="text-sm text-muted-foreground bg-muted/40 rounded-xl p-4">
+                  Este estabelecimento ainda não cadastrou quartos disponíveis para reserva.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {quartos.map((quarto) => (
+                    <QuartoCard key={quarto.id} item={quarto} estabelecimentoSlug={e.slug} />
+                  ))}
+                </div>
+              )}
+            </section>
+
             {/* Sobre o local para famílias TEA */}
             <section>
               <h2 className="text-xl font-bold text-primary mb-3">
@@ -474,19 +517,28 @@ function EstabPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
             <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
               <h3 className="text-lg font-bold text-primary">Solicitar Reserva</h3>
-              <p className="text-sm text-muted-foreground">
-                Envie o perfil completo do seu filho para que a equipe esteja
-                preparada antes da chegada.
-              </p>
-              <Button
-                asChild
-                className="w-full bg-secondary hover:bg-secondary/90 text-white"
-                size="lg"
-              >
-                <Link to="/minha-conta/reservas/nova" search={{ slug: e.slug } as never}>
-                  Solicitar Reserva
-                </Link>
-              </Button>
+              {quartos.length > 0 ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    A partir de{" "}
+                    <span className="font-semibold text-primary">
+                      {Math.min(...quartos.map((q) => q.preco)).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>{" "}
+                    / noite. Escolha um quarto para enviar o pedido com o perfil sensorial do seu
+                    filho.
+                  </p>
+                  <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-white" size="lg">
+                    <a href="#quartos">Ver quartos disponíveis</a>
+                  </Button>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Este estabelecimento ainda não tem quartos disponíveis para reserva.
+                </p>
+              )}
               <p className="text-[11px] text-muted-foreground leading-snug">
                 Esta plataforma conecta você ao estabelecimento. O pagamento é
                 feito diretamente com eles.
@@ -510,8 +562,7 @@ function EstabPage() {
           <DialogHeader>
             <DialogTitle>Adicionar novo perfil sensorial</DialogTitle>
             <DialogDescription>
-              Cadastre o perfil de mais uma criança da sua família.
-            </DialogDescription>
+                        </DialogDescription>
           </DialogHeader>
           <PerfilSensorialForm
             draft={novoPerfil}

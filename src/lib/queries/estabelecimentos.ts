@@ -389,6 +389,21 @@ export async function fetchEstabelecimentoPorSlug(
   return data ? normalizeEstabelecimento(data) : null;
 }
 
+/** Mesma garantia de `fetchEstabelecimentoPorSlug`, buscando por `id` - usado nas páginas de item reservável. */
+export async function fetchEstabelecimentoPorId(
+  id: string,
+): Promise<EstabelecimentoNormalized | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("*")
+    .eq("id", id)
+    .eq("status", "ativo")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? normalizeEstabelecimento(data) : null;
+}
+
 /** Campos mínimos que `/meu-estabelecimento` precisa do próprio local do dono. */
 export type EstabelecimentoDoOwner = Pick<
   EstabelecimentoFull,

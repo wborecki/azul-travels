@@ -21,6 +21,7 @@ export { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./ava
 
 export {
   fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentoPorId,
   fetchEstabelecimentoDetalhe,
   fetchEstabelecimentoDoOwner,
   fetchEstabelecimentosView,
@@ -88,6 +89,7 @@ export {
 // Itens reserváveis do estabelecimento (quarto de hotel) - Fase 1.
 export {
   fetchItensDoEstabelecimento,
+  fetchItensAtivosDoEstabelecimento,
   fetchItemReservavelPorId,
   criarItemReservavel,
   atualizarItemReservavel,
@@ -96,6 +98,9 @@ export {
   type ItemReservavelInsert,
   type ItemReservavelUpdate,
 } from "./itens-reservaveis";
+
+// Disponibilidade pública do item (dias bloqueados/lotados) para o calendário.
+export { fetchDatasIndisponiveisItem } from "./disponibilidade";
 
 // Períodos em que um item reservável fica manualmente indisponível (manutenção etc.).
 export {

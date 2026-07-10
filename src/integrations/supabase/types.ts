@@ -395,6 +395,7 @@ export type Database = {
           email: string | null
           endereco: string | null
           estado: string | null
+          estrutura: Json
           foto_capa: string | null
           fotos: Json | null
           id: string
@@ -439,6 +440,7 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          estrutura?: Json
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
@@ -483,6 +485,7 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          estrutura?: Json
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
@@ -1583,6 +1586,10 @@ export type Database = {
     }
     Functions: {
       _mascarar_email: { Args: { _email: string }; Returns: string }
+      datas_indisponiveis_item: {
+        Args: { p_item_id: string; p_inicio?: string; p_fim?: string }
+        Returns: { dia: string }[]
+      }
       expurgar_admin_password_resets: {
         Args: { _dias?: number }
         Returns: number

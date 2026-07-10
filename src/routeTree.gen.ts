@@ -14,6 +14,7 @@ import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SelecionarPerfilRouteImport } from './routes/selecionar-perfil'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReservarRouteImport } from './routes/reservar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
 import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
@@ -34,6 +35,7 @@ import { Route as MinhaContaIndexRouteImport } from './routes/minha-conta.index'
 import { Route as MeuEstabelecimentoIndexRouteImport } from './routes/meu-estabelecimento.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as QuartosIdRouteImport } from './routes/quartos.$id'
 import { Route as PreCheckinSlugRouteImport } from './routes/pre-checkin.$slug'
 import { Route as MinhaContaPerfilRouteImport } from './routes/minha-conta.perfil'
 import { Route as MeuEstabelecimentoReservasRouteImport } from './routes/meu-estabelecimento.reservas'
@@ -90,6 +92,11 @@ const SelecionarPerfilRoute = SelecionarPerfilRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReservarRoute = ReservarRouteImport.update({
+  id: '/reservar',
+  path: '/reservar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -191,6 +198,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const QuartosIdRoute = QuartosIdRouteImport.update({
+  id: '/quartos/$id',
+  path: '/quartos/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PreCheckinSlugRoute = PreCheckinSlugRouteImport.update({
   id: '/pre-checkin/$slug',
@@ -378,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -400,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/minha-conta/perfil': typeof MinhaContaPerfilRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/meu-estabelecimento/': typeof MeuEstabelecimentoIndexRoute
@@ -435,6 +449,7 @@ export interface FileRoutesByTo {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -456,6 +471,7 @@ export interface FileRoutesByTo {
   '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/minha-conta/perfil': typeof MinhaContaPerfilRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
   '/meu-estabelecimento': typeof MeuEstabelecimentoIndexRoute
@@ -494,6 +510,7 @@ export interface FileRoutesById {
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -516,6 +533,7 @@ export interface FileRoutesById {
   '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/minha-conta/perfil': typeof MinhaContaPerfilRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
   '/meu-estabelecimento/': typeof MeuEstabelecimentoIndexRoute
@@ -555,6 +573,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -577,6 +596,7 @@ export interface FileRouteTypes {
     | '/meu-estabelecimento/reservas'
     | '/minha-conta/perfil'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin/'
     | '/conteudo/'
     | '/meu-estabelecimento/'
@@ -612,6 +632,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -633,6 +654,7 @@ export interface FileRouteTypes {
     | '/meu-estabelecimento/reservas'
     | '/minha-conta/perfil'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin'
     | '/conteudo'
     | '/meu-estabelecimento'
@@ -670,6 +692,7 @@ export interface FileRouteTypes {
     | '/minha-empresa'
     | '/nossa-historia'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -692,6 +715,7 @@ export interface FileRouteTypes {
     | '/meu-estabelecimento/reservas'
     | '/minha-conta/perfil'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin/'
     | '/conteudo/'
     | '/meu-estabelecimento/'
@@ -730,6 +754,7 @@ export interface RootRouteChildren {
   MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ReservarRoute: typeof ReservarRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SelecionarPerfilRoute: typeof SelecionarPerfilRoute
   SobreRoute: typeof SobreRoute
@@ -742,6 +767,7 @@ export interface RootRouteChildren {
   MeuEstabelecimentoMensagensRoute: typeof MeuEstabelecimentoMensagensRoute
   MeuEstabelecimentoReservasRoute: typeof MeuEstabelecimentoReservasRoute
   PreCheckinSlugRoute: typeof PreCheckinSlugRoute
+  QuartosIdRoute: typeof QuartosIdRoute
   ConteudoIndexRoute: typeof ConteudoIndexRoute
   MeuEstabelecimentoIndexRoute: typeof MeuEstabelecimentoIndexRoute
 }
@@ -781,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reservar': {
+      id: '/reservar'
+      path: '/reservar'
+      fullPath: '/reservar'
+      preLoaderRoute: typeof ReservarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -922,6 +955,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/quartos/$id': {
+      id: '/quartos/$id'
+      path: '/quartos/$id'
+      fullPath: '/quartos/$id'
+      preLoaderRoute: typeof QuartosIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/pre-checkin/$slug': {
       id: '/pre-checkin/$slug'
@@ -1271,6 +1311,7 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ReservarRoute: ReservarRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SelecionarPerfilRoute: SelecionarPerfilRoute,
   SobreRoute: SobreRoute,
@@ -1283,6 +1324,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeuEstabelecimentoMensagensRoute: MeuEstabelecimentoMensagensRoute,
   MeuEstabelecimentoReservasRoute: MeuEstabelecimentoReservasRoute,
   PreCheckinSlugRoute: PreCheckinSlugRoute,
+  QuartosIdRoute: QuartosIdRoute,
   ConteudoIndexRoute: ConteudoIndexRoute,
   MeuEstabelecimentoIndexRoute: MeuEstabelecimentoIndexRoute,
 }

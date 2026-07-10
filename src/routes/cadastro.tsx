@@ -11,6 +11,10 @@ import { toast } from "sonner";
 import { logAuthEvent } from "@/lib/audit/logAuthEvent";
 
 export const Route = createFileRoute("/cadastro")({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    const r = typeof search.redirect === "string" ? search.redirect : undefined;
+    return r ? { redirect: r } : {};
+  },
   head: () => ({ meta: [{ title: "Criar conta · Turismo Azul" }] }),
   component: CadastroPage,
 });
@@ -18,6 +22,7 @@ export const Route = createFileRoute("/cadastro")({
 type AccountType = "familia" | "estabelecimento";
 
 function CadastroPage() {
+  const { redirect } = Route.useSearch();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
@@ -25,8 +30,12 @@ function CadastroPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (user) navigate({ to: "/minha-conta" });
-  }, [user, loading, navigate]);
+    if (user) {
+      const redirectValido =
+        redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : null;
+      navigate({ to: redirectValido ?? "/minha-conta" });
+    }
+  }, [user, loading, redirect, navigate]);
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -61,13 +70,18 @@ function CadastroPage() {
           {step === 2 && accountType && (
             <StepData
               accountType={accountType}
+              redirect={redirect}
               onBack={() => setStep(1)}
             />
           )}
 
           <p className="mt-6 text-sm text-center text-muted-foreground">
             Já tem conta?{" "}
-            <Link to="/login" className="text-primary font-semibold hover:underline">
+            <Link
+              to="/login"
+              search={redirect ? { redirect } : {}}
+              className="text-primary font-semibold hover:underline"
+            >
               Entrar
             </Link>
           </p>
@@ -162,7 +176,15 @@ function TypeCard({
   );
 }
 
-function StepData({ accountType, onBack }: { accountType: AccountType; onBack: () => void }) {
+function StepData({
+  accountType,
+  redirect,
+  onBack,
+}: {
+  accountType: AccountType;
+  redirect?: string;
+  onBack: () => void;
+}) {
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -183,7 +205,14 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
     }
     setBusy(true);
     const emailNorm = email.trim().toLowerCase();
-    const destino = accountType === "estabelecimento" ? "/meu-estabelecimento" : "/minha-conta";
+    // Conta de estabelecimento nunca reaproveita um redirect de família
+    // (ex.: vindo de /reservar) - só famílias voltam para onde estavam.
+    const redirectValido =
+      accountType === "familia" && redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+        ? redirect
+        : null;
+    const destino =
+      accountType === "estabelecimento" ? "/meu-estabelecimento" : (redirectValido ?? "/minha-conta");
     const { data, error } = await supabase.auth.signUp({
       email: emailNorm,
       password,
@@ -223,7 +252,7 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
       navigate({ to: destino });
     } else {
       toast.success("Conta criada! Confirme seu e-mail para entrar.");
-      navigate({ to: "/login" });
+      navigate({ to: "/login", search: redirectValido ? { redirect: redirectValido } : {} });
     }
   }
 

@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import logo from "@/assets/logo-turismo-azul.svg";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
+import { ESTRUTURA_ITEMS } from "@/lib/estrutura-tea";
 import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
 
 export const Route = createFileRoute("/meu-estabelecimento/")({
@@ -33,16 +34,6 @@ export const Route = createFileRoute("/meu-estabelecimento/")({
 
 const TIPOS = ESTAB_TIPOS;
 const COLAB_OPTS = ["1-5", "6-15", "16-30", "31-50", "50+"];
-const ESTRUTURA_ITEMS: Array<[string, string]> = [
-  ["quartos_silenciosos", "Quartos silenciosos disponíveis"],
-  ["iluminacao_regulavel", "Iluminação regulável nos quartos"],
-  ["area_escape_sensorial", "Área de descanso/escape sensorial"],
-  ["cardapio_seletividade", "Cardápio com opções para seletividade"],
-  ["comunicacao_visual", "Comunicação visual no estabelecimento"],
-  ["entrada_sem_filas", "Entrada sem filas disponível"],
-  ["piscina_horarios_reservados", "Área de piscina com horários reservados"],
-  ["equipe_treinada_tea", "Equipe com algum treinamento em TEA"],
-];
 
 type Estrutura = Record<string, boolean>;
 
@@ -203,6 +194,7 @@ function MeuEstabelecimentoPage() {
           website: draft.website || null,
           recebe_grupos_escolares_tea:
             draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
+          estrutura: draft.estrutura,
         })
         .eq("id", estabId);
     }
@@ -262,6 +254,12 @@ function MeuEstabelecimentoPage() {
                 >
                   Quartos
                 </Link>
+                <button
+                  onClick={() => setEditando(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+                >
+                  <Building2 className="h-4 w-4" /> Editar perfil
+                </button>
               </>
             )}
             <button
