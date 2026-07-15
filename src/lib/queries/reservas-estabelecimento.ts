@@ -8,6 +8,7 @@ export type ReservaEstabelecimentoRow = Reserva & {
     Tables<"familia_profiles">,
     "id" | "nome_responsavel" | "email" | "telefone" | "cidade" | "estado"
   > | null;
+  itens_reservaveis: Tables<"itens_reservaveis"> | null;
   perfil_sensorial: Tables<"perfil_sensorial"> | null;
   reserva_perfis: Array<{ perfil_sensorial: Tables<"perfil_sensorial"> | null }>;
   perfil_tea: Tables<"perfil_tea"> | null;
@@ -16,6 +17,7 @@ export type ReservaEstabelecimentoRow = Reserva & {
 const RESERVA_ESTAB_SELECT = `
   *,
   familia_profiles(id, nome_responsavel, email, telefone, cidade, estado),
+  itens_reservaveis(*),
   perfil_sensorial!reservas_perfil_sensorial_id_fkey(*),
   reserva_perfis(perfil_sensorial(*)),
   perfil_tea(*)

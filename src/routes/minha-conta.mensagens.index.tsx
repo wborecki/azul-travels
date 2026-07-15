@@ -2,7 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchReservasDaFamilia, type ReservaComContexto } from "@/lib/queries/reservas";
+import {
+  fetchReservasDaFamilia,
+  perfisDaReserva,
+  type ReservaComContexto,
+} from "@/lib/queries/reservas";
 import {
   fetchUltimasMensagensPorReservas,
   fetchContagemNaoLidasPorReservas,
@@ -28,7 +32,11 @@ import {
   Users,
   MapPin,
   Phone,
+  BedDouble,
+  Building2,
 } from "lucide-react";
+import { ItemReservadoFotos } from "@/components/reserva/ItemReservadoFotos";
+import { PerfisTeaLista } from "@/components/reserva/PerfisTeaDaReserva";
 import { formatDateBR } from "@/lib/brazil";
 import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
 import { STATUS_DOT_CLASS, STATUS_CHIP_CLASS } from "@/components/estabelecimento/StatusBadge";
@@ -374,20 +382,44 @@ function MensagensWorkspace() {
 
 function ReservaInfoPainel({ reserva }: { reserva: ReservaComContexto }) {
   const estab = reserva.estabelecimentos;
+  const item = reserva.itens_reservaveis;
+  const perfis = perfisDaReserva(reserva);
+
+  // Endereço do quarto quando ele tem endereço próprio; senão, o do estabelecimento.
+  const cidade = (item?.usa_endereco_proprio ? item.cidade : null) ?? estab?.cidade;
+  const estado = (item?.usa_endereco_proprio ? item.estado : null) ?? estab?.estado;
+  const endereco = (item?.usa_endereco_proprio ? item.endereco : null) ?? estab?.endereco;
 
   return (
     <div className="space-y-6">
-      <div
-        className="h-36 w-full bg-cover bg-center bg-primary/10"
-        style={estab?.foto_capa ? { backgroundImage: `url(${estab.foto_capa})` } : undefined}
-      />
+      {item ? (
+        <div className="px-4 pt-4">
+          <ItemReservadoFotos imagens={item.imagens} titulo={item.nome} alturaClassName="h-40" />
+        </div>
+      ) : (
+        <div
+          className="h-36 w-full bg-cover bg-center bg-primary/10"
+          style={estab?.foto_capa ? { backgroundImage: `url(${estab.foto_capa})` } : undefined}
+        />
+      )}
       <div className="px-5 space-y-6 pb-5">
         <div>
-          <h3 className="font-display font-bold text-lg text-foreground">{estab?.nome ?? "-"}</h3>
-          {(estab?.cidade || estab?.estado) && (
+          <h3 className="font-display font-bold text-lg text-foreground">
+            {item?.nome ?? estab?.nome ?? "-"}
+          </h3>
+          {(cidade || estado) && (
             <p className="text-sm text-foreground/50 mt-0.5">
-              {[estab?.cidade, estab?.estado].filter(Boolean).join(" / ")}
+              {[cidade, estado].filter(Boolean).join(" / ")}
             </p>
+          )}
+          {item && (
+            <Link
+              to="/quartos/$id"
+              params={{ id: item.id }}
+              className="mt-1.5 inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+            >
+              <ExternalLink className="h-3 w-3" /> Ver página do quarto
+            </Link>
           )}
         </div>
 
@@ -403,15 +435,44 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaComContexto }) {
             {reserva.num_adultos ?? 0} adulto(s) · {reserva.num_autistas ?? 0} autista(s)
             {reserva.num_acompanhantes ? ` · ${reserva.num_acompanhantes} acompanhante(s)` : ""}
           </InfoRow>
+          {item && (
+            <InfoRow icon={<BedDouble className="h-4 w-4" />}>
+              {item.quantidade_camas} cama(s) · até {item.capacidade_total} pessoa(s)
+              {item.check_in_padrao ? ` · check-in ${item.check_in_padrao.slice(0, 5)}` : ""}
+              {item.check_out_padrao ? ` · check-out ${item.check_out_padrao.slice(0, 5)}` : ""}
+            </InfoRow>
+          )}
         </section>
+
+        {perfis.length > 0 && (
+          <section className="space-y-2.5 border-t pt-4">
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
+              {perfis.length === 1 ? "Perfil TEA da reserva" : "Perfis TEA da reserva"}
+            </h4>
+            <PerfisTeaLista perfis={perfis} />
+          </section>
+        )}
 
         <section className="space-y-2.5 border-t pt-4">
           <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
-            Local
+            Estabelecimento
           </h4>
-          {estab?.endereco && (
-            <InfoRow icon={<MapPin className="h-4 w-4" />}>{estab.endereco}</InfoRow>
+          {estab && (
+            <InfoRow icon={<Building2 className="h-4 w-4" />}>
+              {estab.slug ? (
+                <Link
+                  to="/estabelecimento/$slug"
+                  params={{ slug: estab.slug }}
+                  className="hover:underline text-primary font-medium"
+                >
+                  {estab.nome}
+                </Link>
+              ) : (
+                estab.nome
+              )}
+            </InfoRow>
           )}
+          {endereco && <InfoRow icon={<MapPin className="h-4 w-4" />}>{endereco}</InfoRow>}
           {estab?.telefone && (
             <InfoRow icon={<Phone className="h-4 w-4" />}>{estab.telefone}</InfoRow>
           )}

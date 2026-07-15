@@ -39,7 +39,9 @@ import {
   X,
   CheckCheck,
   MessageSquare,
+  BedDouble,
 } from "lucide-react";
+import { ItemReservadoFotos } from "@/components/reserva/ItemReservadoFotos";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import {
@@ -161,8 +163,10 @@ function MeuEstabelecimentoReservasPage() {
   const reservasComBusca = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     if (!termo) return reservas;
-    return reservas.filter((r) =>
-      (r.familia_profiles?.nome_responsavel ?? "").toLowerCase().includes(termo),
+    return reservas.filter(
+      (r) =>
+        (r.familia_profiles?.nome_responsavel ?? "").toLowerCase().includes(termo) ||
+        (r.itens_reservaveis?.nome ?? "").toLowerCase().includes(termo),
     );
   }, [reservas, busca]);
 
@@ -354,6 +358,12 @@ function MeuEstabelecimentoReservasPage() {
                               <StatusBadge status={r.status} />
                             </div>
                             <div className="mt-1 text-sm text-foreground/60 flex flex-wrap items-center gap-x-3 gap-y-1">
+                              {r.itens_reservaveis && (
+                                <span className="inline-flex items-center gap-1 font-medium text-foreground/80">
+                                  <BedDouble className="h-3.5 w-3.5" />
+                                  {r.itens_reservaveis.nome}
+                                </span>
+                              )}
                               <span className="inline-flex items-center gap-1">
                                 <Calendar className="h-3.5 w-3.5" />
                                 {formatDataBr(r.data_checkin)}
@@ -481,6 +491,7 @@ function DetalheReserva({
   onAction: (next: ReservaStatus) => void;
 }) {
   const fam = reserva.familia_profiles;
+  const item = reserva.itens_reservaveis;
   const perfilTea = reserva.perfil_tea;
   const perfisSensoriais = perfisSensoriaisDaReservaEstab(reserva);
   const consentido = reserva.perfil_enviado_ao_estabelecimento;
@@ -495,7 +506,7 @@ function DetalheReserva({
           <StatusBadge status={reserva.status} />
         </div>
         <SheetDescription>
-          Recebida em{" "}
+          {item ? `${item.nome} · ` : ""}Recebida em{" "}
           {new Date(reserva.criado_em).toLocaleString("pt-BR", {
             dateStyle: "short",
             timeStyle: "short",
@@ -504,8 +515,39 @@ function DetalheReserva({
       </SheetHeader>
 
       <div className="mt-6 space-y-5">
+        <section className="space-y-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            O que foi reservado
+          </h3>
+          {item ? (
+            <>
+              <ItemReservadoFotos
+                imagens={item.imagens}
+                titulo={item.nome}
+                alturaClassName="h-36"
+              />
+              <div className="font-medium text-foreground">{item.nome}</div>
+              <InfoLine icon={<BedDouble className="h-4 w-4" />} label="Capacidade">
+                {item.quantidade_camas} cama(s) · até {item.capacidade_total} pessoa(s) ·{" "}
+                {item.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                /noite
+              </InfoLine>
+              {!item.ativo && (
+                <p className="text-xs text-muted-foreground inline-flex items-start gap-1.5">
+                  <ShieldAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  Este item não está mais ativo no seu catálogo.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground inline-flex items-start gap-1.5">
+              <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />
+              Reserva sem item vinculado (fluxo antigo, por estabelecimento).
+            </p>
+          )}
+        </section>
         {(reserva.status === "pendente" || reserva.status === "confirmada") && (
-          <section className="space-y-2">
+          <section className="space-y-2 border-t pt-4">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Ações
             </h3>
@@ -548,13 +590,7 @@ function DetalheReserva({
           </section>
         )}
 
-        <section
-          className={
-            reserva.status === "pendente" || reserva.status === "confirmada"
-              ? "space-y-2 border-t pt-4"
-              : "space-y-2"
-          }
-        >
+        <section className="space-y-2 border-t pt-4">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Estadia
           </h3>

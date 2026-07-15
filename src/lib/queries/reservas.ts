@@ -26,19 +26,39 @@ export type PerfilDaReserva = Pick<
   "id" | "nome_autista" | "nivel_tea" | "idade" | "foto_url"
 >;
 
-/** Reserva enriquecida com dados leves do estabelecimento e perfis. */
+/** Reserva enriquecida com dados leves do estabelecimento, item e perfis. */
 export type ReservaComContexto = Reserva & {
   estabelecimentos: Pick<
     Tables<"estabelecimentos">,
-    "id" | "slug" | "nome" | "cidade" | "estado" | "foto_capa" | "tipo" | "endereco" | "telefone"
+    | "id"
+    | "slug"
+    | "nome"
+    | "cidade"
+    | "estado"
+    | "foto_capa"
+    | "tipo"
+    | "endereco"
+    | "telefone"
+    | "tem_sala_sensorial"
+    | "tem_concierge_tea"
+    | "tem_checkin_antecipado"
+    | "tem_fila_prioritaria"
+    | "tem_cardapio_visual"
+    | "tem_caa"
+    | "tem_beneficio_tea"
+    | "beneficio_tea_descricao"
   > | null;
+  itens_reservaveis: Tables<"itens_reservaveis"> | null;
   perfil_sensorial: PerfilDaReserva | null;
   reserva_perfis: Array<{ perfil_sensorial: PerfilDaReserva | null }>;
 };
 
 const SELECT = `
   *,
-  estabelecimentos(id, slug, nome, cidade, estado, foto_capa, tipo, endereco, telefone),
+  estabelecimentos(id, slug, nome, cidade, estado, foto_capa, tipo, endereco, telefone,
+    tem_sala_sensorial, tem_concierge_tea, tem_checkin_antecipado, tem_fila_prioritaria,
+    tem_cardapio_visual, tem_caa, tem_beneficio_tea, beneficio_tea_descricao),
+  itens_reservaveis(*),
   perfil_sensorial!reservas_perfil_sensorial_id_fkey(id, nome_autista, nivel_tea, idade, foto_url),
   reserva_perfis(perfil_sensorial(id, nome_autista, nivel_tea, idade, foto_url))
 ` as const;

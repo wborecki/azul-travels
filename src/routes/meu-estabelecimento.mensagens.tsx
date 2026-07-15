@@ -22,6 +22,7 @@ import {
   MoreVertical,
   ShieldAlert,
   ArrowLeft,
+  BedDouble,
   ExternalLink,
   MessagesSquare,
 } from "lucide-react";
@@ -33,11 +34,14 @@ import {
   fetchReservasDoEstabelecimento,
   fetchUltimasMensagensPorReservas,
   fetchContagemNaoLidasPorReservas,
+  perfisSensoriaisDaReservaEstab,
   type ReservaEstabelecimentoRow,
   type ReservaMensagemRow,
 } from "@/lib/queries";
 import { StatusBadge, STATUS_DOT_CLASS } from "@/components/estabelecimento/StatusBadge";
 import { ReservaChat } from "@/components/ReservaChat";
+import { ItemReservadoFotos } from "@/components/reserva/ItemReservadoFotos";
+import { PerfisTeaLista } from "@/components/reserva/PerfisTeaDaReserva";
 
 type Filtro = "todas" | "nao_lidas" | "nao_respondidas";
 
@@ -429,6 +433,8 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaEstabelecimentoRow }) 
   const fam = reserva.familia_profiles;
   const consentido = reserva.perfil_enviado_ao_estabelecimento;
   const nome = fam?.nome_responsavel ?? "Família não identificada";
+  const perfis = perfisSensoriaisDaReservaEstab(reserva);
+  const item = reserva.itens_reservaveis;
 
   return (
     <div className="p-5 space-y-6">
@@ -459,6 +465,15 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaEstabelecimentoRow }) 
         </InfoRow>
       </section>
 
+      {perfis.length > 0 && (
+        <section className="space-y-2.5 border-t pt-4">
+          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
+            {perfis.length === 1 ? "Perfil TEA da reserva" : "Perfis TEA da reserva"}
+          </h4>
+          <PerfisTeaLista perfis={perfis} />
+        </section>
+      )}
+
       <section className="space-y-2.5 border-t pt-4">
         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
           Contato
@@ -486,6 +501,25 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaEstabelecimentoRow }) 
           </>
         )}
       </section>
+
+      {item && (
+        <section className="space-y-2.5 border-t pt-4">
+          <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
+            O que foi reservado
+          </h4>
+          <ItemReservadoFotos imagens={item.imagens} titulo={item.nome} alturaClassName="h-32" />
+          <p className="text-sm font-semibold text-foreground">{item.nome}</p>
+          <InfoRow icon={<BedDouble className="h-4 w-4" />}>
+            {item.quantidade_camas} cama(s) · até {item.capacidade_total} pessoa(s)
+          </InfoRow>
+          {!item.ativo && (
+            <p className="text-xs text-muted-foreground inline-flex items-start gap-1.5">
+              <ShieldAlert className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              Este item não está mais ativo no seu catálogo.
+            </p>
+          )}
+        </section>
+      )}
 
       {reserva.mensagem && (
         <section className="space-y-2 border-t pt-4">

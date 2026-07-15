@@ -64,6 +64,7 @@ export {
 export {
   fetchReservasDaFamilia,
   fetchReservasDaFamiliaPorEstabelecimento,
+  fetchReservaDaFamiliaPorId,
   criarReserva,
   vincularPerfisAReserva,
   perfisDaReserva,
