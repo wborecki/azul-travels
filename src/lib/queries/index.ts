@@ -5,9 +5,9 @@
  *
  *   import {
  *     fetchEstabelecimentoPorSlug,
- *     fetchEstabelecimentosView,
+ *     fetchItensViewPaginated,
  *     fetchAvaliacoesPublicasPorEstab,
- *     type EstabelecimentoView,
+ *     type ItemView,
  *     type EstabelecimentoFull,
  *     type AvaliacaoComFamilia,
  *   } from "@/lib/queries";
@@ -27,9 +27,6 @@ export {
   fetchNomeResponsavelDoEstabelecimento,
   fetchEstabelecimentoProfile,
   fetchEstabelecimentoFullDoOwner,
-  fetchEstabelecimentosView,
-  fetchEstabelecimentosViewPaginated,
-  fetchEstabelecimentosCards, // deprecated alias
   applyEstabelecimentosViewFilters,
   resolvePagination,
   normalizeEstabelecimento,
@@ -43,7 +40,6 @@ export {
   type EstabelecimentoDoOwner,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
-  type EstabelecimentosViewPage,
   type ResolvedPagination,
   type SeloFlag,
   type RecursoFlag,
@@ -222,3 +218,24 @@ export {
 
 // Encurtador de URLs do /explorar.
 export { obterOuCriarLinkCurto, resolverLinkCurto, type LinkCurto } from "./links-curtos";
+
+// Contatos gerais (formulários públicos de /contato e /explorar).
+export { criarContatoGeral, type ContatoGeralInsert } from "./contatos";
+
+// F1 — View SQL `itens_reservaveis_view` + camada de query para /explorar.
+export {
+  fetchItensViewPaginated,
+  normalizeItemView,
+  applyItensViewFilters,
+  ITEM_PAGE_SIZE_DEFAULT,
+  type ItemView,
+  type ItensViewFilters,
+  type ItensViewPage,
+  type SeloFlag as ItemSeloFlag,
+  type RecursoFlag as ItemRecursoFlag,
+  type Ordenacao,
+} from "./itens-view";
+
+// Shared pagination helpers (extraídos de estabelecimentos.ts).
+// `resolvePagination` e `ResolvedPagination` já são re-exportados via
+// `./estabelecimentos` — não duplicar aqui.

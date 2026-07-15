@@ -1618,7 +1618,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      itens_reservaveis_view: {
+        Row: {
+          id: string
+          item_nome: string
+          descricao: string | null
+          preco: number
+          quantidade: number
+          capacidade_total: number
+          capacidade_adultos: number | null
+          capacidade_criancas: number | null
+          comodidades: string[]
+          quantidade_camas: number
+          imagens: Json
+          check_in_padrao: string | null
+          check_out_padrao: string | null
+          cidade: string | null
+          estado: string | null
+          endereco: string | null
+          latitude: number | null
+          longitude: number | null
+          estabelecimento_id: string
+          estabelecimento_nome: string
+          estabelecimento_slug: string
+          estabelecimento_tipo: Database["public"]["Enums"]["estab_tipo"]
+          estabelecimento_foto_capa: string | null
+          estabelecimento_tour_360_url: string | null
+          selo_azul: boolean | null
+          selo_azul_validade: string | null
+          selo_governamental: boolean | null
+          selo_privado: boolean | null
+          selo_privado_nome: string | null
+          tem_beneficio_tea: boolean | null
+          beneficio_tea_descricao: string | null
+          tem_sala_sensorial: boolean | null
+          tem_concierge_tea: boolean | null
+          tem_checkin_antecipado: boolean | null
+          tem_fila_prioritaria: boolean | null
+          tem_cardapio_visual: boolean | null
+          tem_caa: boolean | null
+          destaque: boolean | null
+          recebe_grupos_escolares_tea: boolean
+          avaliacao_media: number | null
+          total_avaliacoes: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_reservaveis_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "estabelecimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       _mascarar_email: { Args: { _email: string }; Returns: string }

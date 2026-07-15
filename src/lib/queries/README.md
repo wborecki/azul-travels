@@ -6,7 +6,7 @@ o ESLint (`no-restricted-syntax` em `eslint.config.js`) bloqueia.
 
 ```ts
 // ✅ correto
-import { fetchEstabelecimentosView, type EstabelecimentoView } from "@/lib/queries";
+import { fetchItensViewPaginated, type ItemView } from "@/lib/queries";
 
 // ❌ erro de lint
 const { data } = await supabase.from("estabelecimentos").select("*");
@@ -73,32 +73,51 @@ type EstabelecimentoView = Pick<
 >;
 ```
 
+**Uso:** os fetchers públicos (`fetchEstabelecimentosView(Paginated)`) foram
+removidos quando `/explorar` migrou para itens reserváveis (ver `ItemView`
+abaixo). O shape continua vivo: o painel admin consome
+`applyEstabelecimentosViewFilters` + `ESTAB_VIEW_SELECT` via
+`fetchEstabelecimentosAdminView` (`admin.ts`), e os cards continuam
+recebendo `EstabelecimentoView` nos embeds.
+
+---
+
+### `ItemView` - `itens-view.ts`
+
+Payload da busca do `/explorar` (F1): cada **item reservável** ativo com o
+contexto do estabelecimento (selos, recursos TEA, localização efetiva
+considerando `usa_endereco_proprio`, média de avaliações públicas). Fonte:
+view SQL `itens_reservaveis_view` (`security_invoker`, herda a RLS pública).
+
+Garantias de normalização: `imagens` sempre `string[]` (via
+`normalizeFotos`), `avaliacao_media: number | null`,
+`total_avaliacoes: number`.
+
 **Uso:**
 ```ts
 import {
-  fetchEstabelecimentosView,
-  fetchEstabelecimentosViewPaginated,
-  ESTAB_PAGE_SIZE_DEFAULT,
-  type EstabelecimentosViewPage,
+  fetchItensViewPaginated,
+  ITEM_PAGE_SIZE_DEFAULT,
+  type ItensViewPage,
 } from "@/lib/queries";
 
-// Sem paginação visual - passar pagina/tamanhoPagina ainda funciona
-// (mais explícito do que o antigo `limite`).
-const destaques = await fetchEstabelecimentosView({
-  apenasDestaque: true,
-  pagina: 1,
-  tamanhoPagina: 6,
-});
-
-// Com paginação tipada (offset/limit) + total - usado em /explorar.
-const page: EstabelecimentosViewPage = await fetchEstabelecimentosViewPaginated({
-  busca: "florianopolis",
+// Sempre paginado, uma ida ao banco (count: "exact").
+const page: ItensViewPage = await fetchItensViewPaginated({
+  busca: "gramado",
   tipos: ["hotel", "pousada"],
-  pagina: 2,
-  tamanhoPagina: ESTAB_PAGE_SIZE_DEFAULT, // 24, clampado em [1, 100]
+  selos: ["selo_azul"],
+  recursos: ["tem_sala_sensorial"],
+  preco_max: 500,
+  capacidade_min: 3,
+  ordenacao: "avaliacao", // preco_asc (default) | preco_desc | avaliacao
+  pagina: 1,
+  tamanhoPagina: ITEM_PAGE_SIZE_DEFAULT, // 24, clampado em [1, 100]
 });
 // page.items, page.total, page.pagina, page.tamanhoPagina, page.totalPaginas
 ```
+
+Os search params da rota `/explorar` (URL ⇄ filtros) vivem em
+`src/lib/explorar-search.ts`.
 
 ---
 

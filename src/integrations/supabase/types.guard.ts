@@ -233,7 +233,9 @@ import type {
   EstabelecimentoFull,
   EstabelecimentoNormalized,
   EstabelecimentoView,
+  EstabelecimentoAdminView,
   EstabelecimentoDetalhe,
+  ItemView,
   ReservaComContexto,
   ReservaFormInput,
   PerfilOption,
@@ -241,7 +243,8 @@ import type {
 import {
   fetchEstabelecimentoPorSlug,
   fetchEstabelecimentoDetalhe,
-  fetchEstabelecimentosView,
+  fetchEstabelecimentosAdminView,
+  fetchItensViewPaginated,
   fetchReservasDaFamilia,
   criarReserva,
   buildReservaPayload,
@@ -250,7 +253,8 @@ import {
 
 type EstabReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoPorSlug>>>;
 type DetalheReturn = NonNullable<Awaited<ReturnType<typeof fetchEstabelecimentoDetalhe>>>;
-type ViewReturn = Awaited<ReturnType<typeof fetchEstabelecimentosView>>[number];
+type ViewReturn = Awaited<ReturnType<typeof fetchEstabelecimentosAdminView>>[number];
+type ItemReturn = Awaited<ReturnType<typeof fetchItensViewPaginated>>["items"][number];
 type ReservasReturn = Awaited<ReturnType<typeof fetchReservasDaFamilia>>[number];
 type CriarReservaReturn = Awaited<ReturnType<typeof criarReserva>>;
 type PerfisReturn = Awaited<ReturnType<typeof fetchPerfisDaFamilia>>[number];
@@ -299,12 +303,16 @@ type _CheckEstabIdMatchesFull = AssertEqual<
   "REGRESSION: Normalized.id divergiu de Full.id"
 >;
 
-// Payload View unificado - usado em listagem, cards, destaques, benefícios.
-type _CheckViewNotAny = AssertNotAny<ViewReturn, "REGRESSION: fetchEstabelecimentosView -> any">;
+// Payload View unificado - hoje servido pelo fetcher admin (o público de
+// /explorar migrou para itens_reservaveis_view, guardado logo abaixo).
+type _CheckViewNotAny = AssertNotAny<
+  ViewReturn,
+  "REGRESSION: fetchEstabelecimentosAdminView -> any"
+>;
 type _CheckViewShape = AssertEqual<
   ViewReturn,
-  EstabelecimentoView,
-  "REGRESSION: fetchEstabelecimentosView divergiu de EstabelecimentoView"
+  EstabelecimentoAdminView,
+  "REGRESSION: fetchEstabelecimentosAdminView divergiu de EstabelecimentoAdminView"
 >;
 
 // Garante que campos críticos da View existem com tipo certo.
@@ -329,6 +337,25 @@ type _CheckViewIdMatchesFull = AssertEqual<
   ViewReturn["id"],
   EstabelecimentoFull["id"],
   "REGRESSION: View.id e Full.id divergiram"
+>;
+
+// Payload de busca do /explorar (F1) - view `itens_reservaveis_view`.
+type _CheckItemNotAny = AssertNotAny<ItemReturn, "REGRESSION: fetchItensViewPaginated -> any">;
+type _CheckItemShape = AssertEqual<
+  ItemReturn,
+  ItemView,
+  "REGRESSION: fetchItensViewPaginated divergiu de ItemView"
+>;
+// Garantias de normalização - UI não lida com Json/null aqui.
+type _CheckItemImagens = AssertEqual<
+  ItemReturn["imagens"],
+  string[],
+  "REGRESSION: ItemView.imagens deveria ser string[]"
+>;
+type _CheckItemAvaliacao = AssertEqual<
+  ItemReturn["avaliacao_media"],
+  number | null,
+  "REGRESSION: ItemView.avaliacao_media quebrou"
 >;
 
 type _CheckReservasNotAny = AssertNotAny<

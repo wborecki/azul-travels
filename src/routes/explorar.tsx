@@ -1,105 +1,191 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { Compass, Loader2, SearchX, SlidersHorizontal } from "lucide-react";
+import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SearchBar } from "@/components/explorar/SearchBar";
+import { CategoryPills } from "@/components/explorar/CategoryPills";
+import { FilterPanel } from "@/components/explorar/FilterPanel";
+import { ItemCard } from "@/components/explorar/ItemCard";
+import { ExplorarPagination } from "@/components/explorar/ExplorarPagination";
+import { useAuth } from "@/hooks/useAuth";
 import {
-  fetchEstabelecimentosView,
-  type EstabelecimentoView,
-} from "@/lib/queries/estabelecimentos";
+  criarContatoGeral,
+  fetchItensViewPaginated,
+  fetchFiltrosPadrao,
+  salvarFiltrosPadrao,
+  temFiltrosSalvos,
+  type ItensViewPage,
+  type Ordenacao,
+} from "@/lib/queries";
 import {
-  ESTAB_TIPO_LABEL,
-  ESTAB_TIPOS,
-  SUBTIPO_EDUCATIVO_LABEL,
-  type EstabTipo,
-  type SubtipoEducativo,
-} from "@/lib/enums";
-import { ESTADOS_BR } from "@/lib/brazil";
-import {
-  VolumeX,
-  Utensils,
-  Eye,
-  Waves,
-  MapPin,
-  ShieldCheck,
-  Loader2,
-  Compass,
-} from "lucide-react";
-import { toast } from "sonner";
+  ORDENACAO_LABEL,
+  contarFiltrosAtivos,
+  csvOrUndefined,
+  parseRecursosCsv,
+  parseSelosCsv,
+  parseTiposCsv,
+  searchToFilters,
+  temFiltrosRelevantes,
+  validateExplorarSearch,
+  type ExplorarSearch,
+} from "@/lib/explorar-search";
 
 export const Route = createFileRoute("/explorar")({
+  validateSearch: validateExplorarSearch,
   head: () => ({
     meta: [
-      { title: "Explorar destinos · Turismo Azul" },
+      { title: "Explorar quartos · Turismo Azul" },
       {
         name: "description",
         content:
-          "Hotéis, pousadas, parques e restaurantes preparados para receber famílias TEA.",
+          "Encontre quartos e acomodações em hotéis, pousadas e resorts preparados para receber famílias TEA.",
       },
     ],
   }),
   component: ExplorarPage,
 });
 
-function ExplorarPage() {
-  const [items, setItems] = useState<EstabelecimentoView[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [estado, setEstado] = useState("");
-  const [tipo, setTipo] = useState<EstabTipo | "">("");
-  const [subtipoEdu, setSubtipoEdu] = useState<SubtipoEducativo | "fazenda_sitio" | "">("");
-  const [apenasSeloAzul, setApenasSeloAzul] = useState(false);
+const ORDENACOES_UI: ReadonlyArray<Ordenacao> = ["preco_asc", "preco_desc", "avaliacao"];
 
+function ExplorarPage() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/explorar" });
+  const { user, loading: authLoading } = useAuth();
+
+  const [pageData, setPageData] = useState<ItensViewPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
+  const [sheetAberto, setSheetAberto] = useState(false);
+  const [salvandoPadrao, setSalvandoPadrao] = useState(false);
+
+  // Busca paginada no servidor - a URL é a única fonte dos filtros.
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    fetchEstabelecimentosView({})
-      .then((rows) => {
-        if (alive) setItems(rows);
+    setErro(false);
+    fetchItensViewPaginated(searchToFilters(search))
+      .then((page) => {
+        if (alive) setPageData(page);
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Não foi possível carregar os estabelecimentos.");
+        if (!alive) return;
+        setErro(true);
+        toast.error("Não foi possível carregar os quartos.");
       })
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [search, tentativa]);
 
-  const total = items.length;
+  // URL apontando para página além da última (link antigo/compartilhado):
+  // corrige silenciosamente para a última página válida.
+  useEffect(() => {
+    if (loading || !pageData) return;
+    if (
+      pageData.total > 0 &&
+      pageData.items.length === 0 &&
+      pageData.pagina > pageData.totalPaginas
+    ) {
+      void navigate({
+        replace: true,
+        search: (prev) => ({
+          ...prev,
+          pagina: pageData.totalPaginas > 1 ? pageData.totalPaginas : undefined,
+        }),
+      });
+    }
+  }, [loading, pageData, navigate]);
 
-  const filtrados = useMemo(() => {
-    return items.filter((e) => {
-      if (estado && e.estado !== estado) return false;
-      if (tipo && e.tipo !== tipo) return false;
-      if (tipo === "passeio_educativo" && subtipoEdu) {
-        const sub = e.subtipo_educativo ?? "";
-        if (subtipoEdu === "fazenda_sitio") {
-          if (sub !== "fazenda" && sub !== "sitio") return false;
-        } else if (sub !== subtipoEdu) {
-          return false;
-        }
-      }
-      if (apenasSeloAzul && !e.selo_azul) return false;
-      return true;
-    });
-  }, [items, estado, tipo, subtipoEdu, apenasSeloAzul]);
+  // Entrada "limpa" de usuário logado: reaplica os filtros salvos como padrão.
+  const filtrosPadraoVerificados = useRef(false);
+  useEffect(() => {
+    if (filtrosPadraoVerificados.current || authLoading) return;
+    filtrosPadraoVerificados.current = true;
+    if (!user || temFiltrosRelevantes(search)) return;
+    fetchFiltrosPadrao(user.id)
+      .then((salvos) => {
+        if (!temFiltrosSalvos(salvos)) return;
+        void navigate({
+          replace: true,
+          search: (prev) =>
+            // Usuário pode ter interagido enquanto o fetch corria - não sobrescreve.
+            temFiltrosRelevantes(prev)
+              ? prev
+              : {
+                  ...prev,
+                  tipos: csvOrUndefined(parseTiposCsv(salvos.tipos.join(","))),
+                  selos: csvOrUndefined(parseSelosCsv(salvos.selos.join(","))),
+                  recursos: csvOrUndefined(parseRecursosCsv(salvos.recursos.join(","))),
+                },
+        });
+      })
+      .catch(() => {
+        // Silencioso: preferências salvas nunca bloqueiam a busca.
+      });
+  }, [authLoading, user, search, navigate]);
 
-  const categoriasRapidas: Array<{
-    key: EstabTipo | "";
-    label: string;
-    icon: string;
-  }> = [
-    { key: "", label: "Tudo", icon: "✨" },
-    { key: "hotel", label: "Hotéis", icon: "🏨" },
-    { key: "pousada", label: "Pousadas", icon: "🏡" },
-    { key: "restaurante", label: "Restaurantes", icon: "🍽️" },
-    { key: "parque", label: "Parques", icon: "🎢" },
-    { key: "passeio_educativo", label: "Passeios Educativos", icon: "🎒" },
-  ];
+  /** Aplica um patch de filtros e volta para a página 1. */
+  function patchSearch(patch: Partial<ExplorarSearch>) {
+    void navigate({ search: (prev) => ({ ...prev, ...patch, pagina: undefined }) });
+  }
+
+  function irParaPagina(pagina: number) {
+    void navigate({ search: (prev) => ({ ...prev, pagina: pagina > 1 ? pagina : undefined }) });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function limparTudo() {
+    void navigate({ search: {} });
+  }
+
+  async function salvarComoPadrao() {
+    if (!user) return;
+    setSalvandoPadrao(true);
+    try {
+      await salvarFiltrosPadrao(user.id, {
+        tipos: parseTiposCsv(search.tipos),
+        selos: parseSelosCsv(search.selos),
+        recursos: parseRecursosCsv(search.recursos),
+      });
+      toast.success("Filtros salvos como padrão.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Não foi possível salvar os filtros.");
+    } finally {
+      setSalvandoPadrao(false);
+    }
+  }
+
+  const tiposAtuais = parseTiposCsv(search.tipos);
+  const tipoAtivo = tiposAtuais.length === 1 ? tiposAtuais[0] : undefined;
+  const filtrosAtivos = contarFiltrosAtivos(search);
+  const temFiltros = temFiltrosRelevantes(search);
+
+  const total = pageData?.total ?? 0;
+  const exibindoDe = pageData && total > 0 ? (pageData.pagina - 1) * pageData.tamanhoPagina + 1 : 0;
+  const exibindoAte = pageData ? Math.min(total, pageData.pagina * pageData.tamanhoPagina) : 0;
+
+  const painelFiltros = (
+    <FilterPanel
+      aplicados={search}
+      onAplicar={(patch) => {
+        patchSearch(patch);
+        setSheetAberto(false);
+      }}
+      onSalvarPadrao={user ? () => void salvarComoPadrao() : undefined}
+      salvandoPadrao={salvandoPadrao}
+    />
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -110,147 +196,122 @@ function ExplorarPage() {
             Explorar destinos
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Locais cadastrados e preparados para receber famílias TEA.
+            Quartos e acomodações preparados para receber famílias TEA.
           </p>
 
-          {/* Banner contador */}
-          <div className="mt-5 rounded-xl bg-primary/5 border border-primary/15 px-5 py-3 text-sm text-primary flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 shrink-0" />
-            {loading ? (
-              <span className="text-muted-foreground">
-                Carregando estabelecimentos…
-              </span>
-            ) : total === 0 ? (
-              <span>Primeiros estabelecimentos chegando em breve.</span>
-            ) : (
-              <span>
-                <strong>{total}</strong> estabelecimento{total === 1 ? "" : "s"}{" "}
-                já cadastrado{total === 1 ? "" : "s"} e preparado
-                {total === 1 ? "" : "s"} para receber sua família.
-              </span>
-            )}
+          <div className="mt-5">
+            <SearchBar
+              valor={search.busca ?? ""}
+              onBuscar={(termo) => patchSearch({ busca: termo || undefined })}
+            />
           </div>
 
-          {/* Categorias rápidas */}
-          <div className="mt-6 flex flex-wrap gap-2">
-            {categoriasRapidas.map((c) => {
-              const ativo = tipo === c.key;
-              return (
-                <button
-                  key={c.key || "tudo"}
-                  type="button"
-                  onClick={() => {
-                    setTipo(c.key);
-                    if (c.key !== "passeio_educativo") setSubtipoEdu("");
-                  }}
-                  className={
-                    "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition " +
-                    (ativo
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "bg-white text-foreground/80 border-border hover:border-primary/40 hover:text-primary")
-                  }
-                >
-                  <span aria-hidden>{c.icon}</span>
-                  {c.label}
-                </button>
-              );
-            })}
+          <div className="mt-4">
+            <CategoryPills
+              tipoAtivo={tipoAtivo}
+              onSelect={(tipo) => patchSearch({ tipos: tipo })}
+            />
           </div>
 
-          {/* Filtros */}
-          <div className="mt-4 grid sm:grid-cols-3 gap-3 bg-white border rounded-xl p-4">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">
-                Estado
-              </label>
-              <select
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"
-              >
-                <option value="">Todos</option>
-                {ESTADOS_BR.map((uf) => (
-                  <option key={uf.sigla} value={uf.sigla}>
-                    {uf.nome}
-                  </option>
-                ))}
-              </select>
+          <div className="mt-6 flex gap-8 items-start">
+            {/* Filtros - sidebar fixa no desktop */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-24 rounded-xl border bg-white p-4 max-h-[calc(100vh-7rem)] overflow-y-auto">
+                {painelFiltros}
+              </div>
+            </aside>
+
+            <div className="flex-1 min-w-0">
+              {/* Barra de resultados: contagem, filtros (mobile) e ordenação */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground" aria-live="polite">
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Buscando quartos…
+                    </span>
+                  ) : total > 0 ? (
+                    <>
+                      Mostrando <strong>{exibindoDe}</strong>–<strong>{exibindoAte}</strong> de{" "}
+                      <strong>{total}</strong> quarto{total === 1 ? "" : "s"}
+                    </>
+                  ) : (
+                    "Nenhum quarto encontrado"
+                  )}
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Sheet open={sheetAberto} onOpenChange={setSheetAberto}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="lg:hidden">
+                        <SlidersHorizontal className="h-4 w-4 mr-1.5" />
+                        Filtros
+                        {filtrosAtivos > 0 && (
+                          <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
+                            {filtrosAtivos}
+                          </span>
+                        )}
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[320px] sm:w-[380px] overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Filtros</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-4">{painelFiltros}</div>
+                    </SheetContent>
+                  </Sheet>
+
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="hidden sm:inline">Ordenar:</span>
+                    <select
+                      value={search.ordenacao ?? "preco_asc"}
+                      onChange={(e) => {
+                        const v = e.target.value as Ordenacao;
+                        patchSearch({ ordenacao: v === "preco_asc" ? undefined : v });
+                      }}
+                      className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white text-foreground"
+                      aria-label="Ordenar resultados"
+                    >
+                      {ORDENACOES_UI.map((o) => (
+                        <option key={o} value={o}>
+                          {ORDENACAO_LABEL[o]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              {/* Resultados */}
+              <div className="mt-4">
+                {loading ? (
+                  <GradeSkeleton />
+                ) : erro ? (
+                  <ErroBusca onTentarNovamente={() => setTentativa((t) => t + 1)} />
+                ) : !pageData || pageData.items.length === 0 ? (
+                  <EstadoVazio temFiltros={temFiltros} onLimpar={limparTudo} />
+                ) : (
+                  <>
+                    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {pageData.items.map((item) => (
+                        <ItemCard
+                          key={item.id}
+                          item={item}
+                          dataIn={search.data_in}
+                          dataOut={search.data_out}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-8">
+                      <ExplorarPagination
+                        pagina={pageData.pagina}
+                        totalPaginas={pageData.totalPaginas}
+                        onChange={irParaPagina}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">
-                Tipo
-              </label>
-              <select
-                value={tipo}
-                onChange={(e) => {
-                  const v = e.target.value as EstabTipo | "";
-                  setTipo(v);
-                  if (v !== "passeio_educativo") setSubtipoEdu("");
-                }}
-                className="mt-1 w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"
-              >
-                <option value="">Todos</option>
-                {ESTAB_TIPOS.map((t) => (
-                  <option key={t} value={t}>
-                    {t === "passeio_educativo" ? "🎒 " : ""}
-                    {ESTAB_TIPO_LABEL[t]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <label className="flex items-end gap-2 text-sm pb-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={apenasSeloAzul}
-                onChange={(e) => setApenasSeloAzul(e.target.checked)}
-                className="h-4 w-4 accent-primary"
-              />
-              Mostrar só com Selo Azul
-            </label>
-
-            {tipo === "passeio_educativo" && (
-              <div className="sm:col-span-3">
-                <label className="text-xs font-semibold text-muted-foreground uppercase">
-                  Subcategoria de passeio educativo
-                </label>
-                <select
-                  value={subtipoEdu}
-                  onChange={(e) =>
-                    setSubtipoEdu(
-                      e.target.value as SubtipoEducativo | "fazenda_sitio" | "",
-                    )
-                  }
-                  className="mt-1 w-full px-3 py-2 border border-border rounded-lg text-sm bg-white"
-                >
-                  <option value="">Todas</option>
-                  <option value="fazenda_sitio">Fazenda / Sítio</option>
-                  <option value="museu">{SUBTIPO_EDUCATIVO_LABEL.museu}</option>
-                  <option value="parque_tematico">
-                    {SUBTIPO_EDUCATIVO_LABEL.parque_tematico}
-                  </option>
-                  <option value="espaco_cultural">
-                    {SUBTIPO_EDUCATIVO_LABEL.espaco_cultural}
-                  </option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* Resultados */}
-          <div className="mt-6">
-            {loading ? (
-              <div className="flex items-center justify-center py-20 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
-              </div>
-            ) : filtrados.length === 0 ? (
-              <EstadoVazio />
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtrados.map((e) => (
-                  <EstabCard key={e.id} estab={e} />
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </main>
@@ -259,87 +320,74 @@ function ExplorarPage() {
   );
 }
 
-const ADAPTACOES: Array<{
-  key: keyof EstabelecimentoView;
-  label: string;
-  Icon: typeof VolumeX;
-}> = [
-  { key: "tem_sala_sensorial", label: "Ambiente silencioso", Icon: VolumeX },
-  { key: "tem_cardapio_visual", label: "Cardápio adaptado", Icon: Utensils },
-  { key: "tem_caa", label: "Comunicação visual", Icon: Eye },
-  { key: "tem_concierge_tea", label: "Concierge TEA", Icon: Waves },
-];
-
-function EstabCard({ estab }: { estab: EstabelecimentoView }) {
-  const adaptacoes = ADAPTACOES.filter((a) => estab[a.key]);
+function GradeSkeleton() {
   return (
-    <div className="relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition">
-      {estab.selo_azul && (
-        <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold shadow">
-          <ShieldCheck className="h-3 w-3" /> Selo Azul ✓
-        </span>
-      )}
-      <div className="aspect-[16/10] bg-azul-claro">
-        {estab.foto_capa ? (
-          <img
-            src={estab.foto_capa}
-            alt={estab.nome}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-primary/40">
-            <Compass className="h-10 w-10" />
+    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="rounded-2xl border overflow-hidden">
+          <Skeleton className="aspect-[16/10] w-full rounded-none" />
+          <div className="p-4 space-y-2">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-4 w-24" />
           </div>
-        )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ErroBusca({ onTentarNovamente }: { onTentarNovamente: () => void }) {
+  return (
+    <div className="py-16 text-center">
+      <p className="text-sm text-muted-foreground">
+        Não foi possível carregar os quartos. Verifique sua conexão.
+      </p>
+      <Button variant="outline" className="mt-4" onClick={onTentarNovamente}>
+        Tentar novamente
+      </Button>
+    </div>
+  );
+}
+
+function EstadoVazio({ temFiltros, onLimpar }: { temFiltros: boolean; onLimpar: () => void }) {
+  return (
+    <div className="bg-azul-claro/40 border rounded-2xl p-8 md:p-10 text-center max-w-2xl mx-auto">
+      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+        {temFiltros ? <SearchX className="h-8 w-8" /> : <Compass className="h-8 w-8" />}
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
-          {ESTAB_TIPO_LABEL[estab.tipo]}
-        </div>
-        <h3 className="mt-1 font-display font-bold text-primary text-lg leading-tight">
-          {estab.nome}
-        </h3>
-        {(estab.cidade || estab.estado) && (
-          <div className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            {[estab.cidade, estab.estado].filter(Boolean).join(" · ")}
-          </div>
-        )}
-
-        {adaptacoes.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
-            {adaptacoes.map(({ key, label, Icon }) => (
-              <span
-                key={key}
-                className="inline-flex items-center gap-1 text-[11px] text-foreground/80"
-                title={label}
-              >
-                <Icon className="h-3.5 w-3.5 text-primary" />
-                {label}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto pt-4 grid grid-cols-2 gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/estabelecimento/$slug" params={{ slug: estab.slug }}>
-              Conhecer o local
-            </Link>
+      <h2 className="mt-4 text-xl font-display font-bold text-primary">
+        {temFiltros
+          ? "Nenhum quarto encontrado com esses filtros."
+          : "Ainda não temos quartos cadastrados."}
+      </h2>
+      {temFiltros ? (
+        <>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Tente ampliar a busca removendo alguns filtros.
+          </p>
+          <Button variant="outline" className="mt-4" onClick={onLimpar}>
+            Limpar todos os filtros
           </Button>
-          <Button asChild size="sm" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-            <Link to="/minha-conta/reservas/nova" search={{ slug: estab.slug } as never}>
-              Solicitar Reserva →
-            </Link>
-          </Button>
-        </div>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Primeiros estabelecimentos chegando em breve.
+        </p>
+      )}
+
+      <div className="mt-8 border-t pt-6">
+        <p className="text-sm text-muted-foreground">
+          Indique um local que você gostaria de ver aqui →
+        </p>
+        <FormIndicacao />
       </div>
     </div>
   );
 }
 
-function EstadoVazio() {
+function FormIndicacao() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -352,17 +400,20 @@ function EstadoVazio() {
       return;
     }
     setEnviando(true);
-    const { error } = await supabase.from("contatos_gerais").insert({
-      nome: nome.trim(),
-      email: email.trim(),
-      assunto: "Indicação de estabelecimento",
-      mensagem: mensagem.trim(),
-      origem: "explorar_indicacao",
-    });
-    setEnviando(false);
-    if (error) {
+    try {
+      await criarContatoGeral({
+        nome: nome.trim(),
+        email: email.trim(),
+        assunto: "Indicação de estabelecimento",
+        mensagem: mensagem.trim(),
+        origem: "explorar_indicacao",
+      });
+    } catch (err) {
+      console.error(err);
       toast.error("Erro ao enviar. Tente novamente.");
       return;
+    } finally {
+      setEnviando(false);
     }
     toast.success("Indicação enviada! Obrigado.");
     setNome("");
@@ -371,55 +422,40 @@ function EstadoVazio() {
   }
 
   return (
-    <div className="bg-azul-claro/40 border rounded-2xl p-8 md:p-10 text-center max-w-2xl mx-auto">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-        <Compass className="h-8 w-8" />
-      </div>
-      <h2 className="mt-4 text-xl font-display font-bold text-primary">
-        Ainda não temos estabelecimentos nessa região.
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Indique um local que você gostaria de ver aqui →
-      </p>
-
-      <form
-        onSubmit={handleSubmit}
-        className="mt-6 grid gap-3 text-left max-w-md mx-auto"
+    <form onSubmit={handleSubmit} className="mt-4 grid gap-3 text-left max-w-md mx-auto">
+      <Input
+        placeholder="Seu nome"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        required
+      />
+      <Input
+        type="email"
+        placeholder="Seu e-mail"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <Textarea
+        placeholder="Nome e cidade do local que você gostaria de indicar"
+        value={mensagem}
+        onChange={(e) => setMensagem(e.target.value)}
+        rows={3}
+        required
+      />
+      <Button
+        type="submit"
+        disabled={enviando}
+        className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
       >
-        <Input
-          placeholder="Seu nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
-        />
-        <Input
-          type="email"
-          placeholder="Seu e-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Textarea
-          placeholder="Nome e cidade do local que você gostaria de indicar"
-          value={mensagem}
-          onChange={(e) => setMensagem(e.target.value)}
-          rows={3}
-          required
-        />
-        <Button
-          type="submit"
-          disabled={enviando}
-          className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-        >
-          {enviando ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" /> Enviando…
-            </>
-          ) : (
-            "Indicar"
-          )}
-        </Button>
-      </form>
-    </div>
+        {enviando ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" /> Enviando…
+          </>
+        ) : (
+          "Indicar"
+        )}
+      </Button>
+    </form>
   );
 }
