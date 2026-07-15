@@ -9,6 +9,7 @@ import {
   criarPerfilSensorial,
   buildReservaPayload,
   pickEstabMedia,
+  perfisDaReserva,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
   type PerfilOption,
@@ -17,6 +18,7 @@ import {
   type ItemReservavel,
 } from "@/lib/queries";
 import { QuartoCard } from "@/components/estabelecimento/QuartoCard";
+import { PerfisTeaAvatares } from "@/components/reserva/PerfisTeaDaReserva";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
@@ -65,6 +67,7 @@ import {
   Loader2,
   CheckCircle2,
   Clock,
+  Calendar,
   Mail,
   CalendarCheck,
   History,
@@ -707,35 +710,47 @@ function HistoricoReservasCard({
 
   return (
     <div className="bg-card rounded-2xl border border-border p-5">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-4">
         <History className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-sm font-bold text-primary">Suas reservas neste local</h3>
       </div>
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {lista.map((r) => {
+          const item = r.itens_reservaveis;
+          const perfis = perfisDaReserva(r);
           const status: ReservaStatus = r.status ?? "pendente";
           const StatusIcon = STATUS_ICON[status];
           return (
-            <li
-              key={r.id}
-              className="flex items-start justify-between gap-3 py-2 border-b border-border last:border-b-0"
-            >
-              <div className="min-w-0 text-xs">
-                <div className="text-foreground font-medium">
-                  {r.data_checkin || r.data_checkout
-                    ? `${formatDateBR(r.data_checkin)} → ${formatDateBR(r.data_checkout)}`
-                    : "Sem datas definidas"}
-                </div>
-                <div className="text-muted-foreground mt-0.5">
-                  Solicitada em {formatDateBR(r.criado_em)}
-                </div>
-              </div>
-              <span
-                className={`inline-flex items-center gap-1 shrink-0 text-[10px] px-2 py-0.5 rounded-full font-semibold ${STATUS_BADGE_CLASS[status]}`}
+            <li key={r.id}>
+              <Link
+                to="/minha-conta/reservas/$id"
+                params={{ id: r.id }}
+                className="block p-3 rounded-xl border border-border hover:bg-azul-claro/20 transition"
               >
-                <StatusIcon className="h-2.5 w-2.5" />
-                {RESERVA_STATUS_LABEL[status]}
-              </span>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-display font-bold text-primary text-sm truncate">
+                      {item?.nome ?? "Reserva"}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-foreground/80 mt-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-foreground/40 shrink-0" />
+                      <span>
+                        {r.data_checkin ? formatDateBR(r.data_checkin) : "-"} →{" "}
+                        {r.data_checkout ? formatDateBR(r.data_checkout) : "-"}
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <PerfisTeaAvatares perfis={perfis} />
+                    </div>
+                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1 shrink-0 text-[10px] px-2 py-0.5 rounded-full font-semibold ${STATUS_BADGE_CLASS[status]}`}
+                  >
+                    <StatusIcon className="h-2.5 w-2.5" />
+                    {RESERVA_STATUS_LABEL[status]}
+                  </span>
+                </div>
+              </Link>
             </li>
           );
         })}
