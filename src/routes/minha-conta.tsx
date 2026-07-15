@@ -63,7 +63,7 @@ function MinhaContaLayout() {
         }
         tabs={[
           { label: "Meu Perfil", to: "/minha-conta", exact: true },
-          { label: "Perfil do Meu Filho", to: "/minha-conta/perfil" },
+          { label: "Perfis dos Meus Filhos", to: "/minha-conta/perfil" },
           { label: "Conversas", to: "/minha-conta/mensagens" },
           { label: "Reservas", to: "/minha-conta/reservas" },
         ]}

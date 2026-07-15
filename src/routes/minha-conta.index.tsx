@@ -21,8 +21,7 @@ export const Route = createFileRoute("/minha-conta/")({
 
 function MinhaContaIndex() {
   const { user } = useAuth();
-  const [perfilNome, setPerfilNome] = useState<string | null>(null);
-  const [perfilExiste, setPerfilExiste] = useState(false);
+  const [perfilNomes, setPerfilNomes] = useState<string[]>([]);
   const [posicao, setPosicao] = useState<number | null>(null);
   const [totalFila, setTotalFila] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,7 @@ function MinhaContaIndex() {
         .from("perfil_sensorial")
         .select("id, nome_autista")
         .eq("familia_id", user.id)
-        .maybeSingle(),
+        .order("criado_em"),
       supabase
         .from("familia_profiles")
         .select("criado_em")
@@ -45,8 +44,7 @@ function MinhaContaIndex() {
         .maybeSingle(),
     ]).then(async ([perfilRes, meRes]) => {
       if (!alive) return;
-      setPerfilExiste(!!perfilRes.data);
-      setPerfilNome(perfilRes.data?.nome_autista ?? null);
+      setPerfilNomes((perfilRes.data ?? []).map((p) => p.nome_autista));
 
       if (meRes.data?.criado_em) {
         const [{ count: ate }, { count: total }] = await Promise.all([
@@ -113,25 +111,28 @@ function MinhaContaIndex() {
               <HeartPulse className="h-6 w-6" />
             </div>
             <h2 className="font-display font-bold text-base text-primary leading-tight">
-              Perfil Sensorial do Seu Filho
+              Perfis Sensoriais dos Seus Filhos
             </h2>
           </div>
 
-          {perfilExiste ? (
+          {perfilNomes.length > 0 ? (
             <>
               <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 self-start px-3 py-1.5 rounded-full">
-                <CheckCircle2 className="h-4 w-4" /> Perfil completo
+                <CheckCircle2 className="h-4 w-4" />
+                {perfilNomes.length === 1 ? "Perfil completo" : `${perfilNomes.length} perfis salvos`}
               </div>
               <p className="mt-3 text-sm text-foreground/70 flex-1">
-                Perfil de <strong>{perfilNome ?? "seu filho"}</strong> salvo.
-                Você pode atualizar a qualquer momento.
+                {perfilNomes.length === 1 ? "Perfil de " : "Perfis de "}
+                <strong>{perfilNomes.join(", ")}</strong>{" "}
+                {perfilNomes.length === 1 ? "salvo" : "salvos"}. Você pode atualizar ou
+                adicionar outro filho a qualquer momento.
               </p>
               <Button
                 asChild
                 variant="outline"
                 className="mt-4 self-start border-primary text-primary hover:bg-azul-claro"
               >
-                <Link to="/minha-conta/perfil">Editar perfil</Link>
+                <Link to="/minha-conta/perfil">Gerenciar perfis</Link>
               </Button>
             </>
           ) : (

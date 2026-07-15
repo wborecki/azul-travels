@@ -6,6 +6,7 @@ import {
   fetchReservasDaFamiliaPorEstabelecimento,
   fetchItensAtivosDoEstabelecimento,
   criarReserva,
+  criarPerfilSensorial,
   buildReservaPayload,
   pickEstabMedia,
   type EstabelecimentoNormalized,
@@ -16,7 +17,6 @@ import {
   type ItemReservavel,
 } from "@/lib/queries";
 import { QuartoCard } from "@/components/estabelecimento/QuartoCard";
-import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
@@ -275,21 +275,20 @@ function EstabPage() {
       return;
     }
     setSalvandoPerfil(true);
-    const { data, error } = await supabase
-      .from("perfil_sensorial")
-      .insert({ ...novoPerfil, familia_id: user.id })
-      .select("id, nome_autista")
-      .single();
-    setSalvandoPerfil(false);
-    if (error) {
-      toast.error("Erro ao salvar perfil", { description: error.message });
-      return;
+    try {
+      const data = await criarPerfilSensorial({ ...novoPerfil, familia_id: user.id });
+      toast.success(`Perfil de ${data.nome_autista} criado.`);
+      setPerfis((p) => [...p, data]);
+      setPerfilSel(data.id);
+      setPerfilModalOpen(false);
+      setNovoPerfil(DEFAULT_PERFIL_DRAFT);
+    } catch (err) {
+      toast.error("Erro ao salvar perfil", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setSalvandoPerfil(false);
     }
-    toast.success(`Perfil de ${data.nome_autista} criado.`);
-    setPerfis((p) => [...p, data]);
-    setPerfilSel(data.id);
-    setPerfilModalOpen(false);
-    setNovoPerfil(DEFAULT_PERFIL_DRAFT);
   };
 
   return (

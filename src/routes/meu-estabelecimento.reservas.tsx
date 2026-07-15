@@ -55,6 +55,7 @@ import {
   fetchReservasDoEstabelecimento,
   atualizarStatusReservaEstabelecimento,
   registrarAuditoriaReservaEstabelecimento,
+  perfisSensoriaisDaReservaEstab,
   type EstabelecimentoDoOwner,
   type ReservaEstabelecimentoRow,
 } from "@/lib/queries";
@@ -481,7 +482,7 @@ function DetalheReserva({
 }) {
   const fam = reserva.familia_profiles;
   const perfilTea = reserva.perfil_tea;
-  const perfilSensorial = reserva.perfil_sensorial;
+  const perfisSensoriais = perfisSensoriaisDaReservaEstab(reserva);
   const consentido = reserva.perfil_enviado_ao_estabelecimento;
 
   return (
@@ -681,8 +682,12 @@ function DetalheReserva({
                 <FileDown className="h-4 w-4 mr-1.5" /> Baixar perfil completo em PDF
               </Button>
             </>
-          ) : perfilSensorial ? (
-            <PerfilSensorialDestaques perfil={perfilSensorial} />
+          ) : perfisSensoriais.length > 0 ? (
+            <div className="space-y-4">
+              {perfisSensoriais.map((p) => (
+                <PerfilSensorialDestaques key={p.id} perfil={p} />
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">
               Nenhum perfil sensorial vinculado a esta reserva.
@@ -759,6 +764,28 @@ function PerfilSensorialDestaques({
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center gap-2.5">
+        <div className="h-9 w-9 rounded-full overflow-hidden bg-azul-claro grid place-items-center shrink-0 border border-border">
+          {perfil.foto_url ? (
+            <img
+              src={perfil.foto_url}
+              alt={`Foto de ${perfil.nome_autista}`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="font-display font-bold text-primary text-sm">
+              {perfil.nome_autista.trim().charAt(0).toUpperCase() || "?"}
+            </span>
+          )}
+        </div>
+        <div className="text-sm">
+          <span className="font-semibold text-primary">{perfil.nome_autista}</span>
+          <span className="text-muted-foreground">
+            {perfil.idade != null ? ` · ${perfil.idade} anos` : ""}
+            {perfil.nivel_tea ? ` · Nível ${perfil.nivel_tea}` : ""}
+          </span>
+        </div>
+      </div>
       <div className="flex flex-wrap gap-1.5">
         {flags.map(([label]) => (
           <span

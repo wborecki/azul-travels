@@ -18,6 +18,7 @@ type Reserva = Tables<"reservas"> & {
     "id" | "slug" | "nome" | "cidade" | "estado"
   > | null;
   perfil_sensorial: Tables<"perfil_sensorial"> | null;
+  reserva_perfis: Array<{ perfil_sensorial: Tables<"perfil_sensorial"> | null }>;
 };
 
 interface Acomp {
@@ -38,7 +39,7 @@ function ReservaDetalhe() {
     supabase
       .from("reservas")
       .select(
-        "*, estabelecimentos(id, slug, nome, cidade, estado), perfil_sensorial(*)",
+        "*, estabelecimentos(id, slug, nome, cidade, estado), perfil_sensorial!reservas_perfil_sensorial_id_fkey(*), reserva_perfis(perfil_sensorial(*))",
       )
       .eq("id", id)
       .eq("familia_id", user.id)
@@ -74,7 +75,18 @@ function ReservaDetalhe() {
   }
 
   const acomp = (reserva.acompanhantes ?? []) as unknown as Acomp[];
-  const p = reserva.perfil_sensorial;
+  // Unifica a coluna legada com os N vínculos de reserva_perfis, sem duplicar.
+  const perfisVistos = new Set<string>();
+  const perfisEnviados: Array<Tables<"perfil_sensorial">> = [];
+  for (const rp of reserva.reserva_perfis) {
+    if (rp.perfil_sensorial && !perfisVistos.has(rp.perfil_sensorial.id)) {
+      perfisVistos.add(rp.perfil_sensorial.id);
+      perfisEnviados.push(rp.perfil_sensorial);
+    }
+  }
+  if (reserva.perfil_sensorial && !perfisVistos.has(reserva.perfil_sensorial.id)) {
+    perfisEnviados.push(reserva.perfil_sensorial);
+  }
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -139,20 +151,44 @@ function ReservaDetalhe() {
         </div>
       )}
 
-      {p && (
+      {perfisEnviados.length > 0 && (
         <div className="bg-azul-claro/40 border border-primary/20 rounded-2xl p-5">
           <h2 className="font-display font-bold text-primary">
-            Perfil TEA enviado: {p.nome_autista}
+            {perfisEnviados.length === 1
+              ? "Perfil TEA enviado"
+              : `Perfis TEA enviados (${perfisEnviados.length})`}
           </h2>
-          <p className="text-sm text-foreground/80 mt-1">
-            {p.idade ? `${p.idade} anos · ` : ""}
-            {p.nivel_tea ? `Nível ${p.nivel_tea}` : ""}
-          </p>
+          <ul className="mt-2 space-y-2">
+            {perfisEnviados.map((p) => (
+              <li key={p.id} className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full overflow-hidden bg-white grid place-items-center shrink-0 border border-primary/20">
+                  {p.foto_url ? (
+                    <img
+                      src={p.foto_url}
+                      alt={`Foto de ${p.nome_autista}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="font-display font-bold text-primary text-sm">
+                      {p.nome_autista.trim().charAt(0).toUpperCase() || "?"}
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm">
+                  <span className="font-semibold text-primary">{p.nome_autista}</span>
+                  <span className="text-foreground/80">
+                    {p.idade ? ` · ${p.idade} anos` : ""}
+                    {p.nivel_tea ? ` · Nível ${p.nivel_tea}` : ""}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
           <Link
             to="/minha-conta/perfil"
-            className="text-xs text-secondary hover:underline mt-2 inline-block"
+            className="text-xs text-secondary hover:underline mt-3 inline-block"
           >
-            Ver / editar perfil →
+            Ver / editar perfis →
           </Link>
         </div>
       )}

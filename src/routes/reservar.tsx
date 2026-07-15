@@ -8,6 +8,8 @@ import {
   fetchAvaliacoesPublicasPorEstab,
   fetchPerfisDaFamilia,
   criarReserva,
+  vincularPerfisAReserva,
+  criarPerfilSensorial,
   buildReservaPayload,
   type ItemReservavel,
   type EstabelecimentoNormalized,
@@ -20,17 +22,9 @@ import {
   type PerfilSensorialDraft,
 } from "@/components/PerfilSensorialForm";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { formatDataISO, parseDataISO, parseInteiroUrl } from "@/lib/brazil";
 import { ArrowLeft, Check, Loader2, Plus, Star } from "lucide-react";
@@ -137,19 +131,24 @@ function ReservarPage() {
   }, [itemId]);
 
   const [perfis, setPerfis] = useState<PerfilOption[]>([]);
-  const [perfilSel, setPerfilSel] = useState<string>("");
+  const [perfisSel, setPerfisSel] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user) {
       setPerfis([]);
-      setPerfilSel("");
+      setPerfisSel([]);
       return;
     }
     void fetchPerfisDaFamilia(user.id).then((data) => {
       setPerfis(data);
-      setPerfilSel((atual) => atual || (data.length > 0 ? data[0].id : ""));
+      // Pré-seleciona todos os filhos; a família desmarca quem não vai viajar.
+      setPerfisSel((atual) => (atual.length > 0 ? atual : data.map((p) => p.id)));
     });
   }, [user]);
+
+  function togglePerfil(id: string) {
+    setPerfisSel((atual) => (atual.includes(id) ? atual.filter((x) => x !== id) : [...atual, id]));
+  }
 
   const [perfilModalOpen, setPerfilModalOpen] = useState(false);
   const [novoPerfil, setNovoPerfil] = useState<PerfilSensorialDraft>(DEFAULT_PERFIL_DRAFT);
@@ -164,21 +163,20 @@ function ReservarPage() {
       return;
     }
     setSalvandoPerfil(true);
-    const { data, error } = await supabase
-      .from("perfil_sensorial")
-      .insert({ ...novoPerfil, familia_id: user.id })
-      .select("id, nome_autista")
-      .single();
-    setSalvandoPerfil(false);
-    if (error) {
-      toast.error("Erro ao salvar perfil", { description: error.message });
-      return;
+    try {
+      const data = await criarPerfilSensorial({ ...novoPerfil, familia_id: user.id });
+      toast.success(`Perfil de ${data.nome_autista} criado.`);
+      setPerfis((p) => [...p, data]);
+      setPerfisSel((atual) => [...atual, data.id]);
+      setPerfilModalOpen(false);
+      setNovoPerfil(DEFAULT_PERFIL_DRAFT);
+    } catch (err) {
+      toast.error("Erro ao salvar perfil", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setSalvandoPerfil(false);
     }
-    toast.success(`Perfil de ${data.nome_autista} criado.`);
-    setPerfis((p) => [...p, data]);
-    setPerfilSel(data.id);
-    setPerfilModalOpen(false);
-    setNovoPerfil(DEFAULT_PERFIL_DRAFT);
   }
 
   if (!itemId) {
@@ -253,24 +251,26 @@ function ReservarPage() {
     setEnviando(true);
     try {
       // O picker de hóspedes só distingue adultos/crianças (idade), não quem
-      // é autista - por isso `num_autistas` reflete o perfil sensorial
-      // vinculado (1 pessoa conhecida) e `num_acompanhantes` cobre as
-      // crianças da viagem, mantendo o schema existente de `reservas`
-      // (pensado para o formulário antigo, por estabelecimento).
+      // é autista - por isso `num_autistas` reflete os perfis sensoriais
+      // vinculados e `num_acompanhantes` cobre as crianças da viagem,
+      // mantendo o schema existente de `reservas`. A coluna legada
+      // `perfil_sensorial_id` guarda o 1º selecionado (compat); os N
+      // vínculos vivem em `reserva_perfis`.
       const payload = buildReservaPayload({
         familia_id: user.id,
         estabelecimento_id: item.estabelecimento_id,
         item_reservavel_id: item.id,
-        perfil_sensorial_id: perfilSel || null,
+        perfil_sensorial_id: perfisSel[0] ?? null,
         data_checkin: formatDataISO(checkIn),
         data_checkout: formatDataISO(checkOut),
         num_adultos: adultos,
-        num_autistas: perfilSel ? 1 : 0,
+        num_autistas: perfisSel.length,
         num_acompanhantes: criancas,
         mensagem,
-        perfil_enviado_ao_estabelecimento: !!perfilSel,
+        perfil_enviado_ao_estabelecimento: perfisSel.length > 0,
       });
       const nova = await criarReserva(payload);
+      await vincularPerfisAReserva(nova.id, perfisSel);
       toast.success("Pedido de reserva enviado!");
       void navigate({ to: "/minha-conta/reservas/$id", params: { id: nova.id } });
     } catch (err) {
@@ -333,40 +333,71 @@ function ReservarPage() {
             <div className="space-y-5">
               <div>
                 <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                  Perfil sensorial (opcional)
+                  Quem vai viajar? Perfis sensoriais (opcional)
                 </Label>
-                <div className="mt-1.5 flex gap-2">
-                  <Select
-                    value={perfilSel || "nenhum"}
-                    onValueChange={(v) => setPerfilSel(v === "nenhum" ? "" : v)}
-                    disabled={!user}
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nenhum">Nenhum selecionado</SelectItem>
-                      {perfis.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.nome_autista}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="mt-1.5 space-y-2">
+                  {perfis.map((p) => {
+                    const ativo = perfisSel.includes(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        disabled={!user}
+                        onClick={() => togglePerfil(p.id)}
+                        aria-pressed={ativo}
+                        className={cn(
+                          "w-full text-left p-2.5 rounded-xl border-2 transition flex items-center gap-3",
+                          ativo
+                            ? "border-secondary bg-teal-claro/40"
+                            : "border-border bg-muted/30 hover:border-secondary/40",
+                        )}
+                      >
+                        <div className="h-10 w-10 rounded-full overflow-hidden bg-azul-claro grid place-items-center shrink-0 border border-border">
+                          {p.foto_url ? (
+                            <img
+                              src={p.foto_url}
+                              alt={`Foto de ${p.nome_autista}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="font-display font-bold text-primary">
+                              {p.nome_autista.trim().charAt(0).toUpperCase() || "?"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm text-primary truncate">
+                            {p.nome_autista}
+                          </div>
+                          {p.idade != null && (
+                            <div className="text-xs text-muted-foreground">{p.idade} anos</div>
+                          )}
+                        </div>
+                        <div
+                          className={cn(
+                            "shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center",
+                            ativo ? "border-secondary bg-secondary" : "border-border bg-background",
+                          )}
+                        >
+                          {ativo && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                      </button>
+                    );
+                  })}
                   <Button
                     type="button"
                     variant="outline"
-                    size="icon"
+                    size="sm"
                     disabled={!user}
                     onClick={() => setPerfilModalOpen(true)}
-                    aria-label="Adicionar perfil sensorial"
+                    className="w-full border-dashed"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4 mr-1.5" /> Adicionar perfil de outro filho
                   </Button>
                 </div>
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  Compartilhar o perfil ajuda o estabelecimento a se preparar para receber sua
-                  família.
+                  Selecione todos que vão nesta viagem. Compartilhar os perfis ajuda o
+                  estabelecimento a se preparar para receber sua família.
                 </p>
               </div>
 

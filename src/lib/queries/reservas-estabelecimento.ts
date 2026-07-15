@@ -9,15 +9,38 @@ export type ReservaEstabelecimentoRow = Reserva & {
     "id" | "nome_responsavel" | "email" | "telefone" | "cidade" | "estado"
   > | null;
   perfil_sensorial: Tables<"perfil_sensorial"> | null;
+  reserva_perfis: Array<{ perfil_sensorial: Tables<"perfil_sensorial"> | null }>;
   perfil_tea: Tables<"perfil_tea"> | null;
 };
 
 const RESERVA_ESTAB_SELECT = `
   *,
   familia_profiles(id, nome_responsavel, email, telefone, cidade, estado),
-  perfil_sensorial(*),
+  perfil_sensorial!reservas_perfil_sensorial_id_fkey(*),
+  reserva_perfis(perfil_sensorial(*)),
   perfil_tea(*)
 ` as const;
+
+/**
+ * Perfis sensoriais vinculados à reserva: unifica a coluna legada
+ * `perfil_sensorial_id` com a join table `reserva_perfis`, sem duplicar.
+ */
+export function perfisSensoriaisDaReservaEstab(
+  reserva: ReservaEstabelecimentoRow,
+): Array<Tables<"perfil_sensorial">> {
+  const vistos = new Set<string>();
+  const lista: Array<Tables<"perfil_sensorial">> = [];
+  for (const rp of reserva.reserva_perfis) {
+    if (rp.perfil_sensorial && !vistos.has(rp.perfil_sensorial.id)) {
+      vistos.add(rp.perfil_sensorial.id);
+      lista.push(rp.perfil_sensorial);
+    }
+  }
+  if (reserva.perfil_sensorial && !vistos.has(reserva.perfil_sensorial.id)) {
+    lista.push(reserva.perfil_sensorial);
+  }
+  return lista;
+}
 
 export async function fetchReservasDoEstabelecimento(
   estabelecimentoId: string,

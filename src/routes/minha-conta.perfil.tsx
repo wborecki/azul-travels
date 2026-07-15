@@ -1,7 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchPerfisCompletos,
+  criarPerfilSensorial,
+  atualizarPerfilSensorial,
+  excluirPerfilSensorial,
+  uploadFotoPerfil,
+  type PerfilSensorial,
+} from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,16 +20,28 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { Tables, TablesInsert } from "@/integrations/supabase/types";
-import { Loader2, CheckCircle2, Circle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import type { TablesInsert } from "@/integrations/supabase/types";
+import { Loader2, CheckCircle2, Circle, Plus, Camera, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/minha-conta/perfil")({
-  component: PerfilTeaPage,
+  component: PerfisTeaPage,
 });
 
-type Perfil = Tables<"perfil_sensorial">;
 type Draft = Partial<TablesInsert<"perfil_sensorial">>;
+
+/** Sentinela de seleção para "criando um novo perfil". */
+const NOVO = "novo" as const;
 
 const NIVEIS = [
   { v: "leve", t: "Leve (Nível 1)" },
@@ -41,37 +60,54 @@ function arrayToCsv(a: string[] | null | undefined): string {
   return (a ?? []).join(", ");
 }
 
-function PerfilTeaPage() {
+function PerfisTeaPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [perfis, setPerfis] = useState<PerfilSensorial[]>([]);
+  const [selecionadoId, setSelecionadoId] = useState<string>(NOVO);
   const [draft, setDraft] = useState<Draft>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [hasExisting, setHasExisting] = useState(false);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
 
   // CSV mirrors for array fields
   const [restricoesCsv, setRestricoesCsv] = useState("");
   const [gatilhosCsv, setGatilhosCsv] = useState("");
   const [interessesCsv, setInteressesCsv] = useState("");
 
+  function carregarNoForm(p: PerfilSensorial | null) {
+    if (p) {
+      setSelecionadoId(p.id);
+      setDraft(p);
+      setRestricoesCsv(arrayToCsv(p.alimentacao_restricoes));
+      setGatilhosCsv(arrayToCsv(p.gatilhos));
+      setInteressesCsv(arrayToCsv(p.interesses_extra));
+    } else {
+      setSelecionadoId(NOVO);
+      setDraft({});
+      setRestricoesCsv("");
+      setGatilhosCsv("");
+      setInteressesCsv("");
+    }
+  }
+
   useEffect(() => {
     if (!user) return;
     let alive = true;
-    supabase
-      .from("perfil_sensorial")
-      .select("*")
-      .eq("familia_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
+    fetchPerfisCompletos(user.id)
+      .then((data) => {
         if (!alive) return;
-        if (data) {
-          const p = data as Perfil;
-          setDraft(p);
-          setHasExisting(true);
-          setRestricoesCsv(arrayToCsv(p.alimentacao_restricoes));
-          setGatilhosCsv(arrayToCsv(p.gatilhos));
-          setInteressesCsv(arrayToCsv(p.interesses_extra));
-        }
+        setPerfis(data);
+        carregarNoForm(data[0] ?? null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (!alive) return;
+        toast.error("Erro ao carregar perfis", {
+          description: err instanceof Error ? err.message : undefined,
+        });
         setLoading(false);
       });
     return () => {
@@ -86,6 +122,29 @@ function PerfilTeaPage() {
     setDraft((d) => ({ ...d, [k]: !d[k] as never }));
   }
 
+  const editando = selecionadoId !== NOVO;
+
+  async function onSelecionarFoto(file: File) {
+    if (!user) return;
+    setUploadingFoto(true);
+    try {
+      const url = await uploadFotoPerfil(user.id, file);
+      set("foto_url", url);
+      // Perfil já salvo: persiste a foto na hora, sem esperar o botão Salvar.
+      if (editando) {
+        const atualizado = await atualizarPerfilSensorial(selecionadoId, { foto_url: url });
+        setPerfis((lista) => lista.map((p) => (p.id === atualizado.id ? atualizado : p)));
+        toast.success("Foto atualizada!");
+      }
+    } catch (err) {
+      toast.error("Erro ao enviar foto", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setUploadingFoto(false);
+    }
+  }
+
   async function onSave() {
     if (!user) return;
     if (!draft.nome_autista || !draft.idade || !draft.nivel_tea) {
@@ -93,30 +152,56 @@ function PerfilTeaPage() {
       return;
     }
     setSaving(true);
+    // Remove campos de controle da row antes de montar o payload.
+    const { id: _id, criado_em: _criadoEm, ...campos } = draft;
     const payload: TablesInsert<"perfil_sensorial"> = {
-      ...draft,
+      ...campos,
       familia_id: user.id,
       nome_autista: draft.nome_autista,
       alimentacao_restricoes: csvToArray(restricoesCsv),
       gatilhos: csvToArray(gatilhosCsv),
       interesses_extra: csvToArray(interessesCsv),
-    } as TablesInsert<"perfil_sensorial">;
+    };
 
-    const { error } = await supabase
-      .from("perfil_sensorial")
-      .upsert(payload, { onConflict: "familia_id" });
-
-    setSaving(false);
-    if (error) {
-      toast.error("Erro ao salvar: " + error.message);
-      return;
+    try {
+      if (editando) {
+        const atualizado = await atualizarPerfilSensorial(selecionadoId, payload);
+        setPerfis((lista) => lista.map((p) => (p.id === atualizado.id ? atualizado : p)));
+        toast.success(`Perfil de ${atualizado.nome_autista} atualizado!`);
+      } else {
+        const criado = await criarPerfilSensorial(payload);
+        setPerfis((lista) => [...lista, criado]);
+        carregarNoForm(criado);
+        toast.success(`Perfil de ${criado.nome_autista} criado!`);
+      }
+      // Redireciona se veio com ?next
+      const url = new URL(window.location.href);
+      const next = url.searchParams.get("next");
+      if (next && next.startsWith("/")) navigate({ to: next });
+    } catch (err) {
+      toast.error("Erro ao salvar", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setSaving(false);
     }
-    toast.success("Perfil TEA salvo!");
-    setHasExisting(true);
-    // Redireciona se veio com ?next
-    const url = new URL(window.location.href);
-    const next = url.searchParams.get("next");
-    if (next && next.startsWith("/")) navigate({ to: next });
+  }
+
+  async function onExcluir() {
+    if (!editando) return;
+    try {
+      await excluirPerfilSensorial(selecionadoId);
+      const restantes = perfis.filter((p) => p.id !== selecionadoId);
+      setPerfis(restantes);
+      carregarNoForm(restantes[0] ?? null);
+      toast.success("Perfil excluído.");
+    } catch (err) {
+      toast.error("Erro ao excluir perfil", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setConfirmandoExclusao(false);
+    }
   }
 
   if (loading) {
@@ -139,30 +224,61 @@ function PerfilTeaPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-display font-bold text-primary">Perfil TEA</h1>
+        <h1 className="text-3xl font-display font-bold text-primary">Perfis TEA</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Salvo uma vez, reaproveitado em todas as reservas. Edite quando algo mudar.
+          Cadastre um perfil para cada filho. Salvos uma vez, são reaproveitados em todas as
+          reservas - edite quando algo mudar.
         </p>
       </header>
+
+      {/* Seletor de filhos + adicionar novo */}
+      <div className="bg-white border rounded-2xl p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {perfis.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => carregarNoForm(p)}
+              aria-pressed={selecionadoId === p.id}
+              className={`inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border-2 text-sm font-medium transition ${
+                selecionadoId === p.id
+                  ? "border-secondary bg-teal-claro text-primary"
+                  : "border-border hover:border-secondary/50 text-muted-foreground"
+              }`}
+            >
+              <FotoAvatar nome={p.nome_autista} fotoUrl={p.foto_url} tamanho="h-7 w-7" />
+              {p.nome_autista}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => carregarNoForm(null)}
+            aria-pressed={!editando}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full border-2 border-dashed text-sm font-medium transition ${
+              !editando
+                ? "border-secondary bg-teal-claro/40 text-primary"
+                : "border-border hover:border-secondary/50 text-muted-foreground"
+            }`}
+          >
+            <Plus className="h-4 w-4" /> Adicionar filho
+          </button>
+        </div>
+      </div>
 
       <div className="bg-white border rounded-2xl p-5 sticky top-16 z-20 shadow-sm">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div>
             <p className="text-sm font-display font-bold text-primary">
-              Progresso do perfil
+              Progresso do perfil{draft.nome_autista ? ` de ${draft.nome_autista}` : ""}
             </p>
             <p className="text-xs text-muted-foreground">
               {completas} de {total} seções preenchidas
             </p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-display font-bold text-secondary leading-none">
-              {pct}%
-            </p>
+            <p className="text-2xl font-display font-bold text-secondary leading-none">{pct}%</p>
             {pct === 100 && (
-              <p className="text-[11px] text-emerald-600 font-semibold mt-1">
-                ✓ Perfil completo
-              </p>
+              <p className="text-[11px] text-emerald-600 font-semibold mt-1">✓ Perfil completo</p>
             )}
           </div>
         </div>
@@ -186,19 +302,57 @@ function PerfilTeaPage() {
                   : "bg-muted/40 border-border text-muted-foreground"
               }`}
             >
-              {s.done ? (
-                <CheckCircle2 className="h-3 w-3" />
-              ) : (
-                <Circle className="h-3 w-3" />
-              )}
+              {s.done ? <CheckCircle2 className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
               {s.label}
             </li>
           ))}
         </ul>
       </div>
 
-
       <div className="bg-white border rounded-2xl p-6 space-y-5">
+        {/* Foto do perfil */}
+        <div className="flex items-center gap-4">
+          <FotoAvatar
+            nome={draft.nome_autista ?? ""}
+            fotoUrl={draft.foto_url ?? null}
+            tamanho="h-20 w-20"
+          />
+          <div>
+            <input
+              ref={fotoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void onSelecionarFoto(file);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploadingFoto}
+              onClick={() => fotoInputRef.current?.click()}
+            >
+              {uploadingFoto ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> Enviando…
+                </>
+              ) : (
+                <>
+                  <Camera className="h-4 w-4 mr-1.5" />
+                  {draft.foto_url ? "Trocar foto" : "Adicionar foto"}
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              A foto ajuda a equipe do estabelecimento a reconhecer seu filho.
+            </p>
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-[1fr_140px_1fr] gap-3">
           <Field label="Nome (como a família chama)" required>
             <Input
@@ -218,9 +372,7 @@ function PerfilTeaPage() {
           <Field label="Nível TEA" required>
             <select
               value={draft.nivel_tea ?? ""}
-              onChange={(e) =>
-                set("nivel_tea", (e.target.value || null) as Draft["nivel_tea"])
-              }
+              onChange={(e) => set("nivel_tea", (e.target.value || null) as Draft["nivel_tea"])}
               className="w-full px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
             >
               <option value="">Selecione…</option>
@@ -410,7 +562,19 @@ function PerfilTeaPage() {
           />
         </Field>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex items-center justify-between gap-2 pt-2 flex-wrap">
+          {editando ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setConfirmandoExclusao(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" /> Excluir perfil
+            </Button>
+          ) : (
+            <span />
+          )}
           <Button
             onClick={() => void onSave()}
             disabled={saving}
@@ -420,7 +584,7 @@ function PerfilTeaPage() {
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" /> Salvando…
               </>
-            ) : hasExisting ? (
+            ) : editando ? (
               "Salvar alterações"
             ) : (
               "Salvar Perfil TEA"
@@ -428,6 +592,52 @@ function PerfilTeaPage() {
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={confirmandoExclusao} onOpenChange={setConfirmandoExclusao}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Excluir o perfil de {draft.nome_autista || "este filho"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. O perfil deixa de aparecer nas próximas reservas (as
+              já enviadas não são alteradas).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => void onExcluir()}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+function FotoAvatar({
+  nome,
+  fotoUrl,
+  tamanho,
+}: {
+  nome: string;
+  fotoUrl: string | null;
+  tamanho: string;
+}) {
+  const inicial = nome.trim().charAt(0).toUpperCase() || "?";
+  return (
+    <div
+      className={`${tamanho} rounded-full overflow-hidden bg-azul-claro grid place-items-center shrink-0 border border-border`}
+    >
+      {fotoUrl ? (
+        <img src={fotoUrl} alt={`Foto de ${nome}`} className="h-full w-full object-cover" />
+      ) : (
+        <span className="font-display font-bold text-primary">{inicial}</span>
+      )}
     </div>
   );
 }
@@ -521,12 +731,7 @@ function computeSectionStatus(
     {
       key: "apoio",
       label: "Apoio diário",
-      done: anyBool(
-        "apoio_higiene",
-        "apoio_alimentacao",
-        "apoio_mobilidade",
-        "apoio_seguranca",
-      ),
+      done: anyBool("apoio_higiene", "apoio_alimentacao", "apoio_mobilidade", "apoio_seguranca"),
     },
     {
       key: "rotina",
@@ -554,8 +759,7 @@ function computeSectionStatus(
     {
       key: "emocional",
       label: "Regulação",
-      done:
-        anyText(csv.gatilhosCsv, d.estrategias_acalmar, d.sinais_sobrecarga),
+      done: anyText(csv.gatilhosCsv, d.estrategias_acalmar, d.sinais_sobrecarga),
     },
     {
       key: "quarto",
@@ -578,4 +782,3 @@ function computeSectionStatus(
     },
   ];
 }
-

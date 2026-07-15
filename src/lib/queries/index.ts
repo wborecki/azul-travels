@@ -65,20 +65,28 @@ export {
   fetchReservasDaFamilia,
   fetchReservasDaFamiliaPorEstabelecimento,
   criarReserva,
+  vincularPerfisAReserva,
+  perfisDaReserva,
   buildReservaPayload,
   type Reserva,
   type ReservaInsert,
   type ReservaComContexto,
   type ReservaFormInput,
+  type PerfilDaReserva,
 } from "./reservas";
 
 export {
   fetchPerfisDaFamilia,
   fetchPerfisCompletos,
+  criarPerfilSensorial,
+  atualizarPerfilSensorial,
+  excluirPerfilSensorial,
+  uploadFotoPerfil,
   fetchNomeResponsavelDaFamilia,
   fetchTemPerfilSensorial,
   type PerfilSensorial,
   type PerfilSensorialInsert,
+  type PerfilSensorialUpdate,
   type PerfilOption,
 } from "./perfis";
 
@@ -88,6 +96,7 @@ export {
   fetchReservaDoEstabelecimentoPorId,
   atualizarStatusReservaEstabelecimento,
   registrarAuditoriaReservaEstabelecimento,
+  perfisSensoriaisDaReservaEstab,
   type ReservaEstabelecimentoRow,
 } from "./reservas-estabelecimento";
 

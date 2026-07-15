@@ -20,20 +20,51 @@ import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 export type Reserva = Tables<"reservas">;
 export type ReservaInsert = TablesInsert<"reservas">;
 
-/** Reserva enriquecida com dados leves do estabelecimento e perfil. */
+/** Perfil leve embutido em reservas (via coluna legada ou reserva_perfis). */
+export type PerfilDaReserva = Pick<
+  Tables<"perfil_sensorial">,
+  "id" | "nome_autista" | "nivel_tea" | "idade" | "foto_url"
+>;
+
+/** Reserva enriquecida com dados leves do estabelecimento e perfis. */
 export type ReservaComContexto = Reserva & {
   estabelecimentos: Pick<
     Tables<"estabelecimentos">,
     "id" | "slug" | "nome" | "cidade" | "estado" | "foto_capa" | "tipo" | "endereco" | "telefone"
   > | null;
-  perfil_sensorial: Pick<Tables<"perfil_sensorial">, "id" | "nome_autista" | "nivel_tea"> | null;
+  perfil_sensorial: PerfilDaReserva | null;
+  reserva_perfis: Array<{ perfil_sensorial: PerfilDaReserva | null }>;
 };
 
 const SELECT = `
   *,
   estabelecimentos(id, slug, nome, cidade, estado, foto_capa, tipo, endereco, telefone),
-  perfil_sensorial(id, nome_autista, nivel_tea)
+  perfil_sensorial!reservas_perfil_sensorial_id_fkey(id, nome_autista, nivel_tea, idade, foto_url),
+  reserva_perfis(perfil_sensorial(id, nome_autista, nivel_tea, idade, foto_url))
 ` as const;
+
+/**
+ * Perfis vinculados a uma reserva, unificando a coluna legada
+ * `perfil_sensorial_id` (reservas antigas) com a join table
+ * `reserva_perfis` (reservas novas, N perfis), sem duplicar.
+ */
+export function perfisDaReserva(reserva: {
+  perfil_sensorial: PerfilDaReserva | null;
+  reserva_perfis: Array<{ perfil_sensorial: PerfilDaReserva | null }>;
+}): PerfilDaReserva[] {
+  const vistos = new Set<string>();
+  const lista: PerfilDaReserva[] = [];
+  for (const rp of reserva.reserva_perfis) {
+    if (rp.perfil_sensorial && !vistos.has(rp.perfil_sensorial.id)) {
+      vistos.add(rp.perfil_sensorial.id);
+      lista.push(rp.perfil_sensorial);
+    }
+  }
+  if (reserva.perfil_sensorial && !vistos.has(reserva.perfil_sensorial.id)) {
+    lista.push(reserva.perfil_sensorial);
+  }
+  return lista;
+}
 
 /** Reservas da família logada, ordenadas por data desc. */
 export async function fetchReservasDaFamilia(familiaId: string): Promise<ReservaComContexto[]> {
@@ -92,6 +123,27 @@ export async function criarReserva(payload: ReservaInsert): Promise<Reserva> {
 
   if (error) throw error;
   return data;
+}
+
+/**
+ * Vincula N perfis sensoriais a uma reserva recém-criada (join table
+ * `reserva_perfis`). Idempotente por PK composta — chamadas repetidas com os
+ * mesmos ids não duplicam.
+ */
+export async function vincularPerfisAReserva(
+  reservaId: string,
+  perfilIds: string[],
+): Promise<void> {
+  if (perfilIds.length === 0) return;
+  const { error } = await supabase.from("reserva_perfis").upsert(
+    perfilIds.map((perfilSensorialId) => ({
+      reserva_id: reservaId,
+      perfil_sensorial_id: perfilSensorialId,
+    })),
+    { onConflict: "reserva_id,perfil_sensorial_id", ignoreDuplicates: true },
+  );
+
+  if (error) throw error;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

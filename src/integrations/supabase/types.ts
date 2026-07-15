@@ -891,6 +891,7 @@ export type Database = {
           estrategias_acalmar: string | null
           estrategias_que_funcionam: string | null
           familia_id: string
+          foto_url: string | null
           gatilhos: string[] | null
           gosta_animais: boolean | null
           gosta_atividades_agua: boolean | null
@@ -939,6 +940,7 @@ export type Database = {
           estrategias_acalmar?: string | null
           estrategias_que_funcionam?: string | null
           familia_id: string
+          foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
@@ -987,6 +989,7 @@ export type Database = {
           estrategias_acalmar?: string | null
           estrategias_que_funcionam?: string | null
           familia_id?: string
+          foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
@@ -1359,6 +1362,39 @@ export type Database = {
           telefone?: string
         }
         Relationships: []
+      }
+      reserva_perfis: {
+        Row: {
+          criado_em: string
+          perfil_sensorial_id: string
+          reserva_id: string
+        }
+        Insert: {
+          criado_em?: string
+          perfil_sensorial_id: string
+          reserva_id: string
+        }
+        Update: {
+          criado_em?: string
+          perfil_sensorial_id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_perfis_perfil_sensorial_id_fkey"
+            columns: ["perfil_sensorial_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_sensorial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_perfis_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reserva_mensagens: {
         Row: {
