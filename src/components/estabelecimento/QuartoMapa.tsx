@@ -1,19 +1,20 @@
-import { MapPin } from "lucide-react";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { Loader2, MapPin } from "lucide-react";
+
+const QuartoMapaLeaflet = lazy(() =>
+  import("./QuartoMapaLeaflet").then((m) => ({ default: m.QuartoMapaLeaflet })),
+);
 
 interface QuartoMapaProps {
   latitude: number | null;
   longitude: number | null;
-  /** Cidade, UF ou endereço para o texto acima do mapa. */
   local?: string | null;
 }
 
-/**
- * Bloco "Onde você estará", inspirado no Airbnb: um texto curto de localização
- * e o mapa incorporado. Usa OpenStreetMap (mesmo embed do painel admin) para
- * não depender de chave/SDK do Google. Sem coordenadas, mostra um aviso suave
- * em vez de um mapa quebrado.
- */
 export function QuartoMapa({ latitude, longitude, local }: QuartoMapaProps) {
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
   const latN = typeof latitude === "number" ? latitude : NaN;
   const lngN = typeof longitude === "number" ? longitude : NaN;
   const valido =
@@ -37,9 +38,6 @@ export function QuartoMapa({ latitude, longitude, local }: QuartoMapaProps) {
     );
   }
 
-  const delta = 0.01;
-  const bbox = `${lngN - delta},${latN - delta},${lngN + delta},${latN + delta}`;
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latN},${lngN}`;
   const linkOut = `https://www.openstreetmap.org/?mlat=${latN}&mlon=${lngN}#map=15/${latN}/${lngN}`;
 
   return (
@@ -50,7 +48,13 @@ export function QuartoMapa({ latitude, longitude, local }: QuartoMapaProps) {
         </p>
       )}
       <div className="rounded-2xl overflow-hidden border border-border aspect-[16/9] bg-muted">
-        <iframe title="Localização no mapa" src={src} className="w-full h-full" loading="lazy" />
+        {montado ? (
+          <Suspense fallback={<MapaSkeleton />}>
+            <QuartoMapaLeaflet latitude={latN} longitude={lngN} />
+          </Suspense>
+        ) : (
+          <MapaSkeleton />
+        )}
       </div>
       <a
         href={linkOut}
@@ -60,6 +64,14 @@ export function QuartoMapa({ latitude, longitude, local }: QuartoMapaProps) {
       >
         <MapPin className="h-3 w-3" /> Abrir no mapa
       </a>
+    </div>
+  );
+}
+
+function MapaSkeleton() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-muted/30 text-muted-foreground">
+      <Loader2 className="h-5 w-5 animate-spin" />
     </div>
   );
 }

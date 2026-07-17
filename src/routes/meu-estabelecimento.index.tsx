@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ import { fetchEstabelecimentoProfile, fetchEstabelecimentoFullDoOwner } from "@/
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 import { ESTRUTURA_ITEMS } from "@/lib/estrutura-tea";
 import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
+import { LocationPickerField } from "@/components/estabelecimento/LocationPickerField";
+import { geocodeEndereco, reverseGeocode } from "@/lib/geocode";
 
 export const Route = createFileRoute("/meu-estabelecimento/")({
   head: () => ({ meta: [{ title: "Meu estabelecimento · Turismo Azul" }] }),
@@ -36,18 +39,17 @@ const COLAB_OPTS = ["1-5", "6-15", "16-30", "31-50", "50+"];
 type Estrutura = Record<string, boolean>;
 
 interface PerfilDraft {
-  // basics → estabelecimentos + estabelecimento_profiles
   nome: string;
   tipo: string;
   endereco: string;
   cidade: string;
   estado: string;
+  latitude: string;
+  longitude: string;
   website: string;
   num_colaboradores: string;
   recebe_grupos_escolares_tea: boolean;
-  // section 2
   estrutura: Estrutura;
-  // section 3
   iniciativa_atual: string;
   num_capacitacao: string;
   contato_preferido: string;
@@ -60,6 +62,8 @@ const EMPTY: PerfilDraft = {
   endereco: "",
   cidade: "",
   estado: "",
+  latitude: "",
+  longitude: "",
   website: "",
   num_colaboradores: "",
   recebe_grupos_escolares_tea: false,
@@ -119,6 +123,8 @@ function MeuEstabelecimentoPage() {
         endereco: estab?.endereco ?? prof?.endereco ?? "",
         cidade: estab?.cidade ?? prof?.cidade ?? "",
         estado: estab?.estado ?? prof?.estado ?? "",
+        latitude: estab?.latitude != null ? String(estab.latitude) : "",
+        longitude: estab?.longitude != null ? String(estab.longitude) : "",
         website: estab?.website ?? prof?.website ?? "",
         num_colaboradores: prof?.num_colaboradores ?? "",
         recebe_grupos_escolares_tea: !!estab?.recebe_grupos_escolares_tea,
@@ -156,13 +162,22 @@ function MeuEstabelecimentoPage() {
 
   async function salvar() {
     if (!user) return;
-    if (!draft.nome.trim() || !draft.tipo || !draft.cidade.trim() || !draft.estado.trim()) {
-      toast.error("Preencha nome, tipo, cidade e estado.");
+    if (
+      !draft.nome.trim() ||
+      !draft.tipo ||
+      !draft.endereco.trim() ||
+      !draft.cidade.trim() ||
+      !draft.estado.trim()
+    ) {
+      toast.error("Preencha nome, tipo, endereço completo, cidade e estado.");
+      return;
+    }
+    if (!draft.latitude.trim() || !draft.longitude.trim()) {
+      toast.error("Posicione o pino no mapa para definir a localização do estabelecimento.");
       return;
     }
     setSalvando(true);
 
-    // 1. Update estabelecimento_profiles
     const { error: profErr } = await supabase
       .from("estabelecimento_profiles")
       .update({
@@ -181,7 +196,6 @@ function MeuEstabelecimentoPage() {
       })
       .eq("id", user.id);
 
-    // 2. Sync basics into estabelecimentos when row exists
     if (!profErr && estabId) {
       await supabase
         .from("estabelecimentos")
@@ -190,6 +204,8 @@ function MeuEstabelecimentoPage() {
           endereco: draft.endereco || null,
           cidade: draft.cidade,
           estado: draft.estado.toUpperCase(),
+          latitude: draft.latitude.trim() ? Number(draft.latitude) : null,
+          longitude: draft.longitude.trim() ? Number(draft.longitude) : null,
           website: draft.website || null,
           recebe_grupos_escolares_tea:
             draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
@@ -277,13 +293,13 @@ function Dashboard({
   onCompletar: () => void;
   onSolicitarSelo: () => void;
 }) {
-  // Cálculo de progresso do perfil (campos chave)
   const camposChave: Array<[string, boolean]> = [
     ["Nome", !!draft.nome],
     ["Tipo", !!draft.tipo],
     ["Endereço", !!draft.endereco],
     ["Cidade", !!draft.cidade],
     ["Estado", !!draft.estado],
+    ["Localização no mapa", !!(draft.latitude && draft.longitude)],
     ["Website", !!draft.website],
     ["Contato preferido", !!draft.contato_preferido],
     ["Iniciativa atual", !!draft.iniciativa_atual],
@@ -301,7 +317,7 @@ function Dashboard({
 
   return (
     <div className="space-y-6">
-      {/* Banner compacto */}
+      
       <div className="rounded-2xl bg-gradient-to-br from-[#1a2f5e] via-primary to-[#1a2f5e] text-white p-6 sm:p-8 shadow-md">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -318,7 +334,7 @@ function Dashboard({
           </div>
         </div>
 
-        {/* Barra de progresso */}
+        
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
             <span>Progresso do perfil</span>
@@ -333,9 +349,9 @@ function Dashboard({
         </div>
       </div>
 
-      {/* Grid de 3 cards principais */}
+      
       <div className="grid md:grid-cols-3 gap-4">
-        {/* Card 1 - Perfil */}
+        
         <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
@@ -376,7 +392,7 @@ function Dashboard({
           )}
         </div>
 
-        {/* Card 2 - Selo Azul (status atual) */}
+        
         <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
@@ -405,7 +421,7 @@ function Dashboard({
           )}
         </div>
 
-        {/* Card 3 - Quero o Selo Azul */}
+        
         <div
           className={`relative border rounded-2xl p-5 flex flex-col shadow-sm transition overflow-hidden ${
             querSelo
@@ -467,7 +483,6 @@ function Dashboard({
         </div>
       </div>
 
-      {/* Timeline horizontal - O que vem pela frente */}
       <TimelineFluxo perfilCompleto={perfilCompleto} querSelo={querSelo} seloAzul={seloAzul} />
     </div>
   );
@@ -490,6 +505,53 @@ function FormularioPerfil({
     set("estrutura", { ...draft.estrutura, [key]: !draft.estrutura[key] });
   }
 
+  const enderecoKey = JSON.stringify([draft.endereco, draft.cidade, draft.estado]);
+  const enderecoKeyDebounced = useDebouncedValue(enderecoKey, 900);
+  const enderecoInicialRef = useRef(enderecoKey);
+  const ultimaFonteRef = useRef<"endereco" | "mapa" | null>(null);
+
+  useEffect(() => {
+    if (ultimaFonteRef.current === "mapa") {
+      ultimaFonteRef.current = null;
+      return;
+    }
+    if (
+      enderecoKeyDebounced === enderecoInicialRef.current &&
+      draft.latitude.trim() &&
+      draft.longitude.trim()
+    ) {
+      return;
+    }
+    const [endereco, cidade, estado] = JSON.parse(enderecoKeyDebounced) as string[];
+    if (!endereco.trim() && !cidade.trim()) return;
+    let cancelado = false;
+    void (async () => {
+      const resultado = await geocodeEndereco({ endereco, cidade, estado }).catch(() => null);
+      if (!cancelado && resultado) {
+        set("latitude", String(resultado.lat));
+        set("longitude", String(resultado.lng));
+      }
+    })();
+    return () => {
+      cancelado = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enderecoKeyDebounced]);
+
+  const handlePinChange = (lat: number, lng: number) => {
+    ultimaFonteRef.current = "mapa";
+    set("latitude", String(lat));
+    set("longitude", String(lng));
+    void (async () => {
+      const resultado = await reverseGeocode(lat, lng).catch(() => null);
+      if (resultado) {
+        if (resultado.endereco) set("endereco", resultado.endereco);
+        if (resultado.cidade) set("cidade", resultado.cidade);
+        if (resultado.estado) set("estado", resultado.estado);
+      }
+    })();
+  };
+
   return (
     <div className="space-y-6">
       <button
@@ -502,7 +564,6 @@ function FormularioPerfil({
       <div className="bg-white border rounded-2xl p-6 md:p-8 space-y-6">
         <h1 className="text-2xl font-display font-bold text-primary">Perfil do estabelecimento</h1>
 
-        {/* Seção 1 */}
         <Secao titulo="1. Informações básicas">
           <Field label="Nome do estabelecimento" required>
             <Input
@@ -541,7 +602,7 @@ function FormularioPerfil({
               </select>
             </Field>
           </div>
-          <Field label="Endereço completo">
+          <Field label="Endereço completo" required>
             <Input
               value={draft.endereco}
               onChange={(e) => set("endereco", e.target.value)}
@@ -564,6 +625,17 @@ function FormularioPerfil({
               />
             </Field>
           </div>
+          <Field label="Localização no mapa" required>
+            <p className="mb-2 text-xs text-foreground/60">
+              O pino é posicionado automaticamente a partir do endereço, cidade e estado. Você
+              também pode clicar ou arrastar o pino no mapa para ajustar manualmente.
+            </p>
+            <LocationPickerField
+              latitude={draft.latitude.trim() ? Number(draft.latitude) : null}
+              longitude={draft.longitude.trim() ? Number(draft.longitude) : null}
+              onChange={handlePinChange}
+            />
+          </Field>
           <Field label="Website (opcional)">
             <Input
               type="url"
@@ -591,7 +663,6 @@ function FormularioPerfil({
           )}
         </Secao>
 
-        {/* Seção 2 */}
         <Secao titulo="2. Estrutura física">
           <p className="text-sm text-muted-foreground -mt-2">Marque o que o local já possui.</p>
           <div className="grid sm:grid-cols-2 gap-2">
@@ -607,7 +678,6 @@ function FormularioPerfil({
           </div>
         </Secao>
 
-        {/* Seção 3 */}
         <Secao titulo="3. Disponibilidade para certificação">
           <Field label="Já tem iniciativa de inclusão para autistas?">
             <RadioList
@@ -782,7 +852,6 @@ function TimelineFluxo({
     },
   ];
 
-  // current step = first not done; if all done → last
   const currentIdx = steps.findIndex((s) => !s.done);
   const activeIdx = currentIdx === -1 ? steps.length - 1 : currentIdx;
 
@@ -795,12 +864,9 @@ function TimelineFluxo({
         </span>
       </div>
 
-      {/* Desktop: horizontal */}
       <div className="hidden md:block">
         <div className="relative">
-          {/* Linha de fundo */}
           <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200" />
-          {/* Linha de progresso */}
           <div
             className="absolute top-5 left-0 h-0.5 bg-[#c9a84c] transition-all"
             style={{
@@ -858,7 +924,6 @@ function TimelineFluxo({
         </div>
       </div>
 
-      {/* Mobile: vertical */}
       <ol className="md:hidden space-y-4">
         {steps.map((s, i) => {
           const isDone = s.done;

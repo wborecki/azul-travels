@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ArrowLeft, MapPin, Search } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
   criarItemReservavel,
@@ -23,9 +23,12 @@ import {
 } from "@/lib/queries";
 import { ESTADOS_BR } from "@/lib/brazil";
 import { COMODIDADES_ITEM } from "@/lib/itens-comodidades";
+import { geocodeEndereco, reverseGeocode } from "@/lib/geocode";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/lib/utils";
 import { FotosGaleria } from "@/components/estabelecimento/FotosGaleria";
 import { ItemReservavelPreviewCard } from "@/components/estabelecimento/ItemReservavelPreviewCard";
+import { LocationPickerField } from "@/components/estabelecimento/LocationPickerField";
 
 const BUCKET = "itens-reservaveis-fotos";
 
@@ -185,7 +188,16 @@ const DESCRICAO_MIN = 30;
 function validarPasso(draft: ItemReservavelDraft, index: number): string | null {
   switch (STEPS[index].key) {
     case "basico":
-      return draft.nome.trim() ? null : "Dê um nome para a opção antes de continuar.";
+      if (!draft.nome.trim()) return "Dê um nome para a opção antes de continuar.";
+      if (draft.usaEnderecoProprio) {
+        if (!draft.endereco.trim() || !draft.cidade.trim() || !draft.estado.trim()) {
+          return "Preencha endereço, cidade e estado desta opção antes de continuar.";
+        }
+        if (!draft.latitude.trim() || !draft.longitude.trim()) {
+          return "Posicione o pino no mapa para definir a localização desta opção.";
+        }
+      }
+      return null;
     case "capacidade":
       if (!draft.capacidadeTotal.trim() || Number(draft.capacidadeTotal) <= 0) {
         return "Informe quantas pessoas cabem no quarto.";
@@ -257,6 +269,54 @@ export function ItemReservavelFormulario({
 
   const set = <K extends keyof ItemReservavelDraft>(k: K, v: ItemReservavelDraft[K]) =>
     setDraft((d) => ({ ...d, [k]: v }));
+
+  const enderecoKey = JSON.stringify([draft.endereco, draft.cidade, draft.estado]);
+  const enderecoKeyDebounced = useDebouncedValue(draft.usaEnderecoProprio ? enderecoKey : "", 900);
+  const enderecoInicialRef = useRef(enderecoKey);
+  const ultimaFonteRef = useRef<"endereco" | "mapa" | null>(null);
+
+  useEffect(() => {
+    if (!draft.usaEnderecoProprio) return;
+    if (ultimaFonteRef.current === "mapa") {
+      ultimaFonteRef.current = null;
+      return;
+    }
+    if (
+      enderecoKeyDebounced === enderecoInicialRef.current &&
+      draft.latitude.trim() &&
+      draft.longitude.trim()
+    ) {
+      return;
+    }
+    const [endereco, cidade, estado] = JSON.parse(enderecoKeyDebounced || "[]") as string[];
+    if (!endereco?.trim() && !cidade?.trim()) return;
+    let cancelado = false;
+    void (async () => {
+      const resultado = await geocodeEndereco({ endereco, cidade, estado }).catch(() => null);
+      if (!cancelado && resultado) {
+        set("latitude", String(resultado.lat));
+        set("longitude", String(resultado.lng));
+      }
+    })();
+    return () => {
+      cancelado = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enderecoKeyDebounced, draft.usaEnderecoProprio]);
+
+  const handlePinChange = (lat: number, lng: number) => {
+    ultimaFonteRef.current = "mapa";
+    set("latitude", String(lat));
+    set("longitude", String(lng));
+    void (async () => {
+      const resultado = await reverseGeocode(lat, lng).catch(() => null);
+      if (resultado) {
+        if (resultado.endereco) set("endereco", resultado.endereco);
+        if (resultado.cidade) set("cidade", resultado.cidade);
+        if (resultado.estado) set("estado", resultado.estado);
+      }
+    })();
+  };
 
   const alternarComodidade = (key: string) => {
     setDraft((d) => ({
@@ -468,21 +528,17 @@ export function ItemReservavelFormulario({
                         ))}
                       </SelectContent>
                     </Select>
-                    <GeocodeButton
-                      endereco={draft.endereco}
-                      cidade={draft.cidade}
-                      estado={draft.estado}
-                      onResult={(lat, lng) => {
-                        set("latitude", String(lat));
-                        set("longitude", String(lng));
-                      }}
-                    />
-                    {draft.latitude && draft.longitude && (
-                      <p className="flex items-center gap-1.5 text-xs text-foreground/50">
-                        <MapPin className="h-3.5 w-3.5" /> Coordenadas encontradas: {draft.latitude}
-                        , {draft.longitude}
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-foreground/60">
+                        O pino é posicionado automaticamente a partir do endereço, cidade e estado
+                        acima. Você também pode clicar ou arrastar o pino no mapa.
                       </p>
-                    )}
+                      <LocationPickerField
+                        latitude={draft.latitude.trim() ? Number(draft.latitude) : null}
+                        longitude={draft.longitude.trim() ? Number(draft.longitude) : null}
+                        onChange={handlePinChange}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -810,75 +866,5 @@ export function ItemReservavelFormulario({
         </div>
       </div>
     </div>
-  );
-}
-
-function GeocodeButton({
-  endereco,
-  cidade,
-  estado,
-  onResult,
-}: {
-  endereco: string;
-  cidade: string;
-  estado: string;
-  onResult: (lat: number, lng: number) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-  const canSearch = Boolean(endereco.trim() || cidade.trim());
-
-  const handleSearch = async () => {
-    if (!canSearch) {
-      toast.error("Preencha pelo menos endereço ou cidade.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        format: "jsonv2",
-        addressdetails: "0",
-        limit: "1",
-        countrycodes: "br",
-      });
-      if (endereco.trim()) params.set("street", endereco.trim());
-      if (cidade.trim()) params.set("city", cidade.trim());
-      if (estado.trim()) params.set("state", estado.trim());
-
-      const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as Array<{ lat: string; lon: string }>;
-      if (!data.length) {
-        toast.error("Endereço não encontrado. Tente refinar os campos.");
-        return;
-      }
-      const lat = Number(data[0].lat);
-      const lng = Number(data[0].lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        toast.error("Coordenadas inválidas retornadas pelo serviço.");
-        return;
-      }
-      onResult(lat, lng);
-      toast.success("Coordenadas encontradas!");
-    } catch (err) {
-      console.error("[geocode] erro:", err);
-      toast.error("Não foi possível buscar as coordenadas. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={() => void handleSearch()}
-      disabled={loading || !canSearch}
-      className="gap-2"
-    >
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-      Buscar coordenadas
-    </Button>
   );
 }

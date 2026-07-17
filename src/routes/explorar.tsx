@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Compass, Loader2, SearchX, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -14,13 +14,17 @@ import { CategoryPills } from "@/components/explorar/CategoryPills";
 import { FilterPanel } from "@/components/explorar/FilterPanel";
 import { ItemCard } from "@/components/explorar/ItemCard";
 import { ExplorarPagination } from "@/components/explorar/ExplorarPagination";
+import { VistaToggle } from "@/components/explorar/VistaToggle";
 import { useAuth } from "@/hooks/useAuth";
 import {
   criarContatoGeral,
+  fetchItensViewMapa,
   fetchItensViewPaginated,
   fetchFiltrosPadrao,
   salvarFiltrosPadrao,
   temFiltrosSalvos,
+  ITEM_MAPA_LIMITE,
+  type ItensViewMapa,
   type ItensViewPage,
   type Ordenacao,
 } from "@/lib/queries";
@@ -36,6 +40,10 @@ import {
   validateExplorarSearch,
   type ExplorarSearch,
 } from "@/lib/explorar-search";
+
+const MapView = lazy(() =>
+  import("@/components/explorar/MapView").then((m) => ({ default: m.MapView })),
+);
 
 export const Route = createFileRoute("/explorar")({
   validateSearch: validateExplorarSearch,
@@ -66,8 +74,16 @@ function ExplorarPage() {
   const [sheetAberto, setSheetAberto] = useState(false);
   const [salvandoPadrao, setSalvandoPadrao] = useState(false);
 
-  // Busca paginada no servidor - a URL é a única fonte dos filtros.
+  const noMapa = search.vista === "mapa";
+  const [mapaData, setMapaData] = useState<ItensViewMapa | null>(null);
+  const [mapaLoading, setMapaLoading] = useState(false);
+  const [mapaErro, setMapaErro] = useState(false);
+
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
   useEffect(() => {
+    if (noMapa) return;
     let alive = true;
     setLoading(true);
     setErro(false);
@@ -85,10 +101,29 @@ function ExplorarPage() {
     return () => {
       alive = false;
     };
-  }, [search, tentativa]);
+  }, [noMapa, search, tentativa]);
 
-  // URL apontando para página além da última (link antigo/compartilhado):
-  // corrige silenciosamente para a última página válida.
+  useEffect(() => {
+    if (!noMapa) return;
+    let alive = true;
+    setMapaLoading(true);
+    setMapaErro(false);
+    fetchItensViewMapa(searchToFilters(search))
+      .then((dados) => {
+        if (alive) setMapaData(dados);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!alive) return;
+        setMapaErro(true);
+        toast.error("Não foi possível carregar o mapa.");
+      })
+      .finally(() => alive && setMapaLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [noMapa, search, tentativa]);
+
   useEffect(() => {
     if (loading || !pageData) return;
     if (
@@ -106,7 +141,6 @@ function ExplorarPage() {
     }
   }, [loading, pageData, navigate]);
 
-  // Entrada "limpa" de usuário logado: reaplica os filtros salvos como padrão.
   const filtrosPadraoVerificados = useRef(false);
   useEffect(() => {
     if (filtrosPadraoVerificados.current || authLoading) return;
@@ -118,7 +152,6 @@ function ExplorarPage() {
         void navigate({
           replace: true,
           search: (prev) =>
-            // Usuário pode ter interagido enquanto o fetch corria - não sobrescreve.
             temFiltrosRelevantes(prev)
               ? prev
               : {
@@ -129,12 +162,9 @@ function ExplorarPage() {
                 },
         });
       })
-      .catch(() => {
-        // Silencioso: preferências salvas nunca bloqueiam a busca.
-      });
+      .catch(() => {});
   }, [authLoading, user, search, navigate]);
 
-  /** Aplica um patch de filtros e volta para a página 1. */
   function patchSearch(patch: Partial<ExplorarSearch>) {
     void navigate({ search: (prev) => ({ ...prev, ...patch, pagina: undefined }) });
   }
@@ -214,18 +244,16 @@ function ExplorarPage() {
           </div>
 
           <div className="mt-6 flex gap-8 items-start">
-            {/* Filtros - sidebar fixa no desktop */}
-            <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-24 rounded-xl border bg-white p-4">
-                {painelFiltros}
-              </div>
+          <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-24 rounded-xl border bg-white p-4">{painelFiltros}</div>
             </aside>
 
             <div className="flex-1 min-w-0">
-              {/* Barra de resultados: contagem, filtros (mobile) e ordenação */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground" aria-live="polite">
-                  {loading ? (
+                  {noMapa ? (
+                    <ResumoMapa loading={mapaLoading} dados={mapaData} />
+                  ) : loading ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" /> Buscando quartos…
                     </span>
@@ -260,30 +288,58 @@ function ExplorarPage() {
                     </SheetContent>
                   </Sheet>
 
-                  <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="hidden sm:inline">Ordenar:</span>
-                    <select
-                      value={search.ordenacao ?? "preco_asc"}
-                      onChange={(e) => {
-                        const v = e.target.value as Ordenacao;
-                        patchSearch({ ordenacao: v === "preco_asc" ? undefined : v });
-                      }}
-                      className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white text-foreground"
-                      aria-label="Ordenar resultados"
-                    >
-                      {ORDENACOES_UI.map((o) => (
-                        <option key={o} value={o}>
-                          {ORDENACAO_LABEL[o]}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  {!noMapa && (
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="hidden sm:inline">Ordenar:</span>
+                      <select
+                        value={search.ordenacao ?? "preco_asc"}
+                        onChange={(e) => {
+                          const v = e.target.value as Ordenacao;
+                          patchSearch({ ordenacao: v === "preco_asc" ? undefined : v });
+                        }}
+                        className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white text-foreground"
+                        aria-label="Ordenar resultados"
+                      >
+                        {ORDENACOES_UI.map((o) => (
+                          <option key={o} value={o}>
+                            {ORDENACAO_LABEL[o]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+
+                  <VistaToggle
+                    vista={search.vista}
+                    onChange={(vista) =>
+                      void navigate({ search: (prev) => ({ ...prev, vista }) })
+                    }
+                  />
                 </div>
               </div>
 
-              {/* Resultados */}
               <div className="mt-4">
-                {loading ? (
+                {noMapa ? (
+                  <div className="h-[70vh] min-h-[420px] overflow-hidden rounded-2xl border">
+                    {mapaErro ? (
+                      <div className="flex h-full items-center justify-center">
+                        <ErroBusca onTentarNovamente={() => setTentativa((t) => t + 1)} />
+                      </div>
+                    ) : !montado || mapaLoading || !mapaData ? (
+                      <MapaSkeleton />
+                    ) : (
+                      <Suspense fallback={<MapaSkeleton />}>
+                        <MapView
+                          items={mapaData.items}
+                          dataIn={search.data_in}
+                          dataOut={search.data_out}
+                          adultos={search.adultos}
+                          criancas={search.criancas}
+                        />
+                      </Suspense>
+                    )}
+                  </div>
+                ) : loading ? (
                   <GradeSkeleton />
                 ) : erro ? (
                   <ErroBusca onTentarNovamente={() => setTentativa((t) => t + 1)} />
@@ -337,6 +393,42 @@ function GradeSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+function MapaSkeleton() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-azul-claro/40">
+      <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Carregando o mapa…
+      </span>
+    </div>
+  );
+}
+
+function ResumoMapa({ loading, dados }: { loading: boolean; dados: ItensViewMapa | null }) {
+  if (loading || !dados) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" /> Buscando quartos…
+      </span>
+    );
+  }
+  if (dados.items.length === 0) {
+    return <>Nenhum quarto com localização cadastrada para esses filtros</>;
+  }
+  if (dados.truncado) {
+    return (
+      <>
+        Mostrando os primeiros <strong>{ITEM_MAPA_LIMITE}</strong> de <strong>{dados.total}</strong>{" "}
+        quartos — refine os filtros para ver todos
+      </>
+    );
+  }
+  return (
+    <>
+      <strong>{dados.items.length}</strong> quarto{dados.items.length === 1 ? "" : "s"} no mapa
+    </>
   );
 }
 

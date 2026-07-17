@@ -158,6 +158,19 @@ export function applyItensViewFilters<Q extends AnyItemViewBuilder>(
   return q;
 }
 
+async function fetchItensIndisponiveis(data_in?: string, data_out?: string): Promise<string[]> {
+  if (!data_in || !data_out) return [];
+  const { data, error } = await supabase.rpc("itens_indisponiveis_no_periodo", {
+    p_checkin: data_in,
+    p_checkout: data_out,
+  });
+  if (error) {
+    console.warn("Erro ao consultar disponibilidade, ignorando filtro de datas", error);
+    return [];
+  }
+  return (data ?? []).map((r) => r.item_id);
+}
+
 export async function fetchItensViewPaginated(
   filters: ItensViewFilters = {},
 ): Promise<ItensViewPage> {
@@ -166,18 +179,7 @@ export async function fetchItensViewPaginated(
     tamanhoPagina: filters.tamanhoPagina ?? ITEM_PAGE_SIZE_DEFAULT,
   })!;
 
-  // F5: quando datas presentes, descobre itens indisponíveis via RPC e exclui.
-  let unavailableIds: string[] = [];
-  if (filters.data_in && filters.data_out) {
-    const { data, error } = await supabase.rpc("itens_indisponiveis_no_periodo", {
-      p_checkin: filters.data_in,
-      p_checkout: filters.data_out,
-    });
-    if (error) {
-      console.warn("Erro ao consultar disponibilidade, ignorando filtro de datas", error);
-    }
-    unavailableIds = (data ?? []).map((r) => r.item_id);
-  }
+  const unavailableIds = await fetchItensIndisponiveis(filters.data_in, filters.data_out);
 
   const base = supabase.from("itens_reservaveis_view").select("*", { count: "exact" });
 
@@ -203,4 +205,82 @@ export async function fetchItensViewPaginated(
     tamanhoPagina: pag.tamanhoPagina,
     totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
   };
+}
+
+export const ITEM_MAPA_LIMITE = 500;
+
+const ITEM_MAPA_SELECT =
+  "id,item_nome,preco,latitude,longitude,imagens,cidade,estado,capacidade_total,quantidade_camas,selo_azul,avaliacao_media,total_avaliacoes,estabelecimento_nome,estabelecimento_tipo,estabelecimento_foto_capa";
+
+type ItemMapaRaw = Pick<
+  ItemViewRaw,
+  | "id"
+  | "item_nome"
+  | "preco"
+  | "latitude"
+  | "longitude"
+  | "imagens"
+  | "cidade"
+  | "estado"
+  | "capacidade_total"
+  | "quantidade_camas"
+  | "selo_azul"
+  | "avaliacao_media"
+  | "total_avaliacoes"
+  | "estabelecimento_nome"
+  | "estabelecimento_tipo"
+  | "estabelecimento_foto_capa"
+>;
+
+export interface ItemMapa extends Omit<ItemMapaRaw, "imagens" | "latitude" | "longitude"> {
+  imagens: string[];
+  latitude: number;
+  longitude: number;
+}
+
+export interface ItensViewMapa {
+  items: ItemMapa[];
+  total: number;
+  truncado: boolean;
+}
+
+export async function fetchItensViewMapa(filters: ItensViewFilters = {}): Promise<ItensViewMapa> {
+  const unavailableIds = await fetchItensIndisponiveis(filters.data_in, filters.data_out);
+
+  const base = supabase.from("itens_reservaveis_view").select(ITEM_MAPA_SELECT, { count: "exact" });
+
+  const q = applyItensViewFilters(base, {
+    ...filters,
+    pagina: undefined,
+    tamanhoPagina: undefined,
+  });
+
+  const comDisponibilidade =
+    unavailableIds.length > 0
+      ? (q.not("id", "in", `(${unavailableIds.join(",")})`) as typeof q)
+      : q;
+
+  const { data, error, count } = await comDisponibilidade
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .limit(ITEM_MAPA_LIMITE)
+    .returns<ItemMapaRaw[]>();
+
+  if (error) throw error;
+
+  const items: ItemMapa[] = (data ?? []).flatMap((row) =>
+    row.latitude === null || row.longitude === null
+      ? []
+      : [
+          {
+            ...row,
+            latitude: row.latitude,
+            longitude: row.longitude,
+            imagens: normalizeFotos(row.imagens),
+          },
+        ],
+  );
+
+  const total = count ?? items.length;
+  return { items, total, truncado: total > items.length };
 }

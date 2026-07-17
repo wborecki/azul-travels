@@ -18,7 +18,10 @@ export interface ExplorarSearch {
   data_in?: string;
   data_out?: string;
   perfil_tea_id?: string;
+  vista?: Vista;
 }
+
+export type Vista = "mapa";
 
 const SELO_FLAGS: Record<ItemSeloFlag, true> = {
   selo_azul: true,
@@ -104,8 +107,6 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     [preco_min, preco_max] = [preco_max, preco_min];
   }
 
-  // Ausentes = filtro de hóspedes desligado; os padrões (1 adulto, 0 crianças)
-  // só entram na URL quando o usuário muda o contador.
   const adultos = parseInteiroUrl(s.adultos, 1);
   const criancas = parseInteiroUrl(s.criancas, 0);
 
@@ -125,6 +126,8 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
 
   const perfil_tea_id = parseTexto(s.perfil_tea_id, 64);
 
+  const vista: Vista | undefined = s.vista === "mapa" ? "mapa" : undefined;
+
   return {
     ...(busca ? { busca } : {}),
     ...(tipos ? { tipos } : {}),
@@ -141,10 +144,10 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     ...(data_in ? { data_in } : {}),
     ...(data_out ? { data_out } : {}),
     ...(perfil_tea_id ? { perfil_tea_id } : {}),
+    ...(vista ? { vista } : {}),
   };
 }
 
-/** Total de hóspedes buscados, com os padrões (1 adulto, 0 crianças) aplicados. */
 export function totalHospedes(search: ExplorarSearch): number {
   return (search.adultos ?? 1) + (search.criancas ?? 0);
 }
