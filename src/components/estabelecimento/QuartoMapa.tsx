@@ -38,7 +38,7 @@ export function QuartoMapa({ latitude, longitude, local }: QuartoMapaProps) {
     );
   }
 
-  const linkOut = `https://www.openstreetmap.org/?mlat=${latN}&mlon=${lngN}#map=15/${latN}/${lngN}`;
+  const linkOut = `https://www.google.com/maps/search/?api=1&query=${latN},${lngN}`;
 
   return (
     <div className="space-y-3">

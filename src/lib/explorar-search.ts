@@ -18,10 +18,18 @@ export interface ExplorarSearch {
   data_in?: string;
   data_out?: string;
   perfil_tea_id?: string;
-  vista?: Vista;
+  /** Mostra o painel do mapa ao lado da lista (desktop) ou no lugar dela (mobile). */
+  mapa?: boolean;
+  /** Área visível do mapa ("buscar nesta área"). Mutuamente exclusivo com centro/raio. */
+  bbox_n?: number;
+  bbox_s?: number;
+  bbox_e?: number;
+  bbox_o?: number;
+  /** Busca por raio ("perto de mim"). Presença de centro_* ignora o bbox. */
+  centro_lat?: number;
+  centro_lng?: number;
+  raio_km?: number;
 }
-
-export type Vista = "mapa";
 
 const SELO_FLAGS: Record<ItemSeloFlag, true> = {
   selo_azul: true,
@@ -91,6 +99,11 @@ function parsePreco(v: unknown): number | undefined {
   return Number.isFinite(n) && n >= 0 ? n : undefined;
 }
 
+function parseCoordenada(v: unknown, min: number, max: number): number | undefined {
+  const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
+  return Number.isFinite(n) && n >= min && n <= max ? n : undefined;
+}
+
 export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSearch {
   const busca = parseTexto(s.busca);
   const tipos = csvOrUndefined(parseTiposCsv(s.tipos));
@@ -126,7 +139,39 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
 
   const perfil_tea_id = parseTexto(s.perfil_tea_id, 64);
 
-  const vista: Vista | undefined = s.vista === "mapa" ? "mapa" : undefined;
+  const mapa = s.mapa === true || s.mapa === "true" ? true : undefined;
+
+  // Centro/raio ("perto de mim") tem prioridade sobre bbox ("buscar nesta área") —
+  // são mutuamente exclusivos.
+  const centro_lat = parseCoordenada(s.centro_lat, -90, 90);
+  const centro_lng = parseCoordenada(s.centro_lng, -180, 180);
+  const temCentro = centro_lat !== undefined && centro_lng !== undefined;
+  const raioBruto = parseCoordenada(s.raio_km, 0.1, 500);
+  const raioValido = temCentro ? (raioBruto ?? 20) : undefined;
+
+  let bbox_n: number | undefined;
+  let bbox_s: number | undefined;
+  let bbox_e: number | undefined;
+  let bbox_o: number | undefined;
+  if (!temCentro) {
+    const n = parseCoordenada(s.bbox_n, -90, 90);
+    const sul = parseCoordenada(s.bbox_s, -90, 90);
+    const e = parseCoordenada(s.bbox_e, -180, 180);
+    const o = parseCoordenada(s.bbox_o, -180, 180);
+    if (
+      n !== undefined &&
+      sul !== undefined &&
+      e !== undefined &&
+      o !== undefined &&
+      sul <= n &&
+      o <= e
+    ) {
+      bbox_n = n;
+      bbox_s = sul;
+      bbox_e = e;
+      bbox_o = o;
+    }
+  }
 
   return {
     ...(busca ? { busca } : {}),
@@ -141,10 +186,12 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     ...(criancas !== undefined ? { criancas } : {}),
     ...(ordenacao ? { ordenacao } : {}),
     ...(pagina !== undefined ? { pagina } : {}),
+    ...(mapa ? { mapa } : {}),
     ...(data_in ? { data_in } : {}),
     ...(data_out ? { data_out } : {}),
     ...(perfil_tea_id ? { perfil_tea_id } : {}),
-    ...(vista ? { vista } : {}),
+    ...(temCentro ? { centro_lat, centro_lng, raio_km: raioValido } : {}),
+    ...(bbox_n !== undefined ? { bbox_n, bbox_s, bbox_e, bbox_o } : {}),
   };
 }
 
@@ -157,6 +204,15 @@ export function searchToFilters(search: ExplorarSearch): ItensViewFilters {
   const selos = parseSelosCsv(search.selos);
   const recursos = parseRecursosCsv(search.recursos);
   const hospedes = totalHospedes(search);
+
+  const temCentro = search.centro_lat !== undefined && search.centro_lng !== undefined;
+  const temBbox =
+    !temCentro &&
+    search.bbox_n !== undefined &&
+    search.bbox_s !== undefined &&
+    search.bbox_e !== undefined &&
+    search.bbox_o !== undefined;
+
   return {
     busca: search.busca,
     tipos: tipos.length > 0 ? tipos : undefined,
@@ -171,7 +227,46 @@ export function searchToFilters(search: ExplorarSearch): ItensViewFilters {
     pagina: search.pagina ?? 1,
     data_in: search.data_in,
     data_out: search.data_out,
+    ...(temCentro
+      ? { centro: { lat: search.centro_lat!, lng: search.centro_lng! }, raio_km: search.raio_km }
+      : {}),
+    ...(temBbox
+      ? {
+          bbox: {
+            norte: search.bbox_n!,
+            sul: search.bbox_s!,
+            leste: search.bbox_e!,
+            oeste: search.bbox_o!,
+          },
+        }
+      : {}),
   };
+}
+
+/** Existe uma área de mapa ativa (bbox ou centro/raio) na busca atual. */
+export function temAreaMapa(search: ExplorarSearch): boolean {
+  return (
+    (search.centro_lat !== undefined && search.centro_lng !== undefined) ||
+    (search.bbox_n !== undefined &&
+      search.bbox_s !== undefined &&
+      search.bbox_e !== undefined &&
+      search.bbox_o !== undefined)
+  );
+}
+
+/** Remove bbox e centro/raio da busca, preservando os demais filtros. */
+export function limparAreaMapa(search: ExplorarSearch): ExplorarSearch {
+  const {
+    bbox_n: _n,
+    bbox_s: _s,
+    bbox_e: _e,
+    bbox_o: _o,
+    centro_lat: _lat,
+    centro_lng: _lng,
+    raio_km: _raio,
+    ...resto
+  } = search;
+  return resto;
 }
 
 export function temFiltrosRelevantes(search: ExplorarSearch): boolean {
@@ -195,6 +290,7 @@ export function temFiltrosRelevantes(search: ExplorarSearch): boolean {
 
 export function contarFiltrosAtivos(search: ExplorarSearch): number {
   let n = 0;
+  if (search.tipos) n += 1;
   if (search.estado) n += 1;
   if (search.cidade) n += 1;
   n += parseSelosCsv(search.selos).length;

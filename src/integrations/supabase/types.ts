@@ -1683,6 +1683,10 @@ export type Database = {
         Args: { p_checkin: string; p_checkout: string }
         Returns: { item_id: string }[]
       }
+      buscar_itens_proximos: {
+        Args: { p_lat: number; p_lng: number; p_raio_km: number }
+        Returns: { item_id: string; distancia_m: number }[]
+      }
       expurgar_admin_password_resets: {
         Args: { _dias?: number }
         Returns: number

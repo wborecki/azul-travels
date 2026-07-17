@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Link } from "@tanstack/react-router";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import {
   BedDouble,
@@ -9,12 +9,15 @@ import {
   ChevronRight,
   Heart,
   ImageOff,
+  LocateFixed,
   Star,
   Users,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { ESTAB_TIPO_LABEL } from "@/lib/enums";
 import { MAPA_ZOOM_MAXIMO, MaptilerBaseLayer } from "@/components/maps/MaptilerBaseLayer";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ItemMapa } from "@/lib/queries";
 
@@ -68,12 +71,45 @@ function clusterIcon(cluster: { getChildCount: () => number }): L.DivIcon {
   });
 }
 
-function AjustarEnquadramento({ items }: { items: ItemMapa[] }) {
+export interface BoundsSimples {
+  norte: number;
+  sul: number;
+  leste: number;
+  oeste: number;
+}
+
+const DEBOUNCE_MOVIMENTO_MS = 450;
+
+function boundsParaSimples(bounds: L.LatLngBounds): BoundsSimples {
+  return {
+    norte: bounds.getNorth(),
+    sul: bounds.getSouth(),
+    leste: bounds.getEast(),
+    oeste: bounds.getWest(),
+  };
+}
+
+/**
+ * Ajusta o enquadramento aos items exibidos — mas só quando não há uma área
+ * de mapa ativa (bbox ou "perto de mim"), senão entraria em loop com
+ * ReportarMovimento (fitBounds -> moveend -> nova busca -> novo fitBounds).
+ */
+function AjustarEnquadramento({
+  items,
+  suspenso,
+  ignorarProximoMove,
+}: {
+  items: ItemMapa[];
+  suspenso: boolean;
+  ignorarProximoMove: MutableRefObject<boolean>;
+}) {
   const map = useMap();
 
   const chave = useMemo(() => items.map((i) => `${i.latitude},${i.longitude}`).join("|"), [items]);
 
   useEffect(() => {
+    if (suspenso) return;
+    ignorarProximoMove.current = true;
     if (items.length === 0) {
       map.setView(CENTRO_BRASIL, ZOOM_BRASIL);
       return;
@@ -81,7 +117,59 @@ function AjustarEnquadramento({ items }: { items: ItemMapa[] }) {
     const bounds = L.latLngBounds(items.map((i) => [i.latitude, i.longitude] as [number, number]));
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: ZOOM_PIN_UNICO });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chave, map, suspenso]);
+
+  return null;
+}
+
+/** Centraliza o mapa em um ponto (usado por "Perto de mim") sem disparar nova busca. */
+function FocarCentro({
+  centro,
+  ignorarProximoMove,
+}: {
+  centro: { lat: number; lng: number } | undefined;
+  ignorarProximoMove: MutableRefObject<boolean>;
+}) {
+  const map = useMap();
+  const chave = centro ? `${centro.lat},${centro.lng}` : "";
+
+  useEffect(() => {
+    if (!centro) return;
+    ignorarProximoMove.current = true;
+    map.setView([centro.lat, centro.lng], ZOOM_PIN_UNICO);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave, map]);
+
+  return null;
+}
+
+/** Observa o movimento do mapa e reporta os novos bounds (com debounce). */
+function ReportarMovimento({
+  ignorarProximoMove,
+  onBoundsChange,
+}: {
+  ignorarProximoMove: MutableRefObject<boolean>;
+  onBoundsChange: (bounds: BoundsSimples) => void;
+}) {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const map = useMapEvents({
+    moveend: () => {
+      if (ignorarProximoMove.current) {
+        ignorarProximoMove.current = false;
+        return;
+      }
+      const bounds = boundsParaSimples(map.getBounds());
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => onBoundsChange(bounds), DEBOUNCE_MOVIMENTO_MS);
+    },
+  });
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return null;
 }
@@ -92,9 +180,24 @@ interface MapViewProps {
   dataOut?: string;
   adultos?: number;
   criancas?: number;
+  /** Há bbox ou centro/raio ativo na URL — suprime o auto-enquadramento. */
+  areaAtiva: boolean;
+  onBoundsChange: (bounds: BoundsSimples) => void;
+  onPertoDeMim: (coords: { lat: number; lng: number }) => void;
+  centroFoco?: { lat: number; lng: number };
 }
 
-export function MapView({ items, dataIn, dataOut, adultos, criancas }: MapViewProps) {
+export function MapView({
+  items,
+  dataIn,
+  dataOut,
+  adultos,
+  criancas,
+  areaAtiva,
+  onBoundsChange,
+  onPertoDeMim,
+  centroFoco,
+}: MapViewProps) {
   const searchQuarto = {
     ...(dataIn ? { checkIn: dataIn } : {}),
     ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
@@ -102,34 +205,84 @@ export function MapView({ items, dataIn, dataOut, adultos, criancas }: MapViewPr
     ...(criancas !== undefined ? { criancas } : {}),
   };
 
+  const ignorarProximoMove = useRef(false);
+  const [buscandoLocalizacao, setBuscandoLocalizacao] = useState(false);
+
+  function handlePertoDeMim() {
+    if (!navigator.geolocation) {
+      toast.error("Seu navegador não suporta geolocalização.");
+      return;
+    }
+    setBuscandoLocalizacao(true);
+    navigator.geolocation.getCurrentPosition(
+      (posicao) => {
+        setBuscandoLocalizacao(false);
+        onPertoDeMim({ lat: posicao.coords.latitude, lng: posicao.coords.longitude });
+      },
+      (erro) => {
+        setBuscandoLocalizacao(false);
+        toast.error(
+          erro.code === erro.PERMISSION_DENIED
+            ? "Permissão de localização negada."
+            : "Não foi possível obter sua localização.",
+        );
+      },
+      { enableHighAccuracy: false, timeout: 10_000 },
+    );
+  }
+
   return (
-    <MapContainer
-      center={CENTRO_BRASIL}
-      zoom={ZOOM_BRASIL}
-      scrollWheelZoom
-      maxZoom={MAPA_ZOOM_MAXIMO}
-      className="mapa-azul h-full w-full rounded-2xl"
-      style={{ zIndex: 0 }}
-    >
-      <MaptilerBaseLayer />
-
-      <AjustarEnquadramento items={items} />
-
-      <MarkerClusterGroup
-        chunkedLoading
-        iconCreateFunction={clusterIcon}
-        maxClusterRadius={60}
-        showCoverageOnHover={false}
+    <div className="relative h-full w-full">
+      <MapContainer
+        center={CENTRO_BRASIL}
+        zoom={ZOOM_BRASIL}
+        scrollWheelZoom
+        maxZoom={MAPA_ZOOM_MAXIMO}
+        className="mapa-azul h-full w-full rounded-2xl"
+        style={{ zIndex: 0 }}
       >
-        {items.map((item) => (
-          <Marker key={item.id} position={[item.latitude, item.longitude]} icon={precoIcon(item)}>
-            <Popup closeButton={false} autoPanPadding={[24, 24]}>
-              <MiniCard item={item} searchQuarto={searchQuarto} />
-            </Popup>
-          </Marker>
-        ))}
-      </MarkerClusterGroup>
-    </MapContainer>
+        <MaptilerBaseLayer />
+
+        <AjustarEnquadramento
+          items={items}
+          suspenso={areaAtiva}
+          ignorarProximoMove={ignorarProximoMove}
+        />
+        <FocarCentro centro={centroFoco} ignorarProximoMove={ignorarProximoMove} />
+        <ReportarMovimento
+          ignorarProximoMove={ignorarProximoMove}
+          onBoundsChange={onBoundsChange}
+        />
+
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={clusterIcon}
+          maxClusterRadius={60}
+          showCoverageOnHover={false}
+        >
+          {items.map((item) => (
+            <Marker key={item.id} position={[item.latitude, item.longitude]} icon={precoIcon(item)}>
+              <Popup closeButton={false} autoPanPadding={[24, 24]}>
+                <MiniCard item={item} searchQuarto={searchQuarto} />
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      </MapContainer>
+
+      <div className="absolute bottom-3 right-3 z-[1000]">
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={buscandoLocalizacao}
+          className="rounded-full shadow-md"
+          onClick={handlePertoDeMim}
+        >
+          <LocateFixed className="h-4 w-4 mr-1.5" />
+          {buscandoLocalizacao ? "Localizando…" : "Perto de mim"}
+        </Button>
+      </div>
+    </div>
   );
 }
 

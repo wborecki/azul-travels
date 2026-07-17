@@ -70,6 +70,18 @@ export function normalizeItemView(row: ItemViewRaw): ItemView {
   };
 }
 
+export interface BoundingBox {
+  norte: number;
+  sul: number;
+  leste: number;
+  oeste: number;
+}
+
+export interface CentroBusca {
+  lat: number;
+  lng: number;
+}
+
 export interface ItensViewFilters {
   busca?: string;
   tipos?: ReadonlyArray<ItemViewRaw["estabelecimento_tipo"]>;
@@ -85,6 +97,10 @@ export interface ItensViewFilters {
   tamanhoPagina?: number;
   data_in?: string;
   data_out?: string;
+  /** Filtra por área visível do mapa (bbox e centro/raio são mutuamente exclusivos). */
+  bbox?: BoundingBox;
+  centro?: CentroBusca;
+  raio_km?: number;
 }
 
 export interface ItensViewPage {
@@ -137,6 +153,14 @@ export function applyItensViewFilters<Q extends AnyItemViewBuilder>(
     q = q.gte("capacidade_total", filters.capacidade_min) as Q;
   }
 
+  if (filters.bbox) {
+    const { norte, sul, leste, oeste } = filters.bbox;
+    q = q.gte("latitude", sul) as Q;
+    q = q.lte("latitude", norte) as Q;
+    q = q.gte("longitude", oeste) as Q;
+    q = q.lte("longitude", leste) as Q;
+  }
+
   for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
   for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;
 
@@ -171,6 +195,26 @@ async function fetchItensIndisponiveis(data_in?: string, data_out?: string): Pro
   return (data ?? []).map((r) => r.item_id);
 }
 
+/** Sentinela: nenhum item pode ter esse id, força um resultado vazio sem pular o filtro. */
+const ID_INEXISTENTE = "00000000-0000-0000-0000-000000000000";
+
+async function fetchIdsProximos(centro: CentroBusca, raioKm: number): Promise<string[]> {
+  const { data, error } = await supabase.rpc("buscar_itens_proximos", {
+    p_lat: centro.lat,
+    p_lng: centro.lng,
+    p_raio_km: raioKm,
+  });
+  if (error) {
+    console.warn("Erro ao consultar itens próximos, ignorando filtro de raio", error);
+    return [];
+  }
+  return (data ?? []).map((r) => r.item_id);
+}
+
+function applyProximidade<Q extends AnyItemViewBuilder>(query: Q, ids: string[]): Q {
+  return query.in("id", ids.length > 0 ? ids : [ID_INEXISTENTE]) as Q;
+}
+
 export async function fetchItensViewPaginated(
   filters: ItensViewFilters = {},
 ): Promise<ItensViewPage> {
@@ -180,6 +224,10 @@ export async function fetchItensViewPaginated(
   })!;
 
   const unavailableIds = await fetchItensIndisponiveis(filters.data_in, filters.data_out);
+  const proximosIds =
+    filters.centro && filters.raio_km !== undefined
+      ? await fetchIdsProximos(filters.centro, filters.raio_km)
+      : null;
 
   const base = supabase.from("itens_reservaveis_view").select("*", { count: "exact" });
 
@@ -194,7 +242,12 @@ export async function fetchItensViewPaginated(
       ? (q.not("id", "in", `(${unavailableIds.join(",")})`) as typeof q)
       : q;
 
-  const { data, error, count } = await qComDisponibilidade.returns<ItemViewRaw[]>();
+  const qComProximidade =
+    proximosIds !== null
+      ? (applyProximidade(qComDisponibilidade, proximosIds) as typeof qComDisponibilidade)
+      : qComDisponibilidade;
+
+  const { data, error, count } = await qComProximidade.returns<ItemViewRaw[]>();
   if (error) throw error;
   const total = count ?? 0;
   const items = (data ?? []).map(normalizeItemView);
@@ -246,6 +299,10 @@ export interface ItensViewMapa {
 
 export async function fetchItensViewMapa(filters: ItensViewFilters = {}): Promise<ItensViewMapa> {
   const unavailableIds = await fetchItensIndisponiveis(filters.data_in, filters.data_out);
+  const proximosIds =
+    filters.centro && filters.raio_km !== undefined
+      ? await fetchIdsProximos(filters.centro, filters.raio_km)
+      : null;
 
   const base = supabase.from("itens_reservaveis_view").select(ITEM_MAPA_SELECT, { count: "exact" });
 
@@ -260,7 +317,12 @@ export async function fetchItensViewMapa(filters: ItensViewFilters = {}): Promis
       ? (q.not("id", "in", `(${unavailableIds.join(",")})`) as typeof q)
       : q;
 
-  const { data, error, count } = await comDisponibilidade
+  const comProximidade =
+    proximosIds !== null
+      ? (applyProximidade(comDisponibilidade, proximosIds) as typeof comDisponibilidade)
+      : comDisponibilidade;
+
+  const { data, error, count } = await comProximidade
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .limit(ITEM_MAPA_LIMITE)
