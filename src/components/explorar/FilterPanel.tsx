@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { CalendarIcon, ChevronDown, Loader2, Save, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ContadorHospedes } from "@/components/ContadorHospedes";
+import { SeletorPeriodo } from "@/components/explorar/SeletorPeriodo";
 import { SELO_BADGES, RECURSO_BADGES } from "@/components/Badges";
-import { ESTADOS_BR } from "@/lib/brazil";
+import { ESTADOS_BR, formatDateBR, formatDataISO, parseDataISO } from "@/lib/brazil";
+import { cn } from "@/lib/utils";
 import type { ItemRecursoFlag, ItemSeloFlag } from "@/lib/queries";
 import {
   ITEM_RECURSO_FLAGS,
@@ -13,6 +17,11 @@ import {
   parseSelosCsv,
   type ExplorarSearch,
 } from "@/lib/explorar-search";
+
+// Teto do contador: o painel não conhece a capacidade dos quartos, então os
+// limites são apenas um valor razoável para uma busca.
+const MAX_ADULTOS = 16;
+const MAX_CRIANCAS = 10;
 
 interface FilterPanelProps {
   /** Filtros aplicados (URL) - o rascunho local ressincroniza quando mudam. */
@@ -40,7 +49,7 @@ function toggle<T>(set: ReadonlySet<T>, valor: T): Set<T> {
 
 /**
  * Painel de filtros do `/explorar`: localização, selos, recursos TEA,
- * faixa de preço e capacidade mínima. Mantém rascunho local - nada muda
+ * faixa de preço, período e hóspedes. Mantém rascunho local - nada muda
  * na URL até "Aplicar filtros". Usado inline no desktop e dentro de um
  * Sheet no mobile (duas instâncias independentes, ambas sincronizadas
  * com os valores aplicados na URL).
@@ -60,7 +69,12 @@ export function FilterPanel({
   );
   const [precoMin, setPrecoMin] = useState(aplicados.preco_min?.toString() ?? "");
   const [precoMax, setPrecoMax] = useState(aplicados.preco_max?.toString() ?? "");
-  const [capacidadeMin, setCapacidadeMin] = useState(aplicados.capacidade_min?.toString() ?? "");
+  const [adultos, setAdultos] = useState(aplicados.adultos ?? 1);
+  const [criancas, setCriancas] = useState(aplicados.criancas ?? 0);
+  const [dataIn, setDataIn] = useState(aplicados.data_in ?? "");
+  const [dataOut, setDataOut] = useState(aplicados.data_out ?? "");
+  const [periodoAberto, setPeriodoAberto] = useState(false);
+  const [hospedesAberto, setHospedesAberto] = useState(false);
 
   // URL mudou por fora (back/forward, pills, limpar) - descarta o rascunho.
   useEffect(() => {
@@ -69,7 +83,10 @@ export function FilterPanel({
     setRecursos(new Set(parseRecursosCsv(aplicados.recursos)));
     setPrecoMin(aplicados.preco_min?.toString() ?? "");
     setPrecoMax(aplicados.preco_max?.toString() ?? "");
-    setCapacidadeMin(aplicados.capacidade_min?.toString() ?? "");
+    setAdultos(aplicados.adultos ?? 1);
+    setCriancas(aplicados.criancas ?? 0);
+    setDataIn(aplicados.data_in ?? "");
+    setDataOut(aplicados.data_out ?? "");
   }, [aplicados]);
 
   function aplicar() {
@@ -79,9 +96,14 @@ export function FilterPanel({
       recursos: csvOrUndefined([...recursos]),
       preco_min: numeroOuUndefined(precoMin),
       preco_max: numeroOuUndefined(precoMax),
-      capacidade_min: numeroOuUndefined(capacidadeMin),
+      adultos: adultos !== 1 ? adultos : undefined,
+      criancas: criancas !== 0 ? criancas : undefined,
+      data_in: dataIn || undefined,
+      data_out: (dataIn && dataOut) || undefined,
     });
   }
+
+  const totalHospedes = adultos + criancas;
 
   function limpar() {
     onAplicar({
@@ -91,7 +113,10 @@ export function FilterPanel({
       recursos: undefined,
       preco_min: undefined,
       preco_max: undefined,
-      capacidade_min: undefined,
+      adultos: undefined,
+      criancas: undefined,
+      data_in: undefined,
+      data_out: undefined,
     });
   }
 
@@ -181,17 +206,104 @@ export function FilterPanel({
       </section>
 
       <section>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase">Período</h3>
+        <Popover open={periodoAberto} onOpenChange={setPeriodoAberto}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
+              aria-label="Selecionar período"
+            >
+              <span className="flex items-center gap-2 truncate">
+                <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                {dataIn ? (
+                  <span className="font-medium">
+                    {formatDateBR(dataIn)}
+                    {dataOut ? <> – {formatDateBR(dataOut)}</> : " (saída)"}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Selecionar datas</span>
+                )}
+              </span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
+            <div className="p-5">
+              <SeletorPeriodo
+                checkIn={parseDataISO(dataIn)}
+                checkOut={parseDataISO(dataOut)}
+                onChange={(ci, co) => {
+                  setDataIn(ci ? formatDataISO(ci) : "");
+                  setDataOut(co ? formatDataISO(co) : "");
+                }}
+                onFechar={() => setPeriodoAberto(false)}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      </section>
+
+      <section>
         <h3 className="text-xs font-semibold text-muted-foreground uppercase">Hóspedes</h3>
-        <Input
-          type="number"
-          min={1}
-          inputMode="numeric"
-          placeholder="Capacidade mínima"
-          value={capacidadeMin}
-          onChange={(e) => setCapacidadeMin(e.target.value)}
-          className="mt-2"
-          aria-label="Capacidade mínima de hóspedes"
-        />
+        <Popover open={hospedesAberto} onOpenChange={setHospedesAberto}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
+              aria-label="Selecionar hóspedes"
+            >
+              <span className="flex items-center gap-2 truncate">
+                <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                {totalHospedes > 1 ? (
+                  <span className="font-medium">
+                    {totalHospedes} hóspedes
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Qualquer</span>
+                )}
+              </span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                  hospedesAberto && "rotate-180",
+                )}
+              />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-4" align="start" sideOffset={8}>
+            <div className="space-y-4">
+              <ContadorHospedes
+                label="Adultos"
+                sublabel="13 anos ou mais"
+                valor={adultos}
+                min={1}
+                max={MAX_ADULTOS}
+                onChange={setAdultos}
+              />
+              <ContadorHospedes
+                label="Crianças"
+                sublabel="De 2 a 12 anos"
+                valor={criancas}
+                min={0}
+                max={MAX_CRIANCAS}
+                onChange={setCriancas}
+              />
+              <p className="text-xs text-muted-foreground">
+                Mostra apenas quartos que acomodam {totalHospedes} hóspede
+                {totalHospedes === 1 ? "" : "s"}.
+              </p>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setHospedesAberto(false)}
+                  className="text-sm font-semibold text-foreground underline underline-offset-2"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </section>
 
       <div className="flex gap-2 pt-1">

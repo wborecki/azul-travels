@@ -216,7 +216,7 @@ function ExplorarPage() {
           <div className="mt-6 flex gap-8 items-start">
             {/* Filtros - sidebar fixa no desktop */}
             <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-24 rounded-xl border bg-white p-4 max-h-[calc(100vh-7rem)] overflow-y-auto">
+              <div className="sticky top-24 rounded-xl border bg-white p-4">
                 {painelFiltros}
               </div>
             </aside>
@@ -298,6 +298,8 @@ function ExplorarPage() {
                           item={item}
                           dataIn={search.data_in}
                           dataOut={search.data_out}
+                          adultos={search.adultos}
+                          criancas={search.criancas}
                         />
                       ))}
                     </div>

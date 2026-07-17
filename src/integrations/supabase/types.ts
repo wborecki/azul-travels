@@ -1452,7 +1452,7 @@ export type Database = {
           num_autistas: number | null
           objetivo: string | null
           objetivo_viagem: string[]
-          item_reservavel_id: string
+          item_reservavel_id: string | null
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
           perfil_tea_id: string | null
@@ -1502,7 +1502,7 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
-          item_reservavel_id?: string
+          item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           perfil_tea_id?: string | null
@@ -1679,6 +1679,10 @@ export type Database = {
         Args: { p_item_id: string; p_inicio?: string; p_fim?: string }
         Returns: { dia: string }[]
       }
+      itens_indisponiveis_no_periodo: {
+        Args: { p_checkin: string; p_checkout: string }
+        Returns: { item_id: string }[]
+      }
       expurgar_admin_password_resets: {
         Args: { _dias?: number }
         Returns: number
@@ -1719,6 +1723,14 @@ export type Database = {
           _user_id?: string
         }
         Returns: string
+      }
+      perfil_pertence_a_familia: {
+        Args: { _familia_id: string; _perfil_id: string }
+        Returns: boolean
+      }
+      perfil_vinculado_a_reserva: {
+        Args: { _perfil_id: string; _reserva_id: string }
+        Returns: boolean
       }
       promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }

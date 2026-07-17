@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { ChevronDown, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ContadorHospedes } from "@/components/ContadorHospedes";
 import { MesGrade } from "@/components/estabelecimento/MesGrade";
 import type { DisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
 import { formatDataISO } from "@/lib/brazil";
@@ -172,7 +173,7 @@ export function ReservaCard({
 
           {painelAberto === "hospedes" && (
             <div className="absolute z-50 left-0 right-0 top-full mt-2 rounded-2xl border border-border bg-card p-4 shadow-2xl space-y-4">
-              <ContadorLinha
+              <ContadorHospedes
                 label="Adultos"
                 sublabel="13 anos ou mais"
                 valor={adultos}
@@ -180,7 +181,7 @@ export function ReservaCard({
                 max={Math.max(1, Math.min(maxAdultos, maxTotal - criancas))}
                 onChange={(v) => definirHospedes(v, criancas)}
               />
-              <ContadorLinha
+              <ContadorHospedes
                 label="Crianças"
                 sublabel="De 2 a 12 anos"
                 valor={criancas}
@@ -234,52 +235,6 @@ export function ReservaCard({
       <p className="text-[11px] text-muted-foreground leading-snug">
         Esta plataforma conecta você ao estabelecimento. O pagamento é feito diretamente com eles.
       </p>
-    </div>
-  );
-}
-
-function ContadorLinha({
-  label,
-  sublabel,
-  valor,
-  min,
-  max,
-  onChange,
-}: {
-  label: string;
-  sublabel: string;
-  valor: number;
-  min: number;
-  max: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <div>
-        <div className="text-sm font-medium text-foreground">{label}</div>
-        <div className="text-xs text-muted-foreground">{sublabel}</div>
-      </div>
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => onChange(Math.max(min, valor - 1))}
-          disabled={valor <= min}
-          className="grid h-8 w-8 place-items-center rounded-full border border-border text-foreground transition disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary"
-          aria-label={`Diminuir ${label.toLowerCase()}`}
-        >
-          <Minus className="h-3.5 w-3.5" />
-        </button>
-        <span className="w-4 text-center text-sm tabular-nums">{valor}</span>
-        <button
-          type="button"
-          onClick={() => onChange(Math.min(max, valor + 1))}
-          disabled={valor >= max}
-          className="grid h-8 w-8 place-items-center rounded-full border border-border text-foreground transition disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary"
-          aria-label={`Aumentar ${label.toLowerCase()}`}
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
-      </div>
     </div>
   );
 }

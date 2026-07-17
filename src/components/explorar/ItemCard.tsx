@@ -16,6 +16,9 @@ interface ItemCardProps {
   /** Datas da busca (`YYYY-MM-DD`) - pré-preenchem a reserva em `/quartos/$id`. */
   dataIn?: string;
   dataOut?: string;
+  /** Hóspedes da busca - pré-preenchem a reserva em `/quartos/$id`. */
+  adultos?: number;
+  criancas?: number;
 }
 
 /**
@@ -23,7 +26,7 @@ interface ItemCardProps {
  * e do estabelecimento, localização, avaliação média, recursos TEA,
  * capacidade e preço por noite. O card inteiro leva ao detalhe do quarto.
  */
-export function ItemCard({ item, dataIn, dataOut }: ItemCardProps) {
+export function ItemCard({ item, dataIn, dataOut, adultos, criancas }: ItemCardProps) {
   const capa = item.imagens[0] ?? item.estabelecimento_foto_capa;
   const recursosAtivos = ITEM_RECURSO_FLAGS.filter((flag) => item[flag]);
   const recursosVisiveis = recursosAtivos.slice(0, MAX_RECURSOS_VISIVEIS);
@@ -36,6 +39,8 @@ export function ItemCard({ item, dataIn, dataOut }: ItemCardProps) {
       search={{
         ...(dataIn ? { checkIn: dataIn } : {}),
         ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
+        ...(adultos !== undefined ? { adultos } : {}),
+        ...(criancas !== undefined ? { criancas } : {}),
       }}
       className="group relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition"
       aria-label={`Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`}
@@ -46,7 +51,7 @@ export function ItemCard({ item, dataIn, dataOut }: ItemCardProps) {
         </span>
       )}
 
-      <div className="aspect-[16/10] bg-azul-claro">
+      <div className="aspect-[16/10] w-full shrink-0 overflow-hidden bg-azul-claro">
         {capa ? (
           <img
             src={capa}

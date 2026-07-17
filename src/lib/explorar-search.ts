@@ -11,7 +11,8 @@ export interface ExplorarSearch {
   cidade?: string;
   preco_min?: number;
   preco_max?: number;
-  capacidade_min?: number;
+  adultos?: number;
+  criancas?: number;
   ordenacao?: Ordenacao;
   pagina?: number;
   data_in?: string;
@@ -103,7 +104,10 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     [preco_min, preco_max] = [preco_max, preco_min];
   }
 
-  const capacidade_min = parseInteiroUrl(s.capacidade_min, 1);
+  // Ausentes = filtro de hóspedes desligado; os padrões (1 adulto, 0 crianças)
+  // só entram na URL quando o usuário muda o contador.
+  const adultos = parseInteiroUrl(s.adultos, 1);
+  const criancas = parseInteiroUrl(s.criancas, 0);
 
   const ordenacao = ORDENACOES.has(s.ordenacao as Ordenacao)
     ? (s.ordenacao as Ordenacao)
@@ -130,7 +134,8 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     ...(cidade ? { cidade } : {}),
     ...(preco_min !== undefined ? { preco_min } : {}),
     ...(preco_max !== undefined ? { preco_max } : {}),
-    ...(capacidade_min !== undefined ? { capacidade_min } : {}),
+    ...(adultos !== undefined ? { adultos } : {}),
+    ...(criancas !== undefined ? { criancas } : {}),
     ...(ordenacao ? { ordenacao } : {}),
     ...(pagina !== undefined ? { pagina } : {}),
     ...(data_in ? { data_in } : {}),
@@ -139,10 +144,16 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
   };
 }
 
+/** Total de hóspedes buscados, com os padrões (1 adulto, 0 crianças) aplicados. */
+export function totalHospedes(search: ExplorarSearch): number {
+  return (search.adultos ?? 1) + (search.criancas ?? 0);
+}
+
 export function searchToFilters(search: ExplorarSearch): ItensViewFilters {
   const tipos = parseTiposCsv(search.tipos);
   const selos = parseSelosCsv(search.selos);
   const recursos = parseRecursosCsv(search.recursos);
+  const hospedes = totalHospedes(search);
   return {
     busca: search.busca,
     tipos: tipos.length > 0 ? tipos : undefined,
@@ -152,9 +163,11 @@ export function searchToFilters(search: ExplorarSearch): ItensViewFilters {
     cidade: search.cidade,
     preco_min: search.preco_min,
     preco_max: search.preco_max,
-    capacidade_min: search.capacidade_min,
+    capacidade_min: hospedes > 1 ? hospedes : undefined,
     ordenacao: search.ordenacao,
     pagina: search.pagina ?? 1,
+    data_in: search.data_in,
+    data_out: search.data_out,
   };
 }
 
@@ -168,9 +181,12 @@ export function temFiltrosRelevantes(search: ExplorarSearch): boolean {
     search.cidade !== undefined ||
     search.preco_min !== undefined ||
     search.preco_max !== undefined ||
-    search.capacidade_min !== undefined ||
+    search.adultos !== undefined ||
+    search.criancas !== undefined ||
     search.ordenacao !== undefined ||
-    search.pagina !== undefined
+    search.pagina !== undefined ||
+    search.data_in !== undefined ||
+    search.data_out !== undefined
   );
 }
 
@@ -182,6 +198,7 @@ export function contarFiltrosAtivos(search: ExplorarSearch): number {
   n += parseRecursosCsv(search.recursos).length;
   if (search.preco_min !== undefined) n += 1;
   if (search.preco_max !== undefined) n += 1;
-  if (search.capacidade_min !== undefined) n += 1;
+  if (search.adultos !== undefined || search.criancas !== undefined) n += 1;
+  if (search.data_in || search.data_out) n += 1;
   return n;
 }

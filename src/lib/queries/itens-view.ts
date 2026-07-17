@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, Database } from "@/integrations/supabase/types";
 import { normalizeFotos } from "@/lib/media";
 import { PAGE_SIZE_DEFAULT, resolvePagination } from "./pagination";
 
@@ -83,6 +83,8 @@ export interface ItensViewFilters {
   ordenacao?: Ordenacao;
   pagina?: number;
   tamanhoPagina?: number;
+  data_in?: string;
+  data_out?: string;
 }
 
 export interface ItensViewPage {
@@ -164,6 +166,19 @@ export async function fetchItensViewPaginated(
     tamanhoPagina: filters.tamanhoPagina ?? ITEM_PAGE_SIZE_DEFAULT,
   })!;
 
+  // F5: quando datas presentes, descobre itens indisponíveis via RPC e exclui.
+  let unavailableIds: string[] = [];
+  if (filters.data_in && filters.data_out) {
+    const { data, error } = await supabase.rpc("itens_indisponiveis_no_periodo", {
+      p_checkin: filters.data_in,
+      p_checkout: filters.data_out,
+    });
+    if (error) {
+      console.warn("Erro ao consultar disponibilidade, ignorando filtro de datas", error);
+    }
+    unavailableIds = (data ?? []).map((r) => r.item_id);
+  }
+
   const base = supabase.from("itens_reservaveis_view").select("*", { count: "exact" });
 
   const q = applyItensViewFilters(base, {
@@ -172,7 +187,12 @@ export async function fetchItensViewPaginated(
     tamanhoPagina: pag.tamanhoPagina,
   });
 
-  const { data, error, count } = await q.returns<ItemViewRaw[]>();
+  const qComDisponibilidade =
+    unavailableIds.length > 0
+      ? (q.not("id", "in", `(${unavailableIds.join(",")})`) as typeof q)
+      : q;
+
+  const { data, error, count } = await qComDisponibilidade.returns<ItemViewRaw[]>();
   if (error) throw error;
   const total = count ?? 0;
   const items = (data ?? []).map(normalizeItemView);
