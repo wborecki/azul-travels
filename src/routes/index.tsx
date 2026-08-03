@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import giselaFoto from "@/assets/gisela-antoniucci.jpeg";
 import heroAeroporto from "@/assets/hero-aeroporto.png";
+import seloOficial from "@/assets/selo-turismo-azul.png";
 import arthurPiscinaSplash from "@/assets/arthur-piscina-splash.jpeg";
 import arthurConfiante from "@/assets/arthur-confiante.jpeg";
 import arthurParque from "@/assets/arthur-parque.jpeg";
@@ -1323,7 +1324,7 @@ function CtaFinal() {
 function SeloBadge({ size = 320 }: { size?: number }) {
   return (
     <img
-      src="/selo-turismo-azul.svg"
+      src={seloOficial}
       alt="Selo Turismo Azul Inclusivo · Certificação Oficial"
       width={size}
       height={size}

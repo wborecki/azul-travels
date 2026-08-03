@@ -1,0 +1,2 @@
+ALTER TABLE public.estabelecimento_profiles ADD COLUMN IF NOT EXISTS is_demo boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_estabelecimento_profiles_is_demo ON public.estabelecimento_profiles (is_demo);

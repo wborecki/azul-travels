@@ -315,6 +315,7 @@ export type Database = {
           estrutura: Json
           id: string
           iniciativa_atual: string | null
+          is_demo: boolean
           last_seen_at: string | null
           nome_responsavel: string | null
           notes: string | null
@@ -341,6 +342,7 @@ export type Database = {
           estrutura?: Json
           id: string
           iniciativa_atual?: string | null
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
@@ -367,6 +369,7 @@ export type Database = {
           estrutura?: Json
           id?: string
           iniciativa_atual?: string | null
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
@@ -399,6 +402,7 @@ export type Database = {
           foto_capa: string | null
           fotos: Json | null
           id: string
+          is_demo: boolean
           latitude: number | null
           listagem_basica: boolean | null
           longitude: number | null
@@ -444,6 +448,7 @@ export type Database = {
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
+          is_demo?: boolean
           latitude?: number | null
           listagem_basica?: boolean | null
           longitude?: number | null
@@ -489,6 +494,7 @@ export type Database = {
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
+          is_demo?: boolean
           latitude?: number | null
           listagem_basica?: boolean | null
           longitude?: number | null
@@ -624,6 +630,7 @@ export type Database = {
           email: string | null
           estado: string | null
           id: string
+          is_demo: boolean
           last_seen_at: string | null
           nome_responsavel: string | null
           notes: string | null
@@ -638,6 +645,7 @@ export type Database = {
           email?: string | null
           estado?: string | null
           id: string
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
@@ -652,6 +660,7 @@ export type Database = {
           email?: string | null
           estado?: string | null
           id?: string
+          is_demo?: boolean
           last_seen_at?: string | null
           nome_responsavel?: string | null
           notes?: string | null
@@ -672,6 +681,7 @@ export type Database = {
           id: string
           iniciativa_atual: string | null
           interesses: string[] | null
+          is_demo: boolean
           nome: string
           nome_estabelecimento: string
           num_colaboradores: string | null
@@ -689,6 +699,7 @@ export type Database = {
           id?: string
           iniciativa_atual?: string | null
           interesses?: string[] | null
+          is_demo?: boolean
           nome: string
           nome_estabelecimento: string
           num_colaboradores?: string | null
@@ -706,6 +717,7 @@ export type Database = {
           id?: string
           iniciativa_atual?: string | null
           interesses?: string[] | null
+          is_demo?: boolean
           nome?: string
           nome_estabelecimento?: string
           num_colaboradores?: string | null
@@ -723,6 +735,7 @@ export type Database = {
           email: string
           estado: string
           id: string
+          is_demo: boolean
           nome: string
           num_filhos_tea: string | null
           origem: string | null
@@ -737,6 +750,7 @@ export type Database = {
           email: string
           estado: string
           id?: string
+          is_demo?: boolean
           nome: string
           num_filhos_tea?: string | null
           origem?: string | null
@@ -751,6 +765,7 @@ export type Database = {
           email?: string
           estado?: string
           id?: string
+          is_demo?: boolean
           nome?: string
           num_filhos_tea?: string | null
           origem?: string | null

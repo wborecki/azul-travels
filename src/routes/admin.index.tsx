@@ -15,6 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DemoBadge } from "@/components/admin/DemoBadge";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -29,6 +30,7 @@ type RecentRow = {
   estado: string | null;
   criado_em: string;
   status: string | null;
+  is_demo: boolean;
 };
 
 type LeadRow = {
@@ -36,6 +38,7 @@ type LeadRow = {
   nome: string;
   email: string;
   criado_em: string;
+  is_demo: boolean;
 };
 
 const NAVY = "#1a2f5e";
@@ -58,18 +61,18 @@ function AdminDashboard() {
           fetchDashboardStats(),
           supabase
             .from("familia_profiles")
-            .select("id, nome_responsavel, cidade, estado, criado_em, status")
+            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo")
             .order("criado_em", { ascending: false })
             .limit(20),
           supabase
             .from("estabelecimento_profiles")
-            .select("id, nome_responsavel, cidade, estado, criado_em, status")
+            .select("id, nome_responsavel, cidade, estado, criado_em, status, is_demo")
             .order("criado_em", { ascending: false })
             .limit(20),
           supabase.from("leads_familias").select("id", { count: "exact", head: true }),
           supabase
             .from("leads_familias")
-            .select("id, nome, email, criado_em")
+            .select("id, nome, email, criado_em, is_demo")
             .order("criado_em", { ascending: false })
             .limit(5),
           supabase
@@ -91,6 +94,7 @@ function AdminDashboard() {
             estado: f.estado,
             criado_em: f.criado_em,
             status: f.status,
+            is_demo: (f as { is_demo?: boolean }).is_demo ?? false,
           })),
           ...(ests.data ?? []).map((e) => ({
             id: e.id,
@@ -100,6 +104,7 @@ function AdminDashboard() {
             estado: e.estado,
             criado_em: e.criado_em,
             status: e.status,
+            is_demo: (e as { is_demo?: boolean }).is_demo ?? false,
           })),
         ].sort((a, b) => b.criado_em.localeCompare(a.criado_em));
         setRecents(merged);
@@ -284,7 +289,10 @@ function AdminDashboard() {
                       className="hover:bg-[#f8fafc] transition-colors"
                     >
                       <TableCell className="font-medium py-2 text-sm">
-                        {r.nome ?? <EmptyCell />}
+                        <span className="inline-flex items-center gap-1.5 flex-wrap">
+                          {r.nome ?? <EmptyCell />}
+                          {r.is_demo && <DemoBadge />}
+                        </span>
                       </TableCell>
                       <TableCell className="py-2">
                         <span
@@ -373,8 +381,9 @@ function AdminDashboard() {
                   <li key={l.id} className="px-5 py-2.5 hover:bg-[#f8fafc] transition-colors">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate" style={{ color: NAVY }}>
-                          {l.nome}
+                        <p className="text-sm font-medium truncate flex items-center gap-1.5" style={{ color: NAVY }}>
+                          <span className="truncate">{l.nome}</span>
+                          {l.is_demo && <DemoBadge className="shrink-0" />}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">{l.email}</p>
                       </div>

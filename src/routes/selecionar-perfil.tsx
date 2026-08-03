@@ -67,7 +67,7 @@ function SelecionarPerfilPage() {
     <div className="min-h-screen bg-[#f8fafc] flex flex-col">
       <header className="bg-white border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/"><Logo /></Link>
+          <Logo variant="light" />
           <Button variant="ghost" size="sm" onClick={() => signOut()}>
             Sair
           </Button>
