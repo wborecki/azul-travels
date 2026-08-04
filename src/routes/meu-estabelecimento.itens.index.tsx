@@ -22,6 +22,7 @@ import {
   excluirItemReservavel,
   type ItemReservavel,
 } from "@/lib/queries";
+import { naturezaDaReserva } from "@/lib/enums";
 
 export const Route = createFileRoute("/meu-estabelecimento/itens/")({
   head: () => ({ meta: [{ title: "Quartos · Turismo Azul" }] }),
@@ -66,6 +67,14 @@ function MeuEstabelecimentoItensPage() {
 
       if (!estabRow || !estabRow.selo_azul || estabRow.status !== "ativo") {
         toast.error("Os quartos ficam disponíveis para locais com Selo Azul ativo.");
+        navigate({ to: "/meu-estabelecimento" });
+        return;
+      }
+
+      // Só hospedagem tem quarto a cadastrar - ver a nav em
+      // meu-estabelecimento.tsx, que também esconde esta aba.
+      if (naturezaDaReserva(estabRow.tipo) !== "estadia") {
+        toast.error("Seu tipo de estabelecimento recebe reservas direto, sem cadastrar quartos.");
         navigate({ to: "/meu-estabelecimento" });
         return;
       }

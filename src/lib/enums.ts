@@ -162,6 +162,43 @@ export function categoriaDoTipo(tipo: EstabTipo): EstabCategoria {
   return TIPO_PARA_CATEGORIA[tipo];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Natureza da reserva
+//
+// Hospedagem se reserva escolhendo um quarto (check-in → check-out). Todo o
+// resto se reserva direto no estabelecimento, com data e hora - um restaurante
+// não publica mesas, uma família marca uma visita.
+//
+// Derivada da categoria, não armazenada: não há como divergir do tipo do
+// estabelecimento. A mesma regra vive na trigger
+// `sincronizar_estabelecimento_id_reserva` (migration 20260804120000), que
+// recusa uma reserva de hospedagem sem quarto.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Uma natureza só para os dois lados: a oferta que a família vê na vitrine e
+ * a reserva que ela envia. Um card de natureza `estadia` é um quarto e leva a
+ * uma reserva de estadia; um de natureza `visita` é o próprio local.
+ *
+ * Vem do enum `oferta_natureza` do banco, que é a coluna discriminadora da
+ * `ofertas_view`. No banco a mesma regra vive em `estab_e_hospedagem`.
+ */
+export const OFERTA_NATUREZAS = Constants.public.Enums.oferta_natureza;
+
+export type OfertaNatureza = Database["public"]["Enums"]["oferta_natureza"];
+
+/** Alias: a natureza da reserva é a mesma da oferta que a originou. */
+export type ReservaNatureza = OfertaNatureza;
+
+export function naturezaDaReserva(tipo: EstabTipo): ReservaNatureza {
+  return categoriaDoTipo(tipo) === "hospedagem" ? "estadia" : "visita";
+}
+
+/** `true` quando a família reserva o próprio local, sem escolher um item. */
+export function aceitaReservaDireta(tipo: EstabTipo): boolean {
+  return naturezaDaReserva(tipo) === "visita";
+}
+
 export const ESTAB_STATUS_LABEL: Record<EstabStatus, string> = {
   ativo: "Ativo",
   inativo: "Inativo",

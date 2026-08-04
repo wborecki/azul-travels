@@ -38,7 +38,7 @@ export function SearchBar({ valor, onBuscar }: SearchBarProps) {
           type="search"
           value={termo}
           onChange={(e) => setTermo(e.target.value)}
-          placeholder="Buscar por cidade, estabelecimento ou quarto…"
+          placeholder="Buscar por cidade, estabelecimento ou lugar…"
           className="pl-9"
           aria-label="Buscar quartos"
         />

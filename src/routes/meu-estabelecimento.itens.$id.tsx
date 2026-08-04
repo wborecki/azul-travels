@@ -11,6 +11,7 @@ import {
   type ItemReservavel,
 } from "@/lib/queries";
 import { ItemReservavelFormulario } from "@/components/estabelecimento/ItemReservavelFormulario";
+import { naturezaDaReserva } from "@/lib/enums";
 
 export const Route = createFileRoute("/meu-estabelecimento/itens/$id")({
   head: () => ({ meta: [{ title: "Editar quarto · Turismo Azul" }] }),
@@ -41,6 +42,11 @@ function EditarItemPage() {
       const estabRow = await fetchEstabelecimentoDoOwner(user.id);
       if (!estabRow || !estabRow.selo_azul || estabRow.status !== "ativo") {
         toast.error("Os quartos ficam disponíveis para locais com Selo Azul ativo.");
+        navigate({ to: "/meu-estabelecimento" });
+        return;
+      }
+      if (naturezaDaReserva(estabRow.tipo) !== "estadia") {
+        toast.error("Seu tipo de estabelecimento recebe reservas direto, sem cadastrar quartos.");
         navigate({ to: "/meu-estabelecimento" });
         return;
       }

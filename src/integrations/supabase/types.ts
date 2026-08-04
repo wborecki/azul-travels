@@ -1459,6 +1459,7 @@ export type Database = {
           estabelecimento_id: string
           familia_id: string
           historico_negativo: string | null
+          hora_visita: string | null
           id: string
           mensagem: string | null
           notas_especificas: string | null
@@ -1484,6 +1485,7 @@ export type Database = {
           estabelecimento_id: string
           familia_id: string
           historico_negativo?: string | null
+          hora_visita?: string | null
           id?: string
           mensagem?: string | null
           notas_especificas?: string | null
@@ -1492,7 +1494,11 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
-          item_reservavel_id: string
+          // Opcional desde a reserva direta de estabelecimento: uma visita não
+          // tem item. Quem garante "estadia exige quarto" é a união
+          // discriminada `ReservaFormInput` no cliente e a trigger
+          // `sincronizar_estabelecimento_id_reserva` no banco.
+          item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
           perfil_tea_id?: string | null
@@ -1509,6 +1515,7 @@ export type Database = {
           estabelecimento_id?: string
           familia_id?: string
           historico_negativo?: string | null
+          hora_visita?: string | null
           id?: string
           mensagem?: string | null
           notas_especificas?: string | null
@@ -1633,18 +1640,22 @@ export type Database = {
       }
     }
     Views: {
-      itens_reservaveis_view: {
+      ofertas_view: {
         Row: {
+          // Nas linhas de visita (estabelecimento reservado direto) as colunas
+          // que só existem em quarto vêm nulas - ver a migration
+          // 20260804130000_ofertas_view.sql.
+          natureza: Database["public"]["Enums"]["oferta_natureza"]
           id: string
           item_nome: string
           descricao: string | null
-          preco: number
-          quantidade: number
-          capacidade_total: number
+          preco: number | null
+          quantidade: number | null
+          capacidade_total: number | null
           capacidade_adultos: number | null
           capacidade_criancas: number | null
           comodidades: string[]
-          quantidade_camas: number
+          quantidade_camas: number | null
           imagens: Json
           check_in_padrao: string | null
           check_out_padrao: string | null
@@ -1677,15 +1688,7 @@ export type Database = {
           avaliacao_media: number | null
           total_avaliacoes: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "itens_reservaveis_estabelecimento_id_fkey"
-            columns: ["estabelecimento_id"]
-            isOneToOne: false
-            referencedRelation: "estabelecimentos"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
@@ -1698,9 +1701,9 @@ export type Database = {
         Args: { p_checkin: string; p_checkout: string }
         Returns: { item_id: string }[]
       }
-      buscar_itens_proximos: {
+      buscar_ofertas_proximas: {
         Args: { p_lat: number; p_lng: number; p_raio_km: number }
-        Returns: { item_id: string; distancia_m: number }[]
+        Returns: { oferta_id: string; distancia_m: number }[]
       }
       expurgar_admin_password_resets: {
         Args: { _dias?: number }
@@ -1775,6 +1778,7 @@ export type Database = {
         | "transporte"
         | "excursao"
         | "passeio_educativo"
+      oferta_natureza: "estadia" | "visita"
       reserva_status: "pendente" | "confirmada" | "cancelada" | "concluida"
       tea_nivel: "leve" | "moderado" | "severo"
     }
@@ -1925,6 +1929,7 @@ export const Constants = {
         "excursao",
         "passeio_educativo",
       ],
+      oferta_natureza: ["estadia", "visita"],
       reserva_status: ["pendente", "confirmada", "cancelada", "concluida"],
       tea_nivel: ["leve", "moderado", "severo"],
     },

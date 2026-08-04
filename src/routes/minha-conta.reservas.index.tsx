@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   fetchReservasDaFamilia,
+  formatPeriodoReserva,
   perfisDaReserva,
   type ReservaComContexto,
 } from "@/lib/queries/reservas";
@@ -87,8 +88,7 @@ function ReservaCard({ r }: { r: ReservaComContexto }) {
           <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1.5 text-sm text-foreground/80">
               <Calendar className="h-4 w-4 text-foreground/40" />
-              {r.data_checkin ? formatDateBR(r.data_checkin) : "-"} →{" "}
-              {r.data_checkout ? formatDateBR(r.data_checkout) : "-"}
+              {formatPeriodoReserva(r, (d) => (d ? formatDateBR(d) : "-"))}
             </span>
             <PerfisTeaAvatares perfis={perfis} />
           </div>

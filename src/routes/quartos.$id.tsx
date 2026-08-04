@@ -21,7 +21,7 @@ import { ReservaCard } from "@/components/estabelecimento/ReservaCard";
 import { MobileReservaBar } from "@/components/estabelecimento/MobileReservaBar";
 import { useDisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
 import { COMODIDADE_POR_KEY } from "@/lib/itens-comodidades";
-import { ESTRUTURA_PUBLICA } from "@/lib/estrutura-tea";
+import { estruturaDoQuarto } from "@/lib/estrutura-tea";
 import { TIPO_LABEL, formatDateBR, parseDataISO, parseInteiroUrl } from "@/lib/brazil";
 import {
   Users,
@@ -504,7 +504,7 @@ function ComodidadesQuarto({ comodidades, nome }: { comodidades: string[]; nome:
 
 function EstruturaEstabelecimentoSecao({ estab }: { estab: EstabelecimentoNormalized }) {
   const estrutura = (estab.estrutura ?? {}) as Record<string, boolean>;
-  const ativos = ESTRUTURA_PUBLICA.filter((item) => estrutura[item.key]);
+  const ativos = estruturaDoQuarto(estab.tipo, estrutura);
   if (ativos.length === 0) return null;
 
   return (

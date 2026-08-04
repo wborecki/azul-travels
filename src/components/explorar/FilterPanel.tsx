@@ -12,9 +12,11 @@ import type { ItemRecursoFlag, ItemSeloFlag } from "@/lib/queries";
 import {
   ITEM_RECURSO_FLAGS,
   ITEM_SELO_FLAGS,
+  buscaSoDeHospedagem,
   csvOrUndefined,
   parseRecursosCsv,
   parseSelosCsv,
+  parseTiposCsv,
   type ExplorarSearch,
 } from "@/lib/explorar-search";
 
@@ -76,6 +78,10 @@ export function FilterPanel({
   const [periodoAberto, setPeriodoAberto] = useState(false);
   const [hospedesAberto, setHospedesAberto] = useState(false);
 
+  // Preço por noite, período e hóspedes só existem em hospedagem. Fora dela
+  // os controles somem e os valores são zerados no `aplicar()`.
+  const soHospedagem = buscaSoDeHospedagem(parseTiposCsv(aplicados.tipos));
+
   // URL mudou por fora (back/forward, pills, limpar) - descarta o rascunho.
   useEffect(() => {
     setEstado(aplicados.estado ?? "");
@@ -94,12 +100,12 @@ export function FilterPanel({
       estado: estado || undefined,
       selos: csvOrUndefined([...selos]),
       recursos: csvOrUndefined([...recursos]),
-      preco_min: numeroOuUndefined(precoMin),
-      preco_max: numeroOuUndefined(precoMax),
-      adultos: adultos !== 1 ? adultos : undefined,
-      criancas: criancas !== 0 ? criancas : undefined,
-      data_in: dataIn || undefined,
-      data_out: (dataIn && dataOut) || undefined,
+      preco_min: soHospedagem ? numeroOuUndefined(precoMin) : undefined,
+      preco_max: soHospedagem ? numeroOuUndefined(precoMax) : undefined,
+      adultos: soHospedagem && adultos !== 1 ? adultos : undefined,
+      criancas: soHospedagem && criancas !== 0 ? criancas : undefined,
+      data_in: soHospedagem ? dataIn || undefined : undefined,
+      data_out: soHospedagem ? (dataIn && dataOut) || undefined : undefined,
     });
   }
 
@@ -179,132 +185,138 @@ export function FilterPanel({
         </div>
       </section>
 
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase">
-          Preço por noite (R$)
-        </h3>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <Input
-            type="number"
-            min={0}
-            inputMode="numeric"
-            placeholder="Mínimo"
-            value={precoMin}
-            onChange={(e) => setPrecoMin(e.target.value)}
-            aria-label="Preço mínimo"
-          />
-          <Input
-            type="number"
-            min={0}
-            inputMode="numeric"
-            placeholder="Máximo"
-            value={precoMax}
-            onChange={(e) => setPrecoMax(e.target.value)}
-            aria-label="Preço máximo"
-          />
-        </div>
-      </section>
-
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase">Período</h3>
-        <Popover open={periodoAberto} onOpenChange={setPeriodoAberto}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
-              aria-label="Selecionar período"
-            >
-              <span className="flex items-center gap-2 truncate">
-                <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                {dataIn ? (
-                  <span className="font-medium">
-                    {formatDateBR(dataIn)}
-                    {dataOut ? <> – {formatDateBR(dataOut)}</> : " (saída)"}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Selecionar datas</span>
-                )}
-              </span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
-            <div className="p-5">
-              <SeletorPeriodo
-                checkIn={parseDataISO(dataIn)}
-                checkOut={parseDataISO(dataOut)}
-                onChange={(ci, co) => {
-                  setDataIn(ci ? formatDataISO(ci) : "");
-                  setDataOut(co ? formatDataISO(co) : "");
-                }}
-                onFechar={() => setPeriodoAberto(false)}
+      {soHospedagem && (
+        <>
+          <section>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase">
+              Preço por noite (R$)
+            </h3>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                placeholder="Mínimo"
+                value={precoMin}
+                onChange={(e) => setPrecoMin(e.target.value)}
+                aria-label="Preço mínimo"
+              />
+              <Input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                placeholder="Máximo"
+                value={precoMax}
+                onChange={(e) => setPrecoMax(e.target.value)}
+                aria-label="Preço máximo"
               />
             </div>
-          </PopoverContent>
-        </Popover>
-      </section>
+          </section>
 
-      <section>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase">Hóspedes</h3>
-        <Popover open={hospedesAberto} onOpenChange={setHospedesAberto}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
-              aria-label="Selecionar hóspedes"
-            >
-              <span className="flex items-center gap-2 truncate">
-                <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
-                {totalHospedes > 1 ? (
-                  <span className="font-medium">
-                    {totalHospedes} hóspedes
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Qualquer</span>
-                )}
-              </span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
-                  hospedesAberto && "rotate-180",
-                )}
-              />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[min(20rem,calc(100vw-2rem))] p-4" align="start" sideOffset={8}>
-            <div className="space-y-4">
-              <ContadorHospedes
-                label="Adultos"
-                sublabel="13 anos ou mais"
-                valor={adultos}
-                min={1}
-                max={MAX_ADULTOS}
-                onChange={setAdultos}
-              />
-              <ContadorHospedes
-                label="Crianças"
-                sublabel="De 2 a 12 anos"
-                valor={criancas}
-                min={0}
-                max={MAX_CRIANCAS}
-                onChange={setCriancas}
-              />
-              <p className="text-xs text-muted-foreground">
-                Mostra apenas quartos que acomodam {totalHospedes} hóspede
-                {totalHospedes === 1 ? "" : "s"}.
-              </p>
-              <div className="flex justify-end">
+          <section>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase">Período</h3>
+            <Popover open={periodoAberto} onOpenChange={setPeriodoAberto}>
+              <PopoverTrigger asChild>
                 <button
                   type="button"
-                  onClick={() => setHospedesAberto(false)}
-                  className="text-sm font-semibold text-foreground underline underline-offset-2"
+                  className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
+                  aria-label="Selecionar período"
                 >
-                  Fechar
+                  <span className="flex items-center gap-2 truncate">
+                    <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    {dataIn ? (
+                      <span className="font-medium">
+                        {formatDateBR(dataIn)}
+                        {dataOut ? <> – {formatDateBR(dataOut)}</> : " (saída)"}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Selecionar datas</span>
+                    )}
+                  </span>
                 </button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </section>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
+                <div className="p-5">
+                  <SeletorPeriodo
+                    checkIn={parseDataISO(dataIn)}
+                    checkOut={parseDataISO(dataOut)}
+                    onChange={(ci, co) => {
+                      setDataIn(ci ? formatDataISO(ci) : "");
+                      setDataOut(co ? formatDataISO(co) : "");
+                    }}
+                    onFechar={() => setPeriodoAberto(false)}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+          </section>
+
+          <section>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase">Hóspedes</h3>
+            <Popover open={hospedesAberto} onOpenChange={setHospedesAberto}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm bg-white hover:bg-accent/50 transition"
+                  aria-label="Selecionar hóspedes"
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    {totalHospedes > 1 ? (
+                      <span className="font-medium">{totalHospedes} hóspedes</span>
+                    ) : (
+                      <span className="text-muted-foreground">Qualquer</span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                      hospedesAberto && "rotate-180",
+                    )}
+                  />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[min(20rem,calc(100vw-2rem))] p-4"
+                align="start"
+                sideOffset={8}
+              >
+                <div className="space-y-4">
+                  <ContadorHospedes
+                    label="Adultos"
+                    sublabel="13 anos ou mais"
+                    valor={adultos}
+                    min={1}
+                    max={MAX_ADULTOS}
+                    onChange={setAdultos}
+                  />
+                  <ContadorHospedes
+                    label="Crianças"
+                    sublabel="De 2 a 12 anos"
+                    valor={criancas}
+                    min={0}
+                    max={MAX_CRIANCAS}
+                    onChange={setCriancas}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Mostra apenas quartos que acomodam {totalHospedes} hóspede
+                    {totalHospedes === 1 ? "" : "s"}.
+                  </p>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setHospedesAberto(false)}
+                      className="text-sm font-semibold text-foreground underline underline-offset-2"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </section>
+        </>
+      )}
 
       <div className="flex gap-2 pt-1">
         <Button onClick={aplicar} className="flex-1">

@@ -18,6 +18,7 @@ import {
   type ItemReservavel,
 } from "@/lib/queries";
 import { QuartoCard } from "@/components/estabelecimento/QuartoCard";
+import { PedidoVisitaCard, MobileVisitaBar } from "@/components/estabelecimento/PedidoVisitaCard";
 import { PerfisTeaAvatares } from "@/components/reserva/PerfisTeaDaReserva";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -49,19 +50,17 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import { TIPO_LABEL, formatDateBR } from "@/lib/brazil";
-import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
+import { RESERVA_STATUS_LABEL, naturezaDaReserva, type ReservaStatus } from "@/lib/enums";
+import { RECURSOS_TEA } from "@/lib/recursos-tea";
+import { estruturaAtiva } from "@/lib/estrutura-tea";
 import {
+  BadgeCheck,
   Camera,
   MapPin,
   Gift,
   Star,
-  Home,
-  Brain,
-  DoorOpen,
-  FastForward,
-  Utensils,
-  MessageSquare,
   Minus,
   Plus,
   Loader2,
@@ -72,6 +71,7 @@ import {
   CalendarCheck,
   History,
   XCircle,
+  Images,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -91,14 +91,9 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
 
 type Estab = EstabelecimentoNormalized;
 
-const RECURSO_INFOS = [
-  { key: "tem_sala_sensorial", icon: Home, label: "Sala Sensorial" },
-  { key: "tem_concierge_tea", icon: Brain, label: "Concierge TEA" },
-  { key: "tem_checkin_antecipado", icon: DoorOpen, label: "Check-in Antecipado" },
-  { key: "tem_fila_prioritaria", icon: FastForward, label: "Fila Prioritária" },
-  { key: "tem_cardapio_visual", icon: Utensils, label: "Cardápio Visual" },
-  { key: "tem_caa", icon: MessageSquare, label: "Comunicação Alternativa (CAA)" },
-] as const;
+// Declaração única em `@/lib/recursos-tea` - a mesma lista alimenta o painel do
+// dono, para rótulo e leitura não divergirem entre as duas telas.
+const RECURSO_INFOS = RECURSOS_TEA;
 
 function todayPlus(days: number) {
   const d = new Date();
@@ -124,6 +119,7 @@ function EstabPage() {
   // Modal "Adicionar novo perfil"
   const [perfilModalOpen, setPerfilModalOpen] = useState(false);
   const [tourModalOpen, setTourModalOpen] = useState(false);
+  const [galeriaAberta, setGaleriaAberta] = useState(false);
   const [novoPerfil, setNovoPerfil] = useState<PerfilSensorialDraft>(DEFAULT_PERFIL_DRAFT);
   const [salvandoPerfil, setSalvandoPerfil] = useState(false);
 
@@ -208,6 +204,15 @@ function EstabPage() {
   const e: Estab | undefined = detalhe?.estabelecimento;
   const avaliacoes = detalhe?.avaliacoes ?? [];
 
+  // Hospedagem se reserva escolhendo um quarto; o resto se reserva direto no
+  // local, com dia e horário.
+  const ehVisita = !!e && naturezaDaReserva(e.tipo) === "visita";
+  // O Selo Azul sempre foi o gate da reserva: a RLS de `itens_reservaveis` só
+  // expõe itens de local ativo e com selo, então nunca houve reserva fora
+  // disso. Como a visita não passa por item, a regra precisa ser dita aqui -
+  // a trigger recusa o insert com ESTAB_SEM_SELO_ATIVO de qualquer forma.
+  const aceitaPedidoDeVisita = ehVisita && !!e?.selo_azul && e.status === "ativo";
+
   // Cálculo das médias (geral + sub-categorias)
   const stats = useMemo(() => {
     if (avaliacoes.length === 0) {
@@ -267,8 +272,20 @@ function EstabPage() {
     );
   }
 
-  const { fotoCapa, tour360Url } = pickEstabMedia(e);
+  const { fotoCapa, fotos, tour360Url } = pickEstabMedia(e);
+
+  // A capa nem sempre está dentro da galeria: o formulário do dono mantém as
+  // duas em sincronia (capa = posição 0), mas o do admin grava `foto_capa` e
+  // `fotos` como campos independentes.
+  const galeria = fotoCapa ? [fotoCapa, ...fotos.filter((f) => f !== fotoCapa)] : fotos;
+
+  // Quantas miniaturas cabem sem deixar buraco no mosaico.
+  const nThumbs = galeria.length >= 5 ? 4 : galeria.length >= 3 ? 2 : galeria.length === 2 ? 1 : 0;
+  const thumbs = galeria.slice(1, 1 + nThumbs);
   const recursosAtivos = RECURSO_INFOS.filter((r) => e[r.key]);
+  // Só as chaves da categoria do local: um restaurante não exibe item de quarto,
+  // mesmo que a chave tenha sobrado no jsonb de antes da separação por categoria.
+  const estruturaAtivos = estruturaAtiva(e.tipo, (e.estrutura ?? {}) as Record<string, boolean>);
   const temBeneficio = e.tem_beneficio_tea && e.beneficio_tea_descricao;
 
   const handleAdicionarPerfil = async () => {
@@ -300,12 +317,62 @@ function EstabPage() {
 
       {/* SEÇÃO 1 · Galeria full-width + header */}
       <div className="relative w-full bg-muted" style={{ height: 420 }}>
-        {fotoCapa ? (
-          <img src={fotoCapa} alt={e.nome} className="w-full h-full object-cover" />
-        ) : (
+        {galeria.length === 0 ? (
           <div className="w-full h-full grid place-items-center text-muted-foreground">
             Sem foto disponível
           </div>
+        ) : (
+          <div className="flex h-full w-full gap-1">
+            <button
+              type="button"
+              onClick={() => setGaleriaAberta(true)}
+              className="relative flex-1 md:flex-[2] overflow-hidden group"
+              aria-label={`Ver as ${galeria.length} fotos de ${e.nome}`}
+            >
+              <img
+                src={galeria[0]}
+                alt={e.nome}
+                className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+            </button>
+            {thumbs.length > 0 && (
+              <div
+                className={cn(
+                  "hidden md:grid flex-1 gap-1",
+                  thumbs.length === 4
+                    ? "grid-cols-2 grid-rows-2"
+                    : thumbs.length === 2
+                      ? "grid-cols-1 grid-rows-2"
+                      : "grid-cols-1 grid-rows-1",
+                )}
+              >
+                {thumbs.map((url, i) => (
+                  <button
+                    key={`${url}-${i}`}
+                    type="button"
+                    onClick={() => setGaleriaAberta(true)}
+                    className="relative overflow-hidden group"
+                    aria-label={`Ver as ${galeria.length} fotos de ${e.nome}`}
+                  >
+                    <img
+                      src={url}
+                      alt={`${e.nome} - foto ${i + 2}`}
+                      className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {galeria.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setGaleriaAberta(true)}
+            className="absolute top-4 right-4 inline-flex items-center gap-2 rounded-xl bg-background/95 px-3.5 py-2 text-sm font-semibold text-foreground shadow-lg backdrop-blur transition hover:bg-background"
+          >
+            <Images className="h-4 w-4" /> Ver todas as {galeria.length} fotos
+          </button>
         )}
         {/* Selos flutuando no canto inferior esquerdo */}
         <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5 max-w-[60%]">
@@ -376,26 +443,29 @@ function EstabPage() {
         <div className="grid lg:grid-cols-[1fr_400px] gap-8">
           {/* COLUNA ESQUERDA · conteúdo */}
           <div className="space-y-10 min-w-0">
-            {/* Quartos disponíveis */}
-            <section id="quartos" className="scroll-mt-24">
-              <h2 className="text-xl font-bold text-primary mb-3">Quartos disponíveis</h2>
-              {quartosCarregando ? (
-                <div className="space-y-3">
-                  <div className="h-32 bg-muted animate-pulse rounded-2xl" />
-                  <div className="h-32 bg-muted animate-pulse rounded-2xl" />
-                </div>
-              ) : quartos.length === 0 ? (
-                <p className="text-sm text-muted-foreground bg-muted/40 rounded-xl p-4">
-                  Este estabelecimento ainda não cadastrou quartos disponíveis para reserva.
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {quartos.map((quarto) => (
-                    <QuartoCard key={quarto.id} item={quarto} estabelecimentoSlug={e.slug} />
-                  ))}
-                </div>
-              )}
-            </section>
+            {/* Quartos disponíveis - só em hospedagem. Num restaurante ou
+                parque a família reserva o próprio local (ver PedidoVisitaCard). */}
+            {!ehVisita && (
+              <section id="quartos" className="scroll-mt-24">
+                <h2 className="text-xl font-bold text-primary mb-3">Quartos disponíveis</h2>
+                {quartosCarregando ? (
+                  <div className="space-y-3">
+                    <div className="h-32 bg-muted animate-pulse rounded-2xl" />
+                    <div className="h-32 bg-muted animate-pulse rounded-2xl" />
+                  </div>
+                ) : quartos.length === 0 ? (
+                  <p className="text-sm text-muted-foreground bg-muted/40 rounded-xl p-4">
+                    Este estabelecimento ainda não cadastrou quartos disponíveis para reserva.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {quartos.map((quarto) => (
+                      <QuartoCard key={quarto.id} item={quarto} estabelecimentoSlug={e.slug} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* Sobre o local para famílias TEA */}
             <section>
@@ -407,34 +477,69 @@ function EstabPage() {
               </p>
             </section>
 
-            {/* O que este local oferece */}
+            {/* O que este local oferece.
+                Dois grupos, porque as duas listas têm peso diferente: os
+                recursos são colunas que a busca filtra e só se editam com o
+                Selo Azul ativo (ver migration 20260804150000); a estrutura é
+                declaração do próprio dono. Exibi-las com a mesma cara faria a
+                família ler como auditado o que ninguém auditou. */}
             <section>
               <h2 className="text-xl font-bold text-primary mb-3">O que este local oferece</h2>
-              {recursosAtivos.length === 0 && !tour360Url ? (
+              {recursosAtivos.length === 0 && estruturaAtivos.length === 0 && !tour360Url ? (
                 <p className="text-sm text-muted-foreground bg-muted/40 rounded-xl p-4">
                   Este estabelecimento ainda não informou seus recursos detalhados.
                 </p>
               ) : (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {recursosAtivos.map((r) => (
-                    <div
-                      key={r.key}
-                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
-                    >
-                      <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
-                        <r.icon className="h-4 w-4" />
+                <div className="space-y-6">
+                  {recursosAtivos.length > 0 && (
+                    <div>
+                      <h3 className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold text-secondary">
+                        <BadgeCheck className="h-4 w-4" /> Verificado pela nossa equipe
+                      </h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {recursosAtivos.map((r) => (
+                          <div
+                            key={r.key}
+                            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
+                          >
+                            <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
+                              <r.icon className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{r.label}</span>
+                          </div>
+                        ))}
                       </div>
-                      <span className="text-sm font-medium text-foreground">{r.label}</span>
                     </div>
-                  ))}
-                  {tour360Url && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card">
-                      <div className="h-9 w-9 rounded-lg bg-amarelo/20 text-amarelo-foreground grid place-items-center shrink-0">
-                        <Camera className="h-4 w-4" />
+                  )}
+
+                  {(estruturaAtivos.length > 0 || tour360Url) && (
+                    <div>
+                      <h3 className="mb-2.5 text-sm font-semibold text-foreground/70">
+                        Informado pelo local
+                      </h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {estruturaAtivos.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30"
+                          >
+                            <div className="h-9 w-9 rounded-lg bg-muted text-foreground/70 grid place-items-center shrink-0">
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{item.label}</span>
+                          </div>
+                        ))}
+                        {tour360Url && (
+                          <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
+                            <div className="h-9 w-9 rounded-lg bg-amarelo/20 text-amarelo-foreground grid place-items-center shrink-0">
+                              <Camera className="h-4 w-4" />
+                            </div>
+                            <span className="text-sm font-medium text-foreground">
+                              Tour 360° disponível
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <span className="text-sm font-medium text-foreground">
-                        Tour 360° disponível
-                      </span>
                     </div>
                   )}
                 </div>
@@ -517,35 +622,65 @@ function EstabPage() {
 
           {/* COLUNA DIREITA · formulário sticky / confirmação / histórico */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
-            <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
-              <h3 className="text-lg font-bold text-primary">Solicitar Reserva</h3>
-              {quartos.length > 0 ? (
-                <>
-                  <p className="text-sm text-muted-foreground">
-                    A partir de{" "}
-                    <span className="font-semibold text-primary">
-                      {Math.min(...quartos.map((q) => q.preco)).toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </span>{" "}
-                    / noite. Escolha um quarto para enviar o pedido com o perfil sensorial do seu
-                    filho.
-                  </p>
-                  <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-white" size="lg">
-                    <a href="#quartos">Ver quartos disponíveis</a>
-                  </Button>
-                </>
+            {ehVisita ? (
+              aceitaPedidoDeVisita ? (
+                <PedidoVisitaCard estabelecimentoId={e.id} />
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Este estabelecimento ainda não tem quartos disponíveis para reserva.
+                <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-3">
+                  <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Este local ainda não tem o Selo Azul, então não recebe pedidos de reserva pela
+                    plataforma. Você pode falar direto com eles.
+                  </p>
+                  {e.telefone && (
+                    <Button asChild variant="outline" className="w-full">
+                      <a href={`tel:${e.telefone}`}>{e.telefone}</a>
+                    </Button>
+                  )}
+                  {e.website && (
+                    <Button asChild variant="outline" className="w-full">
+                      <a href={e.website} target="_blank" rel="noopener noreferrer">
+                        Site do estabelecimento
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              )
+            ) : (
+              <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-4">
+                <h3 className="text-lg font-bold text-primary">Solicitar Reserva</h3>
+                {quartos.length > 0 ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      A partir de{" "}
+                      <span className="font-semibold text-primary">
+                        {Math.min(...quartos.map((q) => q.preco)).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </span>{" "}
+                      / noite. Escolha um quarto para enviar o pedido com o perfil sensorial do seu
+                      filho.
+                    </p>
+                    <Button
+                      asChild
+                      className="w-full bg-secondary hover:bg-secondary/90 text-white"
+                      size="lg"
+                    >
+                      <a href="#quartos">Ver quartos disponíveis</a>
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Este estabelecimento ainda não tem quartos disponíveis para reserva.
+                  </p>
+                )}
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Esta plataforma conecta você ao estabelecimento. O pagamento é feito diretamente
+                  com eles.
                 </p>
-              )}
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                Esta plataforma conecta você ao estabelecimento. O pagamento é
-                feito diretamente com eles.
-              </p>
-            </div>
+              </div>
+            )}
 
             {/* Histórico desta família neste estabelecimento */}
             {user && reservasFamilia.length > 0 && (
@@ -557,6 +692,8 @@ function EstabPage() {
           </aside>
         </div>
       </div>
+
+      {aceitaPedidoDeVisita && <MobileVisitaBar />}
 
       {/* Modal: novo perfil sensorial */}
       <Dialog open={perfilModalOpen} onOpenChange={setPerfilModalOpen}>
@@ -575,6 +712,33 @@ function EstabPage() {
             loading={salvandoPerfil}
             compact
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: galeria completa */}
+      <Dialog open={galeriaAberta} onOpenChange={setGaleriaAberta}>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Images className="h-5 w-5 text-primary" />
+              Fotos de {e.nome}
+            </DialogTitle>
+            <DialogDescription>
+              {galeria.length} {galeria.length === 1 ? "foto enviada" : "fotos enviadas"} pelo
+              estabelecimento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {galeria.map((url, i) => (
+              <img
+                key={`${url}-${i}`}
+                src={url}
+                alt={`${e.nome} - foto ${i + 1}`}
+                loading={i === 0 ? undefined : "lazy"}
+                className="w-full rounded-xl border bg-muted object-cover"
+              />
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
 

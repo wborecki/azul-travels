@@ -45,10 +45,18 @@ function escapeHtml(s: string): string {
   );
 }
 
+/**
+ * Pino da oferta. Estadia mostra o preço; visita não tem preço a mostrar,
+ * então mostra o rótulo do tipo do local ("Restaurante", "Parque").
+ */
 function precoIcon(item: ItemMapa): L.DivIcon {
+  const texto =
+    item.preco !== null
+      ? formatPrecoCurto(item.preco)
+      : ESTAB_TIPO_LABEL[item.estabelecimento_tipo];
   return L.divIcon({
     className: "",
-    html: `<div class="pin-preco"><span>${escapeHtml(formatPrecoCurto(item.preco))}</span></div>`,
+    html: `<div class="pin-preco"><span>${escapeHtml(texto)}</span></div>`,
     iconSize: [64, 26],
     iconAnchor: [32, 13],
   });
@@ -377,13 +385,7 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
         )}
       </div>
 
-      <Link
-        to="/quartos/$id"
-        params={{ id: item.id }}
-        search={searchQuarto}
-        className="group block rounded-b-xl px-3 pb-3 pt-2 no-underline"
-        aria-label={`Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`}
-      >
+      <LinkDaOferta item={item} searchQuarto={searchQuarto}>
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {ESTAB_TIPO_LABEL[item.estabelecimento_tipo]} · {item.estabelecimento_nome}
@@ -406,20 +408,70 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
           {item.item_nome}
         </p>
 
-        <div className="mt-1 flex items-center gap-3 text-[11px] text-foreground/70">
-          <span className="inline-flex items-center gap-1">
-            <Users className="h-3 w-3" /> {item.capacidade_total}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <BedDouble className="h-3 w-3" /> {item.quantidade_camas}
-          </span>
-        </div>
+        {item.capacidade_total !== null && item.quantidade_camas !== null && (
+          <div className="mt-1 flex items-center gap-3 text-[11px] text-foreground/70">
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3 w-3" /> {item.capacidade_total}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <BedDouble className="h-3 w-3" /> {item.quantidade_camas}
+            </span>
+          </div>
+        )}
 
         <p className="mt-1.5 text-sm font-bold text-primary">
-          {item.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-          <span className="text-[11px] font-normal text-muted-foreground"> / noite</span>
+          {item.preco !== null ? (
+            <>
+              {item.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              <span className="text-[11px] font-normal text-muted-foreground"> / noite</span>
+            </>
+          ) : (
+            "Reserva sem cobrança"
+          )}
         </p>
-      </Link>
+      </LinkDaOferta>
     </div>
+  );
+}
+
+/**
+ * Destino do clique no mini card: o quarto numa estadia, a página do local
+ * numa visita. São dois `Link` porque o `to` do TanStack é tipado e cada rota
+ * tem params próprios.
+ */
+function LinkDaOferta({
+  item,
+  searchQuarto,
+  children,
+}: {
+  item: ItemMapa;
+  searchQuarto: Record<string, string | number>;
+  children: React.ReactNode;
+}) {
+  const classe = "group block rounded-b-xl px-3 pb-3 pt-2 no-underline";
+
+  if (item.natureza === "visita") {
+    return (
+      <Link
+        to="/estabelecimento/$slug"
+        params={{ slug: item.estabelecimento_slug }}
+        className={classe}
+        aria-label={`Ver ${item.estabelecimento_nome}`}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/quartos/$id"
+      params={{ id: item.id }}
+      search={searchQuarto}
+      className={classe}
+      aria-label={`Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`}
+    >
+      {children}
+    </Link>
   );
 }

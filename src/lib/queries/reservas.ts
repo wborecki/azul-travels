@@ -86,6 +86,46 @@ export function perfisDaReserva(reserva: {
   return lista;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Natureza de uma reserva já gravada
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * `true` quando a reserva é uma visita (restaurante, parque, passeio) e não
+ * uma estadia.
+ *
+ * O marcador é `hora_visita`, não a ausência de item: um quarto excluído
+ * transforma estadias históricas em linhas sem `item_reservavel_id`
+ * (`ON DELETE SET NULL`, migration 20260715220000), e essas continuam sendo
+ * estadias. Só visita tem horário.
+ */
+export function reservaEhVisita(reserva: Pick<Reserva, "hora_visita">): boolean {
+  return reserva.hora_visita !== null;
+}
+
+/** "20:00" a partir do `time` do Postgres, que vem como "20:00:00". */
+export function formatHoraVisita(hora: string | null): string {
+  return hora ? hora.slice(0, 5) : "";
+}
+
+/**
+ * Período da reserva em uma linha, na forma certa para cada natureza:
+ * `"12/07/2026 → 15/07/2026"` numa estadia, `"12/07/2026 às 20:00"` numa
+ * visita. Usado por todas as telas que listam reservas, para a diferença
+ * viver num lugar só.
+ */
+export function formatPeriodoReserva(
+  reserva: Pick<Reserva, "data_checkin" | "data_checkout" | "hora_visita">,
+  formatData: (d: string | null) => string,
+): string {
+  const dia = formatData(reserva.data_checkin);
+  if (reservaEhVisita(reserva)) {
+    const hora = formatHoraVisita(reserva.hora_visita);
+    return hora ? `${dia} às ${hora}` : dia;
+  }
+  return `${dia} → ${formatData(reserva.data_checkout)}`;
+}
+
 /** Reservas da família logada, ordenadas por data desc. */
 export async function fetchReservasDaFamilia(familiaId: string): Promise<ReservaComContexto[]> {
   const { data, error } = await supabase
@@ -183,16 +223,14 @@ export async function vincularPerfisAReserva(
  * `Reserva["num_adultos"]`…) para que qualquer mudança no schema quebre
  * o build aqui - não dentro de uma rota.
  */
-export interface ReservaFormInput {
+interface ReservaFormBase {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
-  item_reservavel_id: NonNullable<ReservaInsert["item_reservavel_id"]>;
   /** Vínculo ao Perfil TEA permanente da família (preferencial). */
   perfil_tea_id?: ReservaInsert["perfil_tea_id"];
   /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
   perfil_sensorial_id: ReservaInsert["perfil_sensorial_id"];
   data_checkin: string;
-  data_checkout: string;
   num_adultos: NonNullable<Reserva["num_adultos"]>;
   num_autistas: NonNullable<Reserva["num_autistas"]>;
   mensagem: string;
@@ -207,6 +245,35 @@ export interface ReservaFormInput {
   conversa_previa_equipe?: boolean;
 }
 
+/**
+ * Estadia: hospedagem, com um quarto escolhido e período de noites.
+ * `data_checkin` é o check-in e `data_checkout` fecha o período.
+ */
+export interface ReservaEstadiaInput extends ReservaFormBase {
+  natureza: "estadia";
+  item_reservavel_id: NonNullable<ReservaInsert["item_reservavel_id"]>;
+  data_checkout: string;
+}
+
+/**
+ * Visita: restaurante, parque, passeio. Não há item a escolher - a família
+ * reserva o próprio local, num dia e horário. `data_checkin` é o dia da
+ * visita e `data_checkout` fica nulo, o que marca a natureza na linha.
+ */
+export interface ReservaVisitaInput extends ReservaFormBase {
+  natureza: "visita";
+  /** "HH:MM" do `<input type="time">`. */
+  hora_visita: string;
+}
+
+/**
+ * União discriminada pela natureza: montar uma visita com `data_checkout`, ou
+ * uma estadia sem quarto, vira erro de compilação em vez de exceção vinda do
+ * banco. A mesma regra é reimposta pela trigger
+ * `sincronizar_estabelecimento_id_reserva`.
+ */
+export type ReservaFormInput = ReservaEstadiaInput | ReservaVisitaInput;
+
 /** Trim de string; vazio vira `null`. Idêntico ao usado em mídia. */
 function emptyToNull(v: string): string | null {
   const t = v.trim();
@@ -218,14 +285,26 @@ function emptyToNull(v: string): string | null {
  * Esta é a **única** função autorizada a construir esse payload.
  */
 export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
+  const porNatureza =
+    input.natureza === "estadia"
+      ? {
+          item_reservavel_id: input.item_reservavel_id,
+          data_checkout: emptyToNull(input.data_checkout),
+          hora_visita: null,
+        }
+      : {
+          item_reservavel_id: null,
+          data_checkout: null,
+          hora_visita: emptyToNull(input.hora_visita),
+        };
+
   return {
+    ...porNatureza,
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
-    item_reservavel_id: input.item_reservavel_id,
     perfil_tea_id: input.perfil_tea_id ?? null,
     perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
-    data_checkout: emptyToNull(input.data_checkout),
     num_adultos: input.num_adultos,
     num_autistas: input.num_autistas,
     mensagem: emptyToNull(input.mensagem),

@@ -22,29 +22,27 @@ interface ItemCardProps {
 }
 
 /**
- * Card de um item reservável na grade do `/explorar`: foto, nome do quarto
- * e do estabelecimento, localização, avaliação média, recursos TEA,
- * capacidade e preço por noite. O card inteiro leva ao detalhe do quarto.
+ * Card de uma oferta na grade do `/explorar`.
+ *
+ * Numa estadia mostra o quarto (capacidade, camas, preço por noite) e leva a
+ * `/quartos/:id`. Numa visita o card é o próprio local: sem preço nem camas,
+ * porque o local não declara nada disso, e o clique vai para a página dele.
  */
 export function ItemCard({ item, dataIn, dataOut, adultos, criancas }: ItemCardProps) {
+  const ehVisita = item.natureza === "visita";
   const capa = item.imagens[0] ?? item.estabelecimento_foto_capa;
   const recursosAtivos = ITEM_RECURSO_FLAGS.filter((flag) => item[flag]);
   const recursosVisiveis = recursosAtivos.slice(0, MAX_RECURSOS_VISIVEIS);
   const recursosOcultos = recursosAtivos.length - recursosVisiveis.length;
 
-  return (
-    <Link
-      to="/quartos/$id"
-      params={{ id: item.id }}
-      search={{
-        ...(dataIn ? { checkIn: dataIn } : {}),
-        ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
-        ...(adultos !== undefined ? { adultos } : {}),
-        ...(criancas !== undefined ? { criancas } : {}),
-      }}
-      className="group relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition"
-      aria-label={`Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`}
-    >
+  const classeCartao =
+    "group relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition";
+  const rotulo = ehVisita
+    ? `Ver ${item.estabelecimento_nome}`
+    : `Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`;
+
+  const conteudo = (
+    <>
       {item.selo_azul && (
         <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold shadow">
           <ShieldCheck className="h-3 w-3" /> Selo Azul ✓
@@ -94,16 +92,18 @@ export function ItemCard({ item, dataIn, dataOut, adultos, criancas }: ItemCardP
           </div>
         )}
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/70">
-          <span className="inline-flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> Até {item.capacidade_total} pessoa
-            {item.capacidade_total === 1 ? "" : "s"}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <BedDouble className="h-3.5 w-3.5" /> {item.quantidade_camas} cama
-            {item.quantidade_camas === 1 ? "" : "s"}
-          </span>
-        </div>
+        {item.capacidade_total !== null && item.quantidade_camas !== null && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/70">
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3.5 w-3.5" /> Até {item.capacidade_total} pessoa
+              {item.capacidade_total === 1 ? "" : "s"}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <BedDouble className="h-3.5 w-3.5" /> {item.quantidade_camas} cama
+              {item.quantidade_camas === 1 ? "" : "s"}
+            </span>
+          </div>
+        )}
 
         {recursosVisiveis.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
@@ -124,10 +124,47 @@ export function ItemCard({ item, dataIn, dataOut, adultos, criancas }: ItemCardP
         )}
 
         <div className="mt-auto pt-3 flex items-baseline gap-1">
-          <span className="text-lg font-bold text-primary">{formatPreco(item.preco)}</span>
-          <span className="text-xs text-muted-foreground">/ noite</span>
+          {item.preco !== null ? (
+            <>
+              <span className="text-lg font-bold text-primary">{formatPreco(item.preco)}</span>
+              <span className="text-xs text-muted-foreground">/ noite</span>
+            </>
+          ) : (
+            <>
+              <span className="text-sm font-bold text-primary">Reserva sem cobrança</span>
+              <span className="text-xs text-muted-foreground">· dia e horário</span>
+            </>
+          )}
         </div>
       </div>
+    </>
+  );
+
+  // Destinos diferentes exigem dois `Link`: o `to` do TanStack é tipado e não
+  // aceita rota variável com params distintos.
+  return ehVisita ? (
+    <Link
+      to="/estabelecimento/$slug"
+      params={{ slug: item.estabelecimento_slug }}
+      className={classeCartao}
+      aria-label={rotulo}
+    >
+      {conteudo}
+    </Link>
+  ) : (
+    <Link
+      to="/quartos/$id"
+      params={{ id: item.id }}
+      search={{
+        ...(dataIn ? { checkIn: dataIn } : {}),
+        ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
+        ...(adultos !== undefined ? { adultos } : {}),
+        ...(criancas !== undefined ? { criancas } : {}),
+      }}
+      className={classeCartao}
+      aria-label={rotulo}
+    >
+      {conteudo}
     </Link>
   );
 }

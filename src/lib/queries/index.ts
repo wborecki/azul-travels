@@ -44,10 +44,15 @@ export {
   vincularPerfisAReserva,
   perfisDaReserva,
   buildReservaPayload,
+  reservaEhVisita,
+  formatHoraVisita,
+  formatPeriodoReserva,
   type Reserva,
   type ReservaInsert,
   type ReservaComContexto,
   type ReservaFormInput,
+  type ReservaEstadiaInput,
+  type ReservaVisitaInput,
   type PerfilDaReserva,
 } from "./reservas";
 

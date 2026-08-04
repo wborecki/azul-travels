@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchEstabelecimentoDoOwner, type EstabelecimentoDoOwner } from "@/lib/queries";
+import { naturezaDaReserva } from "@/lib/enums";
 import { ItemReservavelFormulario } from "@/components/estabelecimento/ItemReservavelFormulario";
 
 export const Route = createFileRoute("/meu-estabelecimento/itens/nova")({
@@ -33,6 +34,11 @@ function NovoItemPage() {
       const estabRow = await fetchEstabelecimentoDoOwner(user.id);
       if (!estabRow || !estabRow.selo_azul || estabRow.status !== "ativo") {
         toast.error("Os quartos ficam disponíveis para locais com Selo Azul ativo.");
+        navigate({ to: "/meu-estabelecimento" });
+        return;
+      }
+      if (naturezaDaReserva(estabRow.tipo) !== "estadia") {
+        toast.error("Seu tipo de estabelecimento recebe reservas direto, sem cadastrar quartos.");
         navigate({ to: "/meu-estabelecimento" });
         return;
       }

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchReservasDaFamilia,
+  formatPeriodoReserva,
   perfisDaReserva,
   type ReservaComContexto,
 } from "@/lib/queries/reservas";
@@ -428,8 +429,7 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaComContexto }) {
             Reserva
           </h4>
           <InfoRow icon={<Calendar className="h-4 w-4" />}>
-            {reserva.data_checkin ? formatDateBR(reserva.data_checkin) : "-"} →{" "}
-            {reserva.data_checkout ? formatDateBR(reserva.data_checkout) : "-"}
+            {formatPeriodoReserva(reserva, (d) => (d ? formatDateBR(d) : "-"))}
           </InfoRow>
           <InfoRow icon={<Users className="h-4 w-4" />}>
             {reserva.num_adultos ?? 0} adulto(s) · {reserva.num_autistas ?? 0} autista(s)

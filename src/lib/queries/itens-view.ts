@@ -5,7 +5,7 @@ import { PAGE_SIZE_DEFAULT, resolvePagination } from "./pagination";
 
 export const ITEM_PAGE_SIZE_DEFAULT = PAGE_SIZE_DEFAULT;
 
-type ItemViewRaw = Tables<"itens_reservaveis_view">;
+type ItemViewRaw = Tables<"ofertas_view">;
 
 export type SeloFlag = "selo_azul" | "selo_governamental" | "selo_privado";
 
@@ -20,16 +20,22 @@ export type RecursoFlag =
 export type Ordenacao = "preco_asc" | "preco_desc" | "avaliacao";
 
 export interface ItemView {
+  /**
+   * `estadia` = um quarto; `visita` = o próprio estabelecimento. Nas visitas
+   * preço, capacidade, camas e check-in/out são nulos - o local não declara
+   * nada disso, ele confirma ou recusa o pedido.
+   */
+  natureza: ItemViewRaw["natureza"];
   id: string;
   item_nome: string;
   descricao: string | null;
-  preco: number;
-  quantidade: number;
-  capacidade_total: number;
+  preco: number | null;
+  quantidade: number | null;
+  capacidade_total: number | null;
   capacidade_adultos: number | null;
   capacidade_criancas: number | null;
   comodidades: string[];
-  quantidade_camas: number;
+  quantidade_camas: number | null;
   imagens: string[];
   check_in_padrao: string | null;
   check_out_padrao: string | null;
@@ -164,14 +170,16 @@ export function applyItensViewFilters<Q extends AnyItemViewBuilder>(
   for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
   for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;
 
+  // `nullsFirst: false` em toda ordenação por preço: visita não tem preço, e
+  // sem isso o DESC jogaria todos os restaurantes para o topo da lista.
   if (filters.ordenacao === "preco_desc") {
-    q = q.order("preco", { ascending: false }) as Q;
+    q = q.order("preco", { ascending: false, nullsFirst: false }) as Q;
   } else if (filters.ordenacao === "avaliacao") {
     q = q.order("avaliacao_media", { ascending: false, nullsFirst: false }) as Q;
     q = q.order("total_avaliacoes", { ascending: false }) as Q;
-    q = q.order("preco", { ascending: true }) as Q;
+    q = q.order("preco", { ascending: true, nullsFirst: false }) as Q;
   } else {
-    q = q.order("preco", { ascending: true }) as Q;
+    q = q.order("preco", { ascending: true, nullsFirst: false }) as Q;
   }
 
   const pag = resolvePagination(filters);
@@ -182,6 +190,12 @@ export function applyItensViewFilters<Q extends AnyItemViewBuilder>(
   return q;
 }
 
+/**
+ * IDs de quartos lotados no período. Só existe estadia aqui: visita não tem
+ * disponibilidade controlada (o local confirma ou recusa), e como o id de uma
+ * visita é o do estabelecimento, ele nunca aparece nesta lista - ou seja, o
+ * filtro de datas deixa as visitas passarem por construção.
+ */
 async function fetchItensIndisponiveis(data_in?: string, data_out?: string): Promise<string[]> {
   if (!data_in || !data_out) return [];
   const { data, error } = await supabase.rpc("itens_indisponiveis_no_periodo", {
@@ -199,16 +213,16 @@ async function fetchItensIndisponiveis(data_in?: string, data_out?: string): Pro
 const ID_INEXISTENTE = "00000000-0000-0000-0000-000000000000";
 
 async function fetchIdsProximos(centro: CentroBusca, raioKm: number): Promise<string[]> {
-  const { data, error } = await supabase.rpc("buscar_itens_proximos", {
+  const { data, error } = await supabase.rpc("buscar_ofertas_proximas", {
     p_lat: centro.lat,
     p_lng: centro.lng,
     p_raio_km: raioKm,
   });
   if (error) {
-    console.warn("Erro ao consultar itens próximos, ignorando filtro de raio", error);
+    console.warn("Erro ao consultar ofertas próximas, ignorando filtro de raio", error);
     return [];
   }
-  return (data ?? []).map((r) => r.item_id);
+  return (data ?? []).map((r) => r.oferta_id);
 }
 
 function applyProximidade<Q extends AnyItemViewBuilder>(query: Q, ids: string[]): Q {
@@ -229,7 +243,7 @@ export async function fetchItensViewPaginated(
       ? await fetchIdsProximos(filters.centro, filters.raio_km)
       : null;
 
-  const base = supabase.from("itens_reservaveis_view").select("*", { count: "exact" });
+  const base = supabase.from("ofertas_view").select("*", { count: "exact" });
 
   const q = applyItensViewFilters(base, {
     ...filters,
@@ -262,11 +276,14 @@ export async function fetchItensViewPaginated(
 
 export const ITEM_MAPA_LIMITE = 500;
 
+// `natureza` decide o formato do pino; `estabelecimento_slug` é o destino do
+// clique numa visita, que vai para a página do local e não para /quartos/:id.
 const ITEM_MAPA_SELECT =
-  "id,item_nome,preco,latitude,longitude,imagens,cidade,estado,capacidade_total,quantidade_camas,selo_azul,avaliacao_media,total_avaliacoes,estabelecimento_nome,estabelecimento_tipo,estabelecimento_foto_capa";
+  "natureza,id,item_nome,preco,latitude,longitude,imagens,cidade,estado,capacidade_total,quantidade_camas,selo_azul,avaliacao_media,total_avaliacoes,estabelecimento_nome,estabelecimento_slug,estabelecimento_tipo,estabelecimento_foto_capa";
 
 type ItemMapaRaw = Pick<
   ItemViewRaw,
+  | "natureza"
   | "id"
   | "item_nome"
   | "preco"
@@ -281,6 +298,7 @@ type ItemMapaRaw = Pick<
   | "avaliacao_media"
   | "total_avaliacoes"
   | "estabelecimento_nome"
+  | "estabelecimento_slug"
   | "estabelecimento_tipo"
   | "estabelecimento_foto_capa"
 >;
@@ -304,7 +322,7 @@ export async function fetchItensViewMapa(filters: ItensViewFilters = {}): Promis
       ? await fetchIdsProximos(filters.centro, filters.raio_km)
       : null;
 
-  const base = supabase.from("itens_reservaveis_view").select(ITEM_MAPA_SELECT, { count: "exact" });
+  const base = supabase.from("ofertas_view").select(ITEM_MAPA_SELECT, { count: "exact" });
 
   const q = applyItensViewFilters(base, {
     ...filters,

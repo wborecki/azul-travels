@@ -1,6 +1,24 @@
-import { isEstabTipo, type EstabTipo } from "@/lib/enums";
+import { isEstabTipo, naturezaDaReserva, type EstabTipo } from "@/lib/enums";
 import { ESTADOS_BR, parseDataISO, parseInteiroUrl } from "@/lib/brazil";
 import type { ItemRecursoFlag, ItemSeloFlag, ItensViewFilters, Ordenacao } from "@/lib/queries";
+
+/**
+ * Filtros que só fazem sentido em hospedagem. Preço por noite, período de
+ * estadia e número de hóspedes não existem numa visita a restaurante ou
+ * parque - e como a coluna correspondente vem nula na view, aplicá-los sobre
+ * uma busca mista faria as visitas sumirem sem a família entender por quê.
+ *
+ * A UI esconde estes controles fora de hospedagem e limpa os valores; esta
+ * lista é a fonte única de quais são.
+ */
+export const FILTROS_SO_HOSPEDAGEM = [
+  "preco_min",
+  "preco_max",
+  "data_in",
+  "data_out",
+  "adultos",
+  "criancas",
+] as const;
 
 export interface ExplorarSearch {
   busca?: string;
@@ -82,6 +100,23 @@ function isRecursoFlag(v: unknown): v is ItemRecursoFlag {
 
 export function parseTiposCsv(v: unknown): EstabTipo[] {
   return parseCsv(v, isEstabTipo);
+}
+
+/**
+ * `true` quando a busca está restrita a hospedagem - é a condição para os
+ * filtros de `FILTROS_SO_HOSPEDAGEM` aparecerem.
+ *
+ * Seleção vazia (a lista misturada, que é o estado inicial) conta como
+ * "não é só hospedagem": mostrar um filtro de preço ali seria oferecer um
+ * controle que apaga silenciosamente metade dos resultados.
+ */
+export function buscaSoDeHospedagem(tipos: ReadonlyArray<EstabTipo>): boolean {
+  return tipos.length > 0 && tipos.every((t) => naturezaDaReserva(t) === "estadia");
+}
+
+/** Patch que limpa todos os filtros exclusivos de hospedagem. */
+export function limparFiltrosDeHospedagem(): Partial<ExplorarSearch> {
+  return Object.fromEntries(FILTROS_SO_HOSPEDAGEM.map((k) => [k, undefined]));
 }
 export function parseSelosCsv(v: unknown): ItemSeloFlag[] {
   return parseCsv(v, isSeloFlag);

@@ -40,6 +40,7 @@ import {
   CheckCheck,
   MessageSquare,
   BedDouble,
+  Clock,
 } from "lucide-react";
 import { ItemReservadoFotos } from "@/components/reserva/ItemReservadoFotos";
 import { toast } from "sonner";
@@ -58,6 +59,9 @@ import {
   atualizarStatusReservaEstabelecimento,
   registrarAuditoriaReservaEstabelecimento,
   perfisSensoriaisDaReservaEstab,
+  formatHoraVisita,
+  formatPeriodoReserva,
+  reservaEhVisita,
   type EstabelecimentoDoOwner,
   type ReservaEstabelecimentoRow,
 } from "@/lib/queries";
@@ -366,9 +370,7 @@ function MeuEstabelecimentoReservasPage() {
                               )}
                               <span className="inline-flex items-center gap-1">
                                 <Calendar className="h-3.5 w-3.5" />
-                                {formatDataBr(r.data_checkin)}
-                                {" → "}
-                                {formatDataBr(r.data_checkout)}
+                                {formatPeriodoReserva(r, formatDataBr)}
                               </span>
                               <span className="inline-flex items-center gap-1">
                                 <Users className="h-3.5 w-3.5" />
@@ -492,6 +494,7 @@ function DetalheReserva({
 }) {
   const fam = reserva.familia_profiles;
   const item = reserva.itens_reservaveis;
+  const ehVisita = reservaEhVisita(reserva);
   const perfilTea = reserva.perfil_tea;
   const perfisSensoriais = perfisSensoriaisDaReservaEstab(reserva);
   const consentido = reserva.perfil_enviado_ao_estabelecimento;
@@ -539,10 +542,15 @@ function DetalheReserva({
                 </p>
               )}
             </>
+          ) : ehVisita ? (
+            <p className="text-sm text-foreground/80">
+              Visita ao seu estabelecimento — a família não escolhe um item, ela marca dia e horário
+              com vocês.
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground inline-flex items-start gap-1.5">
               <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />
-              Reserva sem item vinculado (fluxo antigo, por estabelecimento).
+              Reserva sem item vinculado (o item foi removido do catálogo).
             </p>
           )}
         </section>
@@ -592,14 +600,27 @@ function DetalheReserva({
 
         <section className="space-y-2 border-t pt-4">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Estadia
+            {ehVisita ? "Visita" : "Estadia"}
           </h3>
-          <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-in">
-            {formatDataBr(reserva.data_checkin)}
-          </InfoLine>
-          <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-out">
-            {formatDataBr(reserva.data_checkout)}
-          </InfoLine>
+          {ehVisita ? (
+            <>
+              <InfoLine icon={<Calendar className="h-4 w-4" />} label="Dia">
+                {formatDataBr(reserva.data_checkin)}
+              </InfoLine>
+              <InfoLine icon={<Clock className="h-4 w-4" />} label="Horário">
+                {formatHoraVisita(reserva.hora_visita)}
+              </InfoLine>
+            </>
+          ) : (
+            <>
+              <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-in">
+                {formatDataBr(reserva.data_checkin)}
+              </InfoLine>
+              <InfoLine icon={<Calendar className="h-4 w-4" />} label="Check-out">
+                {formatDataBr(reserva.data_checkout)}
+              </InfoLine>
+            </>
+          )}
           <InfoLine icon={<Users className="h-4 w-4" />} label="Pessoas">
             {reserva.num_adultos ?? 0} adulto(s) · {reserva.num_autistas ?? 0} autista(s)
             {reserva.num_acompanhantes ? ` · ${reserva.num_acompanhantes} acompanhante(s)` : ""}

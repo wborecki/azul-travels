@@ -9,6 +9,7 @@ import { Logo } from "@/components/Logo";
 import { ArrowLeft, ArrowRight, Building2, HeartHandshake, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logAuthEvent } from "@/lib/audit/logAuthEvent";
+import { ESTAB_TIPOS, ESTAB_TIPO_LABEL, type EstabTipo } from "@/lib/enums";
 
 export const Route = createFileRoute("/cadastro")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
@@ -187,6 +188,8 @@ function StepData({
 }) {
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
+  const [nomeEstab, setNomeEstab] = useState("");
+  const [tipoEstab, setTipoEstab] = useState<EstabTipo | "">("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [password, setPassword] = useState("");
@@ -195,6 +198,10 @@ function StepData({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (accountType === "estabelecimento" && (!nomeEstab.trim() || !tipoEstab)) {
+      toast.error("Informe o nome e o tipo do estabelecimento.");
+      return;
+    }
     if (password.length < 6) {
       toast.error("A senha precisa ter pelo menos 6 caracteres.");
       return;
@@ -224,6 +231,9 @@ function StepData({
           whatsapp: whatsapp.trim(),
           telefone: whatsapp.trim(),
           origem: "cadastro_site",
+          ...(accountType === "estabelecimento"
+            ? { nome_estabelecimento: nomeEstab.trim(), tipo: tipoEstab }
+            : {}),
         },
       },
     });
@@ -279,6 +289,35 @@ function StepData({
           <Label>Nome completo *</Label>
           <Input required value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} />
         </div>
+        {accountType === "estabelecimento" && (
+          <>
+            <div>
+              <Label>Nome do estabelecimento *</Label>
+              <Input
+                required
+                value={nomeEstab}
+                onChange={(e) => setNomeEstab(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <Label>Tipo de estabelecimento *</Label>
+              <select
+                required
+                value={tipoEstab}
+                onChange={(e) => setTipoEstab(e.target.value as EstabTipo)}
+                className="w-full px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
+              >
+                <option value="">Selecione…</option>
+                {ESTAB_TIPOS.map((t) => (
+                  <option key={t} value={t}>
+                    {ESTAB_TIPO_LABEL[t]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
         <div>
           <Label>E-mail *</Label>
           <Input

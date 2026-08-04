@@ -22,9 +22,11 @@ import {
 } from "@/lib/queries";
 import {
   ORDENACAO_LABEL,
+  buscaSoDeHospedagem,
   contarFiltrosAtivos,
   csvOrUndefined,
   limparAreaMapa,
+  limparFiltrosDeHospedagem,
   parseRecursosCsv,
   parseSelosCsv,
   parseTiposCsv,
@@ -34,6 +36,7 @@ import {
   validateExplorarSearch,
   type ExplorarSearch,
 } from "@/lib/explorar-search";
+import type { EstabTipo } from "@/lib/enums";
 import type { BoundsSimples } from "@/components/explorar/MapView";
 
 const MapView = lazy(() =>
@@ -44,11 +47,11 @@ export const Route = createFileRoute("/explorar")({
   validateSearch: validateExplorarSearch,
   head: () => ({
     meta: [
-      { title: "Explorar quartos · Turismo Azul" },
+      { title: "Explorar · Turismo Azul" },
       {
         name: "description",
         content:
-          "Encontre quartos e acomodações em hotéis, pousadas e resorts preparados para receber famílias TEA.",
+          "Encontre hospedagem, restaurantes, parques e passeios preparados para receber famílias TEA.",
       },
     ],
   }),
@@ -128,7 +131,7 @@ function ExplorarPage() {
         console.error(err);
         if (!alive) return;
         setErro(true);
-        toast.error("Não foi possível carregar os quartos.");
+        toast.error("Não foi possível carregar os resultados.");
       })
       .finally(() => alive && setLoading(false));
     return () => {
@@ -231,6 +234,20 @@ function ExplorarPage() {
 
   const tiposAtuais = parseTiposCsv(search.tipos);
   const tipoAtivo = tiposAtuais.length === 1 ? tiposAtuais[0] : undefined;
+
+  /**
+   * Troca de categoria pelas pills. Sair de hospedagem leva junto os filtros
+   * que só existem lá (preço por noite, período, hóspedes): eles somem do
+   * painel, e deixá-los aplicados na URL esconderia resultados por um motivo
+   * que a família não teria mais como ver nem desfazer.
+   */
+  const selecionarTipo = (tipo?: EstabTipo) => {
+    const novos = parseTiposCsv(tipo);
+    patchSearch({
+      tipos: tipo,
+      ...(buscaSoDeHospedagem(novos) ? {} : limparFiltrosDeHospedagem()),
+    });
+  };
   const temFiltros = temFiltrosRelevantes(search);
   const filtrosAtivos = contarFiltrosAtivos(search);
 
@@ -250,7 +267,7 @@ function ExplorarPage() {
             Explorar destinos
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Quartos e acomodações preparados para receber famílias TEA.
+            Lugares preparados para receber famílias TEA.
           </p>
 
           <div className="mt-5">
@@ -384,7 +401,7 @@ function ExplorarPage() {
         onOpenChange={setFiltrosAbertos}
         aplicados={search}
         tipoAtivo={tipoAtivo}
-        onSelectTipo={(tipo) => patchSearch({ tipos: tipo })}
+        onSelectTipo={selecionarTipo}
         onAplicar={(patch) => patchSearch(patch)}
         onSalvarPadrao={user ? () => void salvarComoPadrao() : undefined}
         salvandoPadrao={salvandoPadrao}

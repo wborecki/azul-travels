@@ -237,7 +237,7 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
 
   if (filters.busca && filters.busca.trim()) {
     const term = filters.busca.trim().replace(/[,()]/g, " ");
-    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo.ilike.%${term}%`) as Q;
+    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo::text.ilike.%${term}%`) as Q;
   }
 
   const tiposCombinados: ReadonlyArray<EstabelecimentoFull["tipo"]> = [
@@ -312,7 +312,7 @@ export async function fetchEstabelecimentoPorId(
 /** Campos mínimos que `/meu-estabelecimento` precisa do próprio local do dono. */
 export type EstabelecimentoDoOwner = Pick<
   EstabelecimentoFull,
-  "id" | "nome" | "cidade" | "estado" | "endereco" | "selo_azul" | "status"
+  "id" | "nome" | "cidade" | "estado" | "endereco" | "selo_azul" | "status" | "tipo"
 >;
 
 /** Busca o estabelecimento vinculado ao dono logado (`owner_user_id`). */
@@ -321,7 +321,7 @@ export async function fetchEstabelecimentoDoOwner(
 ): Promise<EstabelecimentoDoOwner | null> {
   const { data, error } = await supabase
     .from("estabelecimentos")
-    .select("id, nome, cidade, estado, endereco, selo_azul, status")
+    .select("id, nome, cidade, estado, endereco, selo_azul, status, tipo")
     .eq("owner_user_id", ownerId)
     .maybeSingle();
 

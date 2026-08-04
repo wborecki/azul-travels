@@ -1,19 +1,12 @@
 import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
   Building2,
   ShieldCheck,
-  Save,
-  ArrowLeft,
   Sparkles,
   CheckCircle2,
   Clock,
@@ -22,57 +15,49 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchEstabelecimentoProfile, fetchEstabelecimentoFullDoOwner } from "@/lib/queries";
-import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
-import { ESTRUTURA_ITEMS } from "@/lib/estrutura-tea";
+import { type EstabTipo } from "@/lib/enums";
+import { RECURSOS_TEA } from "@/lib/recursos-tea";
+import { pickEstabMedia } from "@/lib/media";
 import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
-import { LocationPickerField } from "@/components/estabelecimento/LocationPickerField";
-import { geocodeEndereco, reverseGeocode } from "@/lib/geocode";
+import { PerfilEstabelecimentoEditor } from "@/components/estabelecimento/PerfilEstabelecimentoEditor";
+import {
+  EMPTY_DRAFT,
+  SECOES,
+  type PerfilDraft,
+  type RecursosTea,
+  type SecaoId,
+  type SecaoInfo,
+} from "@/lib/perfil-estabelecimento";
 
 export const Route = createFileRoute("/meu-estabelecimento/")({
   head: () => ({ meta: [{ title: "Meu estabelecimento · Turismo Azul" }] }),
   component: MeuEstabelecimentoPage,
 });
 
-const TIPOS = ESTAB_TIPOS;
-const COLAB_OPTS = ["1-5", "6-15", "16-30", "31-50", "50+"];
+const DIACRITICOS_RE = new RegExp(String.fromCharCode(0x5b, 0x300, 0x2d, 0x36f, 0x5d), "g");
 
-type Estrutura = Record<string, boolean>;
-
-interface PerfilDraft {
-  nome: string;
-  tipo: string;
-  endereco: string;
-  cidade: string;
-  estado: string;
-  latitude: string;
-  longitude: string;
-  website: string;
-  num_colaboradores: string;
-  recebe_grupos_escolares_tea: boolean;
-  estrutura: Estrutura;
-  iniciativa_atual: string;
-  num_capacitacao: string;
-  contato_preferido: string;
-  observacoes: string;
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(DIACRITICOS_RE, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
-const EMPTY: PerfilDraft = {
-  nome: "",
-  tipo: "",
-  endereco: "",
-  cidade: "",
-  estado: "",
-  latitude: "",
-  longitude: "",
-  website: "",
-  num_colaboradores: "",
-  recebe_grupos_escolares_tea: false,
-  estrutura: {},
-  iniciativa_atual: "",
-  num_capacitacao: "",
-  contato_preferido: "",
-  observacoes: "",
-};
+/** Copia de `origem` apenas os campos de uma seção. */
+function pickCampos(origem: PerfilDraft, campos: ReadonlyArray<keyof PerfilDraft>) {
+  return Object.fromEntries(campos.map((c) => [c, origem[c]])) as Partial<PerfilDraft>;
+}
+
+function mensagemErroSalvar(msg: string): string {
+  if (msg.includes("RECURSOS_TEA_EXIGEM_SELO")) {
+    return "Os recursos verificados são liberados quando o Selo Azul fica ativo.";
+  }
+  return msg;
+}
 
 function MeuEstabelecimentoPage() {
   const { user, loading, role } = useAuth();
@@ -81,8 +66,10 @@ function MeuEstabelecimentoPage() {
 
   const [carregando, setCarregando] = useState(true);
   const [editando, setEditando] = useState(false);
-  const [salvando, setSalvando] = useState(false);
-  const [draft, setDraft] = useState<PerfilDraft>(EMPTY);
+  const [salvando, setSalvando] = useState<SecaoId | null>(null);
+  const [secaoAtiva, setSecaoAtiva] = useState<SecaoId>("identidade");
+  const [draft, setDraft] = useState<PerfilDraft>(EMPTY_DRAFT);
+  const [draftSalvo, setDraftSalvo] = useState<PerfilDraft>(EMPTY_DRAFT);
   const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [estabId, setEstabId] = useState<string | null>(null);
   const [seloAzul, setSeloAzul] = useState(false);
@@ -117,7 +104,21 @@ function MeuEstabelecimentoPage() {
       setEstabAtivo(estab?.status === "ativo");
       setQuerSelo(!!estab?.quer_selo_azul);
       setQuerSeloEm(estab?.quer_selo_azul_em ?? null);
-      setDraft({
+
+      // A capa pode ter sido definida pelo admin sem estar na galeria (o form
+      // do admin grava `foto_capa` e `fotos` separadamente). Trazê-la para a
+      // frente do array evita que salvar as fotos apague a capa existente.
+      const media = estab ? pickEstabMedia(estab) : null;
+      const fotosIniciais =
+        media?.fotoCapa && !media.fotos.includes(media.fotoCapa)
+          ? [media.fotoCapa, ...media.fotos]
+          : (media?.fotos ?? []);
+
+      const recursos = Object.fromEntries(
+        RECURSOS_TEA.map((r) => [r.key, estab ? !!estab[r.key] : false]),
+      ) as RecursosTea;
+
+      const inicial: PerfilDraft = {
         nome: estab?.nome ?? "",
         tipo: (estab?.tipo as string) ?? prof?.tipo ?? "",
         endereco: estab?.endereco ?? prof?.endereco ?? "",
@@ -127,13 +128,24 @@ function MeuEstabelecimentoPage() {
         longitude: estab?.longitude != null ? String(estab.longitude) : "",
         website: estab?.website ?? prof?.website ?? "",
         num_colaboradores: prof?.num_colaboradores ?? "",
+        descricao: estab?.descricao ?? "",
+        descricao_tea: estab?.descricao_tea ?? "",
+        telefone: estab?.telefone ?? "",
+        email: estab?.email ?? "",
+        tour_360_url: estab?.tour_360_url ?? "",
         recebe_grupos_escolares_tea: !!estab?.recebe_grupos_escolares_tea,
-        estrutura: (prof?.estrutura as Estrutura) ?? {},
+        fotos: fotosIniciais,
+        estrutura: (prof?.estrutura as PerfilDraft["estrutura"]) ?? {},
+        recursos,
+        tem_beneficio_tea: !!estab?.tem_beneficio_tea,
+        beneficio_tea_descricao: estab?.beneficio_tea_descricao ?? "",
         iniciativa_atual: prof?.iniciativa_atual ?? "",
         num_capacitacao: prof?.num_capacitacao ?? "",
         contato_preferido: prof?.contato_preferido ?? "",
         observacoes: prof?.observacoes ?? "",
-      });
+      };
+      setDraft(inicial);
+      setDraftSalvo(inicial);
       setCarregando(false);
     })();
   }, [user, loading, role, pathname, navigate]);
@@ -160,68 +172,187 @@ function MeuEstabelecimentoPage() {
     setDraft((d) => ({ ...d, [k]: v }));
   }
 
-  async function salvar() {
+  /**
+   * Grava uma seção por vez. Cada uma sabe em qual tabela mora: o questionário
+   * do Selo Azul fica em `estabelecimento_profiles`, o conteúdo público em
+   * `estabelecimentos`, e "Identidade" escreve nas duas - além de ser a única
+   * que cria a linha em `estabelecimentos`, no primeiro salvamento.
+   */
+  async function salvarSecao(secao: SecaoInfo) {
     if (!user) return;
-    if (
-      !draft.nome.trim() ||
-      !draft.tipo ||
-      !draft.endereco.trim() ||
-      !draft.cidade.trim() ||
-      !draft.estado.trim()
-    ) {
-      toast.error("Preencha nome, tipo, endereço completo, cidade e estado.");
+    setSalvando(secao.id);
+    let erro: string | null = null;
+
+    try {
+      if (secao.id === "identidade") {
+        if (
+          !draft.nome.trim() ||
+          !draft.tipo ||
+          !draft.endereco.trim() ||
+          !draft.cidade.trim() ||
+          !draft.estado.trim()
+        ) {
+          toast.error("Preencha nome, tipo, endereço completo, cidade e estado.");
+          return;
+        }
+        if (!draft.latitude.trim() || !draft.longitude.trim()) {
+          toast.error("Posicione o pino no mapa para definir a localização do estabelecimento.");
+          return;
+        }
+
+        const { error: profErr } = await supabase
+          .from("estabelecimento_profiles")
+          .update({
+            tipo: draft.tipo,
+            endereco: draft.endereco || null,
+            cidade: draft.cidade,
+            estado: draft.estado.toUpperCase(),
+            website: draft.website || null,
+            num_colaboradores: draft.num_colaboradores || null,
+            perfil_completo: true,
+          })
+          .eq("id", user.id);
+        if (profErr) {
+          erro = profErr.message;
+        } else {
+          const dadosEstab = {
+            nome: draft.nome,
+            endereco: draft.endereco || null,
+            cidade: draft.cidade,
+            estado: draft.estado.toUpperCase(),
+            latitude: draft.latitude.trim() ? Number(draft.latitude) : null,
+            longitude: draft.longitude.trim() ? Number(draft.longitude) : null,
+            website: draft.website || null,
+          };
+
+          if (estabId) {
+            // `tipo` não entra no UPDATE de propósito: ele decide se o local
+            // recebe reserva de quarto ou de visita, e trocá-lo deixaria
+            // quartos e reservas existentes órfãos. A tela informa isso.
+            const { error } = await supabase
+              .from("estabelecimentos")
+              .update(dadosEstab)
+              .eq("id", estabId);
+            erro = error?.message ?? null;
+          } else {
+            // Cadastro via /cadastro não cria a linha em `estabelecimentos` (só
+            // `estabelecimento_profiles`) - é aqui, no primeiro salvamento da
+            // Identidade, que o estabelecimento é efetivamente criado.
+            const slug = `${slugify(draft.nome)}-${user.id.slice(0, 8)}`;
+            const { data: novoEstab, error } = await supabase
+              .from("estabelecimentos")
+              .insert({
+                ...dadosEstab,
+                tipo: draft.tipo as EstabTipo,
+                slug,
+                owner_user_id: user.id,
+                status: "pendente",
+              })
+              .select("id")
+              .single();
+            erro = error?.message ?? null;
+            if (!error && novoEstab) {
+              const { error: linkErr } = await supabase
+                .from("estabelecimento_profiles")
+                .update({ estabelecimento_id: novoEstab.id })
+                .eq("id", user.id);
+              if (!linkErr) setEstabId(novoEstab.id);
+            }
+          }
+          if (!erro) setPerfilCompleto(true);
+        }
+      } else if (!estabId) {
+        // Toda seção fora da Identidade grava em `estabelecimentos`, e a linha
+        // só passa a existir quando a Identidade é salva pela primeira vez.
+        toast.error("Salve a Identidade primeiro.");
+        setSecaoAtiva("identidade");
+        return;
+      } else if (secao.id === "descricao") {
+        const { error } = await supabase
+          .from("estabelecimentos")
+          .update({
+            descricao: draft.descricao || null,
+            descricao_tea: draft.descricao_tea || null,
+          })
+          .eq("id", estabId);
+        erro = error?.message ?? null;
+      } else if (secao.id === "fotos") {
+        const { error } = await supabase
+          .from("estabelecimentos")
+          .update({
+            // A capa é sempre a primeira da galeria - `FotosGaleria` trata a
+            // posição 0 como capa, então não há um segundo controle para isso.
+            fotos: draft.fotos,
+            foto_capa: draft.fotos[0] ?? null,
+            tour_360_url: draft.tour_360_url || null,
+          })
+          .eq("id", estabId);
+        erro = error?.message ?? null;
+      } else if (secao.id === "contato") {
+        const { error } = await supabase
+          .from("estabelecimentos")
+          .update({
+            telefone: draft.telefone || null,
+            email: draft.email || null,
+          })
+          .eq("id", estabId);
+        erro = error?.message ?? null;
+        if (!erro) {
+          const { error: profErr } = await supabase
+            .from("estabelecimento_profiles")
+            .update({ contato_preferido: draft.contato_preferido || null })
+            .eq("id", user.id);
+          erro = profErr?.message ?? null;
+        }
+      } else if (secao.id === "acolhimento") {
+        // Os recursos só entram no payload quando editáveis. A trigger
+        // `protect_estabelecimentos_admin_columns` recusaria a alteração, e
+        // mandá-los sem necessidade só criaria uma forma de falhar.
+        const podeRecursos = seloAzul && estabAtivo;
+        const { error } = await supabase
+          .from("estabelecimentos")
+          .update({
+            estrutura: draft.estrutura,
+            recebe_grupos_escolares_tea:
+              draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
+            ...(podeRecursos
+              ? {
+                  ...draft.recursos,
+                  tem_beneficio_tea: draft.tem_beneficio_tea,
+                  beneficio_tea_descricao: draft.beneficio_tea_descricao || null,
+                }
+              : {}),
+          })
+          .eq("id", estabId);
+        erro = error?.message ?? null;
+        if (!erro) {
+          const { error: profErr } = await supabase
+            .from("estabelecimento_profiles")
+            .update({ estrutura: draft.estrutura })
+            .eq("id", user.id);
+          erro = profErr?.message ?? null;
+        }
+      } else {
+        const { error } = await supabase
+          .from("estabelecimento_profiles")
+          .update({
+            iniciativa_atual: draft.iniciativa_atual || null,
+            num_capacitacao: draft.num_capacitacao || null,
+            observacoes: draft.observacoes || null,
+          })
+          .eq("id", user.id);
+        erro = error?.message ?? null;
+      }
+    } finally {
+      setSalvando(null);
+    }
+
+    if (erro) {
+      toast.error("Erro ao salvar", { description: mensagemErroSalvar(erro) });
       return;
     }
-    if (!draft.latitude.trim() || !draft.longitude.trim()) {
-      toast.error("Posicione o pino no mapa para definir a localização do estabelecimento.");
-      return;
-    }
-    setSalvando(true);
-
-    const { error: profErr } = await supabase
-      .from("estabelecimento_profiles")
-      .update({
-        endereco: draft.endereco || null,
-        website: draft.website || null,
-        tipo: draft.tipo,
-        cidade: draft.cidade,
-        estado: draft.estado.toUpperCase(),
-        num_colaboradores: draft.num_colaboradores || null,
-        iniciativa_atual: draft.iniciativa_atual || null,
-        num_capacitacao: draft.num_capacitacao || null,
-        contato_preferido: draft.contato_preferido || null,
-        observacoes: draft.observacoes || null,
-        estrutura: draft.estrutura,
-        perfil_completo: true,
-      })
-      .eq("id", user.id);
-
-    if (!profErr && estabId) {
-      await supabase
-        .from("estabelecimentos")
-        .update({
-          nome: draft.nome,
-          endereco: draft.endereco || null,
-          cidade: draft.cidade,
-          estado: draft.estado.toUpperCase(),
-          latitude: draft.latitude.trim() ? Number(draft.latitude) : null,
-          longitude: draft.longitude.trim() ? Number(draft.longitude) : null,
-          website: draft.website || null,
-          recebe_grupos_escolares_tea:
-            draft.tipo === "passeio_educativo" ? draft.recebe_grupos_escolares_tea : false,
-          estrutura: draft.estrutura,
-        })
-        .eq("id", estabId);
-    }
-
-    setSalvando(false);
-    if (profErr) {
-      toast.error("Erro ao salvar: " + profErr.message);
-      return;
-    }
-    setPerfilCompleto(true);
-    setEditando(false);
-    toast.success("Perfil salvo!");
+    setDraftSalvo((prev) => ({ ...prev, ...pickCampos(draft, secao.campos) }));
+    toast.success(`${secao.label} salva`);
   }
 
   if (loading) {
@@ -239,12 +370,18 @@ function MeuEstabelecimentoPage() {
           <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando…
         </div>
       ) : editando ? (
-        <FormularioPerfil
+        <PerfilEstabelecimentoEditor
           draft={draft}
+          draftSalvo={draftSalvo}
           set={set}
-          onCancel={() => setEditando(false)}
-          onSave={salvar}
+          secaoAtiva={secaoAtiva}
+          onSelecionarSecao={setSecaoAtiva}
+          onSalvar={(s) => void salvarSecao(s)}
           salvando={salvando}
+          onFechar={() => setEditando(false)}
+          estabId={estabId}
+          podeEditarRecursos={seloAzul && estabAtivo}
+          uploadPrefixo={user?.id}
         />
       ) : seloAzul && estabAtivo && estabId ? (
         <div className="space-y-4">
@@ -266,7 +403,10 @@ function MeuEstabelecimentoPage() {
           querSelo={querSelo}
           querSeloEm={querSeloEm}
           solicitandoSelo={solicitandoSelo}
-          onCompletar={() => setEditando(true)}
+          onCompletar={(secao) => {
+            if (secao) setSecaoAtiva(secao);
+            setEditando(true);
+          }}
           onSolicitarSelo={() => void solicitarSeloAzul()}
         />
       )}
@@ -290,22 +430,11 @@ function Dashboard({
   querSelo: boolean;
   querSeloEm: string | null;
   solicitandoSelo: boolean;
-  onCompletar: () => void;
+  onCompletar: (secao?: SecaoId) => void;
   onSolicitarSelo: () => void;
 }) {
-  const camposChave: Array<[string, boolean]> = [
-    ["Nome", !!draft.nome],
-    ["Tipo", !!draft.tipo],
-    ["Endereço", !!draft.endereco],
-    ["Cidade", !!draft.cidade],
-    ["Estado", !!draft.estado],
-    ["Localização no mapa", !!(draft.latitude && draft.longitude)],
-    ["Website", !!draft.website],
-    ["Contato preferido", !!draft.contato_preferido],
-    ["Iniciativa atual", !!draft.iniciativa_atual],
-  ];
-  const preenchidos = camposChave.filter(([, v]) => v).length;
-  const progresso = Math.round((preenchidos / camposChave.length) * 100);
+  const pendentes = SECOES.filter((s) => s.pendente(draft));
+  const progresso = Math.round(((SECOES.length - pendentes.length) / SECOES.length) * 100);
 
   const dataSolicitacao = querSeloEm
     ? new Date(querSeloEm).toLocaleDateString("pt-BR", {
@@ -317,7 +446,6 @@ function Dashboard({
 
   return (
     <div className="space-y-6">
-      
       <div className="rounded-2xl bg-gradient-to-br from-[#1a2f5e] via-primary to-[#1a2f5e] text-white p-6 sm:p-8 shadow-md">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -334,7 +462,6 @@ function Dashboard({
           </div>
         </div>
 
-        
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
             <span>Progresso do perfil</span>
@@ -347,11 +474,23 @@ function Dashboard({
             />
           </div>
         </div>
+
+        {pendentes.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {pendentes.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => onCompletar(s.id)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-primary transition hover:bg-white"
+              >
+                {s.label} <ArrowRight className="h-3 w-3" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      
       <div className="grid md:grid-cols-3 gap-4">
-        
         <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
@@ -359,7 +498,7 @@ function Dashboard({
             </div>
             <h2 className="font-display font-bold text-base text-primary">Perfil do local</h2>
           </div>
-          {perfilCompleto ? (
+          {perfilCompleto && pendentes.length === 0 ? (
             <>
               <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
                 <CheckCircle2 className="h-4 w-4" /> Completo
@@ -370,7 +509,7 @@ function Dashboard({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onCompletar}
+                onClick={() => onCompletar()}
                 className="mt-3 self-start border-primary text-primary hover:bg-azul-claro"
               >
                 Ver ou editar
@@ -379,11 +518,13 @@ function Dashboard({
           ) : (
             <>
               <p className="mt-3 text-xs text-foreground/70 flex-1">
-                Faltam {camposChave.length - preenchidos} de {camposChave.length} campos-chave.
+                {pendentes.length === 1
+                  ? "Falta 1 seção para o perfil ficar completo."
+                  : `Faltam ${pendentes.length} de ${SECOES.length} seções.`}
               </p>
               <Button
                 size="sm"
-                onClick={onCompletar}
+                onClick={() => onCompletar(pendentes[0]?.id)}
                 className="mt-3 self-start bg-secondary hover:bg-secondary/90 text-white"
               >
                 Completar perfil <ArrowRight className="h-4 w-4 ml-1" />
@@ -392,7 +533,6 @@ function Dashboard({
           )}
         </div>
 
-        
         <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
@@ -421,7 +561,6 @@ function Dashboard({
           )}
         </div>
 
-        
         <div
           className={`relative border rounded-2xl p-5 flex flex-col shadow-sm transition overflow-hidden ${
             querSelo
@@ -484,333 +623,6 @@ function Dashboard({
       </div>
 
       <TimelineFluxo perfilCompleto={perfilCompleto} querSelo={querSelo} seloAzul={seloAzul} />
-    </div>
-  );
-}
-
-function FormularioPerfil({
-  draft,
-  set,
-  onCancel,
-  onSave,
-  salvando,
-}: {
-  draft: PerfilDraft;
-  set: <K extends keyof PerfilDraft>(k: K, v: PerfilDraft[K]) => void;
-  onCancel: () => void;
-  onSave: () => void;
-  salvando: boolean;
-}) {
-  function togEstrutura(key: string) {
-    set("estrutura", { ...draft.estrutura, [key]: !draft.estrutura[key] });
-  }
-
-  const enderecoKey = JSON.stringify([draft.endereco, draft.cidade, draft.estado]);
-  const enderecoKeyDebounced = useDebouncedValue(enderecoKey, 900);
-  const enderecoInicialRef = useRef(enderecoKey);
-  const ultimaFonteRef = useRef<"endereco" | "mapa" | null>(null);
-
-  useEffect(() => {
-    if (ultimaFonteRef.current === "mapa") {
-      ultimaFonteRef.current = null;
-      return;
-    }
-    if (
-      enderecoKeyDebounced === enderecoInicialRef.current &&
-      draft.latitude.trim() &&
-      draft.longitude.trim()
-    ) {
-      return;
-    }
-    const [endereco, cidade, estado] = JSON.parse(enderecoKeyDebounced) as string[];
-    if (!endereco.trim() && !cidade.trim()) return;
-    let cancelado = false;
-    void (async () => {
-      const resultado = await geocodeEndereco({ endereco, cidade, estado }).catch(() => null);
-      if (!cancelado && resultado) {
-        set("latitude", String(resultado.lat));
-        set("longitude", String(resultado.lng));
-      }
-    })();
-    return () => {
-      cancelado = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enderecoKeyDebounced]);
-
-  const handlePinChange = (lat: number, lng: number) => {
-    ultimaFonteRef.current = "mapa";
-    set("latitude", String(lat));
-    set("longitude", String(lng));
-    void (async () => {
-      const resultado = await reverseGeocode(lat, lng).catch(() => null);
-      if (resultado) {
-        if (resultado.endereco) set("endereco", resultado.endereco);
-        if (resultado.cidade) set("cidade", resultado.cidade);
-        if (resultado.estado) set("estado", resultado.estado);
-      }
-    })();
-  };
-
-  return (
-    <div className="space-y-6">
-      <button
-        onClick={onCancel}
-        className="inline-flex items-center text-sm text-primary hover:underline"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
-      </button>
-
-      <div className="bg-white border rounded-2xl p-6 md:p-8 space-y-6">
-        <h1 className="text-2xl font-display font-bold text-primary">Perfil do estabelecimento</h1>
-
-        <Secao titulo="1. Informações básicas">
-          <Field label="Nome do estabelecimento" required>
-            <Input
-              value={draft.nome}
-              onChange={(e) => set("nome", e.target.value)}
-              maxLength={120}
-            />
-          </Field>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Tipo" required>
-              <select
-                value={draft.tipo}
-                onChange={(e) => set("tipo", e.target.value)}
-                className="w-full px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
-              >
-                <option value="">Selecione…</option>
-                {TIPOS.map((t) => (
-                  <option key={t} value={t}>
-                    {ESTAB_TIPO_LABEL[t]}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Número de colaboradores">
-              <select
-                value={draft.num_colaboradores}
-                onChange={(e) => set("num_colaboradores", e.target.value)}
-                className="w-full px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
-              >
-                <option value="">Selecione…</option>
-                {COLAB_OPTS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-          <Field label="Endereço completo" required>
-            <Input
-              value={draft.endereco}
-              onChange={(e) => set("endereco", e.target.value)}
-              maxLength={200}
-            />
-          </Field>
-          <div className="grid sm:grid-cols-[1fr_120px] gap-4">
-            <Field label="Cidade" required>
-              <Input
-                value={draft.cidade}
-                onChange={(e) => set("cidade", e.target.value)}
-                maxLength={80}
-              />
-            </Field>
-            <Field label="Estado (UF)" required>
-              <Input
-                value={draft.estado}
-                maxLength={2}
-                onChange={(e) => set("estado", e.target.value.toUpperCase())}
-              />
-            </Field>
-          </div>
-          <Field label="Localização no mapa" required>
-            <p className="mb-2 text-xs text-foreground/60">
-              O pino é posicionado automaticamente a partir do endereço, cidade e estado. Você
-              também pode clicar ou arrastar o pino no mapa para ajustar manualmente.
-            </p>
-            <LocationPickerField
-              latitude={draft.latitude.trim() ? Number(draft.latitude) : null}
-              longitude={draft.longitude.trim() ? Number(draft.longitude) : null}
-              onChange={handlePinChange}
-            />
-          </Field>
-          <Field label="Website (opcional)">
-            <Input
-              type="url"
-              placeholder="https://"
-              value={draft.website}
-              onChange={(e) => set("website", e.target.value)}
-              maxLength={200}
-            />
-          </Field>
-          {draft.tipo === "passeio_educativo" && (
-            <label className="flex items-start gap-3 p-3 border rounded-lg bg-azul-claro/20 cursor-pointer hover:bg-azul-claro/30">
-              <Checkbox
-                checked={draft.recebe_grupos_escolares_tea}
-                onCheckedChange={(v) => set("recebe_grupos_escolares_tea", v === true)}
-                className="mt-0.5"
-              />
-              <span className="text-sm">
-                <span className="font-medium">Recebe grupos escolares com alunos TEA</span>
-                <span className="block text-xs text-muted-foreground mt-0.5">
-                  Se marcado, exibimos um selo discreto na sua ficha pública para famílias e
-                  escolas.
-                </span>
-              </span>
-            </label>
-          )}
-        </Secao>
-
-        <Secao titulo="2. Estrutura física">
-          <p className="text-sm text-muted-foreground -mt-2">Marque o que o local já possui.</p>
-          <div className="grid sm:grid-cols-2 gap-2">
-            {ESTRUTURA_ITEMS.map(([k, label]) => (
-              <label
-                key={k}
-                className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm cursor-pointer hover:bg-azul-claro/30"
-              >
-                <Checkbox checked={!!draft.estrutura[k]} onCheckedChange={() => togEstrutura(k)} />
-                <span>{label}</span>
-              </label>
-            ))}
-          </div>
-        </Secao>
-
-        <Secao titulo="3. Disponibilidade para certificação">
-          <Field label="Já tem iniciativa de inclusão para autistas?">
-            <RadioList
-              name="iniciativa"
-              value={draft.iniciativa_atual}
-              onChange={(v) => set("iniciativa_atual", v)}
-              options={[
-                ["estruturado", "Sim, temos algo estruturado"],
-                ["informal", "Temos adaptações informais"],
-                ["queremos_comecar", "Ainda não, mas queremos começar"],
-                ["sem_direcao", "Não sei por onde começar"],
-              ]}
-            />
-          </Field>
-          <Field label="Quantos colaboradores passariam pela capacitação?">
-            <select
-              value={draft.num_capacitacao}
-              onChange={(e) => set("num_capacitacao", e.target.value)}
-              className="w-full sm:w-64 px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
-            >
-              <option value="">Selecione…</option>
-              {COLAB_OPTS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Melhor forma de contato">
-            <RadioList
-              name="contato"
-              value={draft.contato_preferido}
-              onChange={(v) => set("contato_preferido", v)}
-              options={[
-                ["whatsapp", "WhatsApp"],
-                ["email", "E-mail"],
-                ["ligacao", "Ligação"],
-              ]}
-              inline
-            />
-          </Field>
-          <Field label="Observações adicionais">
-            <Textarea
-              rows={3}
-              value={draft.observacoes}
-              onChange={(e) => set("observacoes", e.target.value)}
-              maxLength={1000}
-            />
-          </Field>
-        </Secao>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="ghost" onClick={onCancel} disabled={salvando}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={onSave}
-            disabled={salvando}
-            className="bg-secondary hover:bg-secondary/90 text-white"
-          >
-            {salvando ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Salvar perfil
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <Label className="text-sm font-medium text-primary">
-        {label}
-        {required && <span className="text-destructive ml-0.5">*</span>}
-      </Label>
-      <div className="mt-1.5">{children}</div>
-    </div>
-  );
-}
-
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-4">
-      <h2 className="font-display font-bold text-lg text-primary border-b pb-2">{titulo}</h2>
-      {children}
-    </section>
-  );
-}
-
-function RadioList({
-  name,
-  value,
-  onChange,
-  options,
-  inline,
-}: {
-  name: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: Array<[string, string]>;
-  inline?: boolean;
-}) {
-  return (
-    <div className={inline ? "flex flex-wrap gap-3" : "space-y-2"}>
-      {options.map(([v, label]) => (
-        <label
-          key={v}
-          className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm cursor-pointer hover:bg-azul-claro/30"
-        >
-          <input
-            type="radio"
-            name={name}
-            value={v}
-            checked={value === v}
-            onChange={() => onChange(v)}
-            className="accent-primary"
-          />
-          <span>{label}</span>
-        </label>
-      ))}
     </div>
   );
 }

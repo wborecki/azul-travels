@@ -35,6 +35,8 @@ import {
   fetchUltimasMensagensPorReservas,
   fetchContagemNaoLidasPorReservas,
   perfisSensoriaisDaReservaEstab,
+  formatPeriodoReserva,
+  reservaEhVisita,
   type ReservaEstabelecimentoRow,
   type ReservaMensagemRow,
 } from "@/lib/queries";
@@ -454,10 +456,10 @@ function ReservaInfoPainel({ reserva }: { reserva: ReservaEstabelecimentoRow }) 
 
       <section className="space-y-2.5">
         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-foreground/40">
-          Estadia
+          {reservaEhVisita(reserva) ? "Visita" : "Estadia"}
         </h4>
         <InfoRow icon={<Calendar className="h-4 w-4" />}>
-          {formatDataBr(reserva.data_checkin)} → {formatDataBr(reserva.data_checkout)}
+          {formatPeriodoReserva(reserva, formatDataBr)}
         </InfoRow>
         <InfoRow icon={<Users className="h-4 w-4" />}>
           {reserva.num_adultos ?? 0} adulto(s) · {reserva.num_autistas ?? 0} autista(s)

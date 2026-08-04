@@ -1,13 +1,14 @@
 import { describe, expectTypeOf, it } from "vitest";
 import {
   applyItensViewFilters,
+  type ItemView,
   type ItensViewFilters,
   type RecursoFlag,
   type SeloFlag,
 } from "../itens-view";
 import type { Tables } from "@/integrations/supabase/types";
 
-type ItemViewRow = Tables<"itens_reservaveis_view">;
+type ItemViewRow = Tables<"ofertas_view">;
 
 interface AnyBuilder {
   or(...args: unknown[]): unknown;
@@ -138,5 +139,38 @@ describe("ItensViewFilters - contratos de tipo (regressão)", () => {
     expectTypeOf(out).toEqualTypeOf<BrandedBuilder>();
     expectTypeOf(out).not.toBeAny();
     expectTypeOf(out).not.toBeUnknown();
+  });
+
+  // ── Os dois ramos da view (estadia e visita) ──────────────────────────────
+
+  it("a view discrimina as duas naturezas", () => {
+    expectTypeOf<ItemViewRow["natureza"]>().toEqualTypeOf<"estadia" | "visita">();
+  });
+
+  it("colunas que só existem em quarto são nulas na visita", () => {
+    // Se alguma destas voltar a ser não-nula, a UI que renderiza visita quebra
+    // em runtime sem o build reclamar - por isso o contrato mora aqui.
+    expectTypeOf<ItemViewRow["preco"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemViewRow["capacidade_total"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemViewRow["quantidade_camas"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemViewRow["quantidade"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemViewRow["check_in_padrao"]>().toEqualTypeOf<string | null>();
+    expectTypeOf<ItemViewRow["check_out_padrao"]>().toEqualTypeOf<string | null>();
+  });
+
+  it("colunas presentes nas duas naturezas seguem não-nulas", () => {
+    expectTypeOf<ItemViewRow["id"]>().toEqualTypeOf<string>();
+    expectTypeOf<ItemViewRow["item_nome"]>().toEqualTypeOf<string>();
+    expectTypeOf<ItemViewRow["comodidades"]>().toEqualTypeOf<string[]>();
+    expectTypeOf<ItemViewRow["estabelecimento_id"]>().toEqualTypeOf<string>();
+    // O slug é o destino do clique numa visita - sem ele o card não linka.
+    expectTypeOf<ItemViewRow["estabelecimento_slug"]>().toEqualTypeOf<string>();
+  });
+
+  it("ItemView espelha a nulidade da view", () => {
+    expectTypeOf<ItemView["natureza"]>().toEqualTypeOf<"estadia" | "visita">();
+    expectTypeOf<ItemView["preco"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemView["quantidade_camas"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<ItemView["imagens"]>().toEqualTypeOf<string[]>();
   });
 });

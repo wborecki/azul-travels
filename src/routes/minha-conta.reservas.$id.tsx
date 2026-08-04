@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   fetchReservaDaFamiliaPorId,
+  formatPeriodoReserva,
   perfisDaReserva,
+  reservaEhVisita,
   type ReservaComContexto,
 } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
@@ -92,6 +94,7 @@ function ReservaDetalhe() {
 
   const estab = reserva.estabelecimentos;
   const item = reserva.itens_reservaveis;
+  const ehVisita = reservaEhVisita(reserva);
   // Endereço do quarto quando ele tem endereço próprio; senão, o do estabelecimento.
   const cidade = (item?.usa_endereco_proprio ? item.cidade : null) ?? estab?.cidade;
   const estado = (item?.usa_endereco_proprio ? item.estado : null) ?? estab?.estado;
@@ -124,6 +127,35 @@ function ReservaDetalhe() {
           </p>
         )}
       </div>
+
+      {/* Numa visita não há item: quem ilustra a reserva é o próprio local. */}
+      {ehVisita && estab && (
+        <div className="bg-white border rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="font-display font-bold text-primary">Onde você vai</h2>
+            <Link
+              to="/estabelecimento/$slug"
+              params={{ slug: estab.slug }}
+              className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+            >
+              <ExternalLink className="h-3 w-3" /> Ver página do local
+            </Link>
+          </div>
+
+          <ItemReservadoFotos
+            imagens={estab.foto_capa ? [estab.foto_capa] : []}
+            titulo={estab.nome}
+            alturaClassName="h-56"
+          />
+
+          {(estab.endereco || cidade) && (
+            <p className="inline-flex items-center gap-1.5 text-sm text-foreground/70">
+              <MapPin className="h-4 w-4" />
+              {estab.endereco ?? [cidade, estado].filter(Boolean).join(", ")}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* O que foi reservado */}
       {item && (
@@ -218,11 +250,16 @@ function ReservaDetalhe() {
       )}
 
       <div className="bg-white border rounded-2xl p-5 space-y-2">
-        <h2 className="font-display font-bold text-primary">Datas</h2>
+        <h2 className="font-display font-bold text-primary">{ehVisita ? "Quando" : "Datas"}</h2>
         <p className="text-sm">
-          {reserva.data_checkin ? formatDateBR(reserva.data_checkin) : "-"} →{" "}
-          {reserva.data_checkout ? formatDateBR(reserva.data_checkout) : "-"}
+          {formatPeriodoReserva(reserva, (d) => (d ? formatDateBR(d) : "-"))}
         </p>
+        {ehVisita && (
+          <p className="text-xs text-foreground/60">
+            {reserva.num_adultos ?? 1} adulto(s)
+            {reserva.num_acompanhantes ? `, ${reserva.num_acompanhantes} criança(s)` : ""}
+          </p>
+        )}
       </div>
 
       {reserva.objetivo && (
@@ -234,7 +271,9 @@ function ReservaDetalhe() {
 
       {reserva.mensagem && (
         <div className="bg-white border rounded-2xl p-5">
-          <h2 className="font-display font-bold text-primary">Notas desta estadia</h2>
+          <h2 className="font-display font-bold text-primary">
+            {ehVisita ? "Notas desta visita" : "Notas desta estadia"}
+          </h2>
           <p className="text-sm mt-1 text-foreground/90 whitespace-pre-line">
             {reserva.mensagem}
           </p>

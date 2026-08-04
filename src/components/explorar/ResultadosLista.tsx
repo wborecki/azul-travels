@@ -47,15 +47,15 @@ export function ResultadosLista({
       <p className="text-sm text-muted-foreground" aria-live="polite">
         {loading && !pageData ? (
           <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" /> Buscando quartos…
+            <Loader2 className="h-4 w-4 animate-spin" /> Buscando…
           </span>
         ) : total > 0 ? (
           <>
-            <strong>{total}</strong> quarto{total === 1 ? "" : "s"}{" "}
-            {areaAtiva ? "dentro da área do mapa" : "encontrado" + (total === 1 ? "" : "s")}
+            <strong>{total}</strong> opç{total === 1 ? "ão" : "ões"}{" "}
+            {areaAtiva ? "dentro da área do mapa" : "encontrad" + (total === 1 ? "a" : "as")}
           </>
         ) : (
-          "Nenhum quarto encontrado"
+          "Nenhuma opção encontrada"
         )}
       </p>
 
@@ -120,7 +120,7 @@ function ErroBusca({ onTentarNovamente }: { onTentarNovamente: () => void }) {
   return (
     <div className="py-16 text-center">
       <p className="text-sm text-muted-foreground">
-        Não foi possível carregar os quartos. Verifique sua conexão.
+        Não foi possível carregar os resultados. Verifique sua conexão.
       </p>
       <Button variant="outline" className="mt-4" onClick={onTentarNovamente}>
         Tentar novamente
@@ -157,8 +157,8 @@ function EstadoVazio({ temFiltros, onLimpar }: { temFiltros: boolean; onLimpar: 
       </div>
       <h2 className="mt-4 text-xl font-display font-bold text-primary">
         {temFiltros
-          ? "Nenhum quarto encontrado com esses filtros."
-          : "Ainda não temos quartos cadastrados."}
+          ? "Nenhuma opção encontrada com esses filtros."
+          : "Ainda não temos lugares cadastrados."}
       </h2>
       {temFiltros ? (
         <>
