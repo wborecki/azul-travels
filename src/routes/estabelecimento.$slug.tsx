@@ -23,6 +23,8 @@ import { PerfisTeaAvatares } from "@/components/reserva/PerfisTeaDaReserva";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
+import { QuartoMapa } from "@/components/estabelecimento/QuartoMapa";
+import { SeloAzul3D } from "@/components/estabelecimento/SeloAzul3D";
 import { Pill, SELO_BADGES } from "@/components/Badges";
 import {
   PerfilSensorialForm,
@@ -31,7 +33,6 @@ import {
 } from "@/components/PerfilSensorialForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -56,13 +57,25 @@ import { RESERVA_STATUS_LABEL, naturezaDaReserva, type ReservaStatus } from "@/l
 import { RECURSOS_TEA } from "@/lib/recursos-tea";
 import { estruturaAtiva } from "@/lib/estrutura-tea";
 import {
+  detalhesPreenchidos,
+  formatarDetalhe,
+  horarioMenorMovimento,
+  type DetalhePreenchido,
+  type Detalhes,
+} from "@/lib/detalhes-estabelecimento";
+import {
+  AlertCircle,
   BadgeCheck,
+  Building2,
   Camera,
+  ExternalLink,
+  FileText,
+  Heart,
   MapPin,
+  ShieldCheck,
+  Sparkles,
   Gift,
   Star,
-  Minus,
-  Plus,
   Loader2,
   CheckCircle2,
   Clock,
@@ -207,11 +220,10 @@ function EstabPage() {
   // Hospedagem se reserva escolhendo um quarto; o resto se reserva direto no
   // local, com dia e horário.
   const ehVisita = !!e && naturezaDaReserva(e.tipo) === "visita";
-  // O Selo Azul sempre foi o gate da reserva: a RLS de `itens_reservaveis` só
-  // expõe itens de local ativo e com selo, então nunca houve reserva fora
-  // disso. Como a visita não passa por item, a regra precisa ser dita aqui -
-  // a trigger recusa o insert com ESTAB_SEM_SELO_ATIVO de qualquer forma.
-  const aceitaPedidoDeVisita = ehVisita && !!e?.selo_azul && e.status === "ativo";
+  // O gate da reserva é o local estar ativo - o Selo Azul destaca na busca,
+  // mas não decide mais quem recebe pedido. A trigger recusa o insert com
+  // ESTAB_INATIVO de qualquer forma.
+  const aceitaPedidoDeVisita = ehVisita && e?.status === "ativo";
 
   // Cálculo das médias (geral + sub-categorias)
   const stats = useMemo(() => {
@@ -286,7 +298,15 @@ function EstabPage() {
   // Só as chaves da categoria do local: um restaurante não exibe item de quarto,
   // mesmo que a chave tenha sobrado no jsonb de antes da separação por categoria.
   const estruturaAtivos = estruturaAtiva(e.tipo, (e.estrutura ?? {}) as Record<string, boolean>);
+  // Campos da categoria (jsonb `detalhes`), lidos pela declaração e não por
+  // chave literal - acrescentar um campo não passa por esta tela.
+  const detalhes = detalhesPreenchidos(e.tipo, (e.detalhes ?? {}) as Detalhes);
+  const horarioCalmo = horarioMenorMovimento(e.tipo, (e.detalhes ?? {}) as Detalhes);
   const temBeneficio = e.tem_beneficio_tea && e.beneficio_tea_descricao;
+
+  const cidadeUf = `${e.cidade}, ${e.estado}`;
+  const enderecoMapa = e.endereco ? `${e.endereco} · ${cidadeUf}` : cidadeUf;
+  const temMapa = e.latitude !== null && e.longitude !== null;
 
   const handleAdicionarPerfil = async () => {
     if (!user) return;
@@ -315,11 +335,28 @@ function EstabPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      {/* SEÇÃO 1 · Galeria full-width + header */}
-      <div className="relative w-full bg-muted" style={{ height: 420 }}>
+      {/* SEÇÃO 1 · Galeria full-width + header.
+          Sem foto a faixa encolhe: 420px de cinza vazio empurravam a página
+          inteira para baixo da dobra sem informar nada. Restaurantes e passeios
+          são o caso comum aqui - entraram na vitrine antes de o dono ter como
+          subir foto (ver migration 20260804140000). */}
+      <div
+        className="relative w-full bg-muted"
+        style={{ height: galeria.length === 0 ? 200 : 420 }}
+      >
         {galeria.length === 0 ? (
-          <div className="w-full h-full grid place-items-center text-muted-foreground">
-            Sem foto disponível
+          <div
+            className="grid h-full w-full place-items-center"
+            style={{
+              background:
+                "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+            }}
+          >
+            <div className="rounded-2xl bg-background/90 px-6 py-4 text-center shadow-lg backdrop-blur">
+              <Images className="mx-auto h-5 w-5 text-muted-foreground" />
+              <p className="mt-2 text-sm font-semibold text-primary">{e.nome}</p>
+              <p className="text-xs text-muted-foreground">Fotos em breve</p>
+            </div>
           </div>
         ) : (
           <div className="flex h-full w-full gap-1">
@@ -403,25 +440,41 @@ function EstabPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8 flex-1">
-        {/* Header textual */}
+        {/* Header textual. Uma linha só de metadados (tipo · nota · cidade ·
+            atalho para o mapa): três linhas empilhadas empurravam o conteúdo
+            para baixo sem densidade nenhuma. */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-primary tracking-tight">{e.nome}</h1>
-          <p className="mt-2 text-muted-foreground flex items-center gap-2 flex-wrap">
-            <span className="font-medium">{TIPO_LABEL[e.tipo]}</span>
-            <span>·</span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{TIPO_LABEL[e.tipo]}</span>
+            {stats.total > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-4 w-4 text-amarelo fill-amarelo" />
+                  <span className="font-semibold text-foreground">{stats.geral.toFixed(1)}</span>
+                  <span>
+                    ({stats.total} {stats.total === 1 ? "avaliação" : "avaliações"})
+                  </span>
+                </span>
+              </>
+            )}
+            <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-4 w-4" /> {e.cidade}, {e.estado}
             </span>
-          </p>
-          {stats.total > 0 && (
-            <div className="mt-2 flex items-center gap-1 text-sm">
-              <Star className="h-4 w-4 text-amarelo fill-amarelo" />
-              <span className="font-semibold">{stats.geral.toFixed(1)}</span>
-              <span className="text-muted-foreground">
-                ({stats.total} {stats.total === 1 ? "avaliação" : "avaliações"})
-              </span>
-            </div>
-          )}
+            {temMapa && (
+              <>
+                <span aria-hidden>·</span>
+                <a
+                  href="#localizacao"
+                  className="font-semibold text-secondary underline-offset-2 hover:underline"
+                >
+                  Ver no mapa
+                </a>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Benefício TEA · caixa verde com ícone */}
@@ -467,15 +520,59 @@ function EstabPage() {
               </section>
             )}
 
-            {/* Sobre o local para famílias TEA */}
-            <section>
-              <h2 className="text-xl font-bold text-primary mb-3">
-                Sobre o local para famílias TEA
-              </h2>
-              <p className="text-foreground leading-relaxed whitespace-pre-line">
-                {e.descricao_tea || e.descricao || "Sem descrição disponível."}
-              </p>
-            </section>
+            {/* Descrição. As duas são campos distintos e independentes: uma
+                apresenta o local, a outra conta o que ele faz por famílias
+                atípicas. Antes um `||` fazia a segunda esconder a primeira, e
+                quem preenchia as duas só via uma. */}
+            {(e.descricao || e.descricao_tea) && (
+              <section className="space-y-6">
+                {e.descricao && (
+                  <div>
+                    <h2 className="text-xl font-bold text-primary mb-3">Sobre o local</h2>
+                    <p className="text-foreground leading-relaxed whitespace-pre-line">
+                      {e.descricao}
+                    </p>
+                  </div>
+                )}
+
+                {e.descricao_tea && (
+                  <div className="rounded-2xl border border-secondary/25 bg-azul-claro/30 p-5">
+                    <h2 className="flex items-center gap-2 text-lg font-bold text-primary mb-2">
+                      <Heart className="h-4 w-4 text-secondary" /> O que fazemos por famílias
+                      atípicas
+                    </h2>
+                    <p className="text-foreground leading-relaxed whitespace-pre-line">
+                      {e.descricao_tea}
+                    </p>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Informações práticas - os campos declarados para a categoria.
+                Ficam antes de "O que este local oferece" porque respondem o que
+                a família precisa decidir primeiro: o cardápio, quanto tempo
+                dura, se precisa comprar ingresso antes.
+
+                Cards lado a lado, e cada tipo com o seu tratamento (ver
+                `DetalheCard`) - em linhas empilhadas os três viravam texto
+                pequeno de peso igual, e um deles nem era informação: era um
+                botão disfarçado de linha. */}
+            {detalhes.length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-primary mb-3">Bom saber</h2>
+                <div
+                  className={cn(
+                    "grid gap-3 sm:grid-cols-2",
+                    detalhes.length % 3 === 0 && "lg:grid-cols-3",
+                  )}
+                >
+                  {detalhes.map((d) => (
+                    <DetalheCard key={d.campo.key} campo={d.campo} valor={d.valor} />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* O que este local oferece.
                 Dois grupos, porque as duas listas têm peso diferente: os
@@ -483,95 +580,134 @@ function EstabPage() {
                 Selo Azul ativo (ver migration 20260804150000); a estrutura é
                 declaração do próprio dono. Exibi-las com a mesma cara faria a
                 família ler como auditado o que ninguém auditou. */}
-            <section>
-              <h2 className="text-xl font-bold text-primary mb-3">O que este local oferece</h2>
-              {recursosAtivos.length === 0 && estruturaAtivos.length === 0 && !tour360Url ? (
+            {recursosAtivos.length === 0 && estruturaAtivos.length === 0 && !tour360Url && (
+              <section>
+                <h2 className="text-xl font-bold text-primary mb-3">O que este local oferece</h2>
                 <p className="text-sm text-muted-foreground bg-muted/40 rounded-xl p-4">
                   Este estabelecimento ainda não informou seus recursos detalhados.
                 </p>
-              ) : (
-                <div className="space-y-6">
-                  {recursosAtivos.length > 0 && (
-                    <div>
-                      <h3 className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold text-secondary">
-                        <BadgeCheck className="h-4 w-4" /> Verificado pela nossa equipe
-                      </h3>
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        {recursosAtivos.map((r) => (
-                          <div
-                            key={r.key}
-                            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
-                          >
-                            <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
-                              <r.icon className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium text-foreground">{r.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              </section>
+            )}
 
-                  {(estruturaAtivos.length > 0 || tour360Url) && (
-                    <div>
-                      <h3 className="mb-2.5 text-sm font-semibold text-foreground/70">
-                        Informado pelo local
-                      </h3>
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        {estruturaAtivos.map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30"
-                          >
-                            <div className="h-9 w-9 rounded-lg bg-muted text-foreground/70 grid place-items-center shrink-0">
-                              <item.icon className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium text-foreground">{item.label}</span>
-                          </div>
-                        ))}
-                        {tour360Url && (
-                          <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
-                            <div className="h-9 w-9 rounded-lg bg-amarelo/20 text-amarelo-foreground grid place-items-center shrink-0">
-                              <Camera className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm font-medium text-foreground">
-                              Tour 360° disponível
-                            </span>
-                          </div>
-                        )}
+            {/* Acolhimento verificado. Mesma moldura de `/quartos/$id`
+                (`RecursosTeaSecao`): borda secundária e faixa clara. */}
+            {recursosAtivos.length > 0 && (
+              <section className="rounded-2xl border border-secondary/20 bg-secondary/[0.04] p-5 sm:p-6">
+                <h2 className="text-xl font-bold text-primary mb-1 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-secondary" /> Acolhimento para famílias TEA
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5 flex items-center gap-1.5">
+                  <BadgeCheck className="h-4 w-4 text-secondary shrink-0" />
+                  Verificado pela nossa equipe na visita ao local.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {recursosAtivos.map((r) => (
+                    <div
+                      key={r.key}
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
+                    >
+                      <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
+                        <r.icon className="h-4 w-4" />
                       </div>
+                      <span className="text-sm font-medium text-foreground">{r.label}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
-              )}
-            </section>
+              </section>
+            )}
 
-            {/* Selos e Certificações */}
+            {/* Estrutura informada pelo dono. Mesma moldura de arco-íris de
+                `/quartos/$id` (`EstruturaEstabelecimentoSecao`) - a paleta do
+                espectro é a temática da casa, e as duas páginas mostram o mesmo
+                dado, então mostram do mesmo jeito. */}
+            {(estruturaAtivos.length > 0 || tour360Url) && (
+              <section
+                className="rounded-2xl p-[2px]"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)",
+                }}
+              >
+                <div className="rounded-2xl p-5 sm:p-6 bg-background/95">
+                  <h2 className="text-lg font-bold text-primary mb-1 flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-secondary" /> Sobre o estabelecimento
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Estrutura que {e.nome} informa oferecer para famílias autistas.
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {estruturaAtivos.map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-border bg-background"
+                      >
+                        <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{item.label}</span>
+                      </div>
+                    ))}
+                    {tour360Url && (
+                      <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-background">
+                        <div className="h-9 w-9 rounded-lg bg-amarelo/20 text-amarelo-foreground grid place-items-center shrink-0">
+                          <Camera className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">
+                          Tour 360° disponível
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Selos e Certificações. Com Selo Azul a arte oficial vira o
+                assunto da seção - é a coisa mais forte que a página tem a
+                dizer, e virava uma linha de texto. Os demais certificados
+                seguem como cards, que é o peso que eles têm. */}
             {(e.selo_azul || e.selo_governamental || e.selo_privado) && (
               <section>
-                <h2 className="text-xl font-bold text-primary mb-3">Selos e Certificações</h2>
-                <ul className="space-y-2 text-sm">
-                  {e.selo_azul && (
-                    <li className="flex justify-between py-2 border-b border-border">
-                      <span className="font-semibold">Selo Azul</span>
-                      {e.selo_azul_validade && (
-                        <span className="text-muted-foreground">
-                          Válido até {formatDateBR(e.selo_azul_validade)}
-                        </span>
-                      )}
-                    </li>
-                  )}
+                <h2 className="text-xl font-bold text-primary mb-3">Selos e certificações</h2>
+
+                {e.selo_azul && (
+                  <div className="mb-3 flex flex-col gap-6 sm:flex-row sm:items-center">
+                    <SeloAzul3D className="w-36 shrink-0 self-center sm:w-44 sm:self-auto" />
+                    <div className="min-w-0">
+                      <p className="font-display text-lg font-bold text-primary">Selo Azul</p>
+                      <p className="text-sm font-medium text-secondary">
+                        {e.selo_azul_validade
+                          ? `Válido até ${formatDateBR(e.selo_azul_validade)}`
+                          : "Certificação ativa"}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-foreground/75">
+                        Nossa equipe visitou {e.nome}, avaliou a estrutura e capacitou a equipe. É o
+                        que separa um local que diz acolher de um que foi verificado.
+                      </p>
+                      <Link
+                        to="/como-funciona-o-selo-azul"
+                        className="mt-2 inline-block text-sm font-semibold text-secondary underline-offset-2 hover:underline"
+                      >
+                        Como funciona o Selo Azul
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid gap-3 sm:grid-cols-2">
                   {e.selo_governamental && (
-                    <li className="py-2 border-b border-border font-semibold">
-                      Certificado Governamental
-                    </li>
+                    <SeloCard
+                      titulo="Certificado governamental"
+                      detalhe="Emitido por órgão público"
+                    />
                   )}
                   {e.selo_privado && (
-                    <li className="py-2 border-b border-border font-semibold">
-                      {e.selo_privado_nome || "Selo Privado"}
-                    </li>
+                    <SeloCard
+                      titulo={e.selo_privado_nome || "Selo privado"}
+                      detalhe="Certificação de terceiros"
+                    />
                   )}
-                </ul>
+                </div>
               </section>
             )}
 
@@ -582,9 +718,7 @@ function EstabPage() {
               {stats.total > 0 ? (
                 <div className="bg-card border border-border rounded-2xl p-6 mb-4">
                   <div className="flex items-center gap-4 mb-5">
-                    <div className="text-4xl font-bold text-primary">
-                      {stats.geral.toFixed(1)}
-                    </div>
+                    <div className="text-4xl font-bold text-primary">{stats.geral.toFixed(1)}</div>
                     <div>
                       <div className="flex text-amarelo">
                         {Array.from({ length: 5 }).map((_, i) => (
@@ -614,9 +748,15 @@ function EstabPage() {
               )}
 
               {/* Reusa o componente existente para listar as cards de avaliação */}
-              {stats.total > 0 && (
-                <AvaliacoesPublicasSection estabelecimentoId={e.id} titulo="" />
-              )}
+              {stats.total > 0 && <AvaliacoesPublicasSection estabelecimentoId={e.id} titulo="" />}
+            </section>
+
+            {/* Onde fica. Mesmo componente e mesma posição de `/quartos/$id` -
+                a página do estabelecimento tinha o endereço só como texto no
+                cabeçalho, e um restaurante se escolhe também pelo trajeto. */}
+            <section id="localizacao" className="scroll-mt-24">
+              <h2 className="text-xl font-bold text-primary mb-3">Onde fica</h2>
+              <QuartoMapa latitude={e.latitude} longitude={e.longitude} local={enderecoMapa} />
             </section>
           </div>
 
@@ -624,7 +764,7 @@ function EstabPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
             {ehVisita ? (
               aceitaPedidoDeVisita ? (
-                <PedidoVisitaCard estabelecimentoId={e.id} />
+                <PedidoVisitaCard estabelecimentoId={e.id} horarioCalmo={horarioCalmo} />
               ) : (
                 <div className="bg-card rounded-2xl border border-border shadow-lg p-6 space-y-3">
                   <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
@@ -684,10 +824,7 @@ function EstabPage() {
 
             {/* Histórico desta família neste estabelecimento */}
             {user && reservasFamilia.length > 0 && (
-              <HistoricoReservasCard
-                reservas={reservasFamilia}
-                destacarId={reservaRecemCriadaId}
-              />
+              <HistoricoReservasCard reservas={reservasFamilia} destacarId={reservaRecemCriadaId} />
             )}
           </aside>
         </div>
@@ -700,8 +837,7 @@ function EstabPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Adicionar novo perfil sensorial</DialogTitle>
-            <DialogDescription>
-                        </DialogDescription>
+            <DialogDescription></DialogDescription>
           </DialogHeader>
           <PerfilSensorialForm
             draft={novoPerfil}
@@ -751,7 +887,8 @@ function EstabPage() {
               Tour 360° · {e.nome}
             </DialogTitle>
             <DialogDescription>
-              Explore os ambientes do estabelecimento sem sair da página. Use o mouse ou o toque para navegar.
+              Explore os ambientes do estabelecimento sem sair da página. Use o mouse ou o toque
+              para navegar.
             </DialogDescription>
           </DialogHeader>
           <div className="relative w-full bg-black" style={{ aspectRatio: "16 / 9" }}>
@@ -789,6 +926,126 @@ function EstabPage() {
   );
 }
 
+/**
+ * Um campo de `detalhes` como card, com o tratamento decidido pelo `tipo`
+ * declarado - e não pela chave.
+ *
+ * É o que faz a seção valer para qualquer categoria sem tocar nesta tela: um
+ * número novo em passeios nasce com a mesma cara de número, e um arquivo novo
+ * nasce como botão. Os três tratamentos existem porque as informações não são
+ * do mesmo tipo: o cardápio é uma **ação** (leva a outro lugar), a duração e a
+ * espera são **medidas** (o valor é o assunto), o resto é texto.
+ */
+function DetalheCard({ campo, valor }: DetalhePreenchido) {
+  const base = "flex flex-col rounded-2xl border border-border bg-card p-5";
+  const cabecalho = (
+    <>
+      <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-secondary/10 text-secondary">
+        <campo.icon className="h-5 w-5" />
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {campo.label}
+      </p>
+    </>
+  );
+
+  // Ação: o único item que leva para fora da página merece peso de botão.
+  if (campo.tipo === "arquivo") {
+    return (
+      <div className={base}>
+        {cabecalho}
+        <p className="mt-1 text-sm text-foreground/70">Dá para conferir antes de reservar.</p>
+        <Button
+          asChild
+          className="mt-4 w-full bg-secondary text-white hover:bg-secondary/90"
+          size="sm"
+        >
+          <a href={String(valor)} target="_blank" rel="noreferrer">
+            <FileText className="mr-1.5 h-4 w-4" />
+            Ver {campo.label.toLowerCase()}
+            <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+          </a>
+        </Button>
+      </div>
+    );
+  }
+
+  // Medida: o valor é o assunto, então ele é que fica grande.
+  if (campo.tipo === "numero" || campo.tipo === "hora") {
+    return (
+      <div className={base}>
+        {cabecalho}
+        <p className="mt-2 flex items-baseline gap-1.5">
+          <span className="font-display text-3xl font-bold leading-none text-primary tabular-nums">
+            {campo.tipo === "numero" ? valor : formatarDetalhe(campo, valor)}
+          </span>
+          {campo.tipo === "numero" && (
+            <span className="text-sm font-medium text-muted-foreground">{campo.unidade}</span>
+          )}
+        </p>
+      </div>
+    );
+  }
+
+  if (campo.tipo === "booleano") {
+    return (
+      <div className={base}>
+        {cabecalho}
+        <p
+          className={cn(
+            "mt-2 inline-flex items-center gap-1.5 text-sm font-semibold",
+            valor ? "text-amarelo-foreground" : "text-success",
+          )}
+        >
+          {valor ? <AlertCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+          {formatarDetalhe(campo, valor)}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={base}>
+      {cabecalho}
+      <p className="mt-2 text-sm font-medium leading-relaxed text-foreground">
+        {formatarDetalhe(campo, valor)}
+      </p>
+    </div>
+  );
+}
+
+function SeloCard({
+  titulo,
+  detalhe,
+  destaque,
+}: {
+  titulo: string;
+  detalhe: string;
+  destaque?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-xl border p-3",
+        destaque ? "border-secondary/30 bg-azul-claro/30" : "border-border bg-card",
+      )}
+    >
+      <div
+        className={cn(
+          "grid h-9 w-9 shrink-0 place-items-center rounded-lg",
+          destaque ? "bg-secondary/15 text-secondary" : "bg-primary/10 text-primary",
+        )}
+      >
+        <ShieldCheck className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-foreground">{titulo}</p>
+        <p className="text-xs text-muted-foreground">{detalhe}</p>
+      </div>
+    </div>
+  );
+}
+
 function SubMedia({ label, valor }: { label: string; valor: number }) {
   const pct = (valor / 5) * 100;
   return (
@@ -798,47 +1055,6 @@ function SubMedia({ label, valor }: { label: string; valor: number }) {
         <span className="text-muted-foreground font-medium">{valor.toFixed(1)}</span>
       </div>
       <Progress value={pct} className="h-2" />
-    </div>
-  );
-}
-
-function Stepper({
-  label,
-  value,
-  onChange,
-  min,
-  max,
-}: {
-  label: string;
-  value: number;
-  onChange: (n: number) => void;
-  min: number;
-  max: number;
-}) {
-  return (
-    <div>
-      <Label>{label}</Label>
-      <div className="mt-1.5 flex items-center border border-input rounded-md h-9">
-        <button
-          type="button"
-          onClick={() => onChange(Math.max(min, value - 1))}
-          disabled={value <= min}
-          className="h-full px-2 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-          aria-label={`Diminuir ${label}`}
-        >
-          <Minus className="h-3.5 w-3.5" />
-        </button>
-        <div className="flex-1 text-center text-sm font-semibold tabular-nums">{value}</div>
-        <button
-          type="button"
-          onClick={() => onChange(Math.min(max, value + 1))}
-          disabled={value >= max}
-          className="h-full px-2 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-          aria-label={`Aumentar ${label}`}
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
-      </div>
     </div>
   );
 }

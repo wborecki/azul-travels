@@ -1,4 +1,4 @@
-import { describe, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   applyItensViewFilters,
   type ItemView,
@@ -173,4 +173,36 @@ describe("ItensViewFilters - contratos de tipo (regressão)", () => {
     expectTypeOf<ItemView["quantidade_camas"]>().toEqualTypeOf<number | null>();
     expectTypeOf<ItemView["imagens"]>().toEqualTypeOf<string[]>();
   });
+});
+
+// A vitrine deixou de filtrar por Selo Azul (ver a migration
+// 20260810120000): o selo virou destaque, e o destaque só existe se ele for a
+// primeira chave de ordenação. Se alguém acrescentar um `.order` antes deste,
+// o local certificado afunda no meio da grade sem nada quebrar - por isso a
+// posição está travada aqui.
+describe("applyItensViewFilters - ranking do Selo Azul (regressão)", () => {
+  function builderQueGravaOrder() {
+    const chamadas: Array<[unknown, unknown]> = [];
+    const stub: Record<string, (...args: unknown[]) => unknown> = {};
+    for (const m of ["eq", "in", "or", "not", "limit", "range", "gte", "lte"] as const) {
+      stub[m] = () => stub;
+    }
+    stub.order = (coluna, opcoes) => {
+      chamadas.push([coluna, opcoes]);
+      return stub;
+    };
+    return { builder: stub as unknown as AnyBuilder, chamadas };
+  }
+
+  it.each(["preco_asc", "preco_desc", "avaliacao", undefined] as const)(
+    "ordena por selo_azul antes do critério %s",
+    (ordenacao) => {
+      const { builder, chamadas } = builderQueGravaOrder();
+      applyItensViewFilters(builder, { ordenacao });
+
+      expect(chamadas[0]).toEqual(["selo_azul", { ascending: false, nullsFirst: false }]);
+      // O critério escolhido continua sendo aplicado depois do selo.
+      expect(chamadas.length).toBeGreaterThan(1);
+    },
+  );
 });

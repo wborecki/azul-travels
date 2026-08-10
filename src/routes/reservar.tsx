@@ -282,17 +282,13 @@ function ReservarPage() {
     );
   }
 
-  // O Selo Azul é o gate da reserva em toda a plataforma - na hospedagem ele
-  // vinha de graça pela RLS de `itens_reservaveis`. A visita precisa dizer a
-  // regra; a trigger recusa com ESTAB_SEM_SELO_ATIVO de qualquer forma, mas
-  // barrar aqui evita a família preencher tudo para levar um erro no fim.
-  if (ehVisita && (!estab.selo_azul || estab.status !== "ativo")) {
+  if (ehVisita && estab.status !== "ativo") {
     return (
       <div className="container mx-auto px-4 py-16 text-center max-w-lg">
         <h1 className="text-2xl font-bold text-primary">Reserva indisponível</h1>
         <p className="mt-2 text-muted-foreground">
-          {estab.nome} ainda não tem o Selo Azul, então não recebe pedidos de reserva pela
-          plataforma. Na página do local você encontra os canais de contato direto.
+          {estab.nome} não está recebendo pedidos de reserva pela plataforma no momento. Na página
+          do local você encontra os canais de contato direto.
         </p>
         <Button asChild className="mt-4">
           <Link to="/estabelecimento/$slug" params={{ slug: estab.slug }}>

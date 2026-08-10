@@ -170,6 +170,8 @@ export function applyItensViewFilters<Q extends AnyItemViewBuilder>(
   for (const s of filters.selos ?? []) q = q.eq(s, true) as Q;
   for (const r of filters.recursos ?? []) q = q.eq(r, true) as Q;
 
+  q = q.order("selo_azul", { ascending: false, nullsFirst: false }) as Q;
+
   // `nullsFirst: false` em toda ordenação por preço: visita não tem preço, e
   // sem isso o DESC jogaria todos os restaurantes para o topo da lista.
   if (filters.ordenacao === "preco_desc") {

@@ -1,5 +1,20 @@
-import { Building2, Images, Phone, ShieldCheck, Sparkles, Text, type LucideIcon } from "lucide-react";
+import {
+  Building2,
+  Images,
+  Layers,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  Text,
+  type LucideIcon,
+} from "lucide-react";
 import { estruturaDoTipo, type EstruturaItem } from "@/lib/estrutura-tea";
+import {
+  detalhesDoTipo,
+  detalhesPreenchidos,
+  type CampoDetalhe,
+  type Detalhes,
+} from "@/lib/detalhes-estabelecimento";
 import { isEstabTipo } from "@/lib/enums";
 import type { RecursoTeaKey } from "@/lib/recursos-tea";
 
@@ -22,6 +37,7 @@ export type SecaoId =
   | "fotos"
   | "contato"
   | "acolhimento"
+  | "detalhes"
   | "certificacao";
 
 export type Estrutura = Record<string, boolean>;
@@ -46,6 +62,8 @@ export interface PerfilDraft {
   /** Galeria pública. A posição 0 é a capa. */
   fotos: string[];
   estrutura: Estrutura;
+  /** Campos da categoria (jsonb `estabelecimentos.detalhes`). */
+  detalhes: Detalhes;
   /** Colunas filtráveis - só editáveis com Selo Azul ativo. */
   recursos: RecursosTea;
   tem_beneficio_tea: boolean;
@@ -83,6 +101,7 @@ export const EMPTY_DRAFT: PerfilDraft = {
   recebe_grupos_escolares_tea: false,
   fotos: [],
   estrutura: {},
+  detalhes: {},
   recursos: { ...RECURSOS_VAZIOS },
   tem_beneficio_tea: false,
   beneficio_tea_descricao: "",
@@ -111,18 +130,27 @@ export interface SecaoInfo {
   id: SecaoId;
   label: string;
   icon: LucideIcon;
-  /** O que a seção é, em uma linha - vira o subtítulo do cabeçalho. */
   ajuda: string;
-  /** Valor atual, mostrado no rail para o dono não precisar abrir a seção. */
   resumo: (d: PerfilDraft) => string;
   pendente: (d: PerfilDraft) => boolean;
-  /** Campos do rascunho - usados para detectar alteração não salva. */
   campos: ReadonlyArray<keyof PerfilDraft>;
-  /**
-   * Seções que gravam em `estabelecimentos` só funcionam depois que a linha
-   * existe, e ela nasce no primeiro salvamento de "Identidade".
-   */
+
   exigeEstab: boolean;
+  aplicavel?: (d: PerfilDraft) => boolean;
+}
+
+/** As seções que valem para este rascunho - o que o rail lista e o progresso conta. */
+export function secoesAplicaveis(d: PerfilDraft): SecaoInfo[] {
+  return SECOES.filter((s) => s.aplicavel?.(d) ?? true);
+}
+
+/** Campos da categoria do local. Vazio enquanto o tipo não estiver escolhido. */
+export function detalhesDoDraft(d: PerfilDraft): readonly CampoDetalhe[] {
+  return isEstabTipo(d.tipo) ? detalhesDoTipo(d.tipo) : [];
+}
+
+function contaDetalhes(d: PerfilDraft): number {
+  return isEstabTipo(d.tipo) ? detalhesPreenchidos(d.tipo, d.detalhes).length : 0;
 }
 
 /**
@@ -218,6 +246,20 @@ export const SECOES: readonly SecaoInfo[] = [
       "recebe_grupos_escolares_tea",
     ],
     exigeEstab: true,
+  },
+  {
+    id: "detalhes",
+    label: "Sobre o seu tipo de local",
+    icon: Layers,
+    ajuda: "Os dados que só fazem sentido para quem é como você - e que a família procura antes de marcar.",
+    resumo: (d) => {
+      const total = detalhesDoDraft(d).length;
+      return total === 0 ? "Nada a preencher" : `${contaDetalhes(d)} de ${total} campos`;
+    },
+    pendente: (d) => detalhesDoDraft(d).length > 0 && contaDetalhes(d) === 0,
+    campos: ["detalhes"],
+    exigeEstab: true,
+    aplicavel: (d) => detalhesDoDraft(d).length > 0,
   },
   {
     id: "certificacao",

@@ -35,8 +35,11 @@ export function ItemCard({ item, dataIn, dataOut, adultos, criancas }: ItemCardP
   const recursosVisiveis = recursosAtivos.slice(0, MAX_RECURSOS_VISIVEIS);
   const recursosOcultos = recursosAtivos.length - recursosVisiveis.length;
 
-  const classeCartao =
-    "group relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition";
+  // A grade mistura local com e sem Selo Azul. A pill sozinha some no meio das
+  // fotos - a moldura é o que faz o cartão selado se destacar na varredura.
+  const classeCartao = item.selo_azul
+    ? "group relative bg-white rounded-2xl border border-primary ring-1 ring-primary overflow-hidden flex flex-col shadow-md hover:shadow-lg transition"
+    : "group relative bg-white rounded-2xl border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition";
   const rotulo = ehVisita
     ? `Ver ${item.estabelecimento_nome}`
     : `Ver detalhes de ${item.item_nome} - ${item.estabelecimento_nome}`;

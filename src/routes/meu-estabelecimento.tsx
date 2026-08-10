@@ -35,7 +35,7 @@ function MeuEstabelecimentoLayout() {
         fetchEstabelecimentoDoOwner(user.id),
       ]);
       setNome(nomeResp ?? user.email?.split("@")[0] ?? null);
-      setOperacional(!!estab?.selo_azul && estab.status === "ativo");
+      setOperacional(estab?.status === "ativo");
       setEstabTipo(estab?.tipo ?? null);
     })();
   }, [user, loading, role, pathname, navigate]);

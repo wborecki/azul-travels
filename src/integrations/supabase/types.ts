@@ -395,6 +395,7 @@ export type Database = {
           descricao: string | null
           descricao_tea: string | null
           destaque: boolean | null
+          detalhes: Json
           email: string | null
           endereco: string | null
           estado: string | null
@@ -441,6 +442,7 @@ export type Database = {
           descricao?: string | null
           descricao_tea?: string | null
           destaque?: boolean | null
+          detalhes?: Json
           email?: string | null
           endereco?: string | null
           estado?: string | null
@@ -487,6 +489,7 @@ export type Database = {
           descricao?: string | null
           descricao_tea?: string | null
           destaque?: boolean | null
+          detalhes?: Json
           email?: string | null
           endereco?: string | null
           estado?: string | null
@@ -824,6 +827,7 @@ export type Database = {
           estado: string | null
           id: string
           imagens: Json
+          is_demo: boolean
           latitude: number | null
           longitude: number | null
           nome: string
@@ -848,6 +852,7 @@ export type Database = {
           estado?: string | null
           id?: string
           imagens?: Json
+          is_demo?: boolean
           latitude?: number | null
           longitude?: number | null
           nome: string
@@ -872,6 +877,7 @@ export type Database = {
           estado?: string | null
           id?: string
           imagens?: Json
+          is_demo?: boolean
           latitude?: number | null
           longitude?: number | null
           nome?: string

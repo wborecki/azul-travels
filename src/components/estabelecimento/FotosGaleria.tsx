@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { uploadToBucket } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,20 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { GripVertical, ImagePlus, Loader2, Star as StarIcon, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
-async function uploadToBucket(bucket: string, file: File, prefixo?: string): Promise<string> {
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const nome = `${crypto.randomUUID()}.${ext}`;
-  const path = prefixo ? `${prefixo}/${nome}` : nome;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, {
-    contentType: file.type,
-    upsert: false,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
-
-/** Distingue arrastar arquivo de fora (upload) de arrastar foto da grade (reordenar). */
 function ehArrastoDeArquivo(e: React.DragEvent): boolean {
   return Array.from(e.dataTransfer.types).includes("Files");
 }
@@ -31,13 +17,6 @@ interface FotosGaleriaProps {
   onChange: (v: string[]) => void;
   bucket: string;
   permitirUrl?: boolean;
-  /**
-   * Pasta dentro do bucket. Sem ela o upload vai para a raiz.
-   *
-   * O bucket `estabelecimentos-fotos` exige o prefixo: a policy só deixa o
-   * dono escrever sob `<auth.uid()>/` (migration 20260804140000), justamente
-   * para que um dono não alcance o arquivo de outro.
-   */
   prefixo?: string;
 }
 
@@ -111,8 +90,6 @@ export function FotosGaleria({
       if (dragIndex !== null) setOverIndex(i);
     },
     onDragOver: (e: React.DragEvent) => {
-      // Arquivo vindo de fora não é reordenação: deixa borbulhar para a
-      // área externa, que trata o upload.
       if (ehArrastoDeArquivo(e)) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";

@@ -2,27 +2,19 @@ import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-ro
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  Building2,
-  ShieldCheck,
-  Sparkles,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  Award,
-} from "lucide-react";
+import { Loader2, Building2, Sparkles, Clock, Award } from "lucide-react";
 import { toast } from "sonner";
 import { fetchEstabelecimentoProfile, fetchEstabelecimentoFullDoOwner } from "@/lib/queries";
-import { type EstabTipo } from "@/lib/enums";
+import { isEstabTipo, type EstabTipo } from "@/lib/enums";
 import { RECURSOS_TEA } from "@/lib/recursos-tea";
+import { limparDetalhes } from "@/lib/detalhes-estabelecimento";
 import { pickEstabMedia } from "@/lib/media";
+import { ChecklistOnboarding } from "@/components/estabelecimento/ChecklistOnboarding";
 import { PainelOperacional } from "@/components/estabelecimento/PainelOperacional";
 import { PerfilEstabelecimentoEditor } from "@/components/estabelecimento/PerfilEstabelecimentoEditor";
 import {
   EMPTY_DRAFT,
-  SECOES,
+  secoesAplicaveis,
   type PerfilDraft,
   type RecursosTea,
   type SecaoId,
@@ -59,6 +51,28 @@ function mensagemErroSalvar(msg: string): string {
   return msg;
 }
 
+const CHECKLIST_OCULTO_KEY = "turismo-azul:checklist-oculto";
+
+// Storage é opcional aqui: se o navegador recusar (Safari privado), a
+// preferência só não sobrevive ao reload - nada quebra.
+function lerChecklistOculto(userId: string): boolean {
+  try {
+    return localStorage.getItem(`${CHECKLIST_OCULTO_KEY}:${userId}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function gravarChecklistOculto(userId: string, oculto: boolean) {
+  try {
+    const chave = `${CHECKLIST_OCULTO_KEY}:${userId}`;
+    if (oculto) localStorage.setItem(chave, "1");
+    else localStorage.removeItem(chave);
+  } catch {
+    /* preferência não persiste - ver acima */
+  }
+}
+
 function MeuEstabelecimentoPage() {
   const { user, loading, role } = useAuth();
   const navigate = useNavigate();
@@ -70,13 +84,13 @@ function MeuEstabelecimentoPage() {
   const [secaoAtiva, setSecaoAtiva] = useState<SecaoId>("identidade");
   const [draft, setDraft] = useState<PerfilDraft>(EMPTY_DRAFT);
   const [draftSalvo, setDraftSalvo] = useState<PerfilDraft>(EMPTY_DRAFT);
-  const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [estabId, setEstabId] = useState<string | null>(null);
   const [seloAzul, setSeloAzul] = useState(false);
   const [estabAtivo, setEstabAtivo] = useState(false);
   const [querSelo, setQuerSelo] = useState(false);
   const [querSeloEm, setQuerSeloEm] = useState<string | null>(null);
   const [solicitandoSelo, setSolicitandoSelo] = useState(false);
+  const [checklistOculto, setChecklistOculto] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -99,11 +113,11 @@ function MeuEstabelecimentoPage() {
         return [null, null] as const;
       });
       setEstabId(estab?.id ?? null);
-      setPerfilCompleto(prof?.perfil_completo ?? false);
       setSeloAzul(!!estab?.selo_azul);
       setEstabAtivo(estab?.status === "ativo");
       setQuerSelo(!!estab?.quer_selo_azul);
       setQuerSeloEm(estab?.quer_selo_azul_em ?? null);
+      setChecklistOculto(lerChecklistOculto(user.id));
 
       // A capa pode ter sido definida pelo admin sem estar na galeria (o form
       // do admin grava `foto_capa` e `fotos` separadamente). Trazê-la para a
@@ -136,6 +150,8 @@ function MeuEstabelecimentoPage() {
         recebe_grupos_escolares_tea: !!estab?.recebe_grupos_escolares_tea,
         fotos: fotosIniciais,
         estrutura: (prof?.estrutura as PerfilDraft["estrutura"]) ?? {},
+        // Só em `estabelecimentos` - `detalhes` não tem cópia no profile (0.4).
+        detalhes: (estab?.detalhes as PerfilDraft["detalhes"]) ?? {},
         recursos,
         tem_beneficio_tea: !!estab?.tem_beneficio_tea,
         beneficio_tea_descricao: estab?.beneficio_tea_descricao ?? "",
@@ -168,6 +184,16 @@ function MeuEstabelecimentoPage() {
     toast.success("Interesse registrado! Nossa equipe entrará em contato.");
   }
 
+  function ocultarChecklist() {
+    if (user) gravarChecklistOculto(user.id, true);
+    setChecklistOculto(true);
+  }
+
+  function reabrirChecklist() {
+    if (user) gravarChecklistOculto(user.id, false);
+    setChecklistOculto(false);
+  }
+
   function set<K extends keyof PerfilDraft>(k: K, v: PerfilDraft[K]) {
     setDraft((d) => ({ ...d, [k]: v }));
   }
@@ -182,6 +208,10 @@ function MeuEstabelecimentoPage() {
     if (!user) return;
     setSalvando(secao.id);
     let erro: string | null = null;
+    // O que o salvamento mudou no próprio rascunho. Sem isso, uma seção que
+    // normaliza antes de gravar (ver "detalhes") voltaria da gravação marcada
+    // como "alterações não salvas", comparando o rascunho cru com o limpo.
+    let normalizado: Partial<PerfilDraft> = {};
 
     try {
       if (secao.id === "identidade") {
@@ -259,7 +289,6 @@ function MeuEstabelecimentoPage() {
               if (!linkErr) setEstabId(novoEstab.id);
             }
           }
-          if (!erro) setPerfilCompleto(true);
         }
       } else if (!estabId) {
         // Toda seção fora da Identidade grava em `estabelecimentos`, e a linha
@@ -332,6 +361,19 @@ function MeuEstabelecimentoPage() {
             .eq("id", user.id);
           erro = profErr?.message ?? null;
         }
+      } else if (secao.id === "detalhes") {
+        // `limparDetalhes` descarta campo vazio e valida cada valor contra o
+        // tipo declarado, para o jsonb não acumular `""` nem chave de outra
+        // categoria - a leitura pública confia nesse formato.
+        const detalhes = isEstabTipo(draft.tipo)
+          ? limparDetalhes(draft.tipo, draft.detalhes)
+          : draft.detalhes;
+        const { error } = await supabase
+          .from("estabelecimentos")
+          .update({ detalhes })
+          .eq("id", estabId);
+        erro = error?.message ?? null;
+        if (!erro) normalizado = { detalhes };
       } else {
         const { error } = await supabase
           .from("estabelecimento_profiles")
@@ -351,7 +393,11 @@ function MeuEstabelecimentoPage() {
       toast.error("Erro ao salvar", { description: mensagemErroSalvar(erro) });
       return;
     }
-    setDraftSalvo((prev) => ({ ...prev, ...pickCampos(draft, secao.campos) }));
+    const gravado = { ...draft, ...normalizado };
+    if (Object.keys(normalizado).length > 0) {
+      setDraft((d) => ({ ...d, ...normalizado }));
+    }
+    setDraftSalvo((prev) => ({ ...prev, ...pickCampos(gravado, secao.campos) }));
     toast.success(`${secao.label} salva`);
   }
 
@@ -362,6 +408,13 @@ function MeuEstabelecimentoPage() {
       </div>
     );
   }
+
+  // Uma seção que não vale para este tipo de local não pode contar contra o
+  // progresso nem virar atalho para o nada - mesmo recorte do rail do editor.
+  const secoes = secoesAplicaveis(draft);
+  const pendentesPerfil = secoes.filter((s) => s.pendente(draft));
+  const checklistConcluido = pendentesPerfil.length === 0 && estabAtivo && seloAzul;
+  const mostrarChecklist = !checklistConcluido && !checklistOculto;
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
@@ -383,9 +436,22 @@ function MeuEstabelecimentoPage() {
           podeEditarRecursos={seloAzul && estabAtivo}
           uploadPrefixo={user?.id}
         />
-      ) : seloAzul && estabAtivo && estabId ? (
-        <div className="space-y-4">
-          <div className="flex justify-end">
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center justify-end gap-2 flex-wrap">
+            {seloAzul && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white">
+                <Award className="h-3.5 w-3.5" /> Selo Azul ativo
+              </span>
+            )}
+            {!mostrarChecklist && !checklistConcluido && (
+              <button
+                onClick={reabrirChecklist}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-white border text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
+              >
+                <Sparkles className="h-4 w-4" /> Retomar configuração
+              </button>
+            )}
             <button
               onClick={() => setEditando(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-white border text-foreground/70 hover:bg-azul-claro hover:text-primary transition"
@@ -393,400 +459,45 @@ function MeuEstabelecimentoPage() {
               <Building2 className="h-4 w-4" /> Editar perfil
             </button>
           </div>
-          <PainelOperacional estabId={estabId} />
+
+          {mostrarChecklist && (
+            <ChecklistOnboarding
+              totalSecoes={secoes.length}
+              pendentes={pendentesPerfil}
+              estabAtivo={estabAtivo}
+              seloAzul={seloAzul}
+              querSelo={querSelo}
+              querSeloEm={querSeloEm}
+              solicitandoSelo={solicitandoSelo}
+              onCompletar={(secao) => {
+                if (secao) setSecaoAtiva(secao);
+                setEditando(true);
+              }}
+              onSolicitarSelo={() => void solicitarSeloAzul()}
+              onOcultar={ocultarChecklist}
+            />
+          )}
+
+          {/* O painel operacional lê reservas, que a RLS só devolve para local
+              ativo - antes disso não há o que mostrar, e o checklist acima já
+              explica que o cadastro está em análise. */}
+          {estabAtivo && estabId ? (
+            <PainelOperacional estabId={estabId} />
+          ) : (
+            <div className="rounded-2xl border border-dashed bg-white px-6 py-12 text-center">
+              <Clock className="mx-auto h-8 w-8 text-primary/40" />
+              <h2 className="mt-3 font-display font-bold text-lg text-primary">
+                Seu painel de reservas abre com a publicação
+              </h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-foreground/60">
+                {estabId
+                  ? "Assim que a análise do cadastro terminar, as reservas e a agenda das famílias aparecem aqui."
+                  : "Complete a seção Identidade para criarmos a página do seu local."}
+              </p>
+            </div>
+          )}
         </div>
-      ) : (
-        <Dashboard
-          perfilCompleto={perfilCompleto}
-          draft={draft}
-          seloAzul={seloAzul}
-          querSelo={querSelo}
-          querSeloEm={querSeloEm}
-          solicitandoSelo={solicitandoSelo}
-          onCompletar={(secao) => {
-            if (secao) setSecaoAtiva(secao);
-            setEditando(true);
-          }}
-          onSolicitarSelo={() => void solicitarSeloAzul()}
-        />
       )}
     </main>
-  );
-}
-
-function Dashboard({
-  perfilCompleto,
-  draft,
-  seloAzul,
-  querSelo,
-  querSeloEm,
-  solicitandoSelo,
-  onCompletar,
-  onSolicitarSelo,
-}: {
-  perfilCompleto: boolean;
-  draft: PerfilDraft;
-  seloAzul: boolean;
-  querSelo: boolean;
-  querSeloEm: string | null;
-  solicitandoSelo: boolean;
-  onCompletar: (secao?: SecaoId) => void;
-  onSolicitarSelo: () => void;
-}) {
-  const pendentes = SECOES.filter((s) => s.pendente(draft));
-  const progresso = Math.round(((SECOES.length - pendentes.length) / SECOES.length) * 100);
-
-  const dataSolicitacao = querSeloEm
-    ? new Date(querSeloEm).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : null;
-
-  return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-gradient-to-br from-[#1a2f5e] via-primary to-[#1a2f5e] text-white p-6 sm:p-8 shadow-md">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="font-display font-bold text-2xl sm:text-3xl">
-              Bem-vindo ao seu painel 💙
-            </h1>
-            <p className="mt-2 text-white/90 max-w-2xl text-sm sm:text-base">
-              Acompanhe o status do seu cadastro, complete seu perfil e avance rumo ao Selo Azul.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm border border-white/20">
-            <Clock className="h-4 w-4 text-[#c9a84c]" />
-            Cadastro em análise
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
-            <span>Progresso do perfil</span>
-            <span className="font-semibold text-[#c9a84c]">{progresso}%</span>
-          </div>
-          <div className="h-2 rounded-full bg-white/15 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#c9a84c] to-[#e6c97a] transition-all"
-              style={{ width: `${progresso}%` }}
-            />
-          </div>
-        </div>
-
-        {pendentes.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {pendentes.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => onCompletar(s.id)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-primary transition hover:bg-white"
-              >
-                {s.label} <ArrowRight className="h-3 w-3" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
-              <Building2 className="h-5 w-5" />
-            </div>
-            <h2 className="font-display font-bold text-base text-primary">Perfil do local</h2>
-          </div>
-          {perfilCompleto && pendentes.length === 0 ? (
-            <>
-              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" /> Completo
-              </div>
-              <p className="mt-2 text-xs text-foreground/70 flex-1">
-                Dados salvos e disponíveis para auditoria.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onCompletar()}
-                className="mt-3 self-start border-primary text-primary hover:bg-azul-claro"
-              >
-                Ver ou editar
-              </Button>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 text-xs text-foreground/70 flex-1">
-                {pendentes.length === 1
-                  ? "Falta 1 seção para o perfil ficar completo."
-                  : `Faltam ${pendentes.length} de ${SECOES.length} seções.`}
-              </p>
-              <Button
-                size="sm"
-                onClick={() => onCompletar(pendentes[0]?.id)}
-                className="mt-3 self-start bg-secondary hover:bg-secondary/90 text-white"
-              >
-                Completar perfil <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </>
-          )}
-        </div>
-
-        <div className="bg-white border rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <h2 className="font-display font-bold text-base text-primary">Selo Azul</h2>
-          </div>
-          {seloAzul ? (
-            <>
-              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-                <Award className="h-4 w-4" /> Certificado
-              </div>
-              <p className="mt-2 text-xs text-foreground/70 flex-1">
-                Seu local já exibe o Selo Azul nas buscas.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 text-xs text-foreground/70 flex-1">
-                Local ainda não certificado. Demonstre interesse e nossa equipe avalia o processo.
-              </p>
-              <span className="mt-3 self-start inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-azul-claro text-primary">
-                Não certificado
-              </span>
-            </>
-          )}
-        </div>
-
-        <div
-          className={`relative border rounded-2xl p-5 flex flex-col shadow-sm transition overflow-hidden ${
-            querSelo
-              ? "bg-gradient-to-br from-[#fff8e6] to-white border-[#c9a84c]/40"
-              : "bg-gradient-to-br from-[#1a2f5e] to-primary text-white border-transparent hover:shadow-lg"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`h-10 w-10 rounded-xl flex items-center justify-center ${
-                querSelo ? "bg-[#c9a84c]/15 text-[#8a7028]" : "bg-white/15 text-[#c9a84c]"
-              }`}
-            >
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <h2
-              className={`font-display font-bold text-base ${
-                querSelo ? "text-[#8a7028]" : "text-white"
-              }`}
-            >
-              {querSelo ? "Interesse registrado" : "Quero o Selo Azul"}
-            </h2>
-          </div>
-          {querSelo ? (
-            <>
-              <div className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" /> Solicitação enviada
-              </div>
-              <p className="mt-2 text-xs text-foreground/70 flex-1">
-                {dataSolicitacao
-                  ? `Recebemos seu interesse em ${dataSolicitacao}.`
-                  : "Recebemos seu interesse."}{" "}
-                Nossa equipe entrará em contato em breve.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 text-xs text-white/85 flex-1">
-                Sinalize seu interesse para iniciarmos a avaliação do processo de certificação.
-              </p>
-              <Button
-                size="sm"
-                onClick={onSolicitarSelo}
-                disabled={solicitandoSelo || seloAzul}
-                className="mt-3 self-start bg-[#c9a84c] hover:bg-[#b9962e] text-[#1a2f5e] font-semibold"
-              >
-                {solicitandoSelo ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Enviando...
-                  </>
-                ) : (
-                  <>
-                    Quero participar <ArrowRight className="h-4 w-4 ml-1" />
-                  </>
-                )}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <TimelineFluxo perfilCompleto={perfilCompleto} querSelo={querSelo} seloAzul={seloAzul} />
-    </div>
-  );
-}
-
-function TimelineFluxo({
-  perfilCompleto,
-  querSelo,
-  seloAzul,
-}: {
-  perfilCompleto: boolean;
-  querSelo: boolean;
-  seloAzul: boolean;
-}) {
-  const steps = [
-    {
-      title: "Cadastro criado",
-      desc: "Sua conta está ativa na plataforma.",
-      done: true,
-    },
-    {
-      title: "Perfil completo",
-      desc: "Preencha as informações do estabelecimento.",
-      done: perfilCompleto,
-    },
-    {
-      title: "Interesse no Selo Azul",
-      desc: "Sinalize que quer participar do programa.",
-      done: querSelo || seloAzul,
-    },
-    {
-      title: "Auditoria e capacitação",
-      desc: "Nossa equipe entra em contato e treina sua equipe.",
-      done: seloAzul,
-    },
-    {
-      title: "Selo Azul concedido",
-      desc: "Destaque nas buscas das famílias TEA.",
-      done: seloAzul,
-    },
-  ];
-
-  const currentIdx = steps.findIndex((s) => !s.done);
-  const activeIdx = currentIdx === -1 ? steps.length - 1 : currentIdx;
-
-  return (
-    <div className="bg-white border rounded-2xl p-6 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-display font-bold text-lg text-primary">O que vem pela frente</h3>
-        <span className="text-xs text-foreground/60">
-          Etapa {activeIdx + 1} de {steps.length}
-        </span>
-      </div>
-
-      <div className="hidden md:block">
-        <div className="relative">
-          <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200" />
-          <div
-            className="absolute top-5 left-0 h-0.5 bg-[#c9a84c] transition-all"
-            style={{
-              width: `${(activeIdx / (steps.length - 1)) * 100}%`,
-            }}
-          />
-          <ol className="relative grid grid-cols-5 gap-2">
-            {steps.map((s, i) => {
-              const isDone = s.done;
-              const isActive = i === activeIdx && !isDone;
-              return (
-                <li key={s.title} className="flex flex-col items-center text-center px-1">
-                  <div
-                    className={[
-                      "w-10 h-10 rounded-full flex items-center justify-center border-2 bg-white z-10 transition-colors",
-                      isDone
-                        ? "border-[#c9a84c] bg-[#c9a84c] text-white"
-                        : isActive
-                          ? "border-primary text-primary ring-4 ring-primary/15"
-                          : "border-slate-300 text-slate-400",
-                    ].join(" ")}
-                  >
-                    {isDone ? (
-                      <CheckCircle2 className="h-5 w-5" />
-                    ) : isActive ? (
-                      <Clock className="h-5 w-5" />
-                    ) : (
-                      <span className="text-sm font-bold">{i + 1}</span>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <div
-                      className={[
-                        "text-sm font-semibold",
-                        isActive
-                          ? "text-primary"
-                          : isDone
-                            ? "text-foreground"
-                            : "text-foreground/60",
-                      ].join(" ")}
-                    >
-                      {s.title}
-                    </div>
-                    <div className="text-xs text-foreground/60 mt-1 leading-snug">{s.desc}</div>
-                    {isActive && (
-                      <span className="inline-block mt-2 text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        Etapa atual
-                      </span>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </div>
-
-      <ol className="md:hidden space-y-4">
-        {steps.map((s, i) => {
-          const isDone = s.done;
-          const isActive = i === activeIdx && !isDone;
-          return (
-            <li key={s.title} className="flex gap-3">
-              <div className="flex flex-col items-center">
-                <div
-                  className={[
-                    "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors",
-                    isDone
-                      ? "border-[#c9a84c] bg-[#c9a84c] text-white"
-                      : isActive
-                        ? "border-primary text-primary ring-4 ring-primary/15"
-                        : "border-slate-300 text-slate-400 bg-white",
-                  ].join(" ")}
-                >
-                  {isDone ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : isActive ? (
-                    <Clock className="h-5 w-5" />
-                  ) : (
-                    <span className="text-sm font-bold">{i + 1}</span>
-                  )}
-                </div>
-                {i < steps.length - 1 && (
-                  <div
-                    className={`w-0.5 flex-1 mt-1 ${isDone ? "bg-[#c9a84c]" : "bg-slate-200"}`}
-                  />
-                )}
-              </div>
-              <div className="pb-2">
-                <div
-                  className={[
-                    "text-sm font-semibold",
-                    isActive ? "text-primary" : isDone ? "text-foreground" : "text-foreground/60",
-                  ].join(" ")}
-                >
-                  {s.title}
-                  {isActive && (
-                    <span className="ml-2 text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                      Atual
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-foreground/60 mt-1">{s.desc}</div>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
   );
 }

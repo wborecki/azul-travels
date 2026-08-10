@@ -9,6 +9,7 @@ import {
   Lock,
   Phone,
   Save,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,18 +20,21 @@ import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { ESTAB_TIPOS, ESTAB_TIPO_LABEL } from "@/lib/enums";
 import { RECURSOS_TEA, type RecursoTeaKey } from "@/lib/recursos-tea";
+import type { ValorDetalhe } from "@/lib/detalhes-estabelecimento";
 import {
-  SECOES,
   COLAB_OPTS,
   CONTATO_OPTS,
   INICIATIVA_OPTS,
+  detalhesDoDraft,
   estruturaDoDraft,
+  secoesAplicaveis,
   type PerfilDraft,
   type SecaoId,
   type SecaoInfo,
 } from "@/lib/perfil-estabelecimento";
 import { geocodeEndereco, reverseGeocode } from "@/lib/geocode";
 import { FotosGaleria } from "@/components/estabelecimento/FotosGaleria";
+import { DocumentoUpload } from "@/components/estabelecimento/DocumentoUpload";
 import { LocationPickerField } from "@/components/estabelecimento/LocationPickerField";
 
 interface PerfilEstabelecimentoEditorProps {
@@ -64,13 +68,17 @@ export function PerfilEstabelecimentoEditor({
   podeEditarRecursos,
   uploadPrefixo,
 }: PerfilEstabelecimentoEditorProps) {
-  const secao = SECOES.find((s) => s.id === secaoAtiva) ?? SECOES[0];
+  // Nem toda seção vale para todo local: "Sobre o seu tipo" não existe para
+  // quem não tem campos declarados na categoria. Rail, progresso e seção ativa
+  // enxergam a mesma lista, senão o contador falaria de algo invisível.
+  const aplicaveis = secoesAplicaveis(draft);
+  const secao = aplicaveis.find((s) => s.id === secaoAtiva) ?? aplicaveis[0];
   const bloqueada = secao.exigeEstab && !estabId;
 
   const sujaEm = (s: SecaoInfo) =>
     s.campos.some((c) => JSON.stringify(draft[c]) !== JSON.stringify(draftSalvo[c]));
 
-  const completas = SECOES.filter((s) => !s.pendente(draft)).length;
+  const completas = aplicaveis.filter((s) => !s.pendente(draft)).length;
 
   // Enquanto o estabelecimento não existe não há nada persistido para comparar,
   // então "sem alteração" não pode travar o salvamento que justamente o cria.
@@ -88,7 +96,8 @@ export function PerfilEstabelecimentoEditor({
       <div className="flex flex-col md:flex-row md:items-start gap-6">
         <RailSecoes
           draft={draft}
-          secaoAtiva={secaoAtiva}
+          secoes={aplicaveis}
+          secaoAtiva={secao.id}
           onSelecionar={onSelecionarSecao}
           sujaEm={sujaEm}
           completas={completas}
@@ -143,6 +152,9 @@ export function PerfilEstabelecimentoEditor({
                     podeEditarRecursos={podeEditarRecursos}
                   />
                 )}
+                {secao.id === "detalhes" && (
+                  <SecaoDetalhes draft={draft} set={set} uploadPrefixo={uploadPrefixo} />
+                )}
                 {secao.id === "certificacao" && <SecaoCertificacao draft={draft} set={set} />}
               </div>
 
@@ -176,6 +188,7 @@ export function PerfilEstabelecimentoEditor({
 
 function RailSecoes({
   draft,
+  secoes,
   secaoAtiva,
   onSelecionar,
   sujaEm,
@@ -183,6 +196,7 @@ function RailSecoes({
   estabId,
 }: {
   draft: PerfilDraft;
+  secoes: SecaoInfo[];
   secaoAtiva: SecaoId;
   onSelecionar: (id: SecaoId) => void;
   sujaEm: (s: SecaoInfo) => boolean;
@@ -195,11 +209,11 @@ function RailSecoes({
         <div className="px-4 py-3 border-b bg-azul-claro/20">
           <p className="font-display font-bold text-sm text-primary">Perfil do local</p>
           <p className="text-[11px] text-foreground/60 mt-0.5">
-            {completas} de {SECOES.length} seções completas
+            {completas} de {secoes.length} seções completas
           </p>
         </div>
         <ul>
-          {SECOES.map((s) => {
+          {secoes.map((s) => {
             const ativa = s.id === secaoAtiva;
             const bloqueada = s.exigeEstab && !estabId;
             const pendente = s.pendente(draft);
@@ -678,6 +692,102 @@ function SecaoAcolhimento({
   );
 }
 
+function SecaoDetalhes({
+  draft,
+  set,
+  uploadPrefixo,
+}: {
+  draft: PerfilDraft;
+  set: SetDraft;
+  uploadPrefixo: string | undefined;
+}) {
+  const campos = detalhesDoDraft(draft);
+
+  const setValor = (key: string, v: ValorDetalhe | null) => {
+    const proximo = { ...draft.detalhes };
+    if (v === null || v === "") delete proximo[key];
+    else proximo[key] = v;
+    set("detalhes", proximo);
+  };
+
+  return (
+    <>
+      <p className="rounded-xl border border-dashed bg-azul-claro/20 px-4 py-3 text-xs leading-relaxed text-foreground/70">
+        Nada aqui é obrigatório. Cada campo preenchido é uma dúvida a menos que a família precisa
+        resolver por telefone antes de decidir.
+      </p>
+
+      {campos.map((campo) => {
+        const valor = draft.detalhes[campo.key];
+        return (
+          <Campo key={campo.key} label={campo.label} ajuda={campo.ajuda} icon={campo.icon}>
+            {campo.tipo === "arquivo" ? (
+              <DocumentoUpload
+                value={typeof valor === "string" ? valor : ""}
+                onChange={(url) => setValor(campo.key, url || null)}
+                prefixo={uploadPrefixo}
+                nomeDoDocumento={campo.label}
+              />
+            ) : campo.tipo === "texto_longo" ? (
+              <Textarea
+                rows={3}
+                value={typeof valor === "string" ? valor : ""}
+                onChange={(e) => setValor(campo.key, e.target.value)}
+                maxLength={campo.maxLength}
+                placeholder={campo.placeholder}
+              />
+            ) : campo.tipo === "numero" ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  className="w-32"
+                  min={campo.min}
+                  max={campo.max}
+                  value={typeof valor === "number" ? String(valor) : ""}
+                  onChange={(e) =>
+                    setValor(campo.key, e.target.value === "" ? null : Number(e.target.value))
+                  }
+                />
+                <span className="text-sm text-muted-foreground">{campo.unidade}</span>
+              </div>
+            ) : campo.tipo === "hora" ? (
+              <Input
+                type="time"
+                className="w-40"
+                value={typeof valor === "string" ? valor : ""}
+                onChange={(e) => setValor(campo.key, e.target.value)}
+              />
+            ) : campo.tipo === "booleano" ? (
+              // Três estados de propósito: em branco é "ainda não respondi", e
+              // some da página pública - diferente de um "não" explícito, que
+              // é informação útil e aparece.
+              <select
+                value={valor === true ? "sim" : valor === false ? "nao" : ""}
+                onChange={(e) =>
+                  setValor(campo.key, e.target.value === "" ? null : e.target.value === "sim")
+                }
+                className="w-full sm:w-96 px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
+              >
+                <option value="">Ainda não informar</option>
+                <option value="sim">{campo.rotuloSim}</option>
+                <option value="nao">{campo.rotuloNao}</option>
+              </select>
+            ) : (
+              <Input
+                value={typeof valor === "string" ? valor : ""}
+                onChange={(e) => setValor(campo.key, e.target.value)}
+                maxLength={campo.maxLength}
+                placeholder={campo.placeholder}
+              />
+            )}
+          </Campo>
+        );
+      })}
+    </>
+  );
+}
+
 function SecaoCertificacao({ draft, set }: { draft: PerfilDraft; set: SetDraft }) {
   return (
     <>
@@ -719,16 +829,19 @@ function Campo({
   label,
   required,
   ajuda,
+  icon: Icon,
   children,
 }: {
   label: string;
   required?: boolean;
   ajuda?: string;
+  icon?: LucideIcon;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <Label className="text-sm font-medium text-primary">
+      <Label className="flex items-center gap-1.5 text-sm font-medium text-primary">
+        {Icon && <Icon className="h-3.5 w-3.5 shrink-0 text-secondary" />}
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </Label>

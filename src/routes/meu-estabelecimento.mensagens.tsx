@@ -108,8 +108,8 @@ function MeuEstabelecimentoMensagensPage() {
     void (async () => {
       const estabRow = await fetchEstabelecimentoDoOwner(user.id);
 
-      if (!estabRow || !estabRow.selo_azul || estabRow.status !== "ativo") {
-        toast.error("As conversas ficam disponíveis para locais com Selo Azul ativo.");
+      if (!estabRow || estabRow.status !== "ativo") {
+        toast.error("As conversas ficam disponíveis enquanto o local está ativo.");
         navigate({ to: "/meu-estabelecimento" });
         return;
       }
