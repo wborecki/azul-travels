@@ -1,13 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { List, Loader2, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import { List, Loader2, Map as MapIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SearchBar } from "@/components/explorar/SearchBar";
-import { FiltrosModal } from "@/components/explorar/FiltrosModal";
-import { ResultadosLista } from "@/components/explorar/ResultadosLista";
+import { BarraFiltros } from "@/components/explorar/BarraFiltros";
+import { ChipsAtivos } from "@/components/explorar/ChipsAtivos";
+import { ContagemResultados, ResultadosLista } from "@/components/explorar/ResultadosLista";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import {
@@ -23,7 +29,6 @@ import {
 import {
   ORDENACAO_LABEL,
   buscaSoDeHospedagem,
-  contarFiltrosAtivos,
   csvOrUndefined,
   limparAreaMapa,
   limparFiltrosDeHospedagem,
@@ -70,7 +75,6 @@ function ExplorarPage() {
   const [erro, setErro] = useState(false);
   const [tentativa, setTentativa] = useState(0);
   const [salvandoPadrao, setSalvandoPadrao] = useState(false);
-  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
   const [mapaData, setMapaData] = useState<ItensViewMapa | null>(null);
   const [mapaLoading, setMapaLoading] = useState(false);
@@ -249,7 +253,9 @@ function ExplorarPage() {
     });
   };
   const temFiltros = temFiltrosRelevantes(search);
-  const filtrosAtivos = contarFiltrosAtivos(search);
+
+  const mostrarDicaSelo =
+    (pageData?.total ?? 0) > 1 && !parseSelosCsv(search.selos).includes("selo_azul");
 
   const centroFoco =
     search.centro_lat !== undefined && search.centro_lng !== undefined
@@ -259,37 +265,47 @@ function ExplorarPage() {
   const onTentarNovamente = () => setTentativa((t) => t + 1);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Header />
-      <main className="flex-1">
-        <div className="container mx-auto px-4 pt-8 pb-16">
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-primary">
-            Explorar destinos
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Lugares preparados para receber famílias TEA.
-          </p>
+    <div className="flex-1 bg-white">
+      <div className="container mx-auto px-4 pt-6 pb-4">
+        <h1 className="text-2xl md:text-3xl font-display font-bold text-primary">
+          Explorar destinos
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Lugares preparados para receber famílias TEA.
+        </p>
 
-          <div className="mt-5">
-            <SearchBar
-              valor={search.busca ?? ""}
-              onBuscar={(termo) => patchSearch({ busca: termo || undefined })}
-            />
+        <div className="mt-4">
+          <SearchBar
+            valor={search.busca ?? ""}
+            onBuscar={(termo) => patchSearch({ busca: termo || undefined })}
+          />
+        </div>
+      </div>
+
+      <BarraFiltros
+        search={search}
+        tipoAtivo={tipoAtivo}
+        onSelectTipo={selecionarTipo}
+        onPatch={patchSearch}
+        onSalvarPadrao={user ? () => void salvarComoPadrao() : undefined}
+        salvandoPadrao={salvandoPadrao}
+      />
+
+      <div className="container mx-auto px-4 pt-4 pb-16">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <ContagemResultados loading={loading} pageData={pageData} areaAtiva={areaMapaAtiva} />
+            {mostrarDicaSelo && (
+              <span className="text-xs text-muted-foreground">
+                · Locais com Selo Azul aparecem primeiro
+              </span>
+            )}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button variant="outline" onClick={() => setFiltrosAbertos(true)}>
-              <SlidersHorizontal className="h-4 w-4 mr-1.5" />
-              Filtros
-              {filtrosAtivos > 0 && (
-                <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
-                  {filtrosAtivos}
-                </span>
-              )}
-            </Button>
-
+          <div className="flex items-center gap-2">
             <Button
               variant={mapaVisivel ? "default" : "outline"}
+              size="sm"
               onClick={toggleMapa}
               className="hidden lg:inline-flex"
             >
@@ -297,88 +313,85 @@ function ExplorarPage() {
               {mapaVisivel ? "Ocultar mapa" : "Mostrar mapa"}
             </Button>
 
-            {areaMapaAtiva && (
-              <button
-                type="button"
-                onClick={limparArea}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
-              >
-                {search.centro_lat !== undefined ? "Perto de você" : "Nesta área"}
-                <span aria-hidden>✕</span>
-              </button>
-            )}
-
-            <label className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="hidden sm:inline">Ordenar:</span>
-              <select
-                value={search.ordenacao ?? "preco_asc"}
-                onChange={(e) => {
-                  const v = e.target.value as Ordenacao;
-                  patchSearch({ ordenacao: v === "preco_asc" ? undefined : v });
-                }}
-                className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white text-foreground"
-                aria-label="Ordenar resultados"
-              >
+            <Select
+              value={search.ordenacao ?? "preco_asc"}
+              onValueChange={(v) =>
+                patchSearch({ ordenacao: v === "preco_asc" ? undefined : (v as Ordenacao) })
+              }
+            >
+              <SelectTrigger className="h-9 w-[11.5rem] bg-white" aria-label="Ordenar resultados">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
                 {ORDENACOES_UI.map((o) => (
-                  <option key={o} value={o}>
+                  <SelectItem key={o} value={o}>
                     {ORDENACAO_LABEL[o]}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-6 flex flex-col lg:flex-row gap-6 items-start">
-            <div className={cn("min-w-0 flex-1", mapaVisivel && "hidden lg:block")}>
-              <ResultadosLista
-                loading={loading}
-                erro={erro}
-                pageData={pageData}
-                areaAtiva={areaMapaAtiva}
-                temFiltros={temFiltros}
-                dataIn={search.data_in}
-                dataOut={search.data_out}
-                adultos={search.adultos}
-                criancas={search.criancas}
-                onTentarNovamente={onTentarNovamente}
-                onLimparArea={limparArea}
-                onLimparTudo={limparTudo}
-                irParaPagina={irParaPagina}
-              />
-            </div>
-
-            {mapaVisivel && (
-              <div className="w-full lg:w-[420px] xl:w-[480px] shrink-0 h-[70vh] lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border">
-                {mapaErro && !mapaData ? (
-                  <div className="flex h-full items-center justify-center">
-                    <ErroMapa onTentarNovamente={onTentarNovamente} />
-                  </div>
-                ) : !montado || (mapaLoading && !mapaData) ? (
-                  <MapaSkeleton />
-                ) : mapaData ? (
-                  // Mantido montado entre refetches (ex.: pan do mapa) — trocar por
-                  // <MapaSkeleton /> aqui recriaria o Leaflet do zero a cada busca,
-                  // e o usuário veria o mapa "reiniciar" com zoom a cada movimento.
-                  <Suspense fallback={<MapaSkeleton />}>
-                    <MapView
-                      items={mapaData.items}
-                      dataIn={search.data_in}
-                      dataOut={search.data_out}
-                      adultos={search.adultos}
-                      criancas={search.criancas}
-                      areaAtiva={areaMapaAtiva}
-                      onBoundsChange={handleBoundsChange}
-                      onPertoDeMim={handlePertoDeMim}
-                      centroFoco={centroFoco}
-                    />
-                  </Suspense>
-                ) : null}
-              </div>
-            )}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </main>
-      <Footer />
+
+        <ChipsAtivos
+          className="mt-3"
+          search={search}
+          areaAtiva={areaMapaAtiva}
+          onPatch={patchSearch}
+          onRemoverTipo={() => selecionarTipo(undefined)}
+          onLimparArea={limparArea}
+          onLimparTudo={limparTudo}
+        />
+
+        <div className="mt-5 flex flex-col lg:flex-row gap-6 items-start">
+          <div className={cn("min-w-0 flex-1", mapaVisivel && "hidden lg:block")}>
+            <ResultadosLista
+              loading={loading}
+              erro={erro}
+              pageData={pageData}
+              areaAtiva={areaMapaAtiva}
+              temFiltros={temFiltros}
+              dataIn={search.data_in}
+              dataOut={search.data_out}
+              adultos={search.adultos}
+              criancas={search.criancas}
+              onTentarNovamente={onTentarNovamente}
+              onLimparArea={limparArea}
+              onLimparTudo={limparTudo}
+              irParaPagina={irParaPagina}
+            />
+          </div>
+
+          {mapaVisivel && (
+            <div className="w-full lg:w-[420px] xl:w-[480px] shrink-0 h-[70vh] lg:sticky lg:top-[12rem] lg:h-[calc(100vh-13rem)] overflow-hidden rounded-2xl border">
+              {mapaErro && !mapaData ? (
+                <div className="flex h-full items-center justify-center">
+                  <ErroMapa onTentarNovamente={onTentarNovamente} />
+                </div>
+              ) : !montado || (mapaLoading && !mapaData) ? (
+                <MapaSkeleton />
+              ) : mapaData ? (
+                // Mantido montado entre refetches (ex.: pan do mapa) — trocar por
+                // <MapaSkeleton /> aqui recriaria o Leaflet do zero a cada busca,
+                // e o usuário veria o mapa "reiniciar" com zoom a cada movimento.
+                <Suspense fallback={<MapaSkeleton />}>
+                  <MapView
+                    items={mapaData.items}
+                    dataIn={search.data_in}
+                    dataOut={search.data_out}
+                    adultos={search.adultos}
+                    criancas={search.criancas}
+                    areaAtiva={areaMapaAtiva}
+                    onBoundsChange={handleBoundsChange}
+                    onPertoDeMim={handlePertoDeMim}
+                    centroFoco={centroFoco}
+                  />
+                </Suspense>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </div>
 
       <button
         type="button"
@@ -395,17 +408,6 @@ function ExplorarPage() {
           </>
         )}
       </button>
-
-      <FiltrosModal
-        open={filtrosAbertos}
-        onOpenChange={setFiltrosAbertos}
-        aplicados={search}
-        tipoAtivo={tipoAtivo}
-        onSelectTipo={selecionarTipo}
-        onAplicar={(patch) => patchSearch(patch)}
-        onSalvarPadrao={user ? () => void salvarComoPadrao() : undefined}
-        salvandoPadrao={salvandoPadrao}
-      />
     </div>
   );
 }

@@ -40,26 +40,9 @@ export function ResultadosLista({
   onLimparTudo,
   irParaPagina,
 }: ResultadosListaProps) {
-  const total = pageData?.total ?? 0;
-
   return (
     <div>
-      <p className="text-sm text-muted-foreground" aria-live="polite">
-        {loading && !pageData ? (
-          <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" /> Buscando…
-          </span>
-        ) : total > 0 ? (
-          <>
-            <strong>{total}</strong> opç{total === 1 ? "ão" : "ões"}{" "}
-            {areaAtiva ? "dentro da área do mapa" : "encontrad" + (total === 1 ? "a" : "as")}
-          </>
-        ) : (
-          "Nenhuma opção encontrada"
-        )}
-      </p>
-
-      <div className="mt-4">
+      <div>
         {erro && !pageData ? (
           <ErroBusca onTentarNovamente={onTentarNovamente} />
         ) : loading && !pageData ? (
@@ -95,6 +78,33 @@ export function ResultadosLista({
         )}
       </div>
     </div>
+  );
+}
+
+interface ContagemResultadosProps {
+  loading: boolean;
+  pageData: ItensViewPage | null;
+  areaAtiva: boolean;
+}
+
+export function ContagemResultados({ loading, pageData, areaAtiva }: ContagemResultadosProps) {
+  const total = pageData?.total ?? 0;
+
+  return (
+    <p className="text-sm text-muted-foreground" aria-live="polite">
+      {loading && !pageData ? (
+        <span className="inline-flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" /> Buscando…
+        </span>
+      ) : total > 0 ? (
+        <>
+          <strong className="text-foreground">{total}</strong> opç{total === 1 ? "ão" : "ões"}{" "}
+          {areaAtiva ? "dentro da área do mapa" : "encontrad" + (total === 1 ? "a" : "as")}
+        </>
+      ) : (
+        "Nenhuma opção encontrada"
+      )}
+    </p>
   );
 }
 

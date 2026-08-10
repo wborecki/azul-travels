@@ -16,6 +16,7 @@ interface SeletorPeriodoProps {
   checkOut?: Date | null;
   onChange: (checkIn: Date | null, checkOut: Date | null) => void;
   onFechar?: () => void;
+  mostrarBotaoFechar?: boolean;
 }
 
 export function SeletorPeriodo({
@@ -23,6 +24,7 @@ export function SeletorPeriodo({
   checkOut: checkOutProp,
   onChange,
   onFechar,
+  mostrarBotaoFechar = true,
 }: SeletorPeriodoProps) {
   const hoje = useMemo(() => startOfToday(), []);
   const [checkIn, setCheckIn] = useState<Date | null>(checkInProp ?? null);
@@ -128,11 +130,13 @@ export function SeletorPeriodo({
         ))}
       </div>
 
-      <div className="mt-4 flex justify-end">
-        <Button size="sm" onClick={fechar}>
-          Fechar
-        </Button>
-      </div>
+      {mostrarBotaoFechar && (
+        <div className="mt-4 flex justify-end">
+          <Button size="sm" onClick={fechar}>
+            Fechar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
