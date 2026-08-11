@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { comportamentoRolagem } from "@/lib/movimento";
 import { supabase } from "@/integrations/supabase/client";
 import gustavoFoto from "@/assets/gustavo-passinato.jpeg";
 import giselaFoto from "@/assets/gisela-antoniucci.jpeg";
@@ -82,7 +83,7 @@ interface ArtigoCard {
 }
 
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById(id)?.scrollIntoView({ behavior: comportamentoRolagem(), block: "start" });
 }
 
 function Landing() {

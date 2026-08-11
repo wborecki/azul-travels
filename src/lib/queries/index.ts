@@ -196,6 +196,7 @@ export { criarContatoGeral, type ContatoGeralInsert } from "./contatos";
 export {
   fetchItensViewPaginated,
   fetchItensViewMapa,
+  fetchItensViewTotal,
   normalizeItemView,
   applyItensViewFilters,
   ITEM_PAGE_SIZE_DEFAULT,

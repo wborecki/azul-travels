@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface ResultadosListaProps {
   loading: boolean;
+  atualizando?: boolean;
   erro: boolean;
   pageData: ItensViewPage | null;
   areaAtiva: boolean;
@@ -42,6 +43,7 @@ function classesGrade(visualizacao: VarianteCard, mapaVisivel: boolean): string 
 
 export function ResultadosLista({
   loading,
+  atualizando = false,
   erro,
   pageData,
   areaAtiva,
@@ -61,7 +63,10 @@ export function ResultadosLista({
 }: ResultadosListaProps) {
   return (
     <div>
-      <div>
+      <div
+        aria-busy={atualizando}
+        className={cn("transition-opacity duration-150", atualizando && "opacity-60")}
+      >
         {erro && !pageData ? (
           <ErroBusca onTentarNovamente={onTentarNovamente} />
         ) : loading && !pageData ? (

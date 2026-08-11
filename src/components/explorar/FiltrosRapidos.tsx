@@ -7,6 +7,7 @@ import { SeletorPeriodo } from "@/components/explorar/SeletorPeriodo";
 import { PainelFiltro } from "@/components/explorar/PainelFiltro";
 import { chipSeloClasses } from "@/components/explorar/chips";
 import { RECURSO_BADGES, SELO_BADGES } from "@/components/Badges";
+import { useContagemPreview } from "@/hooks/useContagemPreview";
 import { ESTADOS_BR, formatDataISO, formatDateBR, parseDataISO } from "@/lib/brazil";
 import { cn } from "@/lib/utils";
 import type { ItemRecursoFlag, ItemSeloFlag } from "@/lib/queries";
@@ -97,11 +98,13 @@ export function FiltrosRapidos({
       {soHospedagem && (
         <>
           <PainelPeriodo
+            search={search}
             dataIn={search.data_in}
             dataOut={search.data_out}
             onAplicar={(data_in, data_out) => onPatch({ data_in, data_out })}
           />
           <PainelHospedes
+            search={search}
             adultos={search.adultos}
             criancas={search.criancas}
             total={totalHospedes(search)}
@@ -109,6 +112,7 @@ export function FiltrosRapidos({
             onAplicar={(adultos, criancas) => onPatch({ adultos, criancas })}
           />
           <PainelPreco
+            search={search}
             precoMin={search.preco_min}
             precoMax={search.preco_max}
             onAplicar={(preco_min, preco_max) => onPatch({ preco_min, preco_max })}
@@ -193,21 +197,33 @@ function PainelLista<T extends string>({
 }
 
 function PainelPeriodo({
+  search,
   dataIn,
   dataOut,
   onAplicar,
 }: {
+  search: ExplorarSearch;
   dataIn?: string;
   dataOut?: string;
   onAplicar: (dataIn?: string, dataOut?: string) => void;
 }) {
   const [inicio, setInicio] = useState(dataIn ?? "");
   const [fim, setFim] = useState(dataOut ?? "");
+  const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
     setInicio(dataIn ?? "");
     setFim(dataOut ?? "");
   }, [dataIn, dataOut]);
+
+  const contagem = useContagemPreview(
+    {
+      ...search,
+      data_in: inicio || undefined,
+      data_out: inicio && fim ? fim : undefined,
+    },
+    aberto,
+  );
 
   const rotulo = dataIn
     ? dataOut
@@ -221,6 +237,8 @@ function PainelPeriodo({
       rotulo={rotulo}
       ativo={!!dataIn}
       larguraDesktop="w-auto"
+      contagem={contagem}
+      onAbertoChange={setAberto}
       onLimpar={() => {
         setInicio("");
         setFim("");
@@ -244,12 +262,14 @@ function PainelPeriodo({
 }
 
 function PainelHospedes({
+  search,
   adultos,
   criancas,
   total,
   definido,
   onAplicar,
 }: {
+  search: ExplorarSearch;
   adultos?: number;
   criancas?: number;
   total: number;
@@ -258,6 +278,7 @@ function PainelHospedes({
 }) {
   const [rascunhoAdultos, setRascunhoAdultos] = useState(adultos ?? 1);
   const [rascunhoCriancas, setRascunhoCriancas] = useState(criancas ?? 0);
+  const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
     setRascunhoAdultos(adultos ?? 1);
@@ -266,11 +287,22 @@ function PainelHospedes({
 
   const totalRascunho = rascunhoAdultos + rascunhoCriancas;
 
+  const contagem = useContagemPreview(
+    {
+      ...search,
+      adultos: rascunhoAdultos !== 1 ? rascunhoAdultos : undefined,
+      criancas: rascunhoCriancas !== 0 ? rascunhoCriancas : undefined,
+    },
+    aberto,
+  );
+
   return (
     <PainelFiltro
       titulo="Hóspedes"
       rotulo={definido ? `${total} hóspede${total === 1 ? "" : "s"}` : "Hóspedes"}
       ativo={definido}
+      contagem={contagem}
+      onAbertoChange={setAberto}
       onLimpar={() => {
         setRascunhoAdultos(1);
         setRascunhoCriancas(0);
@@ -335,27 +367,41 @@ function numeroOuUndefined(v: string): number | undefined {
 }
 
 function PainelPreco({
+  search,
   precoMin,
   precoMax,
   onAplicar,
 }: {
+  search: ExplorarSearch;
   precoMin?: number;
   precoMax?: number;
   onAplicar: (min?: number, max?: number) => void;
 }) {
   const [min, setMin] = useState(precoMin?.toString() ?? "");
   const [max, setMax] = useState(precoMax?.toString() ?? "");
+  const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
     setMin(precoMin?.toString() ?? "");
     setMax(precoMax?.toString() ?? "");
   }, [precoMin, precoMax]);
 
+  const contagem = useContagemPreview(
+    {
+      ...search,
+      preco_min: numeroOuUndefined(min),
+      preco_max: numeroOuUndefined(max),
+    },
+    aberto,
+  );
+
   return (
     <PainelFiltro
       titulo="Preço por noite"
       rotulo={rotuloPreco(precoMin, precoMax)}
       ativo={precoMin !== undefined || precoMax !== undefined}
+      contagem={contagem}
+      onAbertoChange={setAberto}
       onLimpar={() => {
         setMin("");
         setMax("");

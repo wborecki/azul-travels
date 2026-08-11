@@ -110,7 +110,7 @@ export function EstabCard(props: EstabCardComponentProps) {
               <Pill key={k} {...RECURSO_BADGES[k]} />
             ))}
             {vm.recursosAtivos.length > maxRecursos && (
-              <span className="text-[11px] text-muted-foreground self-center font-medium">
+              <span className="text-xs text-muted-foreground self-center font-medium">
                 +{vm.recursosAtivos.length - maxRecursos}
               </span>
             )}

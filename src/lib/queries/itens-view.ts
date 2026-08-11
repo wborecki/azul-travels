@@ -276,6 +276,36 @@ export async function fetchItensViewPaginated(
   };
 }
 
+export async function fetchItensViewTotal(filters: ItensViewFilters = {}): Promise<number> {
+  const unavailableIds = await fetchItensIndisponiveis(filters.data_in, filters.data_out);
+  const proximosIds =
+    filters.centro && filters.raio_km !== undefined
+      ? await fetchIdsProximos(filters.centro, filters.raio_km)
+      : null;
+
+  const base = supabase.from("ofertas_view").select("id", { count: "exact", head: true });
+
+  const q = applyItensViewFilters(base, {
+    ...filters,
+    pagina: undefined,
+    tamanhoPagina: undefined,
+  });
+
+  const comDisponibilidade =
+    unavailableIds.length > 0
+      ? (q.not("id", "in", `(${unavailableIds.join(",")})`) as typeof q)
+      : q;
+
+  const comProximidade =
+    proximosIds !== null
+      ? (applyProximidade(comDisponibilidade, proximosIds) as typeof comDisponibilidade)
+      : comDisponibilidade;
+
+  const { error, count } = await comProximidade;
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export const ITEM_MAPA_LIMITE = 500;
 
 // `natureza` decide o formato do pino; `estabelecimento_slug` é o destino do

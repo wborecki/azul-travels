@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { LayoutGrid, Loader2, Map as MapIcon, Rows3 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,16 +17,14 @@ import { ContagemResultados, ResultadosLista } from "@/components/explorar/Resul
 import { TrilhoSeloAzul } from "@/components/explorar/TrilhoSeloAzul";
 import type { VarianteCard } from "@/components/explorar/ItemCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useItensViewMapa, useItensViewPagina } from "@/hooks/useItensView";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { comportamentoRolagem } from "@/lib/movimento";
 import { cn } from "@/lib/utils";
 import {
-  fetchItensViewMapa,
-  fetchItensViewPaginated,
   fetchFiltrosPadrao,
   salvarFiltrosPadrao,
   temFiltrosSalvos,
-  type ItensViewMapa,
-  type ItensViewPage,
   type Ordenacao,
 } from "@/lib/queries";
 import {
@@ -73,20 +71,25 @@ function ExplorarPage() {
   const navigate = useNavigate({ from: "/explorar" });
   const { user, loading: authLoading } = useAuth();
 
-  const [pageData, setPageData] = useState<ItensViewPage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(false);
-  const [tentativa, setTentativa] = useState(0);
   const [salvandoPadrao, setSalvandoPadrao] = useState(false);
   const [visualizacao, setVisualizacao] = useState<VarianteCard>("grade");
   const [itemAtivoId, setItemAtivoId] = useState<string | null>(null);
 
-  const [mapaData, setMapaData] = useState<ItensViewMapa | null>(null);
-  const [mapaLoading, setMapaLoading] = useState(false);
-  const [mapaErro, setMapaErro] = useState(false);
   const areaMapaAtiva = temAreaMapa(search);
   const mapaVisivel = search.mapa === true;
   const ehDesktop = useMediaQuery("(min-width: 1024px)");
+
+  const filtros = useMemo(() => searchToFilters(search), [search]);
+
+  const consultaLista = useItensViewPagina(filtros);
+  const consultaMapa = useItensViewMapa(filtros, mapaVisivel);
+
+  const pageData = consultaLista.data ?? null;
+  const loading = consultaLista.isFetching;
+  const erro = consultaLista.isError;
+
+  const mapaData = consultaMapa.data ?? null;
+  const mapaErro = consultaMapa.isError;
 
   function escolherVisualizacao(nova: VarianteCard) {
     setVisualizacao(nova);
@@ -98,7 +101,7 @@ function ExplorarPage() {
     if (!ehDesktop) return;
     document
       .querySelector(`[data-item-id="${CSS.escape(id)}"]`)
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      ?.scrollIntoView({ behavior: comportamentoRolagem(), block: "center" });
   }
 
   function handleBoundsChange(bounds: BoundsSimples) {
@@ -147,45 +150,16 @@ function ExplorarPage() {
   }, [mapaVisivel, ehDesktop]);
 
   useEffect(() => {
-    let alive = true;
-    setLoading(true);
-    setErro(false);
-    fetchItensViewPaginated(searchToFilters(search))
-      .then((page) => {
-        if (alive) setPageData(page);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!alive) return;
-        setErro(true);
-        toast.error("Não foi possível carregar os resultados.");
-      })
-      .finally(() => alive && setLoading(false));
-    return () => {
-      alive = false;
-    };
-  }, [search, tentativa]);
+    if (!erro) return;
+    console.error(consultaLista.error);
+    toast.error("Não foi possível carregar os resultados.");
+  }, [erro, consultaLista.error]);
 
   useEffect(() => {
-    if (!mapaVisivel) return;
-    let alive = true;
-    setMapaLoading(true);
-    setMapaErro(false);
-    fetchItensViewMapa(searchToFilters(search))
-      .then((dados) => {
-        if (alive) setMapaData(dados);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!alive) return;
-        setMapaErro(true);
-        toast.error("Não foi possível carregar o mapa.");
-      })
-      .finally(() => alive && setMapaLoading(false));
-    return () => {
-      alive = false;
-    };
-  }, [mapaVisivel, search, tentativa]);
+    if (!mapaErro) return;
+    console.error(consultaMapa.error);
+    toast.error("Não foi possível carregar o mapa.");
+  }, [mapaErro, consultaMapa.error]);
 
   useEffect(() => {
     if (loading || !pageData) return;
@@ -234,7 +208,7 @@ function ExplorarPage() {
 
   function irParaPagina(pagina: number) {
     void navigate({ search: (prev) => ({ ...prev, pagina: pagina > 1 ? pagina : undefined }) });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: comportamentoRolagem() });
   }
 
   function limparTudo() {
@@ -280,7 +254,10 @@ function ExplorarPage() {
       ? { lat: search.centro_lat, lng: search.centro_lng }
       : undefined;
 
-  const onTentarNovamente = () => setTentativa((t) => t + 1);
+  const onTentarNovamente = () => {
+    void consultaLista.refetch();
+    if (mapaVisivel) void consultaMapa.refetch();
+  };
 
   const conteudoLista = (
     <>
@@ -369,6 +346,7 @@ function ExplorarPage() {
 
         <ResultadosLista
           loading={loading}
+          atualizando={consultaLista.isPlaceholderData && consultaLista.isFetching}
           erro={erro}
           pageData={pageData}
           areaAtiva={areaMapaAtiva}
@@ -403,9 +381,9 @@ function ExplorarPage() {
         <div className="flex h-full items-center justify-center">
           <ErroMapa onTentarNovamente={onTentarNovamente} />
         </div>
-      ) : !montado || (mapaLoading && !mapaData) ? (
+      ) : !montado || !mapaData ? (
         <MapaSkeleton />
-      ) : mapaData ? (
+      ) : (
         <Suspense fallback={<MapaSkeleton />}>
           <MapView
             items={mapaData.items}
@@ -425,7 +403,7 @@ function ExplorarPage() {
             onFechar={() => patchSearch({ mapa: undefined })}
           />
         </Suspense>
-      ) : null}
+      )}
     </div>
   );
 

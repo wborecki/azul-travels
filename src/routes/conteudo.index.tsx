@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Search, X } from "lucide-react";
 import { formatDateBR } from "@/lib/brazil";
+import { comportamentoRolagem } from "@/lib/movimento";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { filtroConteudoPublico } from "@/lib/conteudoPublico";
 import {
@@ -136,7 +137,8 @@ function ConteudoLista() {
   }
   function irParaPagina(p: number) {
     void navigate({ search: (prev: ConteudoSearch) => ({ ...prev, page: p }) });
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined")
+      window.scrollTo({ top: 0, behavior: comportamentoRolagem() });
   }
 
   const temFiltro = q.trim().length > 0 || catAtual !== "todas";

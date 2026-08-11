@@ -1,10 +1,11 @@
 import { forwardRef, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { chipClasses } from "@/components/explorar/chips";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { ContagemPreview } from "@/hooks/useContagemPreview";
 import { cn } from "@/lib/utils";
 
 interface GatilhoChipProps extends React.ComponentPropsWithoutRef<"button"> {
@@ -37,9 +38,28 @@ interface PainelFiltroProps {
   rotulo: string;
   ativo: boolean;
   larguraDesktop?: string;
+  contagem?: ContagemPreview;
+  onAbertoChange?: (aberto: boolean) => void;
   onLimpar?: () => void;
   onAplicar?: () => void;
   children: (fechar: () => void) => ReactNode;
+}
+
+function RotuloAplicar({ contagem }: { contagem?: ContagemPreview }) {
+  if (!contagem || (contagem.total === null && !contagem.carregando)) return <>Aplicar</>;
+  if (contagem.total === null) {
+    return (
+      <>
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Aplicar
+      </>
+    );
+  }
+  if (contagem.total === 0) return <>Nenhum resultado</>;
+  return (
+    <>
+      Ver {contagem.total} resultado{contagem.total === 1 ? "" : "s"}
+    </>
+  );
 }
 
 export function PainelFiltro({
@@ -47,6 +67,8 @@ export function PainelFiltro({
   rotulo,
   ativo,
   larguraDesktop = "w-[min(20rem,calc(100vw-2rem))]",
+  contagem,
+  onAbertoChange,
   onLimpar,
   onAplicar,
   children,
@@ -54,7 +76,12 @@ export function PainelFiltro({
   const isMobile = useIsMobile();
   const [aberto, setAberto] = useState(false);
 
-  const fechar = () => setAberto(false);
+  function mudarAberto(proximo: boolean) {
+    setAberto(proximo);
+    onAbertoChange?.(proximo);
+  }
+
+  const fechar = () => mudarAberto(false);
   const temAcoes = !!onLimpar || !!onAplicar;
 
   function limpar() {
@@ -74,9 +101,9 @@ export function PainelFiltro({
           ativo={ativo}
           rotulo={rotulo}
           aberto={aberto}
-          onClick={() => setAberto(true)}
+          onClick={() => mudarAberto(true)}
         />
-        <Sheet open={aberto} onOpenChange={setAberto}>
+        <Sheet open={aberto} onOpenChange={mudarAberto}>
           <SheetContent
             side="bottom"
             aria-describedby={undefined}
@@ -100,7 +127,7 @@ export function PainelFiltro({
                 {temAcoes ? "Limpar" : "Fechar"}
               </button>
               <Button type="button" onClick={temAcoes ? aplicar : fechar} className="min-w-32">
-                {temAcoes ? "Aplicar" : "Concluir"}
+                {temAcoes ? <RotuloAplicar contagem={contagem} /> : "Concluir"}
               </Button>
             </div>
           </SheetContent>
@@ -110,7 +137,7 @@ export function PainelFiltro({
   }
 
   return (
-    <Popover open={aberto} onOpenChange={setAberto}>
+    <Popover open={aberto} onOpenChange={mudarAberto}>
       <PopoverTrigger asChild>
         <GatilhoChip ativo={ativo} rotulo={rotulo} aberto={aberto} />
       </PopoverTrigger>
@@ -130,7 +157,7 @@ export function PainelFiltro({
               Limpar
             </button>
             <Button type="button" size="sm" onClick={aplicar}>
-              Aplicar
+              <RotuloAplicar contagem={contagem} />
             </Button>
           </div>
         )}

@@ -3,6 +3,7 @@ import { Logo } from "./Logo";
 import { Menu, X, ArrowRight, LogOut, Repeat } from "lucide-react";
 import { Fragment, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { BotaoModoCalmo } from "@/components/BotaoModoCalmo";
 import { getAccountNav } from "@/lib/account-nav";
 import {
   DropdownMenu,
@@ -93,6 +94,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
+          <BotaoModoCalmo />
           {user && role ? (
             <>
               <Link
@@ -194,6 +196,7 @@ export function Header() {
                 </a>
               ),
             )}
+            <BotaoModoCalmo variante="linha" />
             {user && role ? (
               <>
                 {sections.map((section) => (

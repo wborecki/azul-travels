@@ -196,6 +196,61 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .animate-spin {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+[data-modo-calmo] {
+  scroll-behavior: auto;
+}
+
+[data-modo-calmo] *,
+[data-modo-calmo] *::before,
+[data-modo-calmo] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}
+
+[data-modo-calmo] .animate-spin {
+  animation-duration: 1.6s !important;
+  animation-iteration-count: infinite !important;
+}
+
+[data-modo-calmo] img:not(.leaflet-tile),
+[data-modo-calmo] video {
+  filter: saturate(0.7);
+}
+
+[data-modo-calmo] .leaflet-tile-pane {
+  filter: saturate(0.35) brightness(1.06) contrast(0.9);
+}
+
+[data-modo-calmo] .group:hover .group-hover\:scale-105,
+[data-modo-calmo] .hover\:scale-105:hover,
+[data-modo-calmo] .hover\:scale-110:hover {
+  transform: none !important;
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display);

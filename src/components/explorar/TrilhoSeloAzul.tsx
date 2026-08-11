@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { ItemCard } from "@/components/explorar/ItemCard";
 import { LinhaRolavel } from "@/components/explorar/LinhaRolavel";
-import { fetchItensViewPaginated, type ItemView } from "@/lib/queries";
+import { useItensViewPagina } from "@/hooks/useItensView";
 import { searchToFilters, type ExplorarSearch } from "@/lib/explorar-search";
 
 const MIN_ITENS = 3;
@@ -15,26 +14,14 @@ interface TrilhoSeloAzulProps {
 }
 
 export function TrilhoSeloAzul({ search, totalResultados, onVerTodos }: TrilhoSeloAzulProps) {
-  const [itens, setItens] = useState<ItemView[]>([]);
+  const { data } = useItensViewPagina({
+    ...searchToFilters(search),
+    selos: ["selo_azul"],
+    pagina: 1,
+    tamanhoPagina: MAX_ITENS,
+  });
 
-  useEffect(() => {
-    let alive = true;
-    fetchItensViewPaginated({
-      ...searchToFilters(search),
-      selos: ["selo_azul"],
-      pagina: 1,
-      tamanhoPagina: MAX_ITENS,
-    })
-      .then((page) => {
-        if (alive) setItens(page.items);
-      })
-      .catch(() => {
-        if (alive) setItens([]);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [search]);
+  const itens = data?.items ?? [];
 
   if (itens.length < MIN_ITENS || itens.length >= totalResultados) return null;
 

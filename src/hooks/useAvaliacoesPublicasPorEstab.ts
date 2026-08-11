@@ -13,11 +13,11 @@
  *  - `error` é `Error | null`; preservamos a `Error` original do
  *    Supabase quando possível e empacotamos qualquer outra coisa.
  *
- * Por que não TanStack Query?
- *  Este projeto ainda não tem QueryClientProvider configurado e o resto
- *  das páginas usa o padrão `useState + useEffect`. Manter a mesma
- *  forma evita inconsistência. Se um dia adotarmos Query, este hook
- *  é o único ponto de troca - a UI consumidora não muda.
+ * Por que ainda não TanStack Query?
+ *  O QueryClientProvider passou a existir em `__root.tsx` na Fase 4 do
+ *  redesenho de /explorar, mas só `/explorar` foi migrada. Este hook
+ *  continua sendo o único ponto de troca da página de detalhe - a UI
+ *  consumidora não muda quando ele virar `useQuery`.
  *
  * Cancelamento:
  *  Cada efeito guarda uma flag `cancelled` para descartar respostas de

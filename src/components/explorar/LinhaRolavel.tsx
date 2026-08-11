@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { comportamentoRolagem } from "@/lib/movimento";
 import { cn } from "@/lib/utils";
 
 interface LinhaRolavelProps {
@@ -41,7 +42,10 @@ export function LinhaRolavel({
   function rolar(direcao: 1 | -1) {
     const el = ref.current;
     if (!el) return;
-    el.scrollBy({ left: direcao * Math.round(el.clientWidth * 0.7), behavior: "smooth" });
+    el.scrollBy({
+      left: direcao * Math.round(el.clientWidth * 0.7),
+      behavior: comportamentoRolagem(),
+    });
   }
 
   return (
