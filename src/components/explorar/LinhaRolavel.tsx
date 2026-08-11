@@ -6,9 +6,17 @@ interface LinhaRolavelProps {
   children: ReactNode;
   rotulo: string;
   className?: string;
+  classNameLista?: string;
+  classNameSeta?: string;
 }
 
-export function LinhaRolavel({ children, rotulo, className }: LinhaRolavelProps) {
+export function LinhaRolavel({
+  children,
+  rotulo,
+  className,
+  classNameLista,
+  classNameSeta,
+}: LinhaRolavelProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [temAntes, setTemAntes] = useState(false);
   const [temDepois, setTemDepois] = useState(false);
@@ -43,18 +51,27 @@ export function LinhaRolavel({ children, rotulo, className }: LinhaRolavelProps)
         onScroll={medir}
         role="group"
         aria-label={rotulo}
-        className="flex items-center gap-2 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className={cn(
+          "flex items-center gap-2 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          classNameLista,
+        )}
       >
         {children}
       </div>
 
-      {temAntes && <Seta lado="esquerda" onClick={() => rolar(-1)} />}
-      {temDepois && <Seta lado="direita" onClick={() => rolar(1)} />}
+      {temAntes && <Seta lado="esquerda" onClick={() => rolar(-1)} className={classNameSeta} />}
+      {temDepois && <Seta lado="direita" onClick={() => rolar(1)} className={classNameSeta} />}
     </div>
   );
 }
 
-function Seta({ lado, onClick }: { lado: "esquerda" | "direita"; onClick: () => void }) {
+interface SetaProps {
+  lado: "esquerda" | "direita";
+  onClick: () => void;
+  className?: string;
+}
+
+function Seta({ lado, onClick, className }: SetaProps) {
   const Icone = lado === "esquerda" ? ChevronLeft : ChevronRight;
   return (
     <div
@@ -64,6 +81,7 @@ function Seta({ lado, onClick }: { lado: "esquerda" | "direita"; onClick: () => 
         lado === "esquerda"
           ? "left-0 justify-start bg-gradient-to-r from-white via-white/90 to-transparent"
           : "right-0 justify-end bg-gradient-to-l from-white via-white/90 to-transparent",
+        className,
       )}
     >
       <button

@@ -7,9 +7,12 @@ import {
   BedDouble,
   ChevronLeft,
   ChevronRight,
-  Heart,
   ImageOff,
+  Layers,
+  List,
   LocateFixed,
+  Search,
+  ShieldCheck,
   Star,
   Users,
   X,
@@ -17,7 +20,9 @@ import {
 import { toast } from "sonner";
 import { ESTAB_TIPO_LABEL } from "@/lib/enums";
 import { MAPA_ZOOM_MAXIMO, MaptilerBaseLayer } from "@/components/maps/MaptilerBaseLayer";
+import { pinIcon } from "@/components/explorar/pinos";
 import { Button } from "@/components/ui/button";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
 import type { ItemMapa } from "@/lib/queries";
 
@@ -28,39 +33,7 @@ import "./map-theme.css";
 const CENTRO_BRASIL: L.LatLngExpression = [-14.24, -51.93];
 const ZOOM_BRASIL = 4;
 const ZOOM_PIN_UNICO = 14;
-
-function formatPrecoCurto(preco: number): string {
-  return preco.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
-  );
-}
-
-/**
- * Pino da oferta. Estadia mostra o preço; visita não tem preço a mostrar,
- * então mostra o rótulo do tipo do local ("Restaurante", "Parque").
- */
-function precoIcon(item: ItemMapa): L.DivIcon {
-  const texto =
-    item.preco !== null
-      ? formatPrecoCurto(item.preco)
-      : ESTAB_TIPO_LABEL[item.estabelecimento_tipo];
-  return L.divIcon({
-    className: "",
-    html: `<div class="pin-preco"><span>${escapeHtml(texto)}</span></div>`,
-    iconSize: [64, 26],
-    iconAnchor: [32, 13],
-  });
-}
+const ESPERA_INICIAL_MS = 700;
 
 function tamanhoCluster(n: number): number {
   if (n < 10) return 34;
@@ -86,8 +59,6 @@ export interface BoundsSimples {
   oeste: number;
 }
 
-const DEBOUNCE_MOVIMENTO_MS = 450;
-
 function boundsParaSimples(bounds: L.LatLngBounds): BoundsSimples {
   return {
     norte: bounds.getNorth(),
@@ -97,11 +68,6 @@ function boundsParaSimples(bounds: L.LatLngBounds): BoundsSimples {
   };
 }
 
-/**
- * Ajusta o enquadramento aos items exibidos — mas só quando não há uma área
- * de mapa ativa (bbox ou "perto de mim"), senão entraria em loop com
- * ReportarMovimento (fitBounds -> moveend -> nova busca -> novo fitBounds).
- */
 function AjustarEnquadramento({
   items,
   suspenso,
@@ -130,7 +96,6 @@ function AjustarEnquadramento({
   return null;
 }
 
-/** Centraliza o mapa em um ponto (usado por "Perto de mim") sem disparar nova busca. */
 function FocarCentro({
   centro,
   ignorarProximoMove,
@@ -151,15 +116,14 @@ function FocarCentro({
   return null;
 }
 
-/** Observa o movimento do mapa e reporta os novos bounds (com debounce). */
-function ReportarMovimento({
+function ObservarMovimento({
   ignorarProximoMove,
-  onBoundsChange,
+  onMovimento,
 }: {
   ignorarProximoMove: MutableRefObject<boolean>;
-  onBoundsChange: (bounds: BoundsSimples) => void;
+  onMovimento: (bounds: BoundsSimples) => void;
 }) {
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const montadoEm = useRef(Date.now());
 
   const map = useMapEvents({
     moveend: () => {
@@ -167,17 +131,10 @@ function ReportarMovimento({
         ignorarProximoMove.current = false;
         return;
       }
-      const bounds = boundsParaSimples(map.getBounds());
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => onBoundsChange(bounds), DEBOUNCE_MOVIMENTO_MS);
+      if (Date.now() - montadoEm.current < ESPERA_INICIAL_MS) return;
+      onMovimento(boundsParaSimples(map.getBounds()));
     },
   });
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   return null;
 }
@@ -188,11 +145,16 @@ interface MapViewProps {
   dataOut?: string;
   adultos?: number;
   criancas?: number;
-  /** Há bbox ou centro/raio ativo na URL — suprime o auto-enquadramento. */
   areaAtiva: boolean;
+  truncado: boolean;
+  total: number;
+  itemAtivoId: string | null;
+  onItemAtivo: (id: string | null) => void;
+  onSelecionarItem: (id: string) => void;
   onBoundsChange: (bounds: BoundsSimples) => void;
   onPertoDeMim: (coords: { lat: number; lng: number }) => void;
   centroFoco?: { lat: number; lng: number };
+  onFechar: () => void;
 }
 
 export function MapView({
@@ -202,19 +164,99 @@ export function MapView({
   adultos,
   criancas,
   areaAtiva,
+  truncado,
+  total,
+  itemAtivoId,
+  onItemAtivo,
+  onSelecionarItem,
   onBoundsChange,
   onPertoDeMim,
   centroFoco,
+  onFechar,
 }: MapViewProps) {
-  const searchQuarto = {
-    ...(dataIn ? { checkIn: dataIn } : {}),
-    ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
-    ...(adultos !== undefined ? { adultos } : {}),
-    ...(criancas !== undefined ? { criancas } : {}),
-  };
-
+  const ehDesktop = useMediaQuery("(min-width: 1024px)");
+  const mapRef = useRef<L.Map | null>(null);
+  const marcadoresRef = useRef(new Map<string, L.Marker>());
   const ignorarProximoMove = useRef(false);
+
   const [buscandoLocalizacao, setBuscandoLocalizacao] = useState(false);
+  const [boundsPendentes, setBoundsPendentes] = useState<BoundsSimples | null>(null);
+  const [itemSelecionado, setItemSelecionado] = useState<ItemMapa | null>(null);
+  const [avisoFechado, setAvisoFechado] = useState(false);
+
+  const searchQuarto = useMemo(
+    () => ({
+      ...(dataIn ? { checkIn: dataIn } : {}),
+      ...(dataIn && dataOut ? { checkOut: dataOut } : {}),
+      ...(adultos !== undefined ? { adultos } : {}),
+      ...(criancas !== undefined ? { criancas } : {}),
+    }),
+    [dataIn, dataOut, adultos, criancas],
+  );
+
+  const icones = useMemo(() => new Map(items.map((i) => [i.id, pinIcon(i)])), [items]);
+  const posicoes = useMemo(
+    () => new Map(items.map((i) => [i.id, [i.latitude, i.longitude] as [number, number]])),
+    [items],
+  );
+
+  const acoesRef = useRef({ onItemAtivo, onSelecionarItem });
+  useEffect(() => {
+    acoesRef.current = { onItemAtivo, onSelecionarItem };
+  });
+
+  useEffect(() => {
+    setBoundsPendentes(null);
+    setItemSelecionado(null);
+    setAvisoFechado(false);
+  }, [items]);
+
+  useEffect(() => {
+    if (!itemAtivoId) return;
+    const marcador = marcadoresRef.current.get(itemAtivoId);
+    const elemento = marcador?.getElement();
+    if (!marcador || !elemento) return;
+    elemento.classList.add("pin-ativo");
+    marcador.setZIndexOffset(1000);
+    return () => {
+      elemento.classList.remove("pin-ativo");
+      marcador.setZIndexOffset(0);
+    };
+  }, [itemAtivoId, items]);
+
+  const marcadores = useMemo(
+    () =>
+      items.map((item) => (
+        <Marker
+          key={item.id}
+          position={posicoes.get(item.id) as [number, number]}
+          icon={icones.get(item.id)}
+          ref={(instancia) => {
+            if (instancia) marcadoresRef.current.set(item.id, instancia);
+            else marcadoresRef.current.delete(item.id);
+          }}
+          eventHandlers={{
+            click: () => {
+              acoesRef.current.onSelecionarItem(item.id);
+              if (!ehDesktop) setItemSelecionado(item);
+            },
+            mouseover: () => acoesRef.current.onItemAtivo(item.id),
+            mouseout: () => acoesRef.current.onItemAtivo(null),
+          }}
+        >
+          {ehDesktop && (
+            <Popup closeButton={false} autoPanPadding={[24, 24]}>
+              <MiniCard
+                item={item}
+                searchQuarto={searchQuarto}
+                onFechar={() => mapRef.current?.closePopup()}
+              />
+            </Popup>
+          )}
+        </Marker>
+      )),
+    [items, posicoes, icones, ehDesktop, searchQuarto],
+  );
 
   function handlePertoDeMim() {
     if (!navigator.geolocation) {
@@ -239,14 +281,17 @@ export function MapView({
     );
   }
 
+  const mostrarAvisoTruncado = truncado && !avisoFechado;
+
   return (
     <div className="relative h-full w-full">
       <MapContainer
+        ref={mapRef}
         center={CENTRO_BRASIL}
         zoom={ZOOM_BRASIL}
         scrollWheelZoom
         maxZoom={MAPA_ZOOM_MAXIMO}
-        className="mapa-azul h-full w-full rounded-2xl"
+        className={cn("mapa-azul h-full w-full", !ehDesktop && "mapa-com-barra")}
         style={{ zIndex: 0 }}
       >
         <MaptilerBaseLayer />
@@ -257,9 +302,9 @@ export function MapView({
           ignorarProximoMove={ignorarProximoMove}
         />
         <FocarCentro centro={centroFoco} ignorarProximoMove={ignorarProximoMove} />
-        <ReportarMovimento
+        <ObservarMovimento
           ignorarProximoMove={ignorarProximoMove}
-          onBoundsChange={onBoundsChange}
+          onMovimento={setBoundsPendentes}
         />
 
         <MarkerClusterGroup
@@ -268,28 +313,88 @@ export function MapView({
           maxClusterRadius={60}
           showCoverageOnHover={false}
         >
-          {items.map((item) => (
-            <Marker key={item.id} position={[item.latitude, item.longitude]} icon={precoIcon(item)}>
-              <Popup closeButton={false} autoPanPadding={[24, 24]}>
-                <MiniCard item={item} searchQuarto={searchQuarto} />
-              </Popup>
-            </Marker>
-          ))}
+          {marcadores}
         </MarkerClusterGroup>
       </MapContainer>
 
-      <div className="absolute bottom-3 right-3 z-[1000]">
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={buscandoLocalizacao}
-          className="rounded-full shadow-md"
-          onClick={handlePertoDeMim}
-        >
-          <LocateFixed className="h-4 w-4 mr-1.5" />
-          {buscandoLocalizacao ? "Localizando…" : "Perto de mim"}
-        </Button>
+      {!ehDesktop && (
+        <div className="absolute inset-x-0 top-0 z-[1100] flex items-center justify-between gap-2 border-b border-border bg-white/95 px-3 py-2 backdrop-blur">
+          <span className="text-sm font-semibold text-primary">
+            {total} {total === 1 ? "opção" : "opções"} no mapa
+          </span>
+          <Button size="sm" variant="outline" onClick={onFechar}>
+            <List className="mr-1.5 h-4 w-4" />
+            Ver lista
+          </Button>
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-0 z-[1000] flex flex-col items-center gap-2 px-3",
+          ehDesktop ? "top-3" : "top-14",
+        )}
+      >
+        {mostrarAvisoTruncado && (
+          <div className="pointer-events-auto flex max-w-md items-start gap-2 rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground shadow-md">
+            <Layers className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>
+              Mostrando {items.length} de {total} — aproxime o mapa e busque nesta área para ver o
+              resto.
+            </span>
+            <button
+              type="button"
+              aria-label="Fechar aviso"
+              onClick={() => setAvisoFechado(true)}
+              className="-mr-1 -mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-azul-claro hover:text-primary"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {boundsPendentes && (
+          <button
+            type="button"
+            onClick={() => {
+              onBoundsChange(boundsPendentes);
+              setBoundsPendentes(null);
+            }}
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2"
+          >
+            <Search className="h-4 w-4" />
+            Buscar nesta área
+          </button>
+        )}
       </div>
+
+      {!(itemSelecionado && !ehDesktop) && (
+        <div className="absolute bottom-3 right-3 z-[1000]">
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={buscandoLocalizacao}
+            className="rounded-full shadow-md"
+            onClick={handlePertoDeMim}
+          >
+            <LocateFixed className="mr-1.5 h-4 w-4" />
+            {buscandoLocalizacao ? "Localizando…" : "Perto de mim"}
+          </Button>
+        </div>
+      )}
+
+      {itemSelecionado && !ehDesktop && (
+        <div className="absolute inset-x-0 bottom-0 z-[1100] p-3">
+          <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
+            <MiniCard
+              item={itemSelecionado}
+              searchQuarto={searchQuarto}
+              onFechar={() => setItemSelecionado(null)}
+              className="w-full"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -297,10 +402,11 @@ export function MapView({
 interface MiniCardProps {
   item: ItemMapa;
   searchQuarto: Record<string, string | number>;
+  onFechar: () => void;
+  className?: string;
 }
 
-function MiniCard({ item, searchQuarto }: MiniCardProps) {
-  const map = useMap();
+function MiniCard({ item, searchQuarto, onFechar, className }: MiniCardProps) {
   const fotos =
     item.imagens.length > 0
       ? item.imagens
@@ -308,12 +414,11 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
         ? [item.estabelecimento_foto_capa]
         : [];
   const [indice, setIndice] = useState(0);
-  const [favorito, setFavorito] = useState(false);
 
   const irPara = (i: number) => setIndice((i + fotos.length) % fotos.length);
 
   return (
-    <div className="w-64">
+    <div className={cn("w-64", className)}>
       <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-t-xl bg-azul-claro">
         {fotos.length > 0 ? (
           <img
@@ -328,25 +433,21 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
           </div>
         )}
 
-        <div className="absolute right-2 top-2 flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label={favorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            aria-pressed={favorito}
-            onClick={() => setFavorito((v) => !v)}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-foreground/70 shadow-sm transition hover:scale-105 hover:text-red-500"
-          >
-            <Heart className={cn("h-4 w-4", favorito && "fill-red-500 text-red-500")} />
-          </button>
-          <button
-            type="button"
-            aria-label="Fechar"
-            onClick={() => map.closePopup()}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-foreground/70 shadow-sm transition hover:scale-105 hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-label="Fechar"
+          onClick={onFechar}
+          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-foreground/70 shadow-sm transition hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        {item.selo_azul && (
+          <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-primary shadow-md">
+            <ShieldCheck className="h-3.5 w-3.5 text-secondary" />
+            Selo Azul
+          </span>
+        )}
 
         {fotos.length > 1 && (
           <>
@@ -354,40 +455,25 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
               type="button"
               aria-label="Foto anterior"
               onClick={() => irPara(indice - 1)}
-              className="absolute left-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground/70 opacity-0 shadow-sm transition group-hover:opacity-100 hover:scale-105"
+              className="absolute left-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground/70 shadow-sm transition md:opacity-0 md:group-hover:opacity-100"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
               aria-label="Próxima foto"
               onClick={() => irPara(indice + 1)}
-              className="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground/70 opacity-0 shadow-sm transition group-hover:opacity-100 hover:scale-105"
+              className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground/70 shadow-sm transition md:opacity-0 md:group-hover:opacity-100"
             >
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             </button>
-
-            <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1">
-              {fotos.map((foto, i) => (
-                <button
-                  key={foto}
-                  type="button"
-                  aria-label={`Ver foto ${i + 1}`}
-                  onClick={() => setIndice(i)}
-                  className={cn(
-                    "h-1.5 w-1.5 rounded-full transition",
-                    i === indice ? "bg-white" : "bg-white/50",
-                  )}
-                />
-              ))}
-            </div>
           </>
         )}
       </div>
 
       <LinkDaOferta item={item} searchQuarto={searchQuarto}>
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <span className="truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {ESTAB_TIPO_LABEL[item.estabelecimento_tipo]} · {item.estabelecimento_nome}
           </span>
           {item.avaliacao_media !== null && (
@@ -409,7 +495,7 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
         </p>
 
         {item.capacidade_total !== null && item.quantidade_camas !== null && (
-          <div className="mt-1 flex items-center gap-3 text-[11px] text-foreground/70">
+          <div className="mt-1 flex items-center gap-3 text-xs text-foreground/70">
             <span className="inline-flex items-center gap-1">
               <Users className="h-3 w-3" /> {item.capacidade_total}
             </span>
@@ -423,7 +509,7 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
           {item.preco !== null ? (
             <>
               {item.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-              <span className="text-[11px] font-normal text-muted-foreground"> / noite</span>
+              <span className="text-xs font-normal text-muted-foreground"> / noite</span>
             </>
           ) : (
             "Reserva sem cobrança"
@@ -434,11 +520,6 @@ function MiniCard({ item, searchQuarto }: MiniCardProps) {
   );
 }
 
-/**
- * Destino do clique no mini card: o quarto numa estadia, a página do local
- * numa visita. São dois `Link` porque o `to` do TanStack é tipado e cada rota
- * tem params próprios.
- */
 function LinkDaOferta({
   item,
   searchQuarto,

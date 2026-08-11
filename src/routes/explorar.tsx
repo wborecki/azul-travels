@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { List, Loader2, Map as MapIcon } from "lucide-react";
+import { LayoutGrid, Loader2, Map as MapIcon, Rows3 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,10 @@ import { SearchBar } from "@/components/explorar/SearchBar";
 import { BarraFiltros } from "@/components/explorar/BarraFiltros";
 import { ChipsAtivos } from "@/components/explorar/ChipsAtivos";
 import { ContagemResultados, ResultadosLista } from "@/components/explorar/ResultadosLista";
+import { TrilhoSeloAzul } from "@/components/explorar/TrilhoSeloAzul";
+import type { VarianteCard } from "@/components/explorar/ItemCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
 import {
   fetchItensViewMapa,
@@ -75,19 +78,30 @@ function ExplorarPage() {
   const [erro, setErro] = useState(false);
   const [tentativa, setTentativa] = useState(0);
   const [salvandoPadrao, setSalvandoPadrao] = useState(false);
+  const [visualizacao, setVisualizacao] = useState<VarianteCard>("grade");
+  const [itemAtivoId, setItemAtivoId] = useState<string | null>(null);
 
   const [mapaData, setMapaData] = useState<ItensViewMapa | null>(null);
   const [mapaLoading, setMapaLoading] = useState(false);
   const [mapaErro, setMapaErro] = useState(false);
   const areaMapaAtiva = temAreaMapa(search);
   const mapaVisivel = search.mapa === true;
+  const ehDesktop = useMediaQuery("(min-width: 1024px)");
 
-  function toggleMapa() {
-    patchSearch({ mapa: mapaVisivel ? undefined : true });
+  function escolherVisualizacao(nova: VarianteCard) {
+    setVisualizacao(nova);
+    if (mapaVisivel) patchSearch({ mapa: undefined });
+  }
+
+  function selecionarItemDoMapa(id: string) {
+    setItemAtivoId(id);
+    if (!ehDesktop) return;
+    document
+      .querySelector(`[data-item-id="${CSS.escape(id)}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function handleBoundsChange(bounds: BoundsSimples) {
-    // replace: o pan do mapa não deve empilhar entradas no histórico do navegador.
     void navigate({
       replace: true,
       search: (prev) => ({
@@ -122,6 +136,15 @@ function ExplorarPage() {
 
   const [montado, setMontado] = useState(false);
   useEffect(() => setMontado(true), []);
+
+  useEffect(() => {
+    if (!mapaVisivel || ehDesktop) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = anterior;
+    };
+  }, [mapaVisivel, ehDesktop]);
 
   useEffect(() => {
     let alive = true;
@@ -239,12 +262,6 @@ function ExplorarPage() {
   const tiposAtuais = parseTiposCsv(search.tipos);
   const tipoAtivo = tiposAtuais.length === 1 ? tiposAtuais[0] : undefined;
 
-  /**
-   * Troca de categoria pelas pills. Sair de hospedagem leva junto os filtros
-   * que só existem lá (preço por noite, período, hóspedes): eles somem do
-   * painel, e deixá-los aplicados na URL esconderia resultados por um motivo
-   * que a família não teria mais como ver nem desfazer.
-   */
   const selecionarTipo = (tipo?: EstabTipo) => {
     const novos = parseTiposCsv(tipo);
     patchSearch({
@@ -254,8 +271,9 @@ function ExplorarPage() {
   };
   const temFiltros = temFiltrosRelevantes(search);
 
-  const mostrarDicaSelo =
-    (pageData?.total ?? 0) > 1 && !parseSelosCsv(search.selos).includes("selo_azul");
+  const semFiltroDeSelo = !parseSelosCsv(search.selos).includes("selo_azul");
+  const mostrarDicaSelo = (pageData?.total ?? 0) > 1 && semFiltroDeSelo;
+  const mostrarTrilhoSelo = semFiltroDeSelo && !areaMapaAtiva && !!pageData;
 
   const centroFoco =
     search.centro_lat !== undefined && search.centro_lng !== undefined
@@ -263,6 +281,153 @@ function ExplorarPage() {
       : undefined;
 
   const onTentarNovamente = () => setTentativa((t) => t + 1);
+
+  const conteudoLista = (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <ContagemResultados loading={loading} pageData={pageData} areaAtiva={areaMapaAtiva} />
+          {mostrarDicaSelo && (
+            <span className="text-xs text-muted-foreground">
+              · Locais com Selo Azul aparecem primeiro
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div
+            role="group"
+            aria-label="Formato dos resultados"
+            className="inline-flex items-center gap-0.5 rounded-full border border-border bg-white p-0.5"
+          >
+            <BotaoVisualizacao
+              ativo={!mapaVisivel && visualizacao === "grade"}
+              rotulo="Grade"
+              onClick={() => escolherVisualizacao("grade")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </BotaoVisualizacao>
+            <BotaoVisualizacao
+              ativo={!mapaVisivel && visualizacao === "lista"}
+              rotulo="Lista"
+              className="hidden sm:inline-flex"
+              onClick={() => escolherVisualizacao("lista")}
+            >
+              <Rows3 className="h-4 w-4" />
+            </BotaoVisualizacao>
+            <BotaoVisualizacao
+              ativo={mapaVisivel}
+              rotulo="Mapa"
+              onClick={() => patchSearch({ mapa: true })}
+            >
+              <MapIcon className="h-4 w-4" />
+            </BotaoVisualizacao>
+          </div>
+
+          <Select
+            value={search.ordenacao ?? "preco_asc"}
+            onValueChange={(v) =>
+              patchSearch({ ordenacao: v === "preco_asc" ? undefined : (v as Ordenacao) })
+            }
+          >
+            <SelectTrigger className="h-9 w-[11.5rem] bg-white" aria-label="Ordenar resultados">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ORDENACOES_UI.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {ORDENACAO_LABEL[o]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <ChipsAtivos
+        className="mt-3"
+        search={search}
+        areaAtiva={areaMapaAtiva}
+        onPatch={patchSearch}
+        onRemoverTipo={() => selecionarTipo(undefined)}
+        onLimparArea={limparArea}
+        onLimparTudo={limparTudo}
+      />
+
+      <div className="mt-5">
+        {mostrarTrilhoSelo && (
+          <TrilhoSeloAzul
+            search={search}
+            totalResultados={pageData?.total ?? 0}
+            onVerTodos={() =>
+              patchSearch({
+                selos: csvOrUndefined([...parseSelosCsv(search.selos), "selo_azul"]),
+              })
+            }
+          />
+        )}
+
+        <ResultadosLista
+          loading={loading}
+          erro={erro}
+          pageData={pageData}
+          areaAtiva={areaMapaAtiva}
+          temFiltros={temFiltros}
+          visualizacao={visualizacao}
+          mapaVisivel={mapaVisivel}
+          dataIn={search.data_in}
+          dataOut={search.data_out}
+          adultos={search.adultos}
+          criancas={search.criancas}
+          itemAtivoId={itemAtivoId}
+          onItemAtivo={setItemAtivoId}
+          onTentarNovamente={onTentarNovamente}
+          onLimparArea={limparArea}
+          onLimparTudo={limparTudo}
+          irParaPagina={irParaPagina}
+        />
+      </div>
+    </>
+  );
+
+  const painelMapa = (
+    <div
+      className={cn(
+        "overflow-hidden",
+        ehDesktop
+          ? "sticky top-[11.5rem] h-[calc(100dvh-11.5rem)] self-start border-l border-border"
+          : "fixed inset-0 z-50 bg-white",
+      )}
+    >
+      {mapaErro && !mapaData ? (
+        <div className="flex h-full items-center justify-center">
+          <ErroMapa onTentarNovamente={onTentarNovamente} />
+        </div>
+      ) : !montado || (mapaLoading && !mapaData) ? (
+        <MapaSkeleton />
+      ) : mapaData ? (
+        <Suspense fallback={<MapaSkeleton />}>
+          <MapView
+            items={mapaData.items}
+            dataIn={search.data_in}
+            dataOut={search.data_out}
+            adultos={search.adultos}
+            criancas={search.criancas}
+            areaAtiva={areaMapaAtiva}
+            truncado={mapaData.truncado}
+            total={mapaData.total}
+            itemAtivoId={itemAtivoId}
+            onItemAtivo={setItemAtivoId}
+            onSelecionarItem={selecionarItemDoMapa}
+            onBoundsChange={handleBoundsChange}
+            onPertoDeMim={handlePertoDeMim}
+            centroFoco={centroFoco}
+            onFechar={() => patchSearch({ mapa: undefined })}
+          />
+        </Suspense>
+      ) : null}
+    </div>
+  );
 
   return (
     <div className="flex-1 bg-white">
@@ -291,124 +456,48 @@ function ExplorarPage() {
         salvandoPadrao={salvandoPadrao}
       />
 
-      <div className="container mx-auto px-4 pt-4 pb-16">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <ContagemResultados loading={loading} pageData={pageData} areaAtiva={areaMapaAtiva} />
-            {mostrarDicaSelo && (
-              <span className="text-xs text-muted-foreground">
-                · Locais com Selo Azul aparecem primeiro
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant={mapaVisivel ? "default" : "outline"}
-              size="sm"
-              onClick={toggleMapa}
-              className="hidden lg:inline-flex"
-            >
-              <MapIcon className="h-4 w-4 mr-1.5" />
-              {mapaVisivel ? "Ocultar mapa" : "Mostrar mapa"}
-            </Button>
-
-            <Select
-              value={search.ordenacao ?? "preco_asc"}
-              onValueChange={(v) =>
-                patchSearch({ ordenacao: v === "preco_asc" ? undefined : (v as Ordenacao) })
-              }
-            >
-              <SelectTrigger className="h-9 w-[11.5rem] bg-white" aria-label="Ordenar resultados">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ORDENACOES_UI.map((o) => (
-                  <SelectItem key={o} value={o}>
-                    {ORDENACAO_LABEL[o]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {mapaVisivel ? (
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_46%]">
+          <div className="hidden min-w-0 pb-16 pt-4 lg:block lg:pl-8 lg:pr-6">{conteudoLista}</div>
+          {painelMapa}
         </div>
-
-        <ChipsAtivos
-          className="mt-3"
-          search={search}
-          areaAtiva={areaMapaAtiva}
-          onPatch={patchSearch}
-          onRemoverTipo={() => selecionarTipo(undefined)}
-          onLimparArea={limparArea}
-          onLimparTudo={limparTudo}
-        />
-
-        <div className="mt-5 flex flex-col lg:flex-row gap-6 items-start">
-          <div className={cn("min-w-0 flex-1", mapaVisivel && "hidden lg:block")}>
-            <ResultadosLista
-              loading={loading}
-              erro={erro}
-              pageData={pageData}
-              areaAtiva={areaMapaAtiva}
-              temFiltros={temFiltros}
-              dataIn={search.data_in}
-              dataOut={search.data_out}
-              adultos={search.adultos}
-              criancas={search.criancas}
-              onTentarNovamente={onTentarNovamente}
-              onLimparArea={limparArea}
-              onLimparTudo={limparTudo}
-              irParaPagina={irParaPagina}
-            />
-          </div>
-
-          {mapaVisivel && (
-            <div className="w-full lg:w-[420px] xl:w-[480px] shrink-0 h-[70vh] lg:sticky lg:top-[12rem] lg:h-[calc(100vh-13rem)] overflow-hidden rounded-2xl border">
-              {mapaErro && !mapaData ? (
-                <div className="flex h-full items-center justify-center">
-                  <ErroMapa onTentarNovamente={onTentarNovamente} />
-                </div>
-              ) : !montado || (mapaLoading && !mapaData) ? (
-                <MapaSkeleton />
-              ) : mapaData ? (
-                // Mantido montado entre refetches (ex.: pan do mapa) — trocar por
-                // <MapaSkeleton /> aqui recriaria o Leaflet do zero a cada busca,
-                // e o usuário veria o mapa "reiniciar" com zoom a cada movimento.
-                <Suspense fallback={<MapaSkeleton />}>
-                  <MapView
-                    items={mapaData.items}
-                    dataIn={search.data_in}
-                    dataOut={search.data_out}
-                    adultos={search.adultos}
-                    criancas={search.criancas}
-                    areaAtiva={areaMapaAtiva}
-                    onBoundsChange={handleBoundsChange}
-                    onPertoDeMim={handlePertoDeMim}
-                    centroFoco={centroFoco}
-                  />
-                </Suspense>
-              ) : null}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={toggleMapa}
-        className="lg:hidden fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg"
-      >
-        {mapaVisivel ? (
-          <>
-            <List className="h-4 w-4" /> Ver lista
-          </>
-        ) : (
-          <>
-            <MapIcon className="h-4 w-4" /> Ver mapa
-          </>
-        )}
-      </button>
+      ) : (
+        <div className="container mx-auto px-4 pt-4 pb-16">{conteudoLista}</div>
+      )}
     </div>
+  );
+}
+
+interface BotaoVisualizacaoProps {
+  ativo: boolean;
+  rotulo: string;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}
+
+function BotaoVisualizacao({
+  ativo,
+  rotulo,
+  onClick,
+  className,
+  children,
+}: BotaoVisualizacaoProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={ativo}
+      aria-label={rotulo}
+      title={rotulo}
+      className={cn(
+        "inline-flex h-8 w-8 items-center justify-center rounded-full transition",
+        ativo ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:text-primary",
+        className,
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

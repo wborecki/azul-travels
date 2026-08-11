@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ItemCard } from "@/components/explorar/ItemCard";
+import { ItemCard, type VarianteCard } from "@/components/explorar/ItemCard";
 import { ExplorarPagination } from "@/components/explorar/ExplorarPagination";
 import { criarContatoGeral, type ItensViewPage } from "@/lib/queries";
+import { cn } from "@/lib/utils";
 
 interface ResultadosListaProps {
   loading: boolean;
@@ -15,14 +16,28 @@ interface ResultadosListaProps {
   pageData: ItensViewPage | null;
   areaAtiva: boolean;
   temFiltros: boolean;
+  visualizacao: VarianteCard;
+  mapaVisivel: boolean;
   dataIn?: string;
   dataOut?: string;
   adultos?: number;
   criancas?: number;
+  itemAtivoId?: string | null;
+  onItemAtivo?: (id: string | null) => void;
   onTentarNovamente: () => void;
   onLimparArea: () => void;
   onLimparTudo: () => void;
   irParaPagina: (pagina: number) => void;
+}
+
+function classesGrade(visualizacao: VarianteCard, mapaVisivel: boolean): string {
+  if (visualizacao === "lista") return "flex flex-col gap-4";
+  return cn(
+    "grid gap-5",
+    mapaVisivel
+      ? "grid-cols-1 xl:grid-cols-2"
+      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  );
 }
 
 export function ResultadosLista({
@@ -31,10 +46,14 @@ export function ResultadosLista({
   pageData,
   areaAtiva,
   temFiltros,
+  visualizacao,
+  mapaVisivel,
   dataIn,
   dataOut,
   adultos,
   criancas,
+  itemAtivoId,
+  onItemAtivo,
   onTentarNovamente,
   onLimparArea,
   onLimparTudo,
@@ -46,7 +65,7 @@ export function ResultadosLista({
         {erro && !pageData ? (
           <ErroBusca onTentarNovamente={onTentarNovamente} />
         ) : loading && !pageData ? (
-          <GradeSkeleton />
+          <GradeSkeleton visualizacao={visualizacao} mapaVisivel={mapaVisivel} />
         ) : !pageData || pageData.items.length === 0 ? (
           areaAtiva ? (
             <AreaVaziaEstado onLimparArea={onLimparArea} />
@@ -55,15 +74,19 @@ export function ResultadosLista({
           )
         ) : (
           <>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className={classesGrade(visualizacao, mapaVisivel)}>
               {pageData.items.map((item) => (
                 <ItemCard
                   key={item.id}
                   item={item}
+                  variante={visualizacao}
                   dataIn={dataIn}
                   dataOut={dataOut}
                   adultos={adultos}
                   criancas={criancas}
+                  ativo={itemAtivoId === item.id}
+                  onAtivar={onItemAtivo ? () => onItemAtivo(item.id) : undefined}
+                  onDesativar={onItemAtivo ? () => onItemAtivo(null) : undefined}
                 />
               ))}
             </div>
@@ -108,13 +131,25 @@ export function ContagemResultados({ loading, pageData, areaAtiva }: ContagemRes
   );
 }
 
-function GradeSkeleton() {
+function GradeSkeleton({
+  visualizacao,
+  mapaVisivel,
+}: {
+  visualizacao: VarianteCard;
+  mapaVisivel: boolean;
+}) {
+  const ehLista = visualizacao === "lista";
   return (
-    <div className="grid sm:grid-cols-2 gap-6">
-      {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="rounded-2xl border overflow-hidden">
-          <Skeleton className="aspect-[16/10] w-full rounded-none" />
-          <div className="p-4 space-y-2">
+    <div className={classesGrade(visualizacao, mapaVisivel)}>
+      {Array.from({ length: 8 }, (_, i) => (
+        <div key={i} className={cn("overflow-hidden rounded-2xl border", ehLista && "sm:flex")}>
+          <Skeleton
+            className={cn(
+              "aspect-[16/10] w-full rounded-none sm:aspect-[4/3]",
+              ehLista && "sm:w-60 sm:shrink-0",
+            )}
+          />
+          <div className="flex-1 space-y-2 p-4">
             <Skeleton className="h-3 w-28" />
             <Skeleton className="h-5 w-44" />
             <Skeleton className="h-3 w-32" />
@@ -139,7 +174,6 @@ function ErroBusca({ onTentarNovamente }: { onTentarNovamente: () => void }) {
   );
 }
 
-/** Área do mapa (bbox ou "perto de mim") sem resultados — distinto do estado vazio geral. */
 function AreaVaziaEstado({ onLimparArea }: { onLimparArea: () => void }) {
   return (
     <div className="bg-azul-claro/40 border rounded-2xl p-8 md:p-10 text-center max-w-2xl mx-auto">
