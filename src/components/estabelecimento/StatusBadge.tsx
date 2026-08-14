@@ -6,6 +6,7 @@ import { RESERVA_STATUS_LABEL, type ReservaStatus } from "@/lib/enums";
  * no calendário (pontos/chips), para as duas visões ficarem consistentes.
  */
 export const STATUS_DOT_CLASS: Record<ReservaStatus, string> = {
+  aguardando_pagamento: "bg-secondary",
   pendente: "bg-warning",
   confirmada: "bg-success",
   cancelada: "bg-destructive",
@@ -13,6 +14,7 @@ export const STATUS_DOT_CLASS: Record<ReservaStatus, string> = {
 };
 
 export const STATUS_CHIP_CLASS: Record<ReservaStatus, string> = {
+  aguardando_pagamento: "bg-secondary/15 text-secondary",
   pendente: "bg-warning/15 text-warning",
   confirmada: "bg-success/15 text-success",
   cancelada: "bg-destructive/15 text-destructive",
@@ -20,6 +22,7 @@ export const STATUS_CHIP_CLASS: Record<ReservaStatus, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<ReservaStatus, string> = {
+  aguardando_pagamento: "bg-secondary/15 text-secondary hover:bg-secondary/15",
   pendente: "bg-warning/15 text-warning hover:bg-warning/15",
   confirmada: "bg-success/15 text-success hover:bg-success/15",
   cancelada: "bg-destructive/15 text-destructive hover:bg-destructive/15",

@@ -1064,6 +1064,7 @@ function SubMedia({ label, valor }: { label: string; valor: number }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_BADGE_CLASS: Record<ReservaStatus, string> = {
+  aguardando_pagamento: "bg-secondary text-secondary-foreground",
   pendente: "bg-warning text-warning-foreground",
   confirmada: "bg-success text-success-foreground",
   cancelada: "bg-destructive text-destructive-foreground",
@@ -1071,6 +1072,7 @@ const STATUS_BADGE_CLASS: Record<ReservaStatus, string> = {
 };
 
 const STATUS_ICON: Record<ReservaStatus, typeof Clock> = {
+  aguardando_pagamento: Clock,
   pendente: Clock,
   confirmada: CheckCircle2,
   cancelada: XCircle,

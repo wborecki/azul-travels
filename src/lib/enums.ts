@@ -206,6 +206,7 @@ export const ESTAB_STATUS_LABEL: Record<EstabStatus, string> = {
 };
 
 export const RESERVA_STATUS_LABEL: Record<ReservaStatus, string> = {
+  aguardando_pagamento: "Aguardando pagamento",
   pendente: "Pendente",
   confirmada: "Confirmada",
   cancelada: "Cancelada",
@@ -316,12 +317,19 @@ export const CONTEUDO_CATEGORIA_OPTIONS = makeOptions(
  * trigger `validar_transicao_reserva_status` no banco - qualquer mudança
  * aqui exige migration correspondente.
  *
+ *   aguardando_pagamento → pendente | cancelada
  *   pendente   → confirmada | cancelada
  *   confirmada → concluida  | cancelada
  *   cancelada  → (terminal)
  *   concluida  → (terminal)
+ *
+ * `aguardando_pagamento → pendente` é a transição do webhook do Asaas, e
+ * `→ cancelada` cobre expiração e estorno. Nenhuma das duas parte de uma ação
+ * de tela: quem as dispara é a service role. Elas estão aqui porque este mapa
+ * espelha o banco, não porque algum botão as ofereça.
  */
 export const RESERVA_TRANSICOES_VALIDAS: Record<ReservaStatus, ReadonlyArray<ReservaStatus>> = {
+  aguardando_pagamento: ["pendente", "cancelada"],
   pendente: ["confirmada", "cancelada"],
   confirmada: ["concluida", "cancelada"],
   cancelada: [],

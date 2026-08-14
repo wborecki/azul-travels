@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      asaas_webhook_events: {
+        Row: {
+          asaas_payment_id: string | null
+          erro: string | null
+          evento: string
+          id: string
+          payload: Json
+          processado_em: string | null
+          recebido_em: string
+          tentativas: number
+        }
+        Insert: {
+          asaas_payment_id?: string | null
+          erro?: string | null
+          evento: string
+          // Não é gerado: é o `event.id` que o Asaas envia. É ele que dá
+          // idempotência ao webhook — a segunda entrega do mesmo evento colide
+          // na PK em vez de reprocessar.
+          id: string
+          payload: Json
+          processado_em?: string | null
+          recebido_em?: string
+          tentativas?: number
+        }
+        Update: {
+          asaas_payment_id?: string | null
+          erro?: string | null
+          evento?: string
+          id?: string
+          payload?: Json
+          processado_em?: string | null
+          recebido_em?: string
+          tentativas?: number
+        }
+        Relationships: []
+      }
       auth_audit_log: {
         Row: {
           criado_em: string
@@ -385,8 +421,77 @@ export type Database = {
         }
         Relationships: []
       }
+      estabelecimento_recebimentos: {
+        Row: {
+          asaas_account_id: string | null
+          asaas_wallet_id: string | null
+          atualizado_em: string
+          bairro: string | null
+          comissao_percentual: number | null
+          company_type: string | null
+          complemento: string | null
+          cpf_cnpj: string | null
+          criado_em: string
+          data_nascimento: string | null
+          endereco_numero: string | null
+          estabelecimento_id: string
+          observacao: string | null
+          origem_conta: string | null
+          status_onboarding: string
+          telefone_movel: string | null
+        }
+        Insert: {
+          // Carteira, conta, status de onboarding e comissão são escritos
+          // apenas por service role ou admin — a trigger
+          // `protect_recebimentos_colunas_financeiras` recusa o dono.
+          asaas_account_id?: string | null
+          asaas_wallet_id?: string | null
+          atualizado_em?: string
+          bairro?: string | null
+          comissao_percentual?: number | null
+          company_type?: string | null
+          complemento?: string | null
+          cpf_cnpj?: string | null
+          criado_em?: string
+          data_nascimento?: string | null
+          endereco_numero?: string | null
+          estabelecimento_id: string
+          observacao?: string | null
+          origem_conta?: string | null
+          status_onboarding?: string
+          telefone_movel?: string | null
+        }
+        Update: {
+          asaas_account_id?: string | null
+          asaas_wallet_id?: string | null
+          atualizado_em?: string
+          bairro?: string | null
+          comissao_percentual?: number | null
+          company_type?: string | null
+          complemento?: string | null
+          cpf_cnpj?: string | null
+          criado_em?: string
+          data_nascimento?: string | null
+          endereco_numero?: string | null
+          estabelecimento_id?: string
+          observacao?: string | null
+          origem_conta?: string | null
+          status_onboarding?: string
+          telefone_movel?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estabelecimento_recebimentos_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: true
+            referencedRelation: "estabelecimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estabelecimentos: {
         Row: {
+          aceita_pagamento_online: boolean
           atualizado_em: string
           beneficio_tea_descricao: string | null
           cep: string | null
@@ -434,6 +539,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          aceita_pagamento_online?: boolean
           atualizado_em?: string
           beneficio_tea_descricao?: string | null
           cep?: string | null
@@ -481,6 +587,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          aceita_pagamento_online?: boolean
           atualizado_em?: string
           beneficio_tea_descricao?: string | null
           cep?: string | null
@@ -627,8 +734,10 @@ export type Database = {
       }
       familia_profiles: {
         Row: {
+          asaas_customer_id: string | null
           atualizado_em: string
           cidade: string | null
+          cpf: string | null
           criado_em: string
           email: string | null
           estado: string | null
@@ -642,8 +751,10 @@ export type Database = {
           telefone: string | null
         }
         Insert: {
+          asaas_customer_id?: string | null
           atualizado_em?: string
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
@@ -657,8 +768,10 @@ export type Database = {
           telefone?: string | null
         }
         Update: {
+          asaas_customer_id?: string | null
           atualizado_em?: string
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
@@ -892,6 +1005,71 @@ export type Database = {
             columns: ["estabelecimento_id"]
             isOneToOne: false
             referencedRelation: "estabelecimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          ambiente: string
+          asaas_customer_id: string | null
+          asaas_payment_id: string
+          atualizado_em: string
+          billing_type: string | null
+          criado_em: string
+          due_date: string | null
+          id: string
+          invoice_url: string | null
+          pago_em: string | null
+          reserva_id: string
+          status: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao: number
+          valor_repasse: number
+          valor_total: number
+          wallet_id_destino: string | null
+        }
+        Insert: {
+          ambiente: string
+          asaas_customer_id?: string | null
+          asaas_payment_id: string
+          atualizado_em?: string
+          billing_type?: string | null
+          criado_em?: string
+          due_date?: string | null
+          id?: string
+          invoice_url?: string | null
+          pago_em?: string | null
+          reserva_id: string
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao: number
+          valor_repasse: number
+          valor_total: number
+          wallet_id_destino?: string | null
+        }
+        Update: {
+          ambiente?: string
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string
+          atualizado_em?: string
+          billing_type?: string | null
+          criado_em?: string
+          due_date?: string | null
+          id?: string
+          invoice_url?: string | null
+          pago_em?: string | null
+          reserva_id?: string
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao?: number
+          valor_repasse?: number
+          valor_total?: number
+          wallet_id_destino?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
             referencedColumns: ["id"]
           },
         ]
@@ -1481,6 +1659,9 @@ export type Database = {
           pessoa_referencia: string | null
           recomendacoes_adicionais: string | null
           status: Database["public"]["Enums"]["reserva_status"] | null
+          valor_comissao: number | null
+          valor_repasse: number | null
+          valor_total: number | null
         }
         Insert: {
           acompanhantes?: Json | null
@@ -1511,6 +1692,13 @@ export type Database = {
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
+          // Congelados na criação: uma mudança de preço do quarto depois não
+          // pode alterar uma cobrança já emitida. Nulos em visita, que não é
+          // cobrada. O CHECK `reservas_valores_coerentes` exige os três juntos
+          // ou nenhum, com comissão + repasse = total.
+          valor_comissao?: number | null
+          valor_repasse?: number | null
+          valor_total?: number | null
         }
         Update: {
           acompanhantes?: Json | null
@@ -1537,6 +1725,9 @@ export type Database = {
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
+          valor_comissao?: number | null
+          valor_repasse?: number | null
+          valor_total?: number | null
         }
         Relationships: [
           {
@@ -1580,10 +1771,11 @@ export type Database = {
         Row: {
           acao: string
           ator_email: string | null
-          ator_id: string
+          ator_id: string | null
           criado_em: string
           id: string
           observacao: string | null
+          origem: string
           reserva_id: string
           status_anterior: Database["public"]["Enums"]["reserva_status"] | null
           status_novo: Database["public"]["Enums"]["reserva_status"] | null
@@ -1591,10 +1783,16 @@ export type Database = {
         Insert: {
           acao: string
           ator_email?: string | null
-          ator_id: string
+          // Nulo apenas em ação de sistema (job de expiração). As policies de
+          // INSERT exigem `ator_id = auth.uid()`, então pelo cliente ele é
+          // sempre obrigatório na prática.
+          ator_id?: string | null
           criado_em?: string
           id?: string
           observacao?: string | null
+          // Derivada por trigger a partir de ator_id — mandar valor aqui não
+          // tem efeito.
+          origem?: string
           reserva_id: string
           status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
           status_novo?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1602,10 +1800,11 @@ export type Database = {
         Update: {
           acao?: string
           ator_email?: string | null
-          ator_id?: string
+          ator_id?: string | null
           criado_em?: string
           id?: string
           observacao?: string | null
+          origem?: string
           reserva_id?: string
           status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
           status_novo?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1715,6 +1914,10 @@ export type Database = {
         Args: { _dias?: number }
         Returns: number
       }
+      expirar_reservas_aguardando_pagamento: {
+        Args: { p_prazo_minutos?: number }
+        Returns: number
+      }
       expurgar_auth_audit_log: { Args: { _dias?: number }; Returns: number }
       expurgar_links_curtos_inativos: { Args: never; Returns: number }
       get_dashboard_stats: { Args: never; Returns: Json }
@@ -1785,7 +1988,21 @@ export type Database = {
         | "excursao"
         | "passeio_educativo"
       oferta_natureza: "estadia" | "visita"
-      reserva_status: "pendente" | "confirmada" | "cancelada" | "concluida"
+      pagamento_status:
+        | "pendente"
+        | "confirmado"
+        | "recebido"
+        | "expirado"
+        | "estorno_solicitado"
+        | "estornado"
+        | "cancelado"
+        | "falhou"
+      reserva_status:
+        | "aguardando_pagamento"
+        | "pendente"
+        | "confirmada"
+        | "cancelada"
+        | "concluida"
       tea_nivel: "leve" | "moderado" | "severo"
     }
     CompositeTypes: {
@@ -1936,7 +2153,23 @@ export const Constants = {
         "passeio_educativo",
       ],
       oferta_natureza: ["estadia", "visita"],
-      reserva_status: ["pendente", "confirmada", "cancelada", "concluida"],
+      pagamento_status: [
+        "pendente",
+        "confirmado",
+        "recebido",
+        "expirado",
+        "estorno_solicitado",
+        "estornado",
+        "cancelado",
+        "falhou",
+      ],
+      reserva_status: [
+        "aguardando_pagamento",
+        "pendente",
+        "confirmada",
+        "cancelada",
+        "concluida",
+      ],
       tea_nivel: ["leve", "moderado", "severo"],
     },
   },
