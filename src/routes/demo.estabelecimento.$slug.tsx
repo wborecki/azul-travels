@@ -62,7 +62,7 @@ function DemoDetalhe() {
   function enviar() {
     setEnviado(true);
     toast.success("Reserva de demonstração enviada!", {
-      description: `Na plataforma real, ${estab.nome} receberia o perfil sensorial do ${DEMO_PERFIL_SENSORIAL.nome_autista} e retornaria em até 48h.`,
+      description: `Na plataforma real, ${estab.nome} receberia o Perfil TEA do ${DEMO_PERFIL_SENSORIAL.nome_autista} e retornaria em até 48h.`,
     });
   }
 
@@ -302,7 +302,7 @@ function DemoDetalhe() {
             </div>
 
             <p className="mt-4 text-xs text-muted-foreground bg-azul-claro p-3 rounded-lg">
-              Ao confirmar, autorizo o envio do perfil sensorial do{" "}
+              Ao confirmar, autorizo o envio do Perfil TEA do{" "}
               <strong>{DEMO_PERFIL_SENSORIAL.nome_autista}</strong> para este
               estabelecimento.
             </p>
@@ -320,7 +320,7 @@ function DemoDetalhe() {
             ) : (
               <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-sm text-emerald-900">
                 ✓ Reserva de demonstração enviada! Na plataforma real,{" "}
-                {estab.nome} receberia o perfil sensorial e retornaria em até
+                {estab.nome} receberia o Perfil TEA e retornaria em até
                 48h.
               </div>
             )}

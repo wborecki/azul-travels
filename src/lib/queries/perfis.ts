@@ -1,7 +1,7 @@
 /**
  * Queries tipadas para `perfil_sensorial`.
  *
- * Uma família pode ter N perfis (um por filho), cada um com foto própria
+ * Uma família pode ter N Perfis TEA (um por pessoa autista), cada um com foto própria
  * (bucket `perfis-tea-fotos`, pasta `<familia_id>/`).
  */
 

@@ -1,10 +1,12 @@
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { format, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+import { HospedesColapsavel } from "@/components/estabelecimento/SeletorHospedes";
 import type { DisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
+import type { HospedesQuarto } from "@/hooks/useHospedesQuarto";
 import { formatDataISO } from "@/lib/brazil";
 
 interface PrecoDetalhesDrawerProps {
@@ -13,6 +15,7 @@ interface PrecoDetalhesDrawerProps {
   preco: number;
   itemId: string;
   disponibilidade: DisponibilidadeQuarto;
+  hospedes: HospedesQuarto;
   onAlterarDatas: () => void;
 }
 
@@ -33,10 +36,10 @@ export function PrecoDetalhesDrawer({
   preco,
   itemId,
   disponibilidade,
+  hospedes,
   onAlterarDatas,
 }: PrecoDetalhesDrawerProps) {
   const { checkIn, checkOut, noites } = disponibilidade;
-  const search = useSearch({ from: "/quartos/$id" });
 
   if (!checkIn || !checkOut) return null;
 
@@ -72,6 +75,8 @@ export function PrecoDetalhesDrawer({
           </Button>
         </div>
 
+        <HospedesColapsavel hospedes={hospedes} className="border-t border-border" />
+
         <Button
           asChild
           className="w-full mt-6 bg-secondary hover:bg-secondary/90 text-white"
@@ -83,8 +88,8 @@ export function PrecoDetalhesDrawer({
               itemId,
               checkIn: formatDataISO(checkIn),
               checkOut: formatDataISO(checkOut),
-              adultos: search.adultos ?? 1,
-              criancas: search.criancas ?? 0,
+              adultos: hospedes.adultos,
+              criancas: hospedes.criancas,
             }}
           >
             Reservar

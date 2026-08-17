@@ -53,7 +53,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "O primeiro marketplace brasileiro de turismo para famílias com autismo. Destinos verificados, perfil sensorial e selos de qualidade. Em breve.",
+          "O primeiro marketplace brasileiro de turismo para famílias com autismo. Destinos verificados, Perfil TEA e selos de qualidade. Em breve.",
       },
       {
         property: "og:title",
@@ -231,15 +231,15 @@ function DemoEntrada() {
             </h2>
             <p className="mt-4 text-white/80" style={{ fontSize: 15 }}>
               Preparamos uma demonstração completa com dados de exemplo. Navegue pela busca,
-              explore perfis sensoriais, veja como é a página de um estabelecimento certificado
+              explore Perfis TEA, veja como é a página de um estabelecimento certificado
               e simule uma reserva.
             </p>
 
             <ul className="mt-6 space-y-2.5 text-white">
               {[
                 "Busca com filtros por recursos sensoriais",
-                "Compatibilidade calculada pelo perfil do filho",
-                "Reserva simulada com envio de perfil sensorial",
+                "Compatibilidade calculada pelo Perfil TEA",
+                "Reserva simulada com envio do Perfil TEA",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-2">
                   <span className="text-secondary font-bold mt-0.5">✓</span>
@@ -342,7 +342,7 @@ function DemoEntrada() {
 function Hero() {
   const bullets = [
     { titulo: "Treina", texto: "equipes para acolher famílias atípicas" },
-    { titulo: "Adapta", texto: "ambientes e jornadas com perfil sensorial" },
+    { titulo: "Adapta", texto: "ambientes e jornadas com o Perfil TEA" },
     { titulo: "Certifica", texto: "parceiros com o Selo Azul de inclusão" },
   ];
 
@@ -888,7 +888,7 @@ function ComoFunciona() {
                   emoji: "📍",
                   titulo: "Alguém te esperando",
                   texto:
-                    "Ao chegar no destino, a equipe já foi avisada sobre o perfil do seu filho. Não precisa explicar tudo do zero.",
+                    "Ao chegar no destino, a equipe já foi avisada pelo Perfil TEA. Não precisa explicar tudo do zero.",
                 },
                 {
                   emoji: "🏠",
@@ -1166,9 +1166,9 @@ function OQuePlataformaTera() {
     },
     {
       Icon: Puzzle,
-      titulo: "Perfil sensorial do seu filho",
+      titulo: "Perfil TEA da sua família",
       texto:
-        "Você conta o que seu filho precisa. A plataforma filtra só os lugares prontos para receber sua família.",
+        "Você conta o que a pessoa autista precisa. A plataforma filtra só os lugares prontos para receber sua família.",
     },
     {
       Icon: Gift,

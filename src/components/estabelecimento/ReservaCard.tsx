@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ContadorHospedes } from "@/components/ContadorHospedes";
+import { SeletorHospedes } from "@/components/estabelecimento/SeletorHospedes";
 import { MesGrade } from "@/components/estabelecimento/MesGrade";
 import type { DisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
+import { useHospedesQuarto } from "@/hooks/useHospedesQuarto";
 import { formatDataISO } from "@/lib/brazil";
 import { cn } from "@/lib/utils";
 
@@ -23,10 +24,6 @@ function formatBRL(valor: number): string {
 }
 
 type Painel = "datas" | "hospedes" | null;
-
-function clamp(valor: number, min: number, max: number): number {
-  return Math.min(Math.max(valor, min), max);
-}
 
 /**
  * Card de reserva estilo Airbnb: preço (total quando há datas selecionadas,
@@ -49,8 +46,8 @@ export function ReservaCard({
 
   const [painelAberto, setPainelAberto] = useState<Painel>(null);
 
-  const search = useSearch({ from: "/quartos/$id" });
-  const navigate = useNavigate({ from: "/quartos/$id" });
+  const hospedes = useHospedesQuarto(capacidadeTotal, capacidadeAdultos, capacidadeCriancas);
+  const { adultos, criancas, total: totalHospedes } = hospedes;
 
   const raizRef = useRef<HTMLDivElement>(null);
 
@@ -64,40 +61,6 @@ export function ReservaCard({
     return () => document.removeEventListener("mousedown", aoClicarFora);
   }, []);
 
-  const maxTotal = capacidadeTotal;
-  const maxAdultos = capacidadeAdultos ?? maxTotal;
-  const maxCriancas = capacidadeCriancas ?? maxTotal;
-
-  // Hóspedes moram na URL (?adultos=N&criancas=N) e sempre obedecem a
-  // capacidade do quarto: um valor ausente ou fora do limite é fixado aqui
-  // em um valor válido, e o efeito abaixo corrige a própria URL de volta.
-  const adultos = clamp(search.adultos ?? 1, 1, Math.max(1, Math.min(maxAdultos, maxTotal)));
-  const criancas = clamp(
-    search.criancas ?? 0,
-    0,
-    Math.max(0, Math.min(maxCriancas, maxTotal - adultos)),
-  );
-
-  function definirHospedes(novoAdultos: number, novoCriancas: number) {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        adultos: novoAdultos !== 1 ? novoAdultos : undefined,
-        criancas: novoCriancas !== 0 ? novoCriancas : undefined,
-      }),
-      replace: true,
-      resetScroll: false,
-    });
-  }
-
-  useEffect(() => {
-    if ((search.adultos ?? 1) !== adultos || (search.criancas ?? 0) !== criancas) {
-      definirHospedes(adultos, criancas);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search.adultos, search.criancas, adultos, criancas]);
-
-  const totalHospedes = adultos + criancas;
   const total = preco * noites;
 
   return (
@@ -173,25 +136,7 @@ export function ReservaCard({
 
           {painelAberto === "hospedes" && (
             <div className="absolute z-50 left-0 right-0 top-full mt-2 rounded-2xl border border-border bg-card p-4 shadow-2xl space-y-4">
-              <ContadorHospedes
-                label="Adultos"
-                sublabel="13 anos ou mais"
-                valor={adultos}
-                min={1}
-                max={Math.max(1, Math.min(maxAdultos, maxTotal - criancas))}
-                onChange={(v) => definirHospedes(v, criancas)}
-              />
-              <ContadorHospedes
-                label="Crianças"
-                sublabel="De 2 a 12 anos"
-                valor={criancas}
-                min={0}
-                max={Math.max(0, Math.min(maxCriancas, maxTotal - adultos))}
-                onChange={(v) => definirHospedes(adultos, v)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Este espaço acomoda no máximo {capacidadeTotal} hóspede(s).
-              </p>
+              <SeletorHospedes hospedes={hospedes} />
               <div className="flex justify-end">
                 <button
                   type="button"

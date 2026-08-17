@@ -116,7 +116,7 @@ function StepType({
           onClick={() => onSelect("familia")}
           icon={<HeartHandshake className="h-5 w-5" />}
           title="Sou família com membro TEA"
-          text="Encontre destinos preparados para o seu filho e cadastre o perfil sensorial dele."
+          text="Encontre destinos preparados para a sua família e cadastre o Perfil TEA."
         />
         <TypeCard
           active={selected === "estabelecimento"}

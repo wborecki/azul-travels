@@ -24,7 +24,7 @@ export const Route = createFileRoute("/demo")({
       {
         property: "og:description",
         content:
-          "Navegue por destinos, perfil sensorial e simule uma reserva. Demonstração interativa.",
+          "Navegue por destinos, Perfil TEA e simule uma reserva. Demonstração interativa.",
       },
     ],
   }),

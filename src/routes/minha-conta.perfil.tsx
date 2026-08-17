@@ -226,12 +226,12 @@ function PerfisTeaPage() {
       <header>
         <h1 className="text-3xl font-display font-bold text-primary">Perfis TEA</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Cadastre um perfil para cada filho. Salvos uma vez, são reaproveitados em todas as
-          reservas - edite quando algo mudar.
+          Cadastre um Perfil TEA para cada pessoa autista da família. Salvos uma vez, são
+          reaproveitados em todas as reservas - edite quando algo mudar.
         </p>
       </header>
 
-      {/* Seletor de filhos + adicionar novo */}
+      {/* Seletor de perfis + adicionar novo */}
       <div className="bg-white border rounded-2xl p-4">
         <div className="flex flex-wrap items-center gap-2">
           {perfis.map((p) => (
@@ -260,7 +260,7 @@ function PerfisTeaPage() {
                 : "border-border hover:border-secondary/50 text-muted-foreground"
             }`}
           >
-            <Plus className="h-4 w-4" /> Adicionar filho
+            <Plus className="h-4 w-4" /> Adicionar Perfil TEA
           </button>
         </div>
       </div>
@@ -348,7 +348,7 @@ function PerfisTeaPage() {
               )}
             </Button>
             <p className="text-xs text-muted-foreground mt-1.5">
-              A foto ajuda a equipe do estabelecimento a reconhecer seu filho.
+              A foto ajuda a equipe do estabelecimento a reconhecer a pessoa na chegada.
             </p>
           </div>
         </div>
@@ -364,7 +364,7 @@ function PerfisTeaPage() {
             <Input
               type="number"
               min={1}
-              max={30}
+              max={99}
               value={draft.idade ?? ""}
               onChange={(e) => set("idade", e.target.value ? Number(e.target.value) : null)}
             />
@@ -597,7 +597,7 @@ function PerfisTeaPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Excluir o perfil de {draft.nome_autista || "este filho"}?
+              Excluir o Perfil TEA de {draft.nome_autista || "esta pessoa"}?
             </AlertDialogTitle>
             <AlertDialogDescription>
               Essa ação não pode ser desfeita. O perfil deixa de aparecer nas próximas reservas (as

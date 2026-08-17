@@ -96,8 +96,8 @@ export function PedidoVisitaCard({ estabelecimentoId, horarioCalmo }: PedidoVisi
       <div>
         <h3 className="text-lg font-bold text-primary">Solicitar reserva</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Seu pedido chega com o perfil sensorial do seu filho, para a equipe se preparar antes de
-          vocês chegarem.
+          Seu pedido chega com o Perfil TEA da sua família, para a equipe se preparar antes de vocês
+          chegarem.
         </p>
       </div>
 

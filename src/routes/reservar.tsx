@@ -175,7 +175,7 @@ function ReservarPage() {
     }
     void fetchPerfisDaFamilia(user.id).then((data) => {
       setPerfis(data);
-      // Pré-seleciona todos os filhos; a família desmarca quem não vai viajar.
+      // Pré-seleciona todos os perfis; a família desmarca quem não vai viajar.
       setPerfisSel((atual) => (atual.length > 0 ? atual : data.map((p) => p.id)));
     });
   }, [user]);
@@ -525,7 +525,7 @@ function ReservarPage() {
 
               <div>
                 <Label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                  Quem vai viajar? Perfis sensoriais (opcional)
+                  Quem vai viajar? Perfis TEA (opcional)
                 </Label>
                 <div className="mt-1.5 space-y-2">
                   {perfis.map((p) => {
@@ -584,7 +584,7 @@ function ReservarPage() {
                     onClick={() => setPerfilModalOpen(true)}
                     className="w-full border-dashed"
                   >
-                    <Plus className="h-4 w-4 mr-1.5" /> Adicionar perfil de outro filho
+                    <Plus className="h-4 w-4 mr-1.5" /> Adicionar outro Perfil TEA
                   </Button>
                 </div>
                 <p className="mt-1.5 text-xs text-muted-foreground">
@@ -722,9 +722,9 @@ function ReservarPage() {
       <Dialog open={perfilModalOpen} onOpenChange={setPerfilModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Adicionar novo perfil sensorial</DialogTitle>
+            <DialogTitle>Adicionar novo Perfil TEA</DialogTitle>
             <DialogDescription>
-              Cadastre o perfil de mais uma criança da sua família.
+              Cadastre o Perfil TEA de mais uma pessoa da sua família.
             </DialogDescription>
           </DialogHeader>
           <PerfilSensorialForm

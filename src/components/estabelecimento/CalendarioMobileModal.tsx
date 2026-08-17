@@ -4,7 +4,9 @@ import { ptBR } from "date-fns/locale";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MesGrade, DIAS_SEMANA } from "@/components/estabelecimento/MesGrade";
+import { HospedesColapsavel } from "@/components/estabelecimento/SeletorHospedes";
 import type { DisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
+import type { HospedesQuarto } from "@/hooks/useHospedesQuarto";
 
 const MESES_INICIAIS = 3;
 const MESES_POR_CARGA = 3;
@@ -17,6 +19,7 @@ interface CalendarioMobileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   disponibilidade: DisponibilidadeQuarto;
+  hospedes: HospedesQuarto;
   preco: number;
   onSalvar: () => void;
 }
@@ -35,6 +38,7 @@ export function CalendarioMobileModal({
   open,
   onOpenChange,
   disponibilidade,
+  hospedes,
   preco,
   onSalvar,
 }: CalendarioMobileModalProps) {
@@ -147,6 +151,11 @@ export function CalendarioMobileModal({
           </>
         )}
       </div>
+
+      <HospedesColapsavel
+        hospedes={hospedes}
+        className="shrink-0 border-t border-border px-4 max-h-[45vh] overflow-y-auto"
+      />
 
       <div
         className="shrink-0 border-t border-border px-4 py-3 flex items-center justify-between gap-4"

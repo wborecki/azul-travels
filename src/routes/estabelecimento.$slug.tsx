@@ -20,8 +20,6 @@ import {
 import { QuartoCard } from "@/components/estabelecimento/QuartoCard";
 import { PedidoVisitaCard, MobileVisitaBar } from "@/components/estabelecimento/PedidoVisitaCard";
 import { PerfisTeaAvatares } from "@/components/reserva/PerfisTeaDaReserva";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { AvaliacoesPublicasSection } from "@/components/AvaliacoesPublicasSection";
 import { QuartoMapa } from "@/components/estabelecimento/QuartoMapa";
 import { SeloAzul3D } from "@/components/estabelecimento/SeloAzul3D";
@@ -85,6 +83,7 @@ import {
   History,
   XCircle,
   Images,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -95,7 +94,7 @@ export const Route = createFileRoute("/estabelecimento/$slug")({
       {
         name: "description",
         content:
-          "Detalhes do estabelecimento, recursos para pessoas autistas, avaliações e reserva com perfil sensorial.",
+          "Detalhes do estabelecimento, recursos para pessoas autistas, avaliações e reserva com Perfil TEA.",
       },
     ],
   }),
@@ -185,7 +184,7 @@ function EstabPage() {
         setPerfis(data);
         if (data.length > 0 && !perfilSel) setPerfilSel(data[0].id);
       } catch (err) {
-        toast.error("Erro ao carregar perfis sensoriais", {
+        toast.error("Erro ao carregar Perfis TEA", {
           description: err instanceof Error ? err.message : undefined,
         });
       }
@@ -251,8 +250,7 @@ function EstabPage() {
 
   if (loading || naoEncontrado) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+      <div className="flex-1 flex flex-col bg-background">
         <div className="flex-1 container mx-auto px-4 py-12">
           <div className="h-[420px] bg-muted animate-pulse rounded-2xl" />
           <div className="mt-6 grid lg:grid-cols-3 gap-8">
@@ -264,22 +262,19 @@ function EstabPage() {
             <div className="h-96 bg-muted animate-pulse rounded-2xl" />
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   if (!e) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+      <div className="flex-1 flex flex-col bg-background">
         <div className="flex-1 container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold text-primary">Estabelecimento não encontrado</h1>
           <Button asChild className="mt-4">
             <Link to="/explorar">Explorar outros</Link>
           </Button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -332,8 +327,7 @@ function EstabPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+    <div className="flex-1 flex flex-col bg-background">
 
       {/* SEÇÃO 1 · Galeria full-width + header.
           Sem foto a faixa encolhe: 420px de cinza vazio empurravam a página
@@ -799,8 +793,8 @@ function EstabPage() {
                           currency: "BRL",
                         })}
                       </span>{" "}
-                      / noite. Escolha um quarto para enviar o pedido com o perfil sensorial do seu
-                      filho.
+                      / noite. Escolha um quarto para enviar o pedido com o Perfil TEA da sua
+                      família.
                     </p>
                     <Button
                       asChild
@@ -832,11 +826,11 @@ function EstabPage() {
 
       {aceitaPedidoDeVisita && <MobileVisitaBar />}
 
-      {/* Modal: novo perfil sensorial */}
+      {/* Modal: novo Perfil TEA */}
       <Dialog open={perfilModalOpen} onOpenChange={setPerfilModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Adicionar novo perfil sensorial</DialogTitle>
+            <DialogTitle>Adicionar novo Perfil TEA</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
           <PerfilSensorialForm
@@ -920,8 +914,6 @@ function EstabPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 }
@@ -1072,7 +1064,7 @@ const STATUS_BADGE_CLASS: Record<ReservaStatus, string> = {
 };
 
 const STATUS_ICON: Record<ReservaStatus, typeof Clock> = {
-  aguardando_pagamento: Clock,
+  aguardando_pagamento: CreditCard,
   pendente: Clock,
   confirmada: CheckCircle2,
   cancelada: XCircle,

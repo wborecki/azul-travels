@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { PrecoDetalhesDrawer } from "@/components/estabelecimento/PrecoDetalhesDrawer";
 import { CalendarioMobileModal } from "@/components/estabelecimento/CalendarioMobileModal";
 import type { DisponibilidadeQuarto } from "@/hooks/useDisponibilidadeQuarto";
+import { useHospedesQuarto } from "@/hooks/useHospedesQuarto";
 import { formatDataISO } from "@/lib/brazil";
 
 interface MobileReservaBarProps {
   preco: number;
   itemId: string;
+  capacidadeTotal: number;
+  capacidadeAdultos: number | null;
+  capacidadeCriancas: number | null;
   disponibilidade: DisponibilidadeQuarto;
 }
 
@@ -21,9 +25,16 @@ function formatBRL(valor: number): string {
  * fica escondida lá). Tocar no preço abre os detalhes (ou o calendário
  * direto, se ainda não há datas); o botão à direita reflete o mesmo estado.
  */
-export function MobileReservaBar({ preco, itemId, disponibilidade }: MobileReservaBarProps) {
+export function MobileReservaBar({
+  preco,
+  itemId,
+  capacidadeTotal,
+  capacidadeAdultos,
+  capacidadeCriancas,
+  disponibilidade,
+}: MobileReservaBarProps) {
   const { checkIn, checkOut, noites } = disponibilidade;
-  const search = useSearch({ from: "/quartos/$id" });
+  const hospedes = useHospedesQuarto(capacidadeTotal, capacidadeAdultos, capacidadeCriancas);
   const [detalhesAberto, setDetalhesAberto] = useState(false);
   const [calendarioAberto, setCalendarioAberto] = useState(false);
 
@@ -49,7 +60,8 @@ export function MobileReservaBar({ preco, itemId, disponibilidade }: MobileReser
             <div className="text-xs text-muted-foreground">
               {temDatas ? (
                 <span className="underline underline-offset-2">
-                  {noites} {noites === 1 ? "noite" : "noites"} · ver detalhes
+                  {noites} {noites === 1 ? "noite" : "noites"} · {hospedes.total}{" "}
+                  {hospedes.total === 1 ? "hóspede" : "hóspedes"}
                 </span>
               ) : (
                 "/ noite"
@@ -69,8 +81,8 @@ export function MobileReservaBar({ preco, itemId, disponibilidade }: MobileReser
                   itemId,
                   checkIn: checkIn ? formatDataISO(checkIn) : undefined,
                   checkOut: checkOut ? formatDataISO(checkOut) : undefined,
-                  adultos: search.adultos ?? 1,
-                  criancas: search.criancas ?? 0,
+                  adultos: hospedes.adultos,
+                  criancas: hospedes.criancas,
                 }}
               >
                 Solicitar Reserva
@@ -95,6 +107,7 @@ export function MobileReservaBar({ preco, itemId, disponibilidade }: MobileReser
         preco={preco}
         itemId={itemId}
         disponibilidade={disponibilidade}
+        hospedes={hospedes}
         onAlterarDatas={() => {
           setDetalhesAberto(false);
           setCalendarioAberto(true);
@@ -105,6 +118,7 @@ export function MobileReservaBar({ preco, itemId, disponibilidade }: MobileReser
         open={calendarioAberto}
         onOpenChange={setCalendarioAberto}
         disponibilidade={disponibilidade}
+        hospedes={hospedes}
         preco={preco}
         onSalvar={() => {
           setCalendarioAberto(false);

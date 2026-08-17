@@ -24,7 +24,7 @@ export interface AccountNavSection {
 
 const FAMILIA_ITEMS: AccountNavItem[] = [
   { label: "Minha conta", to: "/minha-conta", icon: User },
-  { label: "Perfil do meu filho", to: "/minha-conta/perfil", icon: HeartPulse },
+  { label: "Perfis TEA", to: "/minha-conta/perfil", icon: HeartPulse },
   { label: "Conversas", to: "/minha-conta/mensagens", icon: MessagesSquare },
   { label: "Reservas", to: "/minha-conta/reservas", icon: CalendarCheck },
 ];

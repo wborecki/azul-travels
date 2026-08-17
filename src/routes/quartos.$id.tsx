@@ -404,6 +404,9 @@ function QuartoDetalhePage() {
       <MobileReservaBar
         preco={item.preco}
         itemId={item.id}
+        capacidadeTotal={item.capacidade_total}
+        capacidadeAdultos={item.capacidade_adultos}
+        capacidadeCriancas={item.capacidade_criancas}
         disponibilidade={disponibilidade}
       />
     </>

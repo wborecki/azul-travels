@@ -63,7 +63,7 @@ function MinhaContaLayout() {
         }
         tabs={[
           { label: "Meu Perfil", to: "/minha-conta", exact: true },
-          { label: "Perfis dos Meus Filhos", to: "/minha-conta/perfil" },
+          { label: "Perfis TEA", to: "/minha-conta/perfil" },
           { label: "Conversas", to: "/minha-conta/mensagens" },
           { label: "Reservas", to: "/minha-conta/reservas" },
         ]}
@@ -76,8 +76,8 @@ function MinhaContaLayout() {
                 <HeartPulse className="h-5 w-5" />
               </div>
               <p className="text-foreground/80">
-                <strong className="text-primary">Complete o perfil sensorial</strong> do seu filho
-                para receber recomendações personalizadas.
+                <strong className="text-primary">Complete o Perfil TEA</strong> para receber
+                recomendações personalizadas.
               </p>
             </div>
             <Link

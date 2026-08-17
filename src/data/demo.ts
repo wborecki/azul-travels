@@ -198,7 +198,7 @@ export const DEMO_ESTABELECIMENTOS: DemoEstabelecimento[] = [
     fotos: [],
     descricao: "Hotel fazenda com cavalos, piscina e atividades rurais.",
     descricao_tea:
-      "Terapia assistida por animais disponível com equipe especializada. Concierge TEA presente em todas as atividades. Quarto preparado com antecedência conforme perfil sensorial enviado.",
+      "Terapia assistida por animais disponível com equipe especializada. Concierge TEA presente em todas as atividades. Quarto preparado com antecedência conforme Perfil TEA enviado.",
     selo_azul: true,
     tem_sala_sensorial: false,
     tem_concierge_tea: true,

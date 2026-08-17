@@ -1,6 +1,6 @@
 /**
  * Queries tipadas para `perfil_tea` - Perfil TEA permanente da família.
- * Uma família pode ter múltiplos perfis (um por filho autista).
+ * Uma família pode ter múltiplos Perfis TEA (um por pessoa autista).
  */
 
 import { supabase } from "@/integrations/supabase/client";

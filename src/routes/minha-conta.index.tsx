@@ -97,21 +97,21 @@ function MinhaContaIndex() {
           </h1>
           <p className="mt-2 text-white/90 max-w-2xl text-sm sm:text-[15px] leading-relaxed">
             Sua jornada começa aqui. Enquanto preparamos os destinos, você já
-            pode montar o perfil do seu filho para quando lançarmos.
+            pode montar o Perfil TEA para quando lançarmos.
           </p>
         </div>
       </div>
 
       {/* Grid principal — 3 cards */}
       <div className="grid md:grid-cols-3 gap-4">
-        {/* CARD 1 — Perfil Sensorial */}
+        {/* CARD 1 — Perfil TEA */}
         <div className="bg-white border rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl bg-azul-claro flex items-center justify-center text-primary">
               <HeartPulse className="h-6 w-6" />
             </div>
             <h2 className="font-display font-bold text-base text-primary leading-tight">
-              Perfis Sensoriais dos Seus Filhos
+              Perfis TEA
             </h2>
           </div>
 
@@ -125,7 +125,7 @@ function MinhaContaIndex() {
                 {perfilNomes.length === 1 ? "Perfil de " : "Perfis de "}
                 <strong>{perfilNomes.join(", ")}</strong>{" "}
                 {perfilNomes.length === 1 ? "salvo" : "salvos"}. Você pode atualizar ou
-                adicionar outro filho a qualquer momento.
+                adicionar outro Perfil TEA a qualquer momento.
               </p>
               <Button
                 asChild
@@ -138,7 +138,7 @@ function MinhaContaIndex() {
           ) : (
             <>
               <p className="mt-4 text-sm text-foreground/75 flex-1 leading-relaxed">
-                Conte para nós como seu filho percebe o mundo. Assim conseguimos
+                Conte para nós como a pessoa autista percebe o mundo. Assim conseguimos
                 indicar destinos que realmente acolhem.
               </p>
               <Button
@@ -224,7 +224,7 @@ function MinhaContaIndex() {
                   )}
 
                   <p className="mt-3 text-xs text-foreground/65 leading-relaxed flex-1">
-                    Famílias com perfil sensorial completo entram primeiro em cada onda.
+                    Famílias com Perfil TEA completo entram primeiro em cada onda.
                   </p>
                 </>
               );
@@ -255,7 +255,7 @@ function MinhaContaIndex() {
           <ul className="mt-4 space-y-3 flex-1">
             {[
               "Acesso antecipado à plataforma",
-              "Filtro por perfil sensorial do seu filho",
+              "Filtro pelo Perfil TEA da sua família",
               "Destinos verificados pela nossa equipe",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-sm text-foreground/85">
@@ -280,7 +280,7 @@ function MinhaContaIndex() {
           {[
             {
               icon: BookOpen,
-              titulo: "O que é o perfil sensorial?",
+              titulo: "O que é o Perfil TEA?",
               desc: "Entenda como ele torna cada viagem mais confortável.",
               to: "/nossa-historia",
             },

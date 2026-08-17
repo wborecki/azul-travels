@@ -716,12 +716,12 @@ function DetalheReserva({
 
         <section className="space-y-3 border-t pt-4">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Perfil sensorial / TEA
+            Perfil TEA
           </h3>
           {!consentido ? (
             <p className="text-sm text-muted-foreground inline-flex items-start gap-1.5">
               <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />A família ainda não autorizou o
-              compartilhamento do perfil sensorial para esta reserva.
+              compartilhamento do Perfil TEA para esta reserva.
             </p>
           ) : perfilTea ? (
             <>
@@ -747,7 +747,7 @@ function DetalheReserva({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Nenhum perfil sensorial vinculado a esta reserva.
+              Nenhum Perfil TEA vinculado a esta reserva.
             </p>
           )}
         </section>

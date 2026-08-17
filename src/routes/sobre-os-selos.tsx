@@ -65,7 +65,7 @@ function SobreOsSelosPage() {
       criterios: [
         "Profissional dedicado, com formação em autismo",
         "Disponível durante toda a estadia da família",
-        "Recebe o perfil sensorial antes do check-in",
+        "Recebe o Perfil TEA antes do check-in",
         "Avaliação obrigatória após cada estadia",
       ],
     },

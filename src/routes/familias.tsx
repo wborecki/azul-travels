@@ -30,9 +30,9 @@ export const Route = createFileRoute("/familias")({
 function FamiliasPage() {
   const bullets = [
     {
-      titulo: "O destino já sabe quem é seu filho",
+      titulo: "O destino já sabe quem vai chegar",
       texto:
-        "O estabelecimento recebe o perfil antes da chegada. Sem ter que explicar tudo de novo na recepção.",
+        "O estabelecimento recebe o Perfil TEA antes da chegada. Sem ter que explicar tudo de novo na recepção.",
     },
     {
       titulo: "Ambientes verificados por quem entende de TEA",

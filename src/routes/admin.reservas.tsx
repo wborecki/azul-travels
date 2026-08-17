@@ -602,7 +602,7 @@ function AdminReservas() {
         "Família - telefone",
         "Família - cidade",
         "Família - estado",
-        "Perfil sensorial enviado",
+        "Perfil TEA enviado",
       ];
 
       const lines = all.map((r) => {
