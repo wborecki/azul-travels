@@ -117,6 +117,7 @@ function Landing() {
       <PorQueExistimos />
       <ComoFunciona />
       <ParaQuemEhSection />
+      <ParceirosInstitucionaisSection />
       <SeloDestaqueSection />
       <SelosImportantes />
       <OQuePlataformaTera />
@@ -596,13 +597,15 @@ function DorQueSoQuemViveSabe() {
   );
 }
 
+const gradienteAutismoEm = (angulo: number) =>
+  `linear-gradient(${angulo}deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)`;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POR QUE A GENTE EXISTE DE VERDADE
 // ─────────────────────────────────────────────────────────────────────────────
 
 function PorQueExistimos() {
-  const gradienteAutismo =
-    "linear-gradient(180deg, #E63946 0%, #1D7FBF 33%, #F4B400 66%, #2E9E55 100%)";
+  const gradienteAutismo = gradienteAutismoEm(180);
 
   return (
     <section id="por-que-existimos" className="py-20 bg-white">
@@ -1013,6 +1016,127 @@ function ParaQuemEhSection() {
             <p className="mt-6 text-[14px] leading-relaxed text-foreground">
               Espaços educativos como fazendas, sítios e museus recebem grupos escolares com crianças autistas sem nenhum preparo específico. Com o Selo Azul, seu espaço passa a ser encontrado pelas famílias e escolas que mais precisam de você.
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ParceirosInstitucionaisSection() {
+  const parceiros = [
+    {
+      nome: "IDT-Cema",
+      descricao: "Instituto de Desenvolvimento, Turismo, Cultura, Esporte e Meio Ambiente",
+      logo: "/parceiros/idt-cema.png",
+      altura: 64,
+    },
+    {
+      nome: "Abrajet",
+      descricao: "Associação Brasileira de Jornalistas de Turismo",
+      logo: "/parceiros/abrajet.png",
+      altura: 46,
+    },
+    {
+      nome: "Visite São Paulo",
+      descricao: "São Paulo Convention & Visitors Bureau",
+      logo: "/parceiros/visite-sao-paulo.png",
+      altura: 70,
+    },
+  ];
+
+  const marcas = [
+    { posicao: "-top-[1.5px] -left-[1.5px] border-t-4 border-l-4", cor: "#E63946" },
+    { posicao: "-top-[1.5px] -right-[1.5px] border-t-4 border-r-4", cor: "#1D7FBF" },
+    { posicao: "-bottom-[1.5px] -right-[1.5px] border-b-4 border-r-4", cor: "#F4B400" },
+    { posicao: "-bottom-[1.5px] -left-[1.5px] border-b-4 border-l-4", cor: "#2E9E55" },
+  ];
+
+
+  const Haste = () => (
+    <span
+      className="block w-1 h-3 flex-shrink-0"
+      style={{ backgroundColor: "#1a3666", opacity: 0.5 }}
+      aria-hidden
+    />
+  );
+
+  const rotulo = (
+    <p
+      className="text-center font-display font-extrabold uppercase text-xs md:text-sm tracking-[0.14em] md:tracking-[0.18em] leading-relaxed"
+      style={{ color: "#12294f" }}
+    >
+      Parceiros institucionais do Turismo Azul Inclusivo
+    </p>
+  );
+
+  const botao = (
+    <Link
+      to="/parceiros"
+      className="inline-flex items-center gap-2 whitespace-nowrap font-display font-extrabold uppercase tracking-wide text-sm transition-all hover:scale-105"
+      style={{
+        backgroundColor: "#1a3666",
+        color: "white",
+        padding: "14px 28px",
+        borderRadius: 50,
+        boxShadow: "0 10px 24px rgba(26,54,102,0.25)",
+      }}
+    >
+      Saber mais <ArrowRight className="h-4 w-4" aria-hidden />
+    </Link>
+  );
+
+  return (
+    <section className="py-16 md:py-20" style={{ backgroundColor: "#f7fbff" }}>
+      <div className="container mx-auto px-4">
+        <div className="relative max-w-5xl mx-auto">
+          <div className="p-px" style={{ background: gradienteAutismoEm(90) }}>
+            <div className="px-6 py-10 md:px-12 md:py-14" style={{ backgroundColor: "#f7fbff" }}>
+              <div className="md:hidden mb-10 flex justify-center">{rotulo}</div>
+
+              <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-14 md:gap-x-20 md:gap-y-10">
+                {parceiros.map((p) => (
+                  <li key={p.nome}>
+                    <img
+                      src={p.logo}
+                      alt={`${p.nome} — ${p.descricao}`}
+                      style={{ height: p.altura }}
+                      className="w-auto object-contain"
+                      loading="lazy"
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              <div className="md:hidden mt-12 flex justify-center">{botao}</div>
+            </div>
+          </div>
+
+          {marcas.map((m) => (
+            <span
+              key={m.posicao}
+              className={`absolute w-4 h-4 pointer-events-none ${m.posicao}`}
+              style={{ borderColor: m.cor }}
+              aria-hidden
+            />
+          ))}
+
+          <div
+            className="hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 items-center whitespace-nowrap"
+            style={{ backgroundColor: "#f7fbff" }}
+          >
+            <Haste />
+            <div className="px-4">{rotulo}</div>
+            <Haste />
+          </div>
+
+          <div
+            className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 items-center"
+            style={{ backgroundColor: "#f7fbff" }}
+          >
+            <Haste />
+            <div className="px-4">{botao}</div>
+            <Haste />
           </div>
         </div>
       </div>

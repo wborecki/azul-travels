@@ -16,6 +16,7 @@ import { Route as SelecionarPerfilRouteImport } from './routes/selecionar-perfil
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReservarRouteImport } from './routes/reservar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ParceirosRouteImport } from './routes/parceiros'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
 import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
@@ -103,6 +104,11 @@ const ReservarRoute = ReservarRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceirosRoute = ParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NossaHistoriaRoute = NossaHistoriaRouteImport.update({
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -517,6 +525,7 @@ export interface FileRoutesById {
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -581,6 +590,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
     | '/reservar'
     | '/reset-password'
@@ -640,6 +650,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
     | '/reservar'
     | '/reset-password'
@@ -701,6 +712,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
     | '/reservar'
     | '/reset-password'
@@ -764,6 +776,7 @@ export interface RootRouteChildren {
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
   MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
+  ParceirosRoute: typeof ParceirosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ReservarRoute: typeof ReservarRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -828,6 +841,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiros': {
+      id: '/parceiros'
+      path: '/parceiros'
+      fullPath: '/parceiros'
+      preLoaderRoute: typeof ParceirosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nossa-historia': {
@@ -1342,6 +1362,7 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaContaRoute: MinhaContaRouteWithChildren,
   MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
+  ParceirosRoute: ParceirosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ReservarRoute: ReservarRoute,
   ResetPasswordRoute: ResetPasswordRoute,
