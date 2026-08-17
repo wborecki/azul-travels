@@ -51,7 +51,6 @@ beforeAll(async () => {
 const TABELAS_SENSIVEIS_SOMENTE_ADMIN = [
   "familia_profiles",
   "estabelecimento_profiles",
-  "perfil_tea",
   "perfil_sensorial",
   "leads_familias",
   "leads_estabelecimentos",
@@ -118,11 +117,11 @@ describe("RLS — escrita anônima bloqueada em tabelas sensíveis", () => {
     expect(error).not.toBeNull();
   });
 
-  it("anon NÃO pode inserir em perfil_tea", async () => {
-    const { error } = await anon.from("perfil_tea").insert({
+  it("anon NÃO pode inserir em perfil_sensorial", async () => {
+    const { error } = await anon.from("perfil_sensorial").insert({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user_id: "00000000-0000-0000-0000-000000000000",
-      nome_pessoa: "teste",
+      familia_id: "00000000-0000-0000-0000-000000000000",
+      nome_autista: "teste",
     } as any);
     expect(error).not.toBeNull();
   });

@@ -35,7 +35,6 @@ export interface ExplorarSearch {
   pagina?: number;
   data_in?: string;
   data_out?: string;
-  perfil_tea_id?: string;
   /** Mostra o painel do mapa ao lado da lista (desktop) ou no lugar dela (mobile). */
   mapa?: boolean;
   /** Área visível do mapa ("buscar nesta área"). Mutuamente exclusivo com centro/raio. */
@@ -172,8 +171,6 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
       ? (s.data_out as string)
       : undefined;
 
-  const perfil_tea_id = parseTexto(s.perfil_tea_id, 64);
-
   const mapa = s.mapa === true || s.mapa === "true" ? true : undefined;
 
   // Centro/raio ("perto de mim") tem prioridade sobre bbox ("buscar nesta área") —
@@ -224,7 +221,6 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     ...(mapa ? { mapa } : {}),
     ...(data_in ? { data_in } : {}),
     ...(data_out ? { data_out } : {}),
-    ...(perfil_tea_id ? { perfil_tea_id } : {}),
     ...(temCentro ? { centro_lat, centro_lng, raio_km: raioValido } : {}),
     ...(bbox_n !== undefined ? { bbox_n, bbox_s, bbox_e, bbox_o } : {}),
   };

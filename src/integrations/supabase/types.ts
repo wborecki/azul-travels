@@ -1076,151 +1076,391 @@ export type Database = {
       }
       perfil_sensorial: {
         Row: {
+          abafadores_descricao: string | null
           alimentacao_observacoes: string | null
           alimentacao_restricoes: string[] | null
           alimentacao_seletiva: boolean | null
+          alimentos_aceitos: string | null
+          alimentos_recusados: string | null
           apoio_alimentacao: boolean | null
+          apoio_alimentacao_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene: boolean | null
+          apoio_higiene_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade: boolean | null
+          apoio_observacoes: string | null
+          apoio_regras_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca: boolean | null
+          apoio_vestir_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas: string[]
+          atividades_preferidas: string | null
+          autonomia_espacos: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade: boolean | null
+          checkin_equipe_saber: boolean | null
+          checkin_evitar_fila: boolean | null
+          compreende_instrucoes: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao: string | null
           comunicacao_verbal: boolean | null
           criado_em: string
           dificuldade_esperar: boolean | null
           dificuldade_mudanca_rotina: boolean | null
+          dorme_melhor_com: string[]
+          espera_fila_restaurante: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar: string | null
+          estrategias_funcionam: string[]
           estrategias_que_funcionam: string | null
           familia_id: string
+          forma_comunicacao: string[]
+          formas_abordagem: string | null
           foto_url: string | null
           gatilhos: string[] | null
           gosta_animais: boolean | null
           gosta_atividades_agua: boolean | null
           gosta_natureza: boolean | null
+          gosta_piscina: Database["public"]["Enums"]["frequencia_simples"] | null
           id: string
           idade: number | null
           interesses_extra: string[] | null
+          marca_favorece_aceitacao: string | null
           nivel_tea: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais: string | null
+          o_que_gera_alegria: string | null
+          o_que_nao_fazer: string | null
+          objetos_adaptacao: string | null
+          objetos_personagens: string | null
+          observacoes_comunicacao: string | null
+          piscina_horario_tranquilo: boolean | null
+          piscina_muitas_pessoas: boolean | null
+          piscina_supervisao: boolean | null
+          piscina_temperatura: boolean | null
           precisa_cardapio_visual: boolean | null
           precisa_checkin_antecipado: boolean | null
           precisa_concierge_tea: boolean | null
           precisa_fila_prioritaria: boolean | null
           precisa_sala_sensorial: boolean | null
+          prefere_ambiente_reservado: boolean | null
+          preferencia_crise: string[]
+          preparacao_especial_quarto: string | null
           quarto_andar_baixo: boolean | null
           quarto_blackout: boolean | null
           quarto_cama_extra: boolean | null
+          quarto_localizacao: string[]
           quarto_longe_elevador: boolean | null
           quarto_observacoes: string | null
           quarto_sem_estampas: boolean | null
+          recreacao_evitar: string | null
+          recreacao_gosta: boolean | null
+          recreacao_interesses: string | null
+          recreacao_preferencia: string | null
+          recreacao_tolera_som: boolean | null
+          recursos_comunicacao: string[]
+          responde_melhor_a: string[]
+          restaurante_apoio_visual: boolean | null
+          restaurante_fila: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo: boolean | null
+          restaurante_reservado: boolean | null
+          risco_fuga: boolean | null
+          risco_recusa_alimentar: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar: string | null
+          rotina_horario_almoco: string | null
+          rotina_horario_cafe: string | null
           rotina_horario_dormir: string | null
+          rotina_horario_jantar: string | null
+          rotina_horario_lanche: string | null
+          rotina_matinal_descricao: string | null
           rotina_observacoes: string | null
+          seletividade: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado: boolean | null
+          sensibilidade_iluminacao: boolean | null
+          sensibilidades_alimentares: string[]
           sensivel_cheiros: boolean | null
           sensivel_luz: boolean | null
           sensivel_multidao: boolean | null
           sensivel_sons: boolean | null
           sensivel_texturas: boolean | null
+          sensorial_barulho_pessoas: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto: string[]
           sinais_sobrecarga: string | null
+          supervisao_constante: boolean | null
+          tem_rotina_matinal: boolean | null
+          tempo_acalmar: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at: string
+          usa_abafadores: boolean | null
           usa_caa: boolean | null
           usa_libras: boolean | null
+          utensilios_especificos: boolean | null
         }
         Insert: {
+          abafadores_descricao?: string | null
           alimentacao_observacoes?: string | null
           alimentacao_restricoes?: string[] | null
           alimentacao_seletiva?: boolean | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
           apoio_alimentacao?: boolean | null
+          apoio_alimentacao_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene?: boolean | null
+          apoio_higiene_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade?: boolean | null
+          apoio_observacoes?: string | null
+          apoio_regras_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca?: boolean | null
+          apoio_vestir_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas?: string[]
+          atividades_preferidas?: string | null
+          autonomia_espacos?: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao?: string | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar?: string | null
+          estrategias_funcionam?: string[]
           estrategias_que_funcionam?: string | null
           familia_id: string
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
           foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
+          gosta_piscina?: Database["public"]["Enums"]["frequencia_simples"] | null
           id?: string
           idade?: number | null
           interesses_extra?: string[] | null
+          marca_favorece_aceitacao?: string | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais?: string | null
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
           precisa_cardapio_visual?: boolean | null
           precisa_checkin_antecipado?: boolean | null
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preparacao_especial_quarto?: string | null
           quarto_andar_baixo?: boolean | null
           quarto_blackout?: boolean | null
           quarto_cama_extra?: boolean | null
+          quarto_localizacao?: string[]
           quarto_longe_elevador?: boolean | null
           quarto_observacoes?: string | null
           quarto_sem_estampas?: boolean | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string[]
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar?: string | null
+          rotina_horario_almoco?: string | null
+          rotina_horario_cafe?: string | null
           rotina_horario_dormir?: string | null
+          rotina_horario_jantar?: string | null
+          rotina_horario_lanche?: string | null
+          rotina_matinal_descricao?: string | null
           rotina_observacoes?: string | null
+          seletividade?: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sensorial_barulho_pessoas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto?: string[]
           sinais_sobrecarga?: string | null
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          tempo_acalmar?: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at?: string
+          usa_abafadores?: boolean | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
+          utensilios_especificos?: boolean | null
         }
         Update: {
+          abafadores_descricao?: string | null
           alimentacao_observacoes?: string | null
           alimentacao_restricoes?: string[] | null
           alimentacao_seletiva?: boolean | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
           apoio_alimentacao?: boolean | null
+          apoio_alimentacao_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene?: boolean | null
+          apoio_higiene_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade?: boolean | null
+          apoio_observacoes?: string | null
+          apoio_regras_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca?: boolean | null
+          apoio_vestir_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas?: string[]
+          atividades_preferidas?: string | null
+          autonomia_espacos?: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao?: string | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar?: string | null
+          estrategias_funcionam?: string[]
           estrategias_que_funcionam?: string | null
           familia_id?: string
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
           foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
+          gosta_piscina?: Database["public"]["Enums"]["frequencia_simples"] | null
           id?: string
           idade?: number | null
           interesses_extra?: string[] | null
+          marca_favorece_aceitacao?: string | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista?: string
           notas_adicionais?: string | null
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
           precisa_cardapio_visual?: boolean | null
           precisa_checkin_antecipado?: boolean | null
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preparacao_especial_quarto?: string | null
           quarto_andar_baixo?: boolean | null
           quarto_blackout?: boolean | null
           quarto_cama_extra?: boolean | null
+          quarto_localizacao?: string[]
           quarto_longe_elevador?: boolean | null
           quarto_observacoes?: string | null
           quarto_sem_estampas?: boolean | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string[]
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar?: string | null
+          rotina_horario_almoco?: string | null
+          rotina_horario_cafe?: string | null
           rotina_horario_dormir?: string | null
+          rotina_horario_jantar?: string | null
+          rotina_horario_lanche?: string | null
+          rotina_matinal_descricao?: string | null
           rotina_observacoes?: string | null
+          seletividade?: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sensorial_barulho_pessoas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto?: string[]
           sinais_sobrecarga?: string | null
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          tempo_acalmar?: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at?: string
+          usa_abafadores?: boolean | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
+          utensilios_especificos?: boolean | null
         }
         Relationships: [
           {
@@ -1231,288 +1471,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      perfil_tea: {
-        Row: {
-          abafadores_descricao: string | null
-          alimentos_aceitos: string | null
-          alimentos_recusados: string | null
-          apoio_alimentacao: string | null
-          apoio_deslocamento: string | null
-          apoio_higiene: string | null
-          apoio_regras: string | null
-          apoio_vestir: string | null
-          atividades_preferidas: string | null
-          autonomia_espacos: string | null
-          checkin_ansiedade: boolean | null
-          checkin_equipe_saber: boolean | null
-          checkin_evitar_fila: boolean | null
-          compreende_instrucoes: string | null
-          comunicacao_misto_descricao: string | null
-          created_at: string
-          desencadeadores: string | null
-          dorme_melhor_com: string[]
-          espera_fila_restaurante: string | null
-          estimulos_acalmam: string | null
-          estrategias_ambientes_novos: string | null
-          estrategias_funcionam: string[]
-          forma_comunicacao: string[]
-          formas_abordagem: string | null
-          gatilho_sensorial: string | null
-          gosta_piscina: string | null
-          horario_acordar: string | null
-          horario_almoco: string | null
-          horario_cafe: string | null
-          horario_dormir: string | null
-          horario_jantar: string | null
-          horario_lanche: string | null
-          id: string
-          idade: number | null
-          marca_favorece_aceitacao: string | null
-          mudanca_rotina_sofrimento: boolean | null
-          nome_pessoa: string
-          o_que_gera_alegria: string | null
-          o_que_nao_fazer: string | null
-          objetos_adaptacao: string | null
-          objetos_personagens: string | null
-          observacoes_comunicacao: string | null
-          piscina_horario_tranquilo: boolean | null
-          piscina_muitas_pessoas: boolean | null
-          piscina_supervisao: boolean | null
-          piscina_temperatura: boolean | null
-          prefere_ambiente_reservado: boolean | null
-          preferencia_crise: string[]
-          preferencia_localizacao: string | null
-          preparacao_especial_quarto: string | null
-          recreacao_evitar: string | null
-          recreacao_gosta: boolean | null
-          recreacao_interesses: string | null
-          recreacao_preferencia: string | null
-          recreacao_tolera_som: boolean | null
-          recursos_comunicacao: string[]
-          responde_melhor_a: string | null
-          restaurante_apoio_visual: boolean | null
-          restaurante_fila: string | null
-          restaurante_horario_tranquilo: boolean | null
-          restaurante_reservado: boolean | null
-          risco_fuga: boolean | null
-          risco_recusa_alimentar: string | null
-          rotina_matinal_descricao: string | null
-          seletividade: string | null
-          sensibilidade_ar_condicionado: boolean | null
-          sensibilidade_iluminacao: boolean | null
-          sensibilidades_alimentares: string[]
-          sensorial_barulho_pessoas: string | null
-          sensorial_calor: string | null
-          sensorial_cheiros_fortes: string | null
-          sensorial_eco: string | null
-          sensorial_frio: string | null
-          sensorial_iluminacao_intensa: string | null
-          sensorial_locais_cheios: string | null
-          sensorial_luz_piscando: string | null
-          sensorial_movimento_visual: string | null
-          sensorial_musica_ambiente: string | null
-          sensorial_perfumes: string | null
-          sensorial_sons_subitos: string | null
-          sensorial_superficies_molhadas: string | null
-          sensorial_toque_inesperado: string | null
-          sinais_desconforto: string[]
-          supervisao_constante: boolean | null
-          tem_rotina_matinal: boolean | null
-          temas_interesses: string | null
-          tempo_acalmar: string | null
-          updated_at: string
-          usa_abafadores: string | null
-          user_id: string
-          utensilios_especificos: boolean | null
-        }
-        Insert: {
-          abafadores_descricao?: string | null
-          alimentos_aceitos?: string | null
-          alimentos_recusados?: string | null
-          apoio_alimentacao?: string | null
-          apoio_deslocamento?: string | null
-          apoio_higiene?: string | null
-          apoio_regras?: string | null
-          apoio_vestir?: string | null
-          atividades_preferidas?: string | null
-          autonomia_espacos?: string | null
-          checkin_ansiedade?: boolean | null
-          checkin_equipe_saber?: boolean | null
-          checkin_evitar_fila?: boolean | null
-          compreende_instrucoes?: string | null
-          comunicacao_misto_descricao?: string | null
-          created_at?: string
-          desencadeadores?: string | null
-          dorme_melhor_com?: string[]
-          espera_fila_restaurante?: string | null
-          estimulos_acalmam?: string | null
-          estrategias_ambientes_novos?: string | null
-          estrategias_funcionam?: string[]
-          forma_comunicacao?: string[]
-          formas_abordagem?: string | null
-          gatilho_sensorial?: string | null
-          gosta_piscina?: string | null
-          horario_acordar?: string | null
-          horario_almoco?: string | null
-          horario_cafe?: string | null
-          horario_dormir?: string | null
-          horario_jantar?: string | null
-          horario_lanche?: string | null
-          id?: string
-          idade?: number | null
-          marca_favorece_aceitacao?: string | null
-          mudanca_rotina_sofrimento?: boolean | null
-          nome_pessoa: string
-          o_que_gera_alegria?: string | null
-          o_que_nao_fazer?: string | null
-          objetos_adaptacao?: string | null
-          objetos_personagens?: string | null
-          observacoes_comunicacao?: string | null
-          piscina_horario_tranquilo?: boolean | null
-          piscina_muitas_pessoas?: boolean | null
-          piscina_supervisao?: boolean | null
-          piscina_temperatura?: boolean | null
-          prefere_ambiente_reservado?: boolean | null
-          preferencia_crise?: string[]
-          preferencia_localizacao?: string | null
-          preparacao_especial_quarto?: string | null
-          recreacao_evitar?: string | null
-          recreacao_gosta?: boolean | null
-          recreacao_interesses?: string | null
-          recreacao_preferencia?: string | null
-          recreacao_tolera_som?: boolean | null
-          recursos_comunicacao?: string[]
-          responde_melhor_a?: string | null
-          restaurante_apoio_visual?: boolean | null
-          restaurante_fila?: string | null
-          restaurante_horario_tranquilo?: boolean | null
-          restaurante_reservado?: boolean | null
-          risco_fuga?: boolean | null
-          risco_recusa_alimentar?: string | null
-          rotina_matinal_descricao?: string | null
-          seletividade?: string | null
-          sensibilidade_ar_condicionado?: boolean | null
-          sensibilidade_iluminacao?: boolean | null
-          sensibilidades_alimentares?: string[]
-          sensorial_barulho_pessoas?: string | null
-          sensorial_calor?: string | null
-          sensorial_cheiros_fortes?: string | null
-          sensorial_eco?: string | null
-          sensorial_frio?: string | null
-          sensorial_iluminacao_intensa?: string | null
-          sensorial_locais_cheios?: string | null
-          sensorial_luz_piscando?: string | null
-          sensorial_movimento_visual?: string | null
-          sensorial_musica_ambiente?: string | null
-          sensorial_perfumes?: string | null
-          sensorial_sons_subitos?: string | null
-          sensorial_superficies_molhadas?: string | null
-          sensorial_toque_inesperado?: string | null
-          sinais_desconforto?: string[]
-          supervisao_constante?: boolean | null
-          tem_rotina_matinal?: boolean | null
-          temas_interesses?: string | null
-          tempo_acalmar?: string | null
-          updated_at?: string
-          usa_abafadores?: string | null
-          user_id: string
-          utensilios_especificos?: boolean | null
-        }
-        Update: {
-          abafadores_descricao?: string | null
-          alimentos_aceitos?: string | null
-          alimentos_recusados?: string | null
-          apoio_alimentacao?: string | null
-          apoio_deslocamento?: string | null
-          apoio_higiene?: string | null
-          apoio_regras?: string | null
-          apoio_vestir?: string | null
-          atividades_preferidas?: string | null
-          autonomia_espacos?: string | null
-          checkin_ansiedade?: boolean | null
-          checkin_equipe_saber?: boolean | null
-          checkin_evitar_fila?: boolean | null
-          compreende_instrucoes?: string | null
-          comunicacao_misto_descricao?: string | null
-          created_at?: string
-          desencadeadores?: string | null
-          dorme_melhor_com?: string[]
-          espera_fila_restaurante?: string | null
-          estimulos_acalmam?: string | null
-          estrategias_ambientes_novos?: string | null
-          estrategias_funcionam?: string[]
-          forma_comunicacao?: string[]
-          formas_abordagem?: string | null
-          gatilho_sensorial?: string | null
-          gosta_piscina?: string | null
-          horario_acordar?: string | null
-          horario_almoco?: string | null
-          horario_cafe?: string | null
-          horario_dormir?: string | null
-          horario_jantar?: string | null
-          horario_lanche?: string | null
-          id?: string
-          idade?: number | null
-          marca_favorece_aceitacao?: string | null
-          mudanca_rotina_sofrimento?: boolean | null
-          nome_pessoa?: string
-          o_que_gera_alegria?: string | null
-          o_que_nao_fazer?: string | null
-          objetos_adaptacao?: string | null
-          objetos_personagens?: string | null
-          observacoes_comunicacao?: string | null
-          piscina_horario_tranquilo?: boolean | null
-          piscina_muitas_pessoas?: boolean | null
-          piscina_supervisao?: boolean | null
-          piscina_temperatura?: boolean | null
-          prefere_ambiente_reservado?: boolean | null
-          preferencia_crise?: string[]
-          preferencia_localizacao?: string | null
-          preparacao_especial_quarto?: string | null
-          recreacao_evitar?: string | null
-          recreacao_gosta?: boolean | null
-          recreacao_interesses?: string | null
-          recreacao_preferencia?: string | null
-          recreacao_tolera_som?: boolean | null
-          recursos_comunicacao?: string[]
-          responde_melhor_a?: string | null
-          restaurante_apoio_visual?: boolean | null
-          restaurante_fila?: string | null
-          restaurante_horario_tranquilo?: boolean | null
-          restaurante_reservado?: boolean | null
-          risco_fuga?: boolean | null
-          risco_recusa_alimentar?: string | null
-          rotina_matinal_descricao?: string | null
-          seletividade?: string | null
-          sensibilidade_ar_condicionado?: boolean | null
-          sensibilidade_iluminacao?: boolean | null
-          sensibilidades_alimentares?: string[]
-          sensorial_barulho_pessoas?: string | null
-          sensorial_calor?: string | null
-          sensorial_cheiros_fortes?: string | null
-          sensorial_eco?: string | null
-          sensorial_frio?: string | null
-          sensorial_iluminacao_intensa?: string | null
-          sensorial_locais_cheios?: string | null
-          sensorial_luz_piscando?: string | null
-          sensorial_movimento_visual?: string | null
-          sensorial_musica_ambiente?: string | null
-          sensorial_perfumes?: string | null
-          sensorial_sons_subitos?: string | null
-          sensorial_superficies_molhadas?: string | null
-          sensorial_toque_inesperado?: string | null
-          sinais_desconforto?: string[]
-          supervisao_constante?: boolean | null
-          tem_rotina_matinal?: boolean | null
-          temas_interesses?: string | null
-          tempo_acalmar?: string | null
-          updated_at?: string
-          usa_abafadores?: string | null
-          user_id?: string
-          utensilios_especificos?: boolean | null
-        }
-        Relationships: []
       }
       pre_checkins: {
         Row: {
@@ -1655,7 +1613,6 @@ export type Database = {
           item_reservavel_id: string | null
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
-          perfil_tea_id: string | null
           pessoa_referencia: string | null
           recomendacoes_adicionais: string | null
           status: Database["public"]["Enums"]["reserva_status"] | null
@@ -1688,7 +1645,6 @@ export type Database = {
           item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
-          perfil_tea_id?: string | null
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1721,7 +1677,6 @@ export type Database = {
           item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
-          perfil_tea_id?: string | null
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1756,13 +1711,6 @@ export type Database = {
             columns: ["perfil_sensorial_id"]
             isOneToOne: false
             referencedRelation: "perfil_sensorial"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reservas_perfil_tea_id_fkey"
-            columns: ["perfil_tea_id"]
-            isOneToOne: false
-            referencedRelation: "perfil_tea"
             referencedColumns: ["id"]
           },
         ]
@@ -1987,6 +1935,9 @@ export type Database = {
         | "transporte"
         | "excursao"
         | "passeio_educativo"
+      frequencia_simples: "sim" | "nao" | "as_vezes"
+      intensidade_incomodo: "baixo" | "medio" | "alto" | "depende"
+      nivel_apoio: "independente" | "apoio_parcial" | "apoio_total"
       oferta_natureza: "estadia" | "visita"
       pagamento_status:
         | "pendente"
@@ -2003,7 +1954,12 @@ export type Database = {
         | "confirmada"
         | "cancelada"
         | "concluida"
+      resposta_com_apoio: "sim" | "nao" | "com_apoio"
+      resposta_parcial: "sim" | "parcialmente" | "nao"
+      risco_nivel: "alto" | "medio" | "baixo"
+      seletividade_nivel: "nao" | "leve" | "moderada" | "severa"
       tea_nivel: "leve" | "moderado" | "severo"
+      tempo_acalmar_faixa: "rapido" | "medio" | "longo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2152,6 +2108,9 @@ export const Constants = {
         "excursao",
         "passeio_educativo",
       ],
+      frequencia_simples: ["sim", "nao", "as_vezes"],
+      intensidade_incomodo: ["baixo", "medio", "alto", "depende"],
+      nivel_apoio: ["independente", "apoio_parcial", "apoio_total"],
       oferta_natureza: ["estadia", "visita"],
       pagamento_status: [
         "pendente",
@@ -2170,7 +2129,12 @@ export const Constants = {
         "cancelada",
         "concluida",
       ],
+      resposta_com_apoio: ["sim", "nao", "com_apoio"],
+      resposta_parcial: ["sim", "parcialmente", "nao"],
+      risco_nivel: ["alto", "medio", "baixo"],
+      seletividade_nivel: ["nao", "leve", "moderada", "severa"],
       tea_nivel: ["leve", "moderado", "severo"],
+      tempo_acalmar_faixa: ["rapido", "medio", "longo"],
     },
   },
 } as const

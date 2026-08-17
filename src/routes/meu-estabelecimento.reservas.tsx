@@ -66,6 +66,7 @@ import {
   type ReservaEstabelecimentoRow,
 } from "@/lib/queries";
 import { StatusBadge } from "@/components/estabelecimento/StatusBadge";
+import { alertasDoPerfil } from "@/lib/perfil/resumo";
 
 // FullCalendar é pesado (~400kB) - carregado só quando o usuário abre a aba Calendário.
 const ReservasCalendario = lazy(() =>
@@ -495,7 +496,6 @@ function DetalheReserva({
   const fam = reserva.familia_profiles;
   const item = reserva.itens_reservaveis;
   const ehVisita = reservaEhVisita(reserva);
-  const perfilTea = reserva.perfil_tea;
   const perfisSensoriais = perfisSensoriaisDaReservaEstab(reserva);
   const consentido = reserva.perfil_enviado_ao_estabelecimento;
 
@@ -723,26 +723,18 @@ function DetalheReserva({
               <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" />A família ainda não autorizou o
               compartilhamento do Perfil TEA para esta reserva.
             </p>
-          ) : perfilTea ? (
-            <>
-              <PerfilTeaDestaques perfil={perfilTea} />
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-primary text-primary hover:bg-azul-claro"
-                onClick={() =>
-                  void import("@/lib/pdf/perfilTeaPdf").then(({ baixarPerfilTeaPdf }) =>
-                    baixarPerfilTeaPdf({ perfil: perfilTea, reserva, estabelecimento: estab }),
-                  )
-                }
-              >
-                <FileDown className="h-4 w-4 mr-1.5" /> Baixar perfil completo em PDF
-              </Button>
-            </>
           ) : perfisSensoriais.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {perfisSensoriais.map((p) => (
-                <PerfilSensorialDestaques key={p.id} perfil={p} />
+                <PerfilTeaDestaques
+                  key={p.id}
+                  perfil={p}
+                  onBaixarPdf={() =>
+                    void import("@/lib/pdf/perfilTeaPdf").then(({ baixarPerfilTeaPdf }) =>
+                      baixarPerfilTeaPdf({ perfil: p, reserva, estabelecimento: estab }),
+                    )
+                  }
+                />
               ))}
             </div>
           ) : (
@@ -766,44 +758,19 @@ function DetalheReserva({
   );
 }
 
-/** Destaques operacionais do Perfil TEA - o documento completo vai no PDF. */
+/**
+ * Destaques operacionais do Perfil TEA - o documento completo vai no PDF.
+ * Os alertas de segurança vêm primeiro: é o que a equipe precisa ter lido mesmo
+ * que não abra mais nada.
+ */
 function PerfilTeaDestaques({
   perfil,
-}: {
-  perfil: NonNullable<ReservaEstabelecimentoRow["perfil_tea"]>;
-}) {
-  const todos: Array<[string, string]> = [
-    ["Idade", perfil.idade != null ? `${perfil.idade} anos` : ""],
-    ["Gatilho sensorial principal", perfil.gatilho_sensorial ?? ""],
-    ["Estímulos que acalmam", perfil.estimulos_acalmam ?? ""],
-    ["O que NÃO fazer", perfil.o_que_nao_fazer ?? ""],
-    ["Sensibilidades alimentares", (perfil.sensibilidades_alimentares ?? []).join(", ")],
-    ["Risco de fuga", perfil.risco_fuga ? "Sim" : ""],
-    ["Ansiedade no check-in", perfil.checkin_ansiedade ? "Sim, evitar fila" : ""],
-    ["Equipe deve ser avisada antes", perfil.checkin_equipe_saber ? "Sim" : ""],
-  ];
-  const destaques = todos.filter(([, v]) => v);
-
-  if (destaques.length === 0) return null;
-
-  return (
-    <dl className="grid sm:grid-cols-2 gap-2 text-sm">
-      {destaques.map(([label, value]) => (
-        <div key={label} className="rounded-lg bg-muted/40 px-3 py-2">
-          <dt className="text-xs text-muted-foreground">{label}</dt>
-          <dd className="text-foreground/90">{value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-/** Fallback para o perfil sensorial legado (sem o PDF do Perfil TEA). */
-function PerfilSensorialDestaques({
-  perfil,
+  onBaixarPdf,
 }: {
   perfil: NonNullable<ReservaEstabelecimentoRow["perfil_sensorial"]>;
+  onBaixarPdf: () => void;
 }) {
+  const alertas = alertasDoPerfil(perfil);
   const todasFlags: Array<[string, boolean | null]> = [
     ["Sensível a sons", perfil.sensivel_sons],
     ["Sensível à luz", perfil.sensivel_luz],
@@ -843,6 +810,17 @@ function PerfilSensorialDestaques({
           </span>
         </div>
       </div>
+      {alertas.length > 0 && (
+        <dl className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 space-y-1.5">
+          {alertas.map((a) => (
+            <div key={a.rotulo}>
+              <dt className="text-xs font-semibold text-amber-900/70">{a.rotulo}</dt>
+              <dd className="text-sm text-amber-950 whitespace-pre-wrap">{a.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
       <div className="flex flex-wrap gap-1.5">
         {flags.map(([label]) => (
           <span
@@ -853,11 +831,21 @@ function PerfilSensorialDestaques({
           </span>
         ))}
       </div>
+
       {perfil.notas_adicionais && (
         <p className="text-sm text-foreground/80 whitespace-pre-wrap rounded-lg bg-muted/40 p-3">
           {perfil.notas_adicionais}
         </p>
       )}
+
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-primary text-primary hover:bg-azul-claro"
+        onClick={onBaixarPdf}
+      >
+        <FileDown className="h-4 w-4 mr-1.5" /> Baixar perfil de {perfil.nome_autista} em PDF
+      </Button>
     </div>
   );
 }

@@ -226,9 +226,7 @@ export async function vincularPerfisAReserva(
 interface ReservaFormBase {
   familia_id: NonNullable<ReservaInsert["familia_id"]>;
   estabelecimento_id: NonNullable<ReservaInsert["estabelecimento_id"]>;
-  /** Vínculo ao Perfil TEA permanente da família (preferencial). */
-  perfil_tea_id?: ReservaInsert["perfil_tea_id"];
-  /** Mantido por compat. com pré-cadastros antigos. Pode ser null. */
+  /** Perfil TEA principal da reserva. Os demais vão em `reserva_perfis`. */
   perfil_sensorial_id: ReservaInsert["perfil_sensorial_id"];
   data_checkin: string;
   num_adultos: NonNullable<Reserva["num_adultos"]>;
@@ -312,7 +310,6 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
     ...porNatureza,
     familia_id: input.familia_id,
     estabelecimento_id: input.estabelecimento_id,
-    perfil_tea_id: input.perfil_tea_id ?? null,
     perfil_sensorial_id: input.perfil_sensorial_id ?? null,
     data_checkin: emptyToNull(input.data_checkin),
     num_adultos: input.num_adultos,

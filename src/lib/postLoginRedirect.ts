@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
  * - 2+ roles distintos → /selecionar-perfil
  * - admin (único) → /admin
  * - estabelecimento (único) → /meu-estabelecimento
- * - família (user) sem perfil_tea → /minha-conta/perfil
+ * - família (user) sem Perfil TEA → /minha-conta/perfil/novo
  * - família com perfil → /minha-conta
  * - se houver redirect explícito válido, prioriza
  */
@@ -40,6 +40,6 @@ export async function resolvePostLoginPath(
     .limit(1);
 
   if (error) return "/minha-conta";
-  if (!data || data.length === 0) return "/minha-conta/perfil";
+  if (!data || data.length === 0) return "/minha-conta/perfil/novo";
   return "/minha-conta";
 }

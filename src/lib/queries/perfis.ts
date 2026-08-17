@@ -42,6 +42,18 @@ export async function fetchPerfisCompletos(familiaId: string): Promise<PerfilSen
   return data ?? [];
 }
 
+/** Busca um perfil pelo id (a RLS já restringe à família dona). */
+export async function fetchPerfilPorId(perfilId: string): Promise<PerfilSensorial | null> {
+  const { data, error } = await supabase
+    .from("perfil_sensorial")
+    .select("*")
+    .eq("id", perfilId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ?? null;
+}
+
 /** Cria um novo perfil sensorial e devolve a row completa. */
 export async function criarPerfilSensorial(
   payload: PerfilSensorialInsert,
