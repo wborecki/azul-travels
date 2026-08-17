@@ -235,6 +235,16 @@ interface ReservaFormBase {
   num_autistas: NonNullable<Reserva["num_autistas"]>;
   mensagem: string;
   perfil_enviado_ao_estabelecimento: NonNullable<Reserva["perfil_enviado_ao_estabelecimento"]>;
+  /**
+   * Padrão `"pendente"` (pedido gratuito). A reserva paga entra como
+   * `"aguardando_pagamento"` — quem define isso é a server function
+   * `criarReservaComPagamento`, nunca um componente.
+   */
+  status?: NonNullable<ReservaInsert["status"]>;
+  /** Congelados na criação da cobrança; nulos em reserva sem pagamento. */
+  valor_total?: ReservaInsert["valor_total"];
+  valor_comissao?: ReservaInsert["valor_comissao"];
+  valor_repasse?: ReservaInsert["valor_repasse"];
   // Campos opcionais específicos da reserva (smart pre-checkin)
   num_acompanhantes?: number | null;
   pessoa_referencia?: string | null;
@@ -308,7 +318,10 @@ export function buildReservaPayload(input: ReservaFormInput): ReservaInsert {
     num_adultos: input.num_adultos,
     num_autistas: input.num_autistas,
     mensagem: emptyToNull(input.mensagem),
-    status: "pendente",
+    status: input.status ?? "pendente",
+    valor_total: input.valor_total ?? null,
+    valor_comissao: input.valor_comissao ?? null,
+    valor_repasse: input.valor_repasse ?? null,
     perfil_enviado_ao_estabelecimento: input.perfil_enviado_ao_estabelecimento,
     num_acompanhantes: input.num_acompanhantes ?? null,
     pessoa_referencia: input.pessoa_referencia ? emptyToNull(input.pessoa_referencia) : null,

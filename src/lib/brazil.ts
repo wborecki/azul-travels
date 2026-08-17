@@ -80,3 +80,29 @@ export function parseInteiroUrl(valor: unknown, minimo: number): number | undefi
   const n = typeof valor === "number" ? valor : typeof valor === "string" ? Number(valor) : NaN;
   return Number.isInteger(n) && n >= minimo ? n : undefined;
 }
+
+/** Só os dígitos: "123.456.789-09" → "12345678909". */
+export function normalizarCPF(valor: string): string {
+  return valor.replace(/\D/g, "");
+}
+
+export function formatarCPF(valor: string): string {
+  const d = normalizarCPF(valor);
+  if (d.length !== 11) return valor;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
+/** Validação pelos dois dígitos verificadores. Rejeita as sequências repetidas. */
+export function validarCPF(valor: string): boolean {
+  const d = normalizarCPF(valor);
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+
+  const digito = (ate: number): number => {
+    let soma = 0;
+    for (let i = 0; i < ate; i++) soma += Number(d[i]) * (ate + 1 - i);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return digito(9) === Number(d[9]) && digito(10) === Number(d[10]);
+}
