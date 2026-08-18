@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { ContadorHospedes } from "@/components/ContadorHospedes";
 import { SeletorPeriodo } from "@/components/explorar/SeletorPeriodo";
 import { PainelFiltro } from "@/components/explorar/PainelFiltro";
+import { ConviteCriarPerfil, PainelPerfis } from "@/components/explorar/PainelPerfis";
 import { chipSeloClasses } from "@/components/explorar/chips";
 import { RECURSO_BADGES, SELO_BADGES } from "@/components/Badges";
 import { useContagemPreview } from "@/hooks/useContagemPreview";
 import { ESTADOS_BR, formatDataISO, formatDateBR, parseDataISO } from "@/lib/brazil";
 import { cn } from "@/lib/utils";
 import type { ItemRecursoFlag, ItemSeloFlag } from "@/lib/queries";
+import type { PerfilNecessidades } from "@/lib/perfil/compatibilidade";
 import {
   ITEM_RECURSO_FLAGS,
   buscaSoDeHospedagem,
@@ -31,6 +33,12 @@ interface FiltrosRapidosProps {
   onPatch: (patch: Partial<ExplorarSearch>) => void;
   onSalvarPadrao?: () => void;
   salvandoPadrao?: boolean;
+  perfisDisponiveis: ReadonlyArray<PerfilNecessidades>;
+  perfisSelecionados: ReadonlyArray<PerfilNecessidades>;
+  /** Necessidades já resolvidas - os previews de contagem precisam delas. */
+  necessidades: ReadonlyArray<ItemRecursoFlag>;
+  /** Evita o convite piscar antes de os perfis carregarem. */
+  carregandoPerfis: boolean;
 }
 
 export function FiltrosRapidos({
@@ -38,6 +46,10 @@ export function FiltrosRapidos({
   onPatch,
   onSalvarPadrao,
   salvandoPadrao,
+  perfisDisponiveis,
+  perfisSelecionados,
+  necessidades,
+  carregandoPerfis,
 }: FiltrosRapidosProps) {
   const selos = parseSelosCsv(search.selos);
   const recursos = parseRecursosCsv(search.recursos);
@@ -79,6 +91,17 @@ export function FiltrosRapidos({
         <HelpCircle className="h-4 w-4" aria-hidden />
       </Link>
 
+      {perfisDisponiveis.length > 0 ? (
+        <PainelPerfis
+          search={search}
+          disponiveis={perfisDisponiveis}
+          selecionados={perfisSelecionados}
+          onPatch={onPatch}
+        />
+      ) : (
+        !carregandoPerfis && <ConviteCriarPerfil />
+      )}
+
       <PainelLista
         titulo="Certificações"
         ativos={certificacoesAtivas}
@@ -99,12 +122,14 @@ export function FiltrosRapidos({
         <>
           <PainelPeriodo
             search={search}
+            necessidades={necessidades}
             dataIn={search.data_in}
             dataOut={search.data_out}
             onAplicar={(data_in, data_out) => onPatch({ data_in, data_out })}
           />
           <PainelHospedes
             search={search}
+            necessidades={necessidades}
             adultos={search.adultos}
             criancas={search.criancas}
             total={totalHospedes(search)}
@@ -113,6 +138,7 @@ export function FiltrosRapidos({
           />
           <PainelPreco
             search={search}
+            necessidades={necessidades}
             precoMin={search.preco_min}
             precoMax={search.preco_max}
             onAplicar={(preco_min, preco_max) => onPatch({ preco_min, preco_max })}
@@ -198,11 +224,13 @@ function PainelLista<T extends string>({
 
 function PainelPeriodo({
   search,
+  necessidades,
   dataIn,
   dataOut,
   onAplicar,
 }: {
   search: ExplorarSearch;
+  necessidades: ReadonlyArray<ItemRecursoFlag>;
   dataIn?: string;
   dataOut?: string;
   onAplicar: (dataIn?: string, dataOut?: string) => void;
@@ -223,6 +251,7 @@ function PainelPeriodo({
       data_out: inicio && fim ? fim : undefined,
     },
     aberto,
+    necessidades,
   );
 
   const rotulo = dataIn
@@ -263,6 +292,7 @@ function PainelPeriodo({
 
 function PainelHospedes({
   search,
+  necessidades,
   adultos,
   criancas,
   total,
@@ -270,6 +300,7 @@ function PainelHospedes({
   onAplicar,
 }: {
   search: ExplorarSearch;
+  necessidades: ReadonlyArray<ItemRecursoFlag>;
   adultos?: number;
   criancas?: number;
   total: number;
@@ -294,6 +325,7 @@ function PainelHospedes({
       criancas: rascunhoCriancas !== 0 ? rascunhoCriancas : undefined,
     },
     aberto,
+    necessidades,
   );
 
   return (
@@ -368,11 +400,13 @@ function numeroOuUndefined(v: string): number | undefined {
 
 function PainelPreco({
   search,
+  necessidades,
   precoMin,
   precoMax,
   onAplicar,
 }: {
   search: ExplorarSearch;
+  necessidades: ReadonlyArray<ItemRecursoFlag>;
   precoMin?: number;
   precoMax?: number;
   onAplicar: (min?: number, max?: number) => void;
@@ -393,6 +427,7 @@ function PainelPreco({
       preco_max: numeroOuUndefined(max),
     },
     aberto,
+    necessidades,
   );
 
   return (

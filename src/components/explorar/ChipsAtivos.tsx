@@ -3,8 +3,10 @@ import { RECURSO_BADGES, SELO_BADGES } from "@/components/Badges";
 import { ESTAB_TIPO_LABEL, type EstabTipo } from "@/lib/enums";
 import { ESTADOS_BR, formatDateBR } from "@/lib/brazil";
 import { cn } from "@/lib/utils";
+import type { PerfilNecessidades } from "@/lib/perfil/compatibilidade";
 import {
   csvOrUndefined,
+  parsePerfisCsv,
   parseRecursosCsv,
   parseSelosCsv,
   parseTiposCsv,
@@ -14,6 +16,7 @@ import {
 
 interface ChipsAtivosProps {
   search: ExplorarSearch;
+  perfisSelecionados?: ReadonlyArray<PerfilNecessidades>;
   areaAtiva: boolean;
   onPatch: (patch: Partial<ExplorarSearch>) => void;
   onRemoverTipo: () => void;
@@ -38,6 +41,7 @@ function precoRotulo(min?: number, max?: number): string {
 
 export function ChipsAtivos({
   search,
+  perfisSelecionados = [],
   areaAtiva,
   onPatch,
   onRemoverTipo,
@@ -70,6 +74,31 @@ export function ChipsAtivos({
       chave: `selo:${flag}`,
       rotulo: SELO_BADGES[flag].label,
       remover: () => onPatch({ selos: csvOrUndefined(selos.filter((s) => s !== flag)) }),
+    });
+  }
+
+  // Um chip por perfil: remover um sem perder os outros é o comportamento
+  // esperado quando a família compara dois filhos ao mesmo tempo.
+  const idsPerfis = parsePerfisCsv(search.perfis);
+  for (const perfil of perfisSelecionados) {
+    chips.push({
+      chave: `perfil:${perfil.id}`,
+      rotulo: `Perfil de ${perfil.nome_autista}`,
+      remover: () => {
+        const restantes = idsPerfis.filter((id) => id !== perfil.id);
+        onPatch({
+          perfis: csvOrUndefined(restantes),
+          ...(restantes.length === 0 ? { so_compativeis: undefined } : {}),
+        });
+      },
+    });
+  }
+
+  if (search.so_compativeis) {
+    chips.push({
+      chave: "so_compativeis",
+      rotulo: "Só os que atendem tudo",
+      remover: () => onPatch({ so_compativeis: undefined }),
     });
   }
 

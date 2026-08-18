@@ -59,6 +59,8 @@ export {
 export {
   fetchPerfisDaFamilia,
   fetchPerfisCompletos,
+  fetchPerfisComNecessidades,
+  PERFIL_NECESSIDADES_SELECT,
   fetchPerfilPorId,
   criarPerfilSensorial,
   atualizarPerfilSensorial,

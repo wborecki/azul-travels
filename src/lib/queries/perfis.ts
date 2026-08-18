@@ -7,6 +7,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { PerfilNecessidades } from "@/lib/perfil/compatibilidade";
 
 export type PerfilSensorial = Tables<"perfil_sensorial">;
 export type PerfilSensorialInsert = TablesInsert<"perfil_sensorial">;
@@ -37,6 +38,30 @@ export async function fetchPerfisCompletos(familiaId: string): Promise<PerfilSen
     .select("*")
     .eq("familia_id", familiaId)
     .order("criado_em", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * Literal, não montado a partir de `CAMPOS_NECESSIDADE`: select dinâmico desliga
+ * a checagem de colunas do supabase-js. O teste garante que os dois não divirjam.
+ */
+export const PERFIL_NECESSIDADES_SELECT =
+  "id, nome_autista, foto_url, precisa_sala_sensorial, precisa_concierge_tea, precisa_checkin_antecipado, precisa_fila_prioritaria, precisa_cardapio_visual, usa_caa" as const;
+
+/**
+ * Perfis da família no formato que o filtro de compatibilidade do /explorar usa:
+ * identificação para o chip + as colunas que casam com os recursos declarados
+ * pelos estabelecimentos.
+ */
+export async function fetchPerfisComNecessidades(familiaId: string): Promise<PerfilNecessidades[]> {
+  const { data, error } = await supabase
+    .from("perfil_sensorial")
+    .select(PERFIL_NECESSIDADES_SELECT)
+    .eq("familia_id", familiaId)
+    .order("nome_autista")
+    .returns<PerfilNecessidades[]>();
 
   if (error) throw error;
   return data ?? [];

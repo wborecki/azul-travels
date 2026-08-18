@@ -17,7 +17,8 @@ import { ContagemResultados, ResultadosLista } from "@/components/explorar/Resul
 import { TrilhoSeloAzul } from "@/components/explorar/TrilhoSeloAzul";
 import type { VarianteCard } from "@/components/explorar/ItemCard";
 import { useAuth } from "@/hooks/useAuth";
-import { useItensViewMapa, useItensViewPagina } from "@/hooks/useItensView";
+import { useItensViewMapa, useItensViewPagina, useItensViewTotal } from "@/hooks/useItensView";
+import { usePerfisCompatibilidade } from "@/hooks/usePerfisCompatibilidade";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { comportamentoRolagem } from "@/lib/movimento";
 import { cn } from "@/lib/utils";
@@ -79,10 +80,27 @@ function ExplorarPage() {
   const mapaVisivel = search.mapa === true;
   const ehDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const filtros = useMemo(() => searchToFilters(search), [search]);
+  const perfis = usePerfisCompatibilidade(search);
+  const nomesPerfis = perfis.selecionados.map((p) => p.nome_autista).join(" e ");
+
+  const filtros = useMemo(
+    () => searchToFilters(search, perfis.necessidades),
+    [search, perfis.necessidades],
+  );
 
   const consultaLista = useItensViewPagina(filtros);
   const consultaMapa = useItensViewMapa(filtros, mapaVisivel);
+
+  // Quantos atendem TUDO, dentro dos demais filtros. Vira o atalho "mostrar só
+  // esses" - sem isso a família só descobre o recorte aplicando e desfazendo.
+  const filtrosCompativeis = useMemo(
+    () => searchToFilters({ ...search, so_compativeis: true }, perfis.necessidades),
+    [search, perfis.necessidades],
+  );
+  const podeSugerirRecorte =
+    perfis.necessidades.length > 0 && !search.so_compativeis && !mapaVisivel;
+  const consultaCompativeis = useItensViewTotal(filtrosCompativeis, podeSugerirRecorte);
+  const totalCompativeis = consultaCompativeis.data ?? null;
 
   const pageData = consultaLista.data ?? null;
   const loading = consultaLista.isFetching;
@@ -324,12 +342,36 @@ function ExplorarPage() {
       <ChipsAtivos
         className="mt-3"
         search={search}
+        perfisSelecionados={perfis.selecionados}
         areaAtiva={areaMapaAtiva}
         onPatch={patchSearch}
         onRemoverTipo={() => selecionarTipo(undefined)}
         onLimparArea={limparArea}
         onLimparTudo={limparTudo}
       />
+
+      {podeSugerirRecorte && totalCompativeis !== null && (pageData?.total ?? 0) > 0 && (
+        <p className="mt-3 text-sm text-foreground/80">
+          {totalCompativeis === 0 ? (
+            <>
+              Nenhuma opção atende tudo que {nomesPerfis} precisa — a nota em cada card mostra o
+              quanto chega perto.
+            </>
+          ) : (
+            <>
+              <strong className="text-primary">{totalCompativeis}</strong> de {pageData?.total}{" "}
+              atendem tudo que {nomesPerfis} precisa.{" "}
+              <button
+                type="button"
+                onClick={() => patchSearch({ so_compativeis: true })}
+                className="font-semibold text-secondary underline underline-offset-2"
+              >
+                Mostrar só essas
+              </button>
+            </>
+          )}
+        </p>
+      )}
 
       <div className="mt-5">
         {mostrarTrilhoSelo && (
@@ -358,6 +400,8 @@ function ExplorarPage() {
           adultos={search.adultos}
           criancas={search.criancas}
           itemAtivoId={itemAtivoId}
+          necessidades={perfis.necessidades}
+          nomesPerfis={nomesPerfis}
           onItemAtivo={setItemAtivoId}
           onTentarNovamente={onTentarNovamente}
           onLimparArea={limparArea}
@@ -432,6 +476,10 @@ function ExplorarPage() {
         onPatch={patchSearch}
         onSalvarPadrao={user ? () => void salvarComoPadrao() : undefined}
         salvandoPadrao={salvandoPadrao}
+        perfisDisponiveis={perfis.disponiveis}
+        perfisSelecionados={perfis.selecionados}
+        necessidades={perfis.necessidades}
+        carregandoPerfis={perfis.carregando}
       />
 
       {mapaVisivel ? (

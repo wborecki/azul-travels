@@ -25,6 +25,10 @@ export interface ExplorarSearch {
   tipos?: string;
   selos?: string;
   recursos?: string;
+  /** Perfis TEA selecionados (ids CSV). Ligam o cálculo de compatibilidade. */
+  perfis?: string;
+  /** Restringe aos locais que atendem todas as necessidades dos perfis. */
+  so_compativeis?: boolean;
   estado?: string;
   cidade?: string;
   preco_min?: number;
@@ -73,6 +77,18 @@ export const ORDENACAO_LABEL: Record<Ordenacao, string> = {
   preco_desc: "Maior preço",
   avaliacao: "Melhor avaliado",
 };
+
+const MAX_PERFIS = 6;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(v: unknown): v is string {
+  return typeof v === "string" && UUID_RE.test(v);
+}
+
+/** Ids de perfil na URL: só o formato é validado aqui - a RLS decide o acesso. */
+export function parsePerfisCsv(v: unknown): string[] {
+  return parseCsv(v, isUuid).slice(0, MAX_PERFIS);
+}
 
 function parseTexto(v: unknown, max = 120): string | undefined {
   if (typeof v !== "string") return undefined;
@@ -143,6 +159,9 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
   const tipos = csvOrUndefined(parseTiposCsv(s.tipos));
   const selos = csvOrUndefined(parseSelosCsv(s.selos));
   const recursos = csvOrUndefined(parseRecursosCsv(s.recursos));
+  const perfis = csvOrUndefined(parsePerfisCsv(s.perfis));
+  const so_compativeis =
+    perfis && (s.so_compativeis === true || s.so_compativeis === "true") ? true : undefined;
 
   const ufBruta = parseTexto(s.estado, 2)?.toUpperCase();
   const estado = ufBruta && UF_SET.has(ufBruta) ? ufBruta : undefined;
@@ -210,6 +229,8 @@ export function validateExplorarSearch(s: Record<string, unknown>): ExplorarSear
     ...(tipos ? { tipos } : {}),
     ...(selos ? { selos } : {}),
     ...(recursos ? { recursos } : {}),
+    ...(perfis ? { perfis } : {}),
+    ...(so_compativeis ? { so_compativeis } : {}),
     ...(estado ? { estado } : {}),
     ...(cidade ? { cidade } : {}),
     ...(preco_min !== undefined ? { preco_min } : {}),
@@ -230,10 +251,19 @@ export function totalHospedes(search: ExplorarSearch): number {
   return (search.adultos ?? 1) + (search.criancas ?? 0);
 }
 
-export function searchToFilters(search: ExplorarSearch): ItensViewFilters {
+/**
+ * `necessidades` chega resolvida de fora: os ids de perfil da URL viram flags
+ * só depois de buscar os perfis, e esta função é síncrona de propósito (o
+ * preview de contagem depende disso).
+ */
+export function searchToFilters(
+  search: ExplorarSearch,
+  necessidades: ReadonlyArray<ItemRecursoFlag> = [],
+): ItensViewFilters {
   const tipos = parseTiposCsv(search.tipos);
   const selos = parseSelosCsv(search.selos);
-  const recursos = parseRecursosCsv(search.recursos);
+  const exigidos = search.so_compativeis ? necessidades : [];
+  const recursos = [...new Set([...parseRecursosCsv(search.recursos), ...exigidos])];
   const hospedes = totalHospedes(search);
 
   const temCentro = search.centro_lat !== undefined && search.centro_lng !== undefined;
@@ -306,6 +336,7 @@ export function temFiltrosRelevantes(search: ExplorarSearch): boolean {
     search.tipos !== undefined ||
     search.selos !== undefined ||
     search.recursos !== undefined ||
+    search.perfis !== undefined ||
     search.estado !== undefined ||
     search.cidade !== undefined ||
     search.preco_min !== undefined ||
@@ -326,6 +357,7 @@ export function contarFiltrosAtivos(search: ExplorarSearch): number {
   if (search.cidade) n += 1;
   n += parseSelosCsv(search.selos).length;
   n += parseRecursosCsv(search.recursos).length;
+  if (search.perfis) n += 1;
   if (search.preco_min !== undefined) n += 1;
   if (search.preco_max !== undefined) n += 1;
   if (search.adultos !== undefined || search.criancas !== undefined) n += 1;

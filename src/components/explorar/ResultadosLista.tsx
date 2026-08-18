@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ItemCard, type VarianteCard } from "@/components/explorar/ItemCard";
 import { ExplorarPagination } from "@/components/explorar/ExplorarPagination";
-import { criarContatoGeral, type ItensViewPage } from "@/lib/queries";
+import { criarContatoGeral, type ItemRecursoFlag, type ItensViewPage } from "@/lib/queries";
+import { compatibilidade } from "@/lib/perfil/compatibilidade";
 import { cn } from "@/lib/utils";
 
 interface ResultadosListaProps {
@@ -24,6 +25,9 @@ interface ResultadosListaProps {
   adultos?: number;
   criancas?: number;
   itemAtivoId?: string | null;
+  /** Necessidades dos perfis selecionados. Vazio = sem nota de compatibilidade. */
+  necessidades?: ReadonlyArray<ItemRecursoFlag>;
+  nomesPerfis?: string;
   onItemAtivo?: (id: string | null) => void;
   onTentarNovamente: () => void;
   onLimparArea: () => void;
@@ -55,6 +59,8 @@ export function ResultadosLista({
   adultos,
   criancas,
   itemAtivoId,
+  necessidades = [],
+  nomesPerfis = "",
   onItemAtivo,
   onTentarNovamente,
   onLimparArea,
@@ -89,6 +95,8 @@ export function ResultadosLista({
                   dataOut={dataOut}
                   adultos={adultos}
                   criancas={criancas}
+                  compat={compatibilidade(item, necessidades)}
+                  nomesPerfis={nomesPerfis}
                   ativo={itemAtivoId === item.id}
                   onAtivar={onItemAtivo ? () => onItemAtivo(item.id) : undefined}
                   onDesativar={onItemAtivo ? () => onItemAtivo(null) : undefined}

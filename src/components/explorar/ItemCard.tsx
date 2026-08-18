@@ -15,6 +15,11 @@ import { RECURSO_BADGES } from "@/components/Badges";
 import { ESTAB_TIPO_LABEL } from "@/lib/enums";
 import type { ItemView } from "@/lib/queries";
 import { ITEM_RECURSO_FLAGS } from "@/lib/explorar-search";
+import {
+  DetalheCompatibilidade,
+  SeloCompatibilidade,
+} from "@/components/explorar/SeloCompatibilidade";
+import type { Compatibilidade } from "@/lib/perfil/compatibilidade";
 import { cn } from "@/lib/utils";
 
 const MAX_RECURSOS_VISIVEIS = 3;
@@ -42,6 +47,10 @@ interface ItemCardProps {
   ativo?: boolean;
   onAtivar?: () => void;
   onDesativar?: () => void;
+  /** `null` quando nenhum Perfil TEA está selecionado - aí não há o que medir. */
+  compat?: Compatibilidade | null;
+  /** Nomes dos perfis comparados, para o texto acessível do selo. */
+  nomesPerfis?: string;
 }
 
 export function ItemCard({
@@ -54,6 +63,8 @@ export function ItemCard({
   ativo = false,
   onAtivar,
   onDesativar,
+  compat = null,
+  nomesPerfis = "",
 }: ItemCardProps) {
   const ehVisita = item.natureza === "visita";
   const ehLista = variante === "lista";
@@ -122,6 +133,7 @@ export function ItemCard({
         alt={item.item_nome}
         selado={!!item.selo_azul}
         className={cn(ehLista && "sm:w-60 sm:shrink-0 sm:self-stretch")}
+        badge={compat ? <SeloCompatibilidade compat={compat} nomes={nomesPerfis} /> : null}
       />
 
       <div className={cn("flex min-w-0 flex-1 flex-col p-3 sm:p-4", ehLista && "sm:p-5")}>
@@ -176,6 +188,8 @@ export function ItemCard({
           </div>
         )}
 
+        {compat && <DetalheCompatibilidade compat={compat} className="mt-2" />}
+
         {(recursosVisiveis.length > 0 || item.tem_beneficio_tea) && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:mt-3">
             {item.tem_beneficio_tea && (
@@ -227,9 +241,10 @@ interface CarrosselProps {
   alt: string;
   selado: boolean;
   className?: string;
+  badge?: React.ReactNode;
 }
 
-function Carrossel({ imagens, alt, selado, className }: CarrosselProps) {
+function Carrossel({ imagens, alt, selado, className, badge }: CarrosselProps) {
   const [indice, setIndice] = useState(0);
   const total = imagens.length;
 
@@ -258,6 +273,8 @@ function Carrossel({ imagens, alt, selado, className }: CarrosselProps) {
           <ImageOff className="h-10 w-10" />
         </div>
       )}
+
+      {badge}
 
       {selado && (
         <span className="absolute bottom-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-primary shadow-md">
