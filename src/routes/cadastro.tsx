@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { authRedirectUrl } from "@/lib/siteUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft, ArrowRight, Building2, HeartHandshake, Loader2 } from "lucide-react";
@@ -224,7 +225,7 @@ function StepData({
       email: emailNorm,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}${destino}`,
+        emailRedirectTo: authRedirectUrl(destino),
         data: {
           account_type: accountType,
           nome_responsavel: nome.trim(),
