@@ -1,0 +1,38 @@
+.mapa-picker {
+  font-family: var(--font-sans);
+  background-color: var(--azul-claro);
+  cursor: crosshair;
+}
+
+.mapa-picker.mapa-tiles-osm .leaflet-tile-pane {
+  filter: saturate(0.6) brightness(1.06) contrast(0.92);
+}
+
+.mapa-picker .pino-local {
+  cursor: grab;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.28));
+  transition: transform 0.12s ease-out;
+}
+
+.mapa-picker .pino-local:hover {
+  transform: scale(1.06);
+}
+
+.mapa-picker .pino-local:active {
+  cursor: grabbing;
+}
+
+.mapa-picker .leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.82);
+  backdrop-filter: blur(4px);
+  border-top-left-radius: var(--radius-sm, 0.5rem);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-picker .pino-local {
+    transition: none;
+  }
+}

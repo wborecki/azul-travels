@@ -172,7 +172,7 @@ export function LeadFamiliasForm({ origem = "home", onSuccess }: { origem?: stri
                   Criar minha conta agora
                 </h3>
                 <p className="mt-1 text-sm text-foreground/80">
-                  Com uma conta você já pode preencher o perfil sensorial do seu filho. Na hora
+                  Com uma conta você já pode preencher o Perfil TEA. Na hora
                   da reserva, ele já vem pronto.
                 </p>
                 <Button

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { authRedirectUrl } from "@/lib/siteUrl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +66,7 @@ export function CreateAccountModal({
       email: email.toLowerCase(),
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}${destino}`,
+        emailRedirectTo: authRedirectUrl(destino),
         data: { account_type: accountType, ...signupMetadata },
       },
     });

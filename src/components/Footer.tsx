@@ -102,13 +102,13 @@ export function Footer() {
           >
             <Globe className="h-5 w-5 flex-shrink-0" style={{ color: "#00b4d8" }} />
             <a
-              href="https://www.turismoazulinclusivo.com.br"
+              href="https://turismoazulinclusivo.com.br"
               target="_blank"
               rel="noopener noreferrer"
               className="font-display font-extrabold uppercase text-sm tracking-wide hover:text-[#00b4d8] transition-colors break-all min-w-0"
               style={{ color: "white" }}
             >
-              www.turismoazulinclusivo.com.br
+              turismoazulinclusivo.com.br
             </a>
           </div>
         </div>

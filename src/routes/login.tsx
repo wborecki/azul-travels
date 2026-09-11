@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { authRedirectUrl } from "@/lib/siteUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { resolvePostLoginPath } from "@/lib/postLoginRedirect";
 import { Logo } from "@/components/Logo";
@@ -49,7 +50,9 @@ function LoginPage() {
       toast.error(
         error.message === "Invalid login credentials"
           ? "E-mail ou senha incorretos."
-          : error.message,
+          : /email not confirmed/i.test(error.message)
+            ? "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada e o spam."
+            : error.message,
       );
       return;
     }
@@ -66,7 +69,7 @@ function LoginPage() {
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: authRedirectUrl("/reset-password"),
     });
     void logAuthEvent("password_reset_request", {
       sucesso: !error,
@@ -193,6 +196,7 @@ function LoginPage() {
             Ainda não tem conta?{" "}
             <Link
               to="/cadastro"
+              search={redirect ? { redirect } : {}}
               className="font-bold no-underline hover:underline"
               style={{ color: "#2563eb" }}
             >

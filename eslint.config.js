@@ -41,6 +41,11 @@ export default tseslint.config(
     ignores: [
       "src/lib/queries/**",
       "src/integrations/supabase/**", // client gerado, guards e auth-middleware
+      // Os testes de RLS chamam a API crua de propósito: o que eles verificam
+      // é que a policy recusa a operação. Passar por um fetcher tipado de
+      // `src/lib/queries/**` testaria o fetcher, não a policy — e para uma
+      // operação proibida esse fetcher nem deveria existir.
+      "src/__tests__/**",
     ],
     rules: {
       "no-restricted-syntax": [

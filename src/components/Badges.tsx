@@ -79,10 +79,17 @@ export const RECURSO_BADGES = {
   },
 } as const;
 
-export function Pill({ icon, label, className }: BadgeDef) {
+export function Pill({
+  icon,
+  label,
+  className,
+  size = "sm",
+}: BadgeDef & { size?: "sm" | "md" }) {
+  const sizeClasses =
+    size === "md" ? "gap-1.5 px-3 py-1.5 text-sm" : "gap-1 px-2 py-0.5 text-xs";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold leading-tight ${className}`}
+      className={`inline-flex items-center rounded-full font-semibold leading-tight ${sizeClasses} ${className}`}
     >
       {icon}
       {label}

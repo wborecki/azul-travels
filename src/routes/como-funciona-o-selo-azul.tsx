@@ -83,7 +83,7 @@ function ComoFuncionaSeloAzulPage() {
     "Espaço de descompressão ou estratégia equivalente validada",
     "Cardápio com opções para restrições alimentares comuns ao TEA",
     "Sinalização visual clara de ambientes, rotas e tempos de espera",
-    "Canal direto com a família antes da visita para receber o perfil sensorial",
+    "Canal direto com a família antes da visita para receber o Perfil TEA",
     "Compromisso público de não discriminação e atendimento prioritário",
   ];
 

@@ -1,0 +1,21 @@
+.mapa-quarto {
+  font-family: var(--font-sans);
+  background-color: var(--azul-claro);
+}
+
+.mapa-quarto.mapa-tiles-osm .leaflet-tile-pane {
+  filter: saturate(0.6) brightness(1.06) contrast(0.92);
+}
+
+.mapa-quarto .pino-quarto {
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.28));
+}
+
+.mapa-quarto .leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.82);
+  backdrop-filter: blur(4px);
+  border-top-left-radius: var(--radius-sm, 0.5rem);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}

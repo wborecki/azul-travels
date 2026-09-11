@@ -345,6 +345,9 @@ function AdminReservas() {
           reserva_id: reserva.id,
           ator_id: user.id,
           ator_email: user.email ?? null,
+          // `origem` é derivada por trigger; com ator preenchido ela sempre
+          // volta como 'humano'. Aqui só se antecipa o que o banco vai gravar.
+          origem: "humano",
           acao: acaoLabel,
           status_anterior: previous,
           status_novo: next,
@@ -505,6 +508,7 @@ function AdminReservas() {
             reserva_id: id,
             ator_id: user.id,
             ator_email: user.email ?? null,
+            origem: "humano",
             acao: acaoLabel,
             status_anterior: previousById.get(id) ?? null,
             status_novo: next,
@@ -598,7 +602,7 @@ function AdminReservas() {
         "Família - telefone",
         "Família - cidade",
         "Família - estado",
-        "Perfil sensorial enviado",
+        "Perfil TEA enviado",
       ];
 
       const lines = all.map((r) => {

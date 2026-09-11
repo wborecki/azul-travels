@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Award, Home as HomeIcon, Heart, Check, MessageCircle } from "lucide-react";
-const seloOficial = "https://ausjcarxquthyvtqgjmu.supabase.co/storage/v1/object/public/conteudo-capas/selos/selo-turismo-azul.png";
+import seloOficial from "@/assets/selo-turismo-azul.png";
 
 export const Route = createFileRoute("/sobre-os-selos")({
   head: () => ({
@@ -65,7 +65,7 @@ function SobreOsSelosPage() {
       criterios: [
         "Profissional dedicado, com formação em autismo",
         "Disponível durante toda a estadia da família",
-        "Recebe o perfil sensorial antes do check-in",
+        "Recebe o Perfil TEA antes do check-in",
         "Avaliação obrigatória após cada estadia",
       ],
     },

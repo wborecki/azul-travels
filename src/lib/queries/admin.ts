@@ -98,7 +98,7 @@ export type EstabAdminRow = Pick<
 /**
  * Lista estabelecimentos no payload admin completo (qualquer status).
  *
- * Aceita os mesmos filtros de `fetchEstabelecimentosView` (busca, tipos,
+ * Aceita os filtros de `EstabelecimentosViewFilters` (busca, tipos,
  * selos, recursos, paginação) - diferença é que **não** força
  * `status = 'ativo'`, então traz pendentes/inativos para o painel.
  */
@@ -141,8 +141,8 @@ export async function fetchEstabelecimentosAdmin(limit = 200): Promise<EstabAdmi
 }
 
 /**
- * Página tipada do payload admin - items + metadados de paginação.
- * Análoga a `EstabelecimentosViewPage` mas para o payload com `status`/`criado_em`.
+ * Página tipada do payload admin - items + metadados de paginação
+ * (mesmo shape de `ItensViewPage`, com o payload de `status`/`criado_em`).
  */
 export interface EstabelecimentosAdminPage {
   items: EstabelecimentoAdminView[];

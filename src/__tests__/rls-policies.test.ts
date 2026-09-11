@@ -32,6 +32,16 @@ beforeAll(() => {
   });
 });
 
+beforeAll(async () => {
+  const { error } = await anon.from("pagamentos").select("id").limit(1);
+  if (error?.code === TABELA_AUSENTE) {
+    pagamentoAusente = true;
+    console.warn(
+      "Tabelas de pagamento não existem no banco — aplique as migrations 20260814120000..20260814120600 e rode novamente. Suíte de pagamento pulada.",
+    );
+  }
+});
+
 /**
  * Para tabelas com RLS de SELECT restrito, o PostgREST não devolve erro —
  * apenas retorna um conjunto vazio. Já operações de INSERT/UPDATE/DELETE
@@ -41,7 +51,6 @@ beforeAll(() => {
 const TABELAS_SENSIVEIS_SOMENTE_ADMIN = [
   "familia_profiles",
   "estabelecimento_profiles",
-  "perfil_tea",
   "perfil_sensorial",
   "leads_familias",
   "leads_estabelecimentos",
@@ -55,6 +64,26 @@ const TABELAS_SENSIVEIS_SOMENTE_ADMIN = [
   "pre_checkins",
   "auth_audit_log",
 ] as const;
+
+/**
+ * Tabelas de pagamento (migrations 20260814120100 / 20260814120200).
+ * `pagamentos` guarda valores e IDs de cobrança, `asaas_webhook_events` guarda
+ * o payload cru do Asaas e `estabelecimento_recebimentos` guarda CNPJ e dados
+ * de conta. Nenhuma tem policy para anon: leitura volta vazia, escrita dá erro.
+ *
+ * Ficam separadas porque `supabase db push` é manual — enquanto as migrations
+ * não forem aplicadas, o PostgREST responde PGRST205 ("table not found in
+ * schema cache") e a suíte se pula com aviso, mesma convenção de
+ * `itens-indisponiveis-no-periodo.test.ts`.
+ */
+const TABELAS_PAGAMENTO = [
+  "pagamentos",
+  "asaas_webhook_events",
+  "estabelecimento_recebimentos",
+] as const;
+
+const TABELA_AUSENTE = "PGRST205";
+let pagamentoAusente = false;
 
 describe("RLS — leitura anônima bloqueada em tabelas sensíveis", () => {
   for (const tabela of TABELAS_SENSIVEIS_SOMENTE_ADMIN) {
@@ -88,11 +117,11 @@ describe("RLS — escrita anônima bloqueada em tabelas sensíveis", () => {
     expect(error).not.toBeNull();
   });
 
-  it("anon NÃO pode inserir em perfil_tea", async () => {
-    const { error } = await anon.from("perfil_tea").insert({
+  it("anon NÃO pode inserir em perfil_sensorial", async () => {
+    const { error } = await anon.from("perfil_sensorial").insert({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user_id: "00000000-0000-0000-0000-000000000000",
-      nome_pessoa: "teste",
+      familia_id: "00000000-0000-0000-0000-000000000000",
+      nome_autista: "teste",
     } as any);
     expect(error).not.toBeNull();
   });
@@ -139,6 +168,59 @@ describe("RLS — escrita anônima bloqueada em tabelas sensíveis", () => {
       .delete()
       .eq("id", "00000000-0000-0000-0000-000000000000");
     expect(error === null || error.code === "42501").toBe(true);
+  });
+});
+
+describe("RLS — tabelas de pagamento fechadas para anônimo", () => {
+  for (const tabela of TABELAS_PAGAMENTO) {
+    it(`anon NÃO pode ler ${tabela}`, async () => {
+      if (pagamentoAusente) return;
+      const { data, error } = await anon
+        .from(tabela)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .select("*" as any)
+        .limit(5);
+      expect(error).toBeNull();
+      expect(Array.isArray(data) ? data.length : 0).toBe(0);
+    });
+  }
+
+  it("anon NÃO pode inserir pagamento", async () => {
+    if (pagamentoAusente) return;
+    // Payload completo de propósito: se passasse, seria uma cobrança forjada
+    // com valores escolhidos pelo atacante.
+    const { error } = await anon.from("pagamentos").insert({
+      reserva_id: "00000000-0000-0000-0000-000000000000",
+      asaas_payment_id: "pay_teste_rls",
+      ambiente: "sandbox",
+      valor_total: 100,
+      valor_comissao: 10,
+      valor_repasse: 90,
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("anon NÃO pode inserir evento de webhook do Asaas", async () => {
+    if (pagamentoAusente) return;
+    // O teste que mais importa da suíte: se isto passar, qualquer um forja um
+    // PAYMENT_RECEIVED e confirma uma reserva sem ter pago. A tabela só recebe
+    // escrita da service role, pela Edge Function do webhook.
+    const { error } = await anon.from("asaas_webhook_events").insert({
+      id: "evt_teste_rls",
+      evento: "PAYMENT_RECEIVED",
+      payload: {},
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("anon NÃO pode inserir dados de recebimento de estabelecimento", async () => {
+    if (pagamentoAusente) return;
+    // Escrever aqui redirecionaria o split de um local para outra carteira.
+    const { error } = await anon.from("estabelecimento_recebimentos").insert({
+      estabelecimento_id: "00000000-0000-0000-0000-000000000000",
+      asaas_wallet_id: "carteira-do-atacante",
+    });
+    expect(error).not.toBeNull();
   });
 });
 

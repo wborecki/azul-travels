@@ -91,14 +91,14 @@ function AdminFamiliasPage() {
           .from("familia_profiles")
           .select("id, nome_responsavel, email, telefone, cidade, estado, criado_em, status, is_demo")
           .order("criado_em", { ascending: false }),
-        supabase.from("perfil_tea").select("user_id"),
+        supabase.from("perfil_sensorial").select("familia_id"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (fams.error) throw fams.error;
       if (perfis.error) throw perfis.error;
       if (roles.error) throw roles.error;
 
-      const comPerfil = new Set((perfis.data ?? []).map((p) => p.user_id));
+      const comPerfil = new Set((perfis.data ?? []).map((p) => p.familia_id));
       const adminSet = new Set(
         (roles.data ?? []).filter((r) => r.role === "admin").map((r) => r.user_id),
       );

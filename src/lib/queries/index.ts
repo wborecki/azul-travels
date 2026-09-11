@@ -1,30 +1,13 @@
-/**
- * Camada central de payloads tipados.
- *
- * Toda página/componente da aplicação importa daqui:
- *
- *   import {
- *     fetchEstabelecimentoPorSlug,
- *     fetchEstabelecimentosView,
- *     fetchAvaliacoesPublicasPorEstab,
- *     type EstabelecimentoView,
- *     type EstabelecimentoFull,
- *     type AvaliacaoComFamilia,
- *   } from "@/lib/queries";
- *
- * Garante shape único, sem `any`/`unknown`. Os guards em
- * `src/integrations/supabase/types.guard.ts` travam o build se
- * qualquer um destes payloads regredir.
- */
-
 export { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 
 export {
   fetchEstabelecimentoPorSlug,
+  fetchEstabelecimentoPorId,
   fetchEstabelecimentoDetalhe,
-  fetchEstabelecimentosView,
-  fetchEstabelecimentosViewPaginated,
-  fetchEstabelecimentosCards, // deprecated alias
+  fetchEstabelecimentoDoOwner,
+  fetchNomeResponsavelDoEstabelecimento,
+  fetchEstabelecimentoProfile,
+  fetchEstabelecimentoFullDoOwner,
   applyEstabelecimentosViewFilters,
   resolvePagination,
   normalizeEstabelecimento,
@@ -35,18 +18,16 @@ export {
   type EstabelecimentoFull,
   type EstabelecimentoNormalized,
   type EstabelecimentoDetalhe,
+  type EstabelecimentoDoOwner,
   type EstabelecimentoView,
   type EstabelecimentosViewFilters,
-  type EstabelecimentosViewPage,
   type ResolvedPagination,
   type SeloFlag,
   type RecursoFlag,
-  type Estabelecimento, // deprecated alias
-  type EstabelecimentoCard, // deprecated alias
+  type Estabelecimento,
+  type EstabelecimentoCard,
 } from "./estabelecimentos";
 
-// Helpers únicos de mídia (galeria + Tour 360°) - mesmo shape em
-// página de detalhe, card de listagem, form admin e embeds.
 export {
   pickEstabMedia,
   normalizeFotos,
@@ -58,23 +39,81 @@ export {
 export {
   fetchReservasDaFamilia,
   fetchReservasDaFamiliaPorEstabelecimento,
+  fetchReservaDaFamiliaPorId,
   criarReserva,
+  vincularPerfisAReserva,
+  perfisDaReserva,
   buildReservaPayload,
+  reservaEhVisita,
+  formatHoraVisita,
+  formatPeriodoReserva,
   type Reserva,
   type ReservaInsert,
   type ReservaComContexto,
   type ReservaFormInput,
+  type ReservaEstadiaInput,
+  type ReservaVisitaInput,
+  type PerfilDaReserva,
 } from "./reservas";
 
 export {
   fetchPerfisDaFamilia,
   fetchPerfisCompletos,
+  fetchPerfisComNecessidades,
+  PERFIL_NECESSIDADES_SELECT,
+  fetchPerfilPorId,
+  criarPerfilSensorial,
+  atualizarPerfilSensorial,
+  excluirPerfilSensorial,
+  uploadFotoPerfil,
+  fetchNomeResponsavelDaFamilia,
+  fetchTemPerfilSensorial,
   type PerfilSensorial,
   type PerfilSensorialInsert,
+  type PerfilSensorialUpdate,
   type PerfilOption,
 } from "./perfis";
 
-// Mapeadores Row → ViewModel - fonte única de derivações para a UI.
+export {
+  fetchReservasDoEstabelecimento,
+  fetchReservaDoEstabelecimentoPorId,
+  atualizarStatusReservaEstabelecimento,
+  registrarAuditoriaReservaEstabelecimento,
+  perfisSensoriaisDaReservaEstab,
+  type ReservaEstabelecimentoRow,
+} from "./reservas-estabelecimento";
+
+export {
+  fetchItensDoEstabelecimento,
+  fetchItensAtivosDoEstabelecimento,
+  fetchItemReservavelPorId,
+  criarItemReservavel,
+  atualizarItemReservavel,
+  excluirItemReservavel,
+  type ItemReservavel,
+  type ItemReservavelInsert,
+  type ItemReservavelUpdate,
+} from "./itens-reservaveis";
+
+export { fetchDatasIndisponiveisItem } from "./disponibilidade";
+
+export {
+  fetchBloqueiosDoItem,
+  criarItemReservavelBloqueio,
+  excluirItemReservavelBloqueio,
+  type ItemReservavelBloqueio,
+  type ItemReservavelBloqueioInsert,
+} from "./item-reservavel-bloqueios";
+
+export {
+  fetchMensagensDaReserva,
+  enviarMensagemReserva,
+  marcarMensagensComoLidas,
+  fetchContagemNaoLidasPorReservas,
+  fetchUltimasMensagensPorReservas,
+  type ReservaMensagemRow,
+} from "./reserva-mensagens";
+
 export {
   mapAvaliacao,
   mapAvaliacoes,
@@ -88,8 +127,6 @@ export {
   type RecursoKey,
 } from "./mappers";
 
-// Props tipadas de componentes (Card/Banner/Modal) derivadas dos VMs.
-// Importe daqui ao tipar componentes que consomem dados do banco.
 export type {
   EstabCardProps,
   AvaliacaoCardProps,
@@ -104,8 +141,6 @@ export type {
   WithOpenChange,
 } from "./component-props";
 
-// Camada admin - listagens/joins do painel + dashboard counts.
-// Toda leitura admin importa daqui (writes ficam inline nas rotas).
 export {
   fetchEstabelecimentosAdmin,
   fetchEstabelecimentosAdminView,
@@ -147,7 +182,6 @@ export {
   type DashboardStats,
 } from "./admin";
 
-// Filtros padrão de exploração - preferências por usuário (1:1).
 export {
   fetchFiltrosPadrao,
   salvarFiltrosPadrao,
@@ -158,9 +192,26 @@ export {
   type ExplorarFiltrosPadraoInsert,
 } from "./explorar-filtros";
 
-// Encurtador de URLs do /explorar.
+export { obterOuCriarLinkCurto, resolverLinkCurto, type LinkCurto } from "./links-curtos";
+
+export { criarContatoGeral, type ContatoGeralInsert } from "./contatos";
+
 export {
-  obterOuCriarLinkCurto,
-  resolverLinkCurto,
-  type LinkCurto,
-} from "./links-curtos";
+  fetchItensViewPaginated,
+  fetchItensViewMapa,
+  fetchItensViewTotal,
+  normalizeItemView,
+  applyItensViewFilters,
+  ITEM_PAGE_SIZE_DEFAULT,
+  ITEM_MAPA_LIMITE,
+  type ItemView,
+  type ItemMapa,
+  type ItensViewFilters,
+  type ItensViewPage,
+  type ItensViewMapa,
+  type SeloFlag as ItemSeloFlag,
+  type RecursoFlag as ItemRecursoFlag,
+  type Ordenacao,
+} from "./itens-view";
+
+

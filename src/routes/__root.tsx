@@ -5,8 +5,12 @@ import {
   Scripts,
   useRouterState,
 } from "@tanstack/react-router";
+import { useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ModoCalmoProvider } from "@/hooks/useModoCalmo";
+import { criarQueryClient } from "@/lib/query-client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@tanstack/react-router";
@@ -76,6 +80,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Provedores({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(criarQueryClient);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ModoCalmoProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </ModoCalmoProvider>
+    </QueryClientProvider>
+  );
+}
+
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
@@ -85,31 +101,25 @@ function RootComponent() {
     pathname === "/selecionar-perfil" ||
     pathname === "/reset-password" ||
     pathname === "/forgot-password";
-  const hasOwnChrome =
-    pathname === "/minha-conta" ||
-    pathname.startsWith("/minha-conta/") ||
-    pathname === "/meu-estabelecimento" ||
-    pathname.startsWith("/meu-estabelecimento/") ||
-    pathname === "/minha-empresa" ||
-    pathname.startsWith("/minha-empresa/");
-  if (isAdmin || isAuthFlow || hasOwnChrome) {
+  const hasOwnChrome = pathname === "/minha-empresa" || pathname.startsWith("/minha-empresa/");
+  if (isAuthFlow || hasOwnChrome) {
     return (
-      <AuthProvider>
+      <Provedores>
         <Outlet />
         <Toaster richColors position="top-right" />
-      </AuthProvider>
+      </Provedores>
     );
   }
   return (
-    <AuthProvider>
+    <Provedores>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 pt-20">
+        <main className="flex-1 pt-20 flex flex-col">
           <Outlet />
         </main>
-        <Footer />
+        {!isAdmin && <Footer />}
       </div>
       <Toaster richColors position="top-right" />
-    </AuthProvider>
+    </Provedores>
   );
 }

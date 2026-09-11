@@ -1,8 +1,10 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Menu, X, ArrowRight, LogOut, ShieldCheck, User } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, ArrowRight, LogOut, Repeat } from "lucide-react";
+import { Fragment, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { BotaoModoCalmo } from "@/components/BotaoModoCalmo";
+import { getAccountNav } from "@/lib/account-nav";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +24,7 @@ export function Header() {
   const isEstab = roles.includes("estabelecimento");
   const distinctRoles = Array.from(new Set(roles));
   const hasMultiple = distinctRoles.length >= 2;
+  const sections = getAccountNav(roles);
 
   const accountTo = hasMultiple
     ? "/selecionar-perfil"
@@ -31,19 +34,16 @@ export function Header() {
         ? "/meu-estabelecimento"
         : "/minha-conta";
 
-  const accountLabel = hasMultiple
-    ? "Selecionar perfil"
-    : isAdmin
-      ? "Painel Admin"
-      : isEstab
-        ? "Meu estabelecimento"
-        : "Minha conta";
-
   const initial = (
-    (user?.user_metadata as Record<string, unknown> | undefined)?.nome_responsavel as string | undefined
-    ?? user?.email
-    ?? "?"
-  ).trim().charAt(0).toUpperCase();
+    ((user?.user_metadata as Record<string, unknown> | undefined)?.nome_responsavel as
+      | string
+      | undefined) ??
+    user?.email ??
+    "?"
+  )
+    .trim()
+    .charAt(0)
+    .toUpperCase();
 
   const handleLogout = async () => {
     await signOut();
@@ -94,40 +94,64 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
+          <BotaoModoCalmo />
           {user && role ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 border border-white/30 text-white font-bold hover:bg-white/20 transition"
-                  aria-label="Conta"
-                >
-                  {initial}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">
-                  {user.email}
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to={accountTo} className="cursor-pointer">
-                    <User className="h-4 w-4 mr-2" /> {accountLabel}
-                  </Link>
-                </DropdownMenuItem>
-                {isAdmin && !hasMultiple ? null : isAdmin ? (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin" className="cursor-pointer">
-                      <ShieldCheck className="h-4 w-4 mr-2" /> Painel Admin
-                    </Link>
+            <>
+              <Link
+                to={accountTo}
+                aria-label="Minha conta"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 border border-white/30 text-white font-bold hover:bg-white/20 transition"
+              >
+                {initial}
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Menu da conta"
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-white/85 hover:bg-white/10 hover:text-white transition"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </div>
+                  {sections.map((section) => (
+                    <Fragment key={section.items[0].to}>
+                      <DropdownMenuSeparator />
+                      {section.title && (
+                        <div className="px-2 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {section.title}
+                        </div>
+                      )}
+                      {section.items.map((item) => (
+                        <DropdownMenuItem asChild key={item.label}>
+                          <Link to={item.to} className="cursor-pointer">
+                            <item.icon className="h-4 w-4 mr-2" /> {item.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </Fragment>
+                  ))}
+                  <DropdownMenuSeparator />
+                  {hasMultiple && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/selecionar-perfil" className="cursor-pointer">
+                        <Repeat className="h-4 w-4 mr-2" /> Trocar de perfil
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" /> Sair
                   </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4 mr-2" /> Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <Link
               to="/login"
@@ -172,33 +196,49 @@ export function Header() {
                 </a>
               ),
             )}
+            <BotaoModoCalmo variante="linha" />
             {user && role ? (
               <>
-                <Link
-                  to={accountTo}
-                  onClick={() => setOpen(false)}
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
-                  style={{ borderRadius: 50 }}
-                >
-                  <User className="h-4 w-4" /> {accountLabel}
-                </Link>
-                {isAdmin && !hasMultiple ? null : isAdmin ? (
-                  <Link
-                    to="/admin"
-                    onClick={() => setOpen(false)}
-                    className="mt-2 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white border border-white/30"
-                    style={{ borderRadius: 50 }}
+                {sections.map((section) => (
+                  <div key={section.items[0].to} className="mt-3 border-t border-white/10 pt-3">
+                    {section.title && (
+                      <div className="pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/50">
+                        {section.title}
+                      </div>
+                    )}
+                    {section.items.map((item) => (
+                      <Link
+                        key={item.label}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-2.5 py-2 text-base font-semibold text-white/90"
+                      >
+                        <item.icon className="h-4 w-4" /> {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+                <div className="mt-3 border-t border-white/10 pt-3 flex flex-col gap-1">
+                  {hasMultiple && (
+                    <Link
+                      to="/selecionar-perfil"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 py-2 text-base font-semibold text-white/90"
+                    >
+                      <Repeat className="h-4 w-4" /> Trocar de perfil
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      void handleLogout();
+                    }}
+                    className="flex items-center gap-2.5 py-2 text-base font-semibold text-white/90"
                   >
-                    <ShieldCheck className="h-4 w-4" /> Painel Admin
-                  </Link>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => { setOpen(false); void handleLogout(); }}
-                  className="mt-2 inline-flex items-center justify-center gap-1.5 h-11 px-6 font-bold text-white/90"
-                >
-                  <LogOut className="h-4 w-4" /> Sair
-                </button>
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                </div>
               </>
             ) : (
               <Link

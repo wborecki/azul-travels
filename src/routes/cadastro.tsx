@@ -4,13 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { authRedirectUrl } from "@/lib/siteUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft, ArrowRight, Building2, HeartHandshake, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logAuthEvent } from "@/lib/audit/logAuthEvent";
+import { ESTAB_TIPOS, ESTAB_TIPO_LABEL, type EstabTipo } from "@/lib/enums";
 
 export const Route = createFileRoute("/cadastro")({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    const r = typeof search.redirect === "string" ? search.redirect : undefined;
+    return r ? { redirect: r } : {};
+  },
   head: () => ({ meta: [{ title: "Criar conta · Turismo Azul" }] }),
   component: CadastroPage,
 });
@@ -18,6 +24,7 @@ export const Route = createFileRoute("/cadastro")({
 type AccountType = "familia" | "estabelecimento";
 
 function CadastroPage() {
+  const { redirect } = Route.useSearch();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
@@ -25,8 +32,12 @@ function CadastroPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (user) navigate({ to: "/minha-conta" });
-  }, [user, loading, navigate]);
+    if (user) {
+      const redirectValido =
+        redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : null;
+      navigate({ to: redirectValido ?? "/minha-conta" });
+    }
+  }, [user, loading, redirect, navigate]);
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -61,13 +72,18 @@ function CadastroPage() {
           {step === 2 && accountType && (
             <StepData
               accountType={accountType}
+              redirect={redirect}
               onBack={() => setStep(1)}
             />
           )}
 
           <p className="mt-6 text-sm text-center text-muted-foreground">
             Já tem conta?{" "}
-            <Link to="/login" className="text-primary font-semibold hover:underline">
+            <Link
+              to="/login"
+              search={redirect ? { redirect } : {}}
+              className="text-primary font-semibold hover:underline"
+            >
               Entrar
             </Link>
           </p>
@@ -101,7 +117,7 @@ function StepType({
           onClick={() => onSelect("familia")}
           icon={<HeartHandshake className="h-5 w-5" />}
           title="Sou família com membro TEA"
-          text="Encontre destinos preparados para o seu filho e cadastre o perfil sensorial dele."
+          text="Encontre destinos preparados para a sua família e cadastre o Perfil TEA."
         />
         <TypeCard
           active={selected === "estabelecimento"}
@@ -162,9 +178,19 @@ function TypeCard({
   );
 }
 
-function StepData({ accountType, onBack }: { accountType: AccountType; onBack: () => void }) {
+function StepData({
+  accountType,
+  redirect,
+  onBack,
+}: {
+  accountType: AccountType;
+  redirect?: string;
+  onBack: () => void;
+}) {
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
+  const [nomeEstab, setNomeEstab] = useState("");
+  const [tipoEstab, setTipoEstab] = useState<EstabTipo | "">("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [password, setPassword] = useState("");
@@ -173,6 +199,10 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (accountType === "estabelecimento" && (!nomeEstab.trim() || !tipoEstab)) {
+      toast.error("Informe o nome e o tipo do estabelecimento.");
+      return;
+    }
     if (password.length < 6) {
       toast.error("A senha precisa ter pelo menos 6 caracteres.");
       return;
@@ -183,18 +213,28 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
     }
     setBusy(true);
     const emailNorm = email.trim().toLowerCase();
-    const destino = accountType === "estabelecimento" ? "/meu-estabelecimento" : "/minha-conta";
+    // Conta de estabelecimento nunca reaproveita um redirect de família
+    // (ex.: vindo de /reservar) - só famílias voltam para onde estavam.
+    const redirectValido =
+      accountType === "familia" && redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+        ? redirect
+        : null;
+    const destino =
+      accountType === "estabelecimento" ? "/meu-estabelecimento" : (redirectValido ?? "/minha-conta");
     const { data, error } = await supabase.auth.signUp({
       email: emailNorm,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}${destino}`,
+        emailRedirectTo: authRedirectUrl(destino),
         data: {
           account_type: accountType,
           nome_responsavel: nome.trim(),
           whatsapp: whatsapp.trim(),
           telefone: whatsapp.trim(),
           origem: "cadastro_site",
+          ...(accountType === "estabelecimento"
+            ? { nome_estabelecimento: nomeEstab.trim(), tipo: tipoEstab }
+            : {}),
         },
       },
     });
@@ -223,7 +263,7 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
       navigate({ to: destino });
     } else {
       toast.success("Conta criada! Confirme seu e-mail para entrar.");
-      navigate({ to: "/login" });
+      navigate({ to: "/login", search: redirectValido ? { redirect: redirectValido } : {} });
     }
   }
 
@@ -250,6 +290,35 @@ function StepData({ accountType, onBack }: { accountType: AccountType; onBack: (
           <Label>Nome completo *</Label>
           <Input required value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} />
         </div>
+        {accountType === "estabelecimento" && (
+          <>
+            <div>
+              <Label>Nome do estabelecimento *</Label>
+              <Input
+                required
+                value={nomeEstab}
+                onChange={(e) => setNomeEstab(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <Label>Tipo de estabelecimento *</Label>
+              <select
+                required
+                value={tipoEstab}
+                onChange={(e) => setTipoEstab(e.target.value as EstabTipo)}
+                className="w-full px-3 py-2 border border-input rounded-md text-sm bg-white h-10"
+              >
+                <option value="">Selecione…</option>
+                {ESTAB_TIPOS.map((t) => (
+                  <option key={t} value={t}>
+                    {ESTAB_TIPO_LABEL[t]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
         <div>
           <Label>E-mail *</Label>
           <Input

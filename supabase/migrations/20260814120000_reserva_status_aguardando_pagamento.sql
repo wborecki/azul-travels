@@ -1,0 +1,34 @@
+-- ============ Pagamento, etapa 1/7 — o estado novo do enum ============
+-- Ver docs/pagamentos/01-fundacao-de-dados.md
+--
+-- Uma estadia paga não nasce mais em `pendente`. Ela nasce em
+-- `aguardando_pagamento`: a cobrança foi emitida no Asaas, o quarto já está
+-- segurado, mas o dinheiro ainda não chegou. Só quando o webhook confirma o
+-- pagamento é que a reserva vira `pendente` e aparece como pedido de verdade
+-- no painel do estabelecimento.
+--
+-- Visita (restaurante, parque, passeio) continua nascendo em `pendente`:
+-- foi decidido que visita não é cobrada.
+--
+-- ---------------------------------------------------------------------------
+-- POR QUE ESTE ARQUIVO TEM UMA LINHA SÓ
+--
+-- `ALTER TYPE ... ADD VALUE` grava o valor novo no catálogo, mas o Postgres
+-- não deixa a MESMA transação usá-lo (o snapshot do catálogo já foi tirado).
+-- Toda migration do Supabase roda dentro de uma transação, então qualquer
+-- referência a 'aguardando_pagamento' neste arquivo derrubaria o `db push`
+-- inteiro com "unsafe use of new value of enum type".
+--
+-- As migrations 20260814120400 (disponibilidade), 20260814120500 (transição)
+-- e 20260814120600 (expiração) é que usam o valor. Elas rodam em transações
+-- separadas, depois desta ter feito commit.
+--
+-- Se você for juntar migrations num squash algum dia: esta continua sozinha.
+-- ---------------------------------------------------------------------------
+
+-- `BEFORE 'pendente'` posiciona o valor no início da ordem do enum, que é a
+-- ordem cronológica do fluxo. Importa para qualquer `ORDER BY status` e para
+-- comparações de ordem — o Postgres ordena enum pela posição de declaração,
+-- não pelo texto.
+ALTER TYPE public.reserva_status
+  ADD VALUE IF NOT EXISTS 'aguardando_pagamento' BEFORE 'pendente';

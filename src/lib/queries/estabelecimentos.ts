@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { fetchAvaliacoesPublicasPorEstab, type AvaliacaoComFamilia } from "./avaliacoes";
 import { normalizeFotos, normalizeUrl, pickEstabMedia, type EstabMedia } from "@/lib/media";
+import { resolvePagination } from "./pagination";
 
 /** Tipo completo da row, idêntico ao schema (usado no detalhe). */
 export type EstabelecimentoFull = Tables<"estabelecimentos">;
@@ -195,40 +196,15 @@ export interface EstabelecimentosViewFilters {
 }
 
 /** Limites de paginação aplicados em `resolvePagination`. */
-export const ESTAB_PAGE_SIZE_MAX = 100;
-export const ESTAB_PAGE_SIZE_DEFAULT = 24;
+export {
+  PAGE_SIZE_MAX as ESTAB_PAGE_SIZE_MAX,
+  PAGE_SIZE_DEFAULT as ESTAB_PAGE_SIZE_DEFAULT,
+} from "./pagination";
 
 /** Resultado de paginação resolvida (sempre números válidos). */
-export interface ResolvedPagination {
-  /** Página 1-indexada. */
-  pagina: number;
-  /** Tamanho da página, clampado em [1, ESTAB_PAGE_SIZE_MAX]. */
-  tamanhoPagina: number;
-  /** Offset inclusivo (passado para `.range`). */
-  from: number;
-  /** Offset inclusivo final (passado para `.range`). */
-  to: number;
-}
+export type { ResolvedPagination } from "./pagination";
 
-/**
- * Normaliza `pagina`/`tamanhoPagina` para offsets seguros do Postgrest.
- * Retorna `null` se nenhum dos dois for fornecido (sem paginação).
- */
-export function resolvePagination(
-  filters: Pick<EstabelecimentosViewFilters, "pagina" | "tamanhoPagina">,
-): ResolvedPagination | null {
-  if (filters.pagina === undefined && filters.tamanhoPagina === undefined) return null;
-
-  const tamanhoBruto = filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT;
-  const tamanhoPagina = Math.min(
-    ESTAB_PAGE_SIZE_MAX,
-    Math.max(1, Math.floor(tamanhoBruto)),
-  );
-  const pagina = Math.max(1, Math.floor(filters.pagina ?? 1));
-  const from = (pagina - 1) * tamanhoPagina;
-  const to = from + tamanhoPagina - 1;
-  return { pagina, tamanhoPagina, from, to };
-}
+export { resolvePagination } from "./pagination";
 
 /**
  * Helper único de filtros - fonte da verdade para construir queries
@@ -261,7 +237,7 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
 
   if (filters.busca && filters.busca.trim()) {
     const term = filters.busca.trim().replace(/[,()]/g, " ");
-    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo.ilike.%${term}%`) as Q;
+    q = q.or(`nome.ilike.%${term}%,cidade.ilike.%${term}%,tipo::text.ilike.%${term}%`) as Q;
   }
 
   const tiposCombinados: ReadonlyArray<EstabelecimentoFull["tipo"]> = [
@@ -297,77 +273,6 @@ export function applyEstabelecimentosViewFilters<Q extends AnyEstabBuilder>(
   return q;
 }
 
-/** Lista estabelecimentos ativos no payload unificado de view. */
-export async function fetchEstabelecimentosView(
-  filters: EstabelecimentosViewFilters = {},
-): Promise<EstabelecimentoView[]> {
-  const base = supabase.from("estabelecimentos").select(ESTAB_VIEW_SELECT).eq("status", "ativo");
-
-  const q = applyEstabelecimentosViewFilters(base, filters);
-
-  const { data, error } = await q.returns<EstabelecimentoView[]>();
-  if (error) throw error;
-  return data ?? [];
-}
-
-/**
- * Página tipada de estabelecimentos - items + metadados de paginação.
- * Use `fetchEstabelecimentosViewPaginated` quando precisar do total /
- * número de páginas para renderizar uma paginação visual.
- */
-export interface EstabelecimentosViewPage {
-  items: EstabelecimentoView[];
-  /** Total de linhas que casam com os filtros (independente da página). */
-  total: number;
-  /** Página 1-indexada efetivamente retornada (após clamp). */
-  pagina: number;
-  /** Tamanho da página efetivamente usado (após clamp). */
-  tamanhoPagina: number;
-  /** `Math.max(1, ceil(total / tamanhoPagina))`. */
-  totalPaginas: number;
-}
-
-/**
- * Versão paginada de `fetchEstabelecimentosView`. Faz uma única ida
- * ao banco com `count: "exact"` - o total é devolvido junto, evitando
- * uma segunda query.
- *
- * Sempre paginado: se `pagina`/`tamanhoPagina` não vierem, usa
- * `pagina=1` e `tamanhoPagina=ESTAB_PAGE_SIZE_DEFAULT`.
- */
-export async function fetchEstabelecimentosViewPaginated(
-  filters: EstabelecimentosViewFilters = {},
-): Promise<EstabelecimentosViewPage> {
-  const pag = resolvePagination({
-    pagina: filters.pagina ?? 1,
-    tamanhoPagina: filters.tamanhoPagina ?? ESTAB_PAGE_SIZE_DEFAULT,
-  })!;
-
-  const base = supabase
-    .from("estabelecimentos")
-    .select(ESTAB_VIEW_SELECT, { count: "exact" })
-    .eq("status", "ativo");
-
-  // Reusa o helper, mas garante a mesma paginação resolvida.
-  const q = applyEstabelecimentosViewFilters(base, {
-    ...filters,
-    pagina: pag.pagina,
-    tamanhoPagina: pag.tamanhoPagina,
-    limite: undefined,
-  });
-
-  const { data, error, count } = await q.returns<EstabelecimentoView[]>();
-  if (error) throw error;
-  const total = count ?? 0;
-  return {
-    items: data ?? [],
-    total,
-    pagina: pag.pagina,
-    tamanhoPagina: pag.tamanhoPagina,
-    totalPaginas: Math.max(1, Math.ceil(total / pag.tamanhoPagina)),
-  };
-}
-
 /**
  * Busca um estabelecimento ativo por slug.
  *
@@ -387,6 +292,85 @@ export async function fetchEstabelecimentoPorSlug(
 
   if (error) throw error;
   return data ? normalizeEstabelecimento(data) : null;
+}
+
+/** Mesma garantia de `fetchEstabelecimentoPorSlug`, buscando por `id` - usado nas páginas de item reservável. */
+export async function fetchEstabelecimentoPorId(
+  id: string,
+): Promise<EstabelecimentoNormalized | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("*")
+    .eq("id", id)
+    .eq("status", "ativo")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? normalizeEstabelecimento(data) : null;
+}
+
+/** Campos mínimos que `/meu-estabelecimento` precisa do próprio local do dono. */
+export type EstabelecimentoDoOwner = Pick<
+  EstabelecimentoFull,
+  "id" | "nome" | "cidade" | "estado" | "endereco" | "selo_azul" | "status" | "tipo"
+>;
+
+/** Busca o estabelecimento vinculado ao dono logado (`owner_user_id`). */
+export async function fetchEstabelecimentoDoOwner(
+  ownerId: string,
+): Promise<EstabelecimentoDoOwner | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("id, nome, cidade, estado, endereco, selo_azul, status, tipo")
+    .eq("owner_user_id", ownerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Nome do responsável cadastrado em `estabelecimento_profiles` (ou `null`). */
+export async function fetchNomeResponsavelDoEstabelecimento(
+  userId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("estabelecimento_profiles")
+    .select("nome_responsavel")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.nome_responsavel ?? null;
+}
+
+/** Row completa de `estabelecimento_profiles` do usuário logado. */
+export type EstabelecimentoProfile = Tables<"estabelecimento_profiles">;
+
+export async function fetchEstabelecimentoProfile(
+  userId: string,
+): Promise<EstabelecimentoProfile | null> {
+  const { data, error } = await supabase
+    .from("estabelecimento_profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Row completa do estabelecimento do dono logado (para o painel/formulário). */
+export async function fetchEstabelecimentoFullDoOwner(
+  ownerId: string,
+): Promise<EstabelecimentoFull | null> {
+  const { data, error } = await supabase
+    .from("estabelecimentos")
+    .select("*")
+    .eq("owner_user_id", ownerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
 }
 
 /**
@@ -435,5 +419,3 @@ export async function fetchEstabelecimentoDetalhe(
 export type Estabelecimento = EstabelecimentoFull;
 /** @deprecated use `EstabelecimentoView` */
 export type EstabelecimentoCard = EstabelecimentoView;
-/** @deprecated use `fetchEstabelecimentosView` */
-export const fetchEstabelecimentosCards = fetchEstabelecimentosView;

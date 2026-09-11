@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      asaas_webhook_events: {
+        Row: {
+          asaas_payment_id: string | null
+          erro: string | null
+          evento: string
+          id: string
+          payload: Json
+          processado_em: string | null
+          recebido_em: string
+          tentativas: number
+        }
+        Insert: {
+          asaas_payment_id?: string | null
+          erro?: string | null
+          evento: string
+          // Não é gerado: é o `event.id` que o Asaas envia. É ele que dá
+          // idempotência ao webhook — a segunda entrega do mesmo evento colide
+          // na PK em vez de reprocessar.
+          id: string
+          payload: Json
+          processado_em?: string | null
+          recebido_em?: string
+          tentativas?: number
+        }
+        Update: {
+          asaas_payment_id?: string | null
+          erro?: string | null
+          evento?: string
+          id?: string
+          payload?: Json
+          processado_em?: string | null
+          recebido_em?: string
+          tentativas?: number
+        }
+        Relationships: []
+      }
       auth_audit_log: {
         Row: {
           criado_em: string
@@ -385,8 +421,77 @@ export type Database = {
         }
         Relationships: []
       }
+      estabelecimento_recebimentos: {
+        Row: {
+          asaas_account_id: string | null
+          asaas_wallet_id: string | null
+          atualizado_em: string
+          bairro: string | null
+          comissao_percentual: number | null
+          company_type: string | null
+          complemento: string | null
+          cpf_cnpj: string | null
+          criado_em: string
+          data_nascimento: string | null
+          endereco_numero: string | null
+          estabelecimento_id: string
+          observacao: string | null
+          origem_conta: string | null
+          status_onboarding: string
+          telefone_movel: string | null
+        }
+        Insert: {
+          // Carteira, conta, status de onboarding e comissão são escritos
+          // apenas por service role ou admin — a trigger
+          // `protect_recebimentos_colunas_financeiras` recusa o dono.
+          asaas_account_id?: string | null
+          asaas_wallet_id?: string | null
+          atualizado_em?: string
+          bairro?: string | null
+          comissao_percentual?: number | null
+          company_type?: string | null
+          complemento?: string | null
+          cpf_cnpj?: string | null
+          criado_em?: string
+          data_nascimento?: string | null
+          endereco_numero?: string | null
+          estabelecimento_id: string
+          observacao?: string | null
+          origem_conta?: string | null
+          status_onboarding?: string
+          telefone_movel?: string | null
+        }
+        Update: {
+          asaas_account_id?: string | null
+          asaas_wallet_id?: string | null
+          atualizado_em?: string
+          bairro?: string | null
+          comissao_percentual?: number | null
+          company_type?: string | null
+          complemento?: string | null
+          cpf_cnpj?: string | null
+          criado_em?: string
+          data_nascimento?: string | null
+          endereco_numero?: string | null
+          estabelecimento_id?: string
+          observacao?: string | null
+          origem_conta?: string | null
+          status_onboarding?: string
+          telefone_movel?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estabelecimento_recebimentos_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: true
+            referencedRelation: "estabelecimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estabelecimentos: {
         Row: {
+          aceita_pagamento_online: boolean
           atualizado_em: string
           beneficio_tea_descricao: string | null
           cep: string | null
@@ -395,9 +500,11 @@ export type Database = {
           descricao: string | null
           descricao_tea: string | null
           destaque: boolean | null
+          detalhes: Json
           email: string | null
           endereco: string | null
           estado: string | null
+          estrutura: Json
           foto_capa: string | null
           fotos: Json | null
           id: string
@@ -432,6 +539,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          aceita_pagamento_online?: boolean
           atualizado_em?: string
           beneficio_tea_descricao?: string | null
           cep?: string | null
@@ -440,9 +548,11 @@ export type Database = {
           descricao?: string | null
           descricao_tea?: string | null
           destaque?: boolean | null
+          detalhes?: Json
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          estrutura?: Json
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
@@ -477,6 +587,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          aceita_pagamento_online?: boolean
           atualizado_em?: string
           beneficio_tea_descricao?: string | null
           cep?: string | null
@@ -485,9 +596,11 @@ export type Database = {
           descricao?: string | null
           descricao_tea?: string | null
           destaque?: boolean | null
+          detalhes?: Json
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          estrutura?: Json
           foto_capa?: string | null
           fotos?: Json | null
           id?: string
@@ -621,8 +734,10 @@ export type Database = {
       }
       familia_profiles: {
         Row: {
+          asaas_customer_id: string | null
           atualizado_em: string
           cidade: string | null
+          cpf: string | null
           criado_em: string
           email: string | null
           estado: string | null
@@ -636,8 +751,10 @@ export type Database = {
           telefone: string | null
         }
         Insert: {
+          asaas_customer_id?: string | null
           atualizado_em?: string
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
@@ -651,8 +768,10 @@ export type Database = {
           telefone?: string | null
         }
         Update: {
+          asaas_customer_id?: string | null
           atualizado_em?: string
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string
           email?: string | null
           estado?: string | null
@@ -772,150 +891,576 @@ export type Database = {
         }
         Relationships: []
       }
+      item_reservavel_bloqueios: {
+        Row: {
+          criado_em: string
+          fim: string
+          id: string
+          inicio: string
+          item_reservavel_id: string
+        }
+        Insert: {
+          criado_em?: string
+          fim: string
+          id?: string
+          inicio: string
+          item_reservavel_id: string
+        }
+        Update: {
+          criado_em?: string
+          fim?: string
+          id?: string
+          inicio?: string
+          item_reservavel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_reservavel_bloqueios_item_reservavel_id_fkey"
+            columns: ["item_reservavel_id"]
+            isOneToOne: false
+            referencedRelation: "itens_reservaveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itens_reservaveis: {
+        Row: {
+          ativo: boolean
+          capacidade_adultos: number | null
+          capacidade_criancas: number | null
+          capacidade_total: number
+          check_in_padrao: string | null
+          check_out_padrao: string | null
+          cidade: string | null
+          comodidades: string[]
+          criado_em: string
+          descricao: string | null
+          endereco: string | null
+          estabelecimento_id: string
+          estado: string | null
+          id: string
+          imagens: Json
+          is_demo: boolean
+          latitude: number | null
+          longitude: number | null
+          nome: string
+          preco: number
+          quantidade: number
+          quantidade_camas: number
+          usa_endereco_proprio: boolean
+        }
+        Insert: {
+          ativo?: boolean
+          capacidade_adultos?: number | null
+          capacidade_criancas?: number | null
+          capacidade_total?: number
+          check_in_padrao?: string | null
+          check_out_padrao?: string | null
+          cidade?: string | null
+          comodidades?: string[]
+          criado_em?: string
+          descricao?: string | null
+          endereco?: string | null
+          estabelecimento_id: string
+          estado?: string | null
+          id?: string
+          imagens?: Json
+          is_demo?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          nome: string
+          preco: number
+          quantidade?: number
+          quantidade_camas?: number
+          usa_endereco_proprio?: boolean
+        }
+        Update: {
+          ativo?: boolean
+          capacidade_adultos?: number | null
+          capacidade_criancas?: number | null
+          capacidade_total?: number
+          check_in_padrao?: string | null
+          check_out_padrao?: string | null
+          cidade?: string | null
+          comodidades?: string[]
+          criado_em?: string
+          descricao?: string | null
+          endereco?: string | null
+          estabelecimento_id?: string
+          estado?: string | null
+          id?: string
+          imagens?: Json
+          is_demo?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          nome?: string
+          preco?: number
+          quantidade?: number
+          quantidade_camas?: number
+          usa_endereco_proprio?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_reservaveis_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "estabelecimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          ambiente: string
+          asaas_customer_id: string | null
+          asaas_payment_id: string
+          atualizado_em: string
+          billing_type: string | null
+          criado_em: string
+          due_date: string | null
+          id: string
+          invoice_url: string | null
+          pago_em: string | null
+          reserva_id: string
+          status: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao: number
+          valor_repasse: number
+          valor_total: number
+          wallet_id_destino: string | null
+        }
+        Insert: {
+          ambiente: string
+          asaas_customer_id?: string | null
+          asaas_payment_id: string
+          atualizado_em?: string
+          billing_type?: string | null
+          criado_em?: string
+          due_date?: string | null
+          id?: string
+          invoice_url?: string | null
+          pago_em?: string | null
+          reserva_id: string
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao: number
+          valor_repasse: number
+          valor_total: number
+          wallet_id_destino?: string | null
+        }
+        Update: {
+          ambiente?: string
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string
+          atualizado_em?: string
+          billing_type?: string | null
+          criado_em?: string
+          due_date?: string | null
+          id?: string
+          invoice_url?: string | null
+          pago_em?: string | null
+          reserva_id?: string
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          valor_comissao?: number
+          valor_repasse?: number
+          valor_total?: number
+          wallet_id_destino?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfil_sensorial: {
         Row: {
+          abafadores_descricao: string | null
           alimentacao_observacoes: string | null
           alimentacao_restricoes: string[] | null
           alimentacao_seletiva: boolean | null
+          alimentos_aceitos: string | null
+          alimentos_recusados: string | null
           apoio_alimentacao: boolean | null
+          apoio_alimentacao_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene: boolean | null
+          apoio_higiene_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade: boolean | null
+          apoio_observacoes: string | null
+          apoio_regras_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca: boolean | null
+          apoio_vestir_nivel: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas: string[]
+          atividades_preferidas: string | null
+          autonomia_espacos: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade: boolean | null
+          checkin_equipe_saber: boolean | null
+          checkin_evitar_fila: boolean | null
+          compreende_instrucoes: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao: string | null
           comunicacao_verbal: boolean | null
           criado_em: string
           dificuldade_esperar: boolean | null
           dificuldade_mudanca_rotina: boolean | null
+          dorme_melhor_com: string[]
+          espera_fila_restaurante: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar: string | null
+          estrategias_funcionam: string[]
           estrategias_que_funcionam: string | null
           familia_id: string
+          forma_comunicacao: string[]
+          formas_abordagem: string | null
+          foto_url: string | null
           gatilhos: string[] | null
           gosta_animais: boolean | null
           gosta_atividades_agua: boolean | null
           gosta_natureza: boolean | null
+          gosta_piscina: Database["public"]["Enums"]["frequencia_simples"] | null
           id: string
           idade: number | null
           interesses_extra: string[] | null
+          marca_favorece_aceitacao: string | null
           nivel_tea: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais: string | null
+          o_que_gera_alegria: string | null
+          o_que_nao_fazer: string | null
+          objetos_adaptacao: string | null
+          objetos_personagens: string | null
+          observacoes_comunicacao: string | null
+          piscina_horario_tranquilo: boolean | null
+          piscina_muitas_pessoas: boolean | null
+          piscina_supervisao: boolean | null
+          piscina_temperatura: boolean | null
           precisa_cardapio_visual: boolean | null
           precisa_checkin_antecipado: boolean | null
           precisa_concierge_tea: boolean | null
           precisa_fila_prioritaria: boolean | null
           precisa_sala_sensorial: boolean | null
+          prefere_ambiente_reservado: boolean | null
+          preferencia_crise: string[]
+          preparacao_especial_quarto: string | null
           quarto_andar_baixo: boolean | null
           quarto_blackout: boolean | null
           quarto_cama_extra: boolean | null
+          quarto_localizacao: string[]
           quarto_longe_elevador: boolean | null
           quarto_observacoes: string | null
           quarto_sem_estampas: boolean | null
+          recreacao_evitar: string | null
+          recreacao_gosta: boolean | null
+          recreacao_interesses: string | null
+          recreacao_preferencia: string | null
+          recreacao_tolera_som: boolean | null
+          recursos_comunicacao: string[]
+          responde_melhor_a: string[]
+          restaurante_apoio_visual: boolean | null
+          restaurante_fila: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo: boolean | null
+          restaurante_reservado: boolean | null
+          risco_fuga: boolean | null
+          risco_recusa_alimentar: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar: string | null
+          rotina_horario_almoco: string | null
+          rotina_horario_cafe: string | null
           rotina_horario_dormir: string | null
+          rotina_horario_jantar: string | null
+          rotina_horario_lanche: string | null
+          rotina_matinal_descricao: string | null
           rotina_observacoes: string | null
+          seletividade: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado: boolean | null
+          sensibilidade_iluminacao: boolean | null
+          sensibilidades_alimentares: string[]
           sensivel_cheiros: boolean | null
           sensivel_luz: boolean | null
           sensivel_multidao: boolean | null
           sensivel_sons: boolean | null
           sensivel_texturas: boolean | null
+          sensorial_barulho_pessoas: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto: string[]
           sinais_sobrecarga: string | null
+          supervisao_constante: boolean | null
+          tem_rotina_matinal: boolean | null
+          tempo_acalmar: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at: string
+          usa_abafadores: boolean | null
           usa_caa: boolean | null
           usa_libras: boolean | null
+          utensilios_especificos: boolean | null
         }
         Insert: {
+          abafadores_descricao?: string | null
           alimentacao_observacoes?: string | null
           alimentacao_restricoes?: string[] | null
           alimentacao_seletiva?: boolean | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
           apoio_alimentacao?: boolean | null
+          apoio_alimentacao_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene?: boolean | null
+          apoio_higiene_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade?: boolean | null
+          apoio_observacoes?: string | null
+          apoio_regras_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca?: boolean | null
+          apoio_vestir_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas?: string[]
+          atividades_preferidas?: string | null
+          autonomia_espacos?: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao?: string | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar?: string | null
+          estrategias_funcionam?: string[]
           estrategias_que_funcionam?: string | null
           familia_id: string
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
+          foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
+          gosta_piscina?: Database["public"]["Enums"]["frequencia_simples"] | null
           id?: string
           idade?: number | null
           interesses_extra?: string[] | null
+          marca_favorece_aceitacao?: string | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista: string
           notas_adicionais?: string | null
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
           precisa_cardapio_visual?: boolean | null
           precisa_checkin_antecipado?: boolean | null
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preparacao_especial_quarto?: string | null
           quarto_andar_baixo?: boolean | null
           quarto_blackout?: boolean | null
           quarto_cama_extra?: boolean | null
+          quarto_localizacao?: string[]
           quarto_longe_elevador?: boolean | null
           quarto_observacoes?: string | null
           quarto_sem_estampas?: boolean | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string[]
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar?: string | null
+          rotina_horario_almoco?: string | null
+          rotina_horario_cafe?: string | null
           rotina_horario_dormir?: string | null
+          rotina_horario_jantar?: string | null
+          rotina_horario_lanche?: string | null
+          rotina_matinal_descricao?: string | null
           rotina_observacoes?: string | null
+          seletividade?: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sensorial_barulho_pessoas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto?: string[]
           sinais_sobrecarga?: string | null
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          tempo_acalmar?: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at?: string
+          usa_abafadores?: boolean | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
+          utensilios_especificos?: boolean | null
         }
         Update: {
+          abafadores_descricao?: string | null
           alimentacao_observacoes?: string | null
           alimentacao_restricoes?: string[] | null
           alimentacao_seletiva?: boolean | null
+          alimentos_aceitos?: string | null
+          alimentos_recusados?: string | null
           apoio_alimentacao?: boolean | null
+          apoio_alimentacao_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          apoio_deslocamento_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_higiene?: boolean | null
+          apoio_higiene_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_mobilidade?: boolean | null
+          apoio_observacoes?: string | null
+          apoio_regras_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
           apoio_seguranca?: boolean | null
+          apoio_vestir_nivel?: Database["public"]["Enums"]["nivel_apoio"] | null
+          areas_usadas?: string[]
+          atividades_preferidas?: string | null
+          autonomia_espacos?: Database["public"]["Enums"]["resposta_parcial"] | null
+          checkin_ansiedade?: boolean | null
+          checkin_equipe_saber?: boolean | null
+          checkin_evitar_fila?: boolean | null
+          compreende_instrucoes?: Database["public"]["Enums"]["resposta_parcial"] | null
+          comunicacao_misto_descricao?: string | null
           comunicacao_verbal?: boolean | null
           criado_em?: string
           dificuldade_esperar?: boolean | null
           dificuldade_mudanca_rotina?: boolean | null
+          dorme_melhor_com?: string[]
+          espera_fila_restaurante?: Database["public"]["Enums"]["resposta_com_apoio"] | null
           estrategias_acalmar?: string | null
+          estrategias_funcionam?: string[]
           estrategias_que_funcionam?: string | null
           familia_id?: string
+          forma_comunicacao?: string[]
+          formas_abordagem?: string | null
+          foto_url?: string | null
           gatilhos?: string[] | null
           gosta_animais?: boolean | null
           gosta_atividades_agua?: boolean | null
           gosta_natureza?: boolean | null
+          gosta_piscina?: Database["public"]["Enums"]["frequencia_simples"] | null
           id?: string
           idade?: number | null
           interesses_extra?: string[] | null
+          marca_favorece_aceitacao?: string | null
           nivel_tea?: Database["public"]["Enums"]["tea_nivel"] | null
           nome_autista?: string
           notas_adicionais?: string | null
+          o_que_gera_alegria?: string | null
+          o_que_nao_fazer?: string | null
+          objetos_adaptacao?: string | null
+          objetos_personagens?: string | null
+          observacoes_comunicacao?: string | null
+          piscina_horario_tranquilo?: boolean | null
+          piscina_muitas_pessoas?: boolean | null
+          piscina_supervisao?: boolean | null
+          piscina_temperatura?: boolean | null
           precisa_cardapio_visual?: boolean | null
           precisa_checkin_antecipado?: boolean | null
           precisa_concierge_tea?: boolean | null
           precisa_fila_prioritaria?: boolean | null
           precisa_sala_sensorial?: boolean | null
+          prefere_ambiente_reservado?: boolean | null
+          preferencia_crise?: string[]
+          preparacao_especial_quarto?: string | null
           quarto_andar_baixo?: boolean | null
           quarto_blackout?: boolean | null
           quarto_cama_extra?: boolean | null
+          quarto_localizacao?: string[]
           quarto_longe_elevador?: boolean | null
           quarto_observacoes?: string | null
           quarto_sem_estampas?: boolean | null
+          recreacao_evitar?: string | null
+          recreacao_gosta?: boolean | null
+          recreacao_interesses?: string | null
+          recreacao_preferencia?: string | null
+          recreacao_tolera_som?: boolean | null
+          recursos_comunicacao?: string[]
+          responde_melhor_a?: string[]
+          restaurante_apoio_visual?: boolean | null
+          restaurante_fila?: Database["public"]["Enums"]["resposta_com_apoio"] | null
+          restaurante_horario_tranquilo?: boolean | null
+          restaurante_reservado?: boolean | null
+          risco_fuga?: boolean | null
+          risco_recusa_alimentar?: Database["public"]["Enums"]["risco_nivel"] | null
           rotina_horario_acordar?: string | null
+          rotina_horario_almoco?: string | null
+          rotina_horario_cafe?: string | null
           rotina_horario_dormir?: string | null
+          rotina_horario_jantar?: string | null
+          rotina_horario_lanche?: string | null
+          rotina_matinal_descricao?: string | null
           rotina_observacoes?: string | null
+          seletividade?: Database["public"]["Enums"]["seletividade_nivel"] | null
+          sensibilidade_ar_condicionado?: boolean | null
+          sensibilidade_iluminacao?: boolean | null
+          sensibilidades_alimentares?: string[]
           sensivel_cheiros?: boolean | null
           sensivel_luz?: boolean | null
           sensivel_multidao?: boolean | null
           sensivel_sons?: boolean | null
           sensivel_texturas?: boolean | null
+          sensorial_barulho_pessoas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_calor?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_cheiros_fortes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_eco?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_frio?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_iluminacao_intensa?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_locais_cheios?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_luz_piscando?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_movimento_visual?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_musica_ambiente?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_perfumes?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_sons_subitos?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_superficies_molhadas?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sensorial_toque_inesperado?: Database["public"]["Enums"]["intensidade_incomodo"] | null
+          sinais_desconforto?: string[]
           sinais_sobrecarga?: string | null
+          supervisao_constante?: boolean | null
+          tem_rotina_matinal?: boolean | null
+          tempo_acalmar?: Database["public"]["Enums"]["tempo_acalmar_faixa"] | null
+          updated_at?: string
+          usa_abafadores?: boolean | null
           usa_caa?: boolean | null
           usa_libras?: boolean | null
+          utensilios_especificos?: boolean | null
         }
         Relationships: [
           {
@@ -926,288 +1471,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      perfil_tea: {
-        Row: {
-          abafadores_descricao: string | null
-          alimentos_aceitos: string | null
-          alimentos_recusados: string | null
-          apoio_alimentacao: string | null
-          apoio_deslocamento: string | null
-          apoio_higiene: string | null
-          apoio_regras: string | null
-          apoio_vestir: string | null
-          atividades_preferidas: string | null
-          autonomia_espacos: string | null
-          checkin_ansiedade: boolean | null
-          checkin_equipe_saber: boolean | null
-          checkin_evitar_fila: boolean | null
-          compreende_instrucoes: string | null
-          comunicacao_misto_descricao: string | null
-          created_at: string
-          desencadeadores: string | null
-          dorme_melhor_com: string[]
-          espera_fila_restaurante: string | null
-          estimulos_acalmam: string | null
-          estrategias_ambientes_novos: string | null
-          estrategias_funcionam: string[]
-          forma_comunicacao: string[]
-          formas_abordagem: string | null
-          gatilho_sensorial: string | null
-          gosta_piscina: string | null
-          horario_acordar: string | null
-          horario_almoco: string | null
-          horario_cafe: string | null
-          horario_dormir: string | null
-          horario_jantar: string | null
-          horario_lanche: string | null
-          id: string
-          idade: number | null
-          marca_favorece_aceitacao: string | null
-          mudanca_rotina_sofrimento: boolean | null
-          nome_pessoa: string
-          o_que_gera_alegria: string | null
-          o_que_nao_fazer: string | null
-          objetos_adaptacao: string | null
-          objetos_personagens: string | null
-          observacoes_comunicacao: string | null
-          piscina_horario_tranquilo: boolean | null
-          piscina_muitas_pessoas: boolean | null
-          piscina_supervisao: boolean | null
-          piscina_temperatura: boolean | null
-          prefere_ambiente_reservado: boolean | null
-          preferencia_crise: string[]
-          preferencia_localizacao: string | null
-          preparacao_especial_quarto: string | null
-          recreacao_evitar: string | null
-          recreacao_gosta: boolean | null
-          recreacao_interesses: string | null
-          recreacao_preferencia: string | null
-          recreacao_tolera_som: boolean | null
-          recursos_comunicacao: string[]
-          responde_melhor_a: string | null
-          restaurante_apoio_visual: boolean | null
-          restaurante_fila: string | null
-          restaurante_horario_tranquilo: boolean | null
-          restaurante_reservado: boolean | null
-          risco_fuga: boolean | null
-          risco_recusa_alimentar: string | null
-          rotina_matinal_descricao: string | null
-          seletividade: string | null
-          sensibilidade_ar_condicionado: boolean | null
-          sensibilidade_iluminacao: boolean | null
-          sensibilidades_alimentares: string[]
-          sensorial_barulho_pessoas: string | null
-          sensorial_calor: string | null
-          sensorial_cheiros_fortes: string | null
-          sensorial_eco: string | null
-          sensorial_frio: string | null
-          sensorial_iluminacao_intensa: string | null
-          sensorial_locais_cheios: string | null
-          sensorial_luz_piscando: string | null
-          sensorial_movimento_visual: string | null
-          sensorial_musica_ambiente: string | null
-          sensorial_perfumes: string | null
-          sensorial_sons_subitos: string | null
-          sensorial_superficies_molhadas: string | null
-          sensorial_toque_inesperado: string | null
-          sinais_desconforto: string[]
-          supervisao_constante: boolean | null
-          tem_rotina_matinal: boolean | null
-          temas_interesses: string | null
-          tempo_acalmar: string | null
-          updated_at: string
-          usa_abafadores: string | null
-          user_id: string
-          utensilios_especificos: boolean | null
-        }
-        Insert: {
-          abafadores_descricao?: string | null
-          alimentos_aceitos?: string | null
-          alimentos_recusados?: string | null
-          apoio_alimentacao?: string | null
-          apoio_deslocamento?: string | null
-          apoio_higiene?: string | null
-          apoio_regras?: string | null
-          apoio_vestir?: string | null
-          atividades_preferidas?: string | null
-          autonomia_espacos?: string | null
-          checkin_ansiedade?: boolean | null
-          checkin_equipe_saber?: boolean | null
-          checkin_evitar_fila?: boolean | null
-          compreende_instrucoes?: string | null
-          comunicacao_misto_descricao?: string | null
-          created_at?: string
-          desencadeadores?: string | null
-          dorme_melhor_com?: string[]
-          espera_fila_restaurante?: string | null
-          estimulos_acalmam?: string | null
-          estrategias_ambientes_novos?: string | null
-          estrategias_funcionam?: string[]
-          forma_comunicacao?: string[]
-          formas_abordagem?: string | null
-          gatilho_sensorial?: string | null
-          gosta_piscina?: string | null
-          horario_acordar?: string | null
-          horario_almoco?: string | null
-          horario_cafe?: string | null
-          horario_dormir?: string | null
-          horario_jantar?: string | null
-          horario_lanche?: string | null
-          id?: string
-          idade?: number | null
-          marca_favorece_aceitacao?: string | null
-          mudanca_rotina_sofrimento?: boolean | null
-          nome_pessoa: string
-          o_que_gera_alegria?: string | null
-          o_que_nao_fazer?: string | null
-          objetos_adaptacao?: string | null
-          objetos_personagens?: string | null
-          observacoes_comunicacao?: string | null
-          piscina_horario_tranquilo?: boolean | null
-          piscina_muitas_pessoas?: boolean | null
-          piscina_supervisao?: boolean | null
-          piscina_temperatura?: boolean | null
-          prefere_ambiente_reservado?: boolean | null
-          preferencia_crise?: string[]
-          preferencia_localizacao?: string | null
-          preparacao_especial_quarto?: string | null
-          recreacao_evitar?: string | null
-          recreacao_gosta?: boolean | null
-          recreacao_interesses?: string | null
-          recreacao_preferencia?: string | null
-          recreacao_tolera_som?: boolean | null
-          recursos_comunicacao?: string[]
-          responde_melhor_a?: string | null
-          restaurante_apoio_visual?: boolean | null
-          restaurante_fila?: string | null
-          restaurante_horario_tranquilo?: boolean | null
-          restaurante_reservado?: boolean | null
-          risco_fuga?: boolean | null
-          risco_recusa_alimentar?: string | null
-          rotina_matinal_descricao?: string | null
-          seletividade?: string | null
-          sensibilidade_ar_condicionado?: boolean | null
-          sensibilidade_iluminacao?: boolean | null
-          sensibilidades_alimentares?: string[]
-          sensorial_barulho_pessoas?: string | null
-          sensorial_calor?: string | null
-          sensorial_cheiros_fortes?: string | null
-          sensorial_eco?: string | null
-          sensorial_frio?: string | null
-          sensorial_iluminacao_intensa?: string | null
-          sensorial_locais_cheios?: string | null
-          sensorial_luz_piscando?: string | null
-          sensorial_movimento_visual?: string | null
-          sensorial_musica_ambiente?: string | null
-          sensorial_perfumes?: string | null
-          sensorial_sons_subitos?: string | null
-          sensorial_superficies_molhadas?: string | null
-          sensorial_toque_inesperado?: string | null
-          sinais_desconforto?: string[]
-          supervisao_constante?: boolean | null
-          tem_rotina_matinal?: boolean | null
-          temas_interesses?: string | null
-          tempo_acalmar?: string | null
-          updated_at?: string
-          usa_abafadores?: string | null
-          user_id: string
-          utensilios_especificos?: boolean | null
-        }
-        Update: {
-          abafadores_descricao?: string | null
-          alimentos_aceitos?: string | null
-          alimentos_recusados?: string | null
-          apoio_alimentacao?: string | null
-          apoio_deslocamento?: string | null
-          apoio_higiene?: string | null
-          apoio_regras?: string | null
-          apoio_vestir?: string | null
-          atividades_preferidas?: string | null
-          autonomia_espacos?: string | null
-          checkin_ansiedade?: boolean | null
-          checkin_equipe_saber?: boolean | null
-          checkin_evitar_fila?: boolean | null
-          compreende_instrucoes?: string | null
-          comunicacao_misto_descricao?: string | null
-          created_at?: string
-          desencadeadores?: string | null
-          dorme_melhor_com?: string[]
-          espera_fila_restaurante?: string | null
-          estimulos_acalmam?: string | null
-          estrategias_ambientes_novos?: string | null
-          estrategias_funcionam?: string[]
-          forma_comunicacao?: string[]
-          formas_abordagem?: string | null
-          gatilho_sensorial?: string | null
-          gosta_piscina?: string | null
-          horario_acordar?: string | null
-          horario_almoco?: string | null
-          horario_cafe?: string | null
-          horario_dormir?: string | null
-          horario_jantar?: string | null
-          horario_lanche?: string | null
-          id?: string
-          idade?: number | null
-          marca_favorece_aceitacao?: string | null
-          mudanca_rotina_sofrimento?: boolean | null
-          nome_pessoa?: string
-          o_que_gera_alegria?: string | null
-          o_que_nao_fazer?: string | null
-          objetos_adaptacao?: string | null
-          objetos_personagens?: string | null
-          observacoes_comunicacao?: string | null
-          piscina_horario_tranquilo?: boolean | null
-          piscina_muitas_pessoas?: boolean | null
-          piscina_supervisao?: boolean | null
-          piscina_temperatura?: boolean | null
-          prefere_ambiente_reservado?: boolean | null
-          preferencia_crise?: string[]
-          preferencia_localizacao?: string | null
-          preparacao_especial_quarto?: string | null
-          recreacao_evitar?: string | null
-          recreacao_gosta?: boolean | null
-          recreacao_interesses?: string | null
-          recreacao_preferencia?: string | null
-          recreacao_tolera_som?: boolean | null
-          recursos_comunicacao?: string[]
-          responde_melhor_a?: string | null
-          restaurante_apoio_visual?: boolean | null
-          restaurante_fila?: string | null
-          restaurante_horario_tranquilo?: boolean | null
-          restaurante_reservado?: boolean | null
-          risco_fuga?: boolean | null
-          risco_recusa_alimentar?: string | null
-          rotina_matinal_descricao?: string | null
-          seletividade?: string | null
-          sensibilidade_ar_condicionado?: boolean | null
-          sensibilidade_iluminacao?: boolean | null
-          sensibilidades_alimentares?: string[]
-          sensorial_barulho_pessoas?: string | null
-          sensorial_calor?: string | null
-          sensorial_cheiros_fortes?: string | null
-          sensorial_eco?: string | null
-          sensorial_frio?: string | null
-          sensorial_iluminacao_intensa?: string | null
-          sensorial_locais_cheios?: string | null
-          sensorial_luz_piscando?: string | null
-          sensorial_movimento_visual?: string | null
-          sensorial_musica_ambiente?: string | null
-          sensorial_perfumes?: string | null
-          sensorial_sons_subitos?: string | null
-          sensorial_superficies_molhadas?: string | null
-          sensorial_toque_inesperado?: string | null
-          sinais_desconforto?: string[]
-          supervisao_constante?: boolean | null
-          tem_rotina_matinal?: boolean | null
-          temas_interesses?: string | null
-          tempo_acalmar?: string | null
-          updated_at?: string
-          usa_abafadores?: string | null
-          user_id?: string
-          utensilios_especificos?: boolean | null
-        }
-        Relationships: []
       }
       pre_checkins: {
         Row: {
@@ -1257,6 +1520,77 @@ export type Database = {
         }
         Relationships: []
       }
+      reserva_perfis: {
+        Row: {
+          criado_em: string
+          perfil_sensorial_id: string
+          reserva_id: string
+        }
+        Insert: {
+          criado_em?: string
+          perfil_sensorial_id: string
+          reserva_id: string
+        }
+        Update: {
+          criado_em?: string
+          perfil_sensorial_id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_perfis_perfil_sensorial_id_fkey"
+            columns: ["perfil_sensorial_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_sensorial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_perfis_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserva_mensagens: {
+        Row: {
+          autor_id: string
+          autor_role: Database["public"]["Enums"]["app_role"] | null
+          corpo: string
+          criado_em: string
+          id: string
+          lida_em: string | null
+          reserva_id: string
+        }
+        Insert: {
+          autor_id: string
+          autor_role?: Database["public"]["Enums"]["app_role"] | null
+          corpo: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          reserva_id: string
+        }
+        Update: {
+          autor_id?: string
+          autor_role?: Database["public"]["Enums"]["app_role"] | null
+          corpo?: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_mensagens_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservas: {
         Row: {
           acompanhantes: Json | null
@@ -1267,6 +1601,7 @@ export type Database = {
           estabelecimento_id: string
           familia_id: string
           historico_negativo: string | null
+          hora_visita: string | null
           id: string
           mensagem: string | null
           notas_especificas: string | null
@@ -1275,12 +1610,15 @@ export type Database = {
           num_autistas: number | null
           objetivo: string | null
           objetivo_viagem: string[]
+          item_reservavel_id: string | null
           perfil_enviado_ao_estabelecimento: boolean | null
           perfil_sensorial_id: string | null
-          perfil_tea_id: string | null
           pessoa_referencia: string | null
           recomendacoes_adicionais: string | null
           status: Database["public"]["Enums"]["reserva_status"] | null
+          valor_comissao: number | null
+          valor_repasse: number | null
+          valor_total: number | null
         }
         Insert: {
           acompanhantes?: Json | null
@@ -1291,6 +1629,7 @@ export type Database = {
           estabelecimento_id: string
           familia_id: string
           historico_negativo?: string | null
+          hora_visita?: string | null
           id?: string
           mensagem?: string | null
           notas_especificas?: string | null
@@ -1299,12 +1638,23 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
+          // Opcional desde a reserva direta de estabelecimento: uma visita não
+          // tem item. Quem garante "estadia exige quarto" é a união
+          // discriminada `ReservaFormInput` no cliente e a trigger
+          // `sincronizar_estabelecimento_id_reserva` no banco.
+          item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
-          perfil_tea_id?: string | null
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
+          // Congelados na criação: uma mudança de preço do quarto depois não
+          // pode alterar uma cobrança já emitida. Nulos em visita, que não é
+          // cobrada. O CHECK `reservas_valores_coerentes` exige os três juntos
+          // ou nenhum, com comissão + repasse = total.
+          valor_comissao?: number | null
+          valor_repasse?: number | null
+          valor_total?: number | null
         }
         Update: {
           acompanhantes?: Json | null
@@ -1315,6 +1665,7 @@ export type Database = {
           estabelecimento_id?: string
           familia_id?: string
           historico_negativo?: string | null
+          hora_visita?: string | null
           id?: string
           mensagem?: string | null
           notas_especificas?: string | null
@@ -1323,12 +1674,15 @@ export type Database = {
           num_autistas?: number | null
           objetivo?: string | null
           objetivo_viagem?: string[]
+          item_reservavel_id?: string | null
           perfil_enviado_ao_estabelecimento?: boolean | null
           perfil_sensorial_id?: string | null
-          perfil_tea_id?: string | null
           pessoa_referencia?: string | null
           recomendacoes_adicionais?: string | null
           status?: Database["public"]["Enums"]["reserva_status"] | null
+          valor_comissao?: number | null
+          valor_repasse?: number | null
+          valor_total?: number | null
         }
         Relationships: [
           {
@@ -1346,17 +1700,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reservas_item_reservavel_id_fkey"
+            columns: ["item_reservavel_id"]
+            isOneToOne: false
+            referencedRelation: "itens_reservaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reservas_perfil_sensorial_id_fkey"
             columns: ["perfil_sensorial_id"]
             isOneToOne: false
             referencedRelation: "perfil_sensorial"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reservas_perfil_tea_id_fkey"
-            columns: ["perfil_tea_id"]
-            isOneToOne: false
-            referencedRelation: "perfil_tea"
             referencedColumns: ["id"]
           },
         ]
@@ -1365,10 +1719,11 @@ export type Database = {
         Row: {
           acao: string
           ator_email: string | null
-          ator_id: string
+          ator_id: string | null
           criado_em: string
           id: string
           observacao: string | null
+          origem: string
           reserva_id: string
           status_anterior: Database["public"]["Enums"]["reserva_status"] | null
           status_novo: Database["public"]["Enums"]["reserva_status"] | null
@@ -1376,10 +1731,16 @@ export type Database = {
         Insert: {
           acao: string
           ator_email?: string | null
-          ator_id: string
+          // Nulo apenas em ação de sistema (job de expiração). As policies de
+          // INSERT exigem `ator_id = auth.uid()`, então pelo cliente ele é
+          // sempre obrigatório na prática.
+          ator_id?: string | null
           criado_em?: string
           id?: string
           observacao?: string | null
+          // Derivada por trigger a partir de ator_id — mandar valor aqui não
+          // tem efeito.
+          origem?: string
           reserva_id: string
           status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
           status_novo?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1387,10 +1748,11 @@ export type Database = {
         Update: {
           acao?: string
           ator_email?: string | null
-          ator_id?: string
+          ator_id?: string | null
           criado_em?: string
           id?: string
           observacao?: string | null
+          origem?: string
           reserva_id?: string
           status_anterior?: Database["public"]["Enums"]["reserva_status"] | null
           status_novo?: Database["public"]["Enums"]["reserva_status"] | null
@@ -1431,12 +1793,77 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ofertas_view: {
+        Row: {
+          // Nas linhas de visita (estabelecimento reservado direto) as colunas
+          // que só existem em quarto vêm nulas - ver a migration
+          // 20260804130000_ofertas_view.sql.
+          natureza: Database["public"]["Enums"]["oferta_natureza"]
+          id: string
+          item_nome: string
+          descricao: string | null
+          preco: number | null
+          quantidade: number | null
+          capacidade_total: number | null
+          capacidade_adultos: number | null
+          capacidade_criancas: number | null
+          comodidades: string[]
+          quantidade_camas: number | null
+          imagens: Json
+          check_in_padrao: string | null
+          check_out_padrao: string | null
+          cidade: string | null
+          estado: string | null
+          endereco: string | null
+          latitude: number | null
+          longitude: number | null
+          estabelecimento_id: string
+          estabelecimento_nome: string
+          estabelecimento_slug: string
+          estabelecimento_tipo: Database["public"]["Enums"]["estab_tipo"]
+          estabelecimento_foto_capa: string | null
+          estabelecimento_tour_360_url: string | null
+          selo_azul: boolean | null
+          selo_azul_validade: string | null
+          selo_governamental: boolean | null
+          selo_privado: boolean | null
+          selo_privado_nome: string | null
+          tem_beneficio_tea: boolean | null
+          beneficio_tea_descricao: string | null
+          tem_sala_sensorial: boolean | null
+          tem_concierge_tea: boolean | null
+          tem_checkin_antecipado: boolean | null
+          tem_fila_prioritaria: boolean | null
+          tem_cardapio_visual: boolean | null
+          tem_caa: boolean | null
+          destaque: boolean | null
+          recebe_grupos_escolares_tea: boolean
+          avaliacao_media: number | null
+          total_avaliacoes: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _mascarar_email: { Args: { _email: string }; Returns: string }
+      datas_indisponiveis_item: {
+        Args: { p_item_id: string; p_inicio?: string; p_fim?: string }
+        Returns: { dia: string }[]
+      }
+      itens_indisponiveis_no_periodo: {
+        Args: { p_checkin: string; p_checkout: string }
+        Returns: { item_id: string }[]
+      }
+      buscar_ofertas_proximas: {
+        Args: { p_lat: number; p_lng: number; p_raio_km: number }
+        Returns: { oferta_id: string; distancia_m: number }[]
+      }
       expurgar_admin_password_resets: {
         Args: { _dias?: number }
+        Returns: number
+      }
+      expirar_reservas_aguardando_pagamento: {
+        Args: { p_prazo_minutos?: number }
         Returns: number
       }
       expurgar_auth_audit_log: { Args: { _dias?: number }; Returns: number }
@@ -1476,6 +1903,14 @@ export type Database = {
         }
         Returns: string
       }
+      perfil_pertence_a_familia: {
+        Args: { _familia_id: string; _perfil_id: string }
+        Returns: boolean
+      }
+      perfil_vinculado_a_reserva: {
+        Args: { _perfil_id: string; _reserva_id: string }
+        Returns: boolean
+      }
       promote_to_admin: { Args: { _user_id: string }; Returns: undefined }
       publicar_conteudo_agendado: { Args: never; Returns: number }
       registrar_acesso_link_curto: { Args: { _slug: string }; Returns: string }
@@ -1500,8 +1935,31 @@ export type Database = {
         | "transporte"
         | "excursao"
         | "passeio_educativo"
-      reserva_status: "pendente" | "confirmada" | "cancelada" | "concluida"
+      frequencia_simples: "sim" | "nao" | "as_vezes"
+      intensidade_incomodo: "baixo" | "medio" | "alto" | "depende"
+      nivel_apoio: "independente" | "apoio_parcial" | "apoio_total"
+      oferta_natureza: "estadia" | "visita"
+      pagamento_status:
+        | "pendente"
+        | "confirmado"
+        | "recebido"
+        | "expirado"
+        | "estorno_solicitado"
+        | "estornado"
+        | "cancelado"
+        | "falhou"
+      reserva_status:
+        | "aguardando_pagamento"
+        | "pendente"
+        | "confirmada"
+        | "cancelada"
+        | "concluida"
+      resposta_com_apoio: "sim" | "nao" | "com_apoio"
+      resposta_parcial: "sim" | "parcialmente" | "nao"
+      risco_nivel: "alto" | "medio" | "baixo"
+      seletividade_nivel: "nao" | "leve" | "moderada" | "severa"
       tea_nivel: "leve" | "moderado" | "severo"
+      tempo_acalmar_faixa: "rapido" | "medio" | "longo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1650,8 +2108,33 @@ export const Constants = {
         "excursao",
         "passeio_educativo",
       ],
-      reserva_status: ["pendente", "confirmada", "cancelada", "concluida"],
+      frequencia_simples: ["sim", "nao", "as_vezes"],
+      intensidade_incomodo: ["baixo", "medio", "alto", "depende"],
+      nivel_apoio: ["independente", "apoio_parcial", "apoio_total"],
+      oferta_natureza: ["estadia", "visita"],
+      pagamento_status: [
+        "pendente",
+        "confirmado",
+        "recebido",
+        "expirado",
+        "estorno_solicitado",
+        "estornado",
+        "cancelado",
+        "falhou",
+      ],
+      reserva_status: [
+        "aguardando_pagamento",
+        "pendente",
+        "confirmada",
+        "cancelada",
+        "concluida",
+      ],
+      resposta_com_apoio: ["sim", "nao", "com_apoio"],
+      resposta_parcial: ["sim", "parcialmente", "nao"],
+      risco_nivel: ["alto", "medio", "baixo"],
+      seletividade_nivel: ["nao", "leve", "moderada", "severa"],
       tea_nivel: ["leve", "moderado", "severo"],
+      tempo_acalmar_faixa: ["rapido", "medio", "longo"],
     },
   },
 } as const

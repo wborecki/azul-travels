@@ -175,8 +175,6 @@ export function LeadEstabelecimentosForm({ origem = "home" }: { origem?: string 
       toast.error("Erro ao enviar. Tente novamente.");
       return;
     }
-    alert("ok");
-
     setEnviado(true);
     void loadCount();
     if (

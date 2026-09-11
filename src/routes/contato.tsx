@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { Mail, Send, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { criarContatoGeral } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,18 +55,21 @@ function ContatoPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("contatos_gerais").insert({
-      nome: parsed.data.nome,
-      email: parsed.data.email,
-      telefone: parsed.data.telefone || null,
-      assunto: parsed.data.assunto || null,
-      mensagem: parsed.data.mensagem,
-      origem: "contato",
-    });
-    setLoading(false);
-    if (error) {
+    try {
+      await criarContatoGeral({
+        nome: parsed.data.nome,
+        email: parsed.data.email,
+        telefone: parsed.data.telefone || null,
+        assunto: parsed.data.assunto || null,
+        mensagem: parsed.data.mensagem,
+        origem: "contato",
+      });
+    } catch (err) {
+      console.error(err);
       toast.error("Não foi possível enviar agora. Tente novamente.");
       return;
+    } finally {
+      setLoading(false);
     }
     setDone(true);
     setForm({ nome: "", email: "", telefone: "", assunto: "", mensagem: "" });
@@ -90,17 +93,11 @@ function ContatoPage() {
         {done ? (
           <div className="bg-white border rounded-2xl p-8 text-center shadow-sm">
             <CheckCircle2 className="h-12 w-12 text-secondary mx-auto" />
-            <h2 className="mt-4 text-xl font-display font-bold text-primary">
-              Mensagem enviada!
-            </h2>
+            <h2 className="mt-4 text-xl font-display font-bold text-primary">Mensagem enviada!</h2>
             <p className="mt-2 text-muted-foreground text-sm">
               A gente vai entrar em contato em breve. Obrigado pelo recado 💙
             </p>
-            <Button
-              className="mt-6"
-              variant="outline"
-              onClick={() => setDone(false)}
-            >
+            <Button className="mt-6" variant="outline" onClick={() => setDone(false)}>
               Enviar outra mensagem
             </Button>
           </div>
@@ -135,9 +132,7 @@ function ContatoPage() {
               <Input
                 id="telefone"
                 value={form.telefone}
-                onChange={(e) =>
-                  setForm({ ...form, telefone: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
                 maxLength={30}
                 placeholder="(opcional)"
               />
@@ -157,9 +152,7 @@ function ContatoPage() {
               <Textarea
                 id="mensagem"
                 value={form.mensagem}
-                onChange={(e) =>
-                  setForm({ ...form, mensagem: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, mensagem: e.target.value })}
                 required
                 rows={5}
                 maxLength={2000}
@@ -171,7 +164,9 @@ function ContatoPage() {
               disabled={loading}
               className="w-full bg-primary hover:bg-secondary text-white min-h-[52px] font-semibold"
             >
-              {loading ? "Enviando..." : (
+              {loading ? (
+                "Enviando..."
+              ) : (
                 <>
                   Enviar mensagem <Send className="h-4 w-4 ml-2" />
                 </>

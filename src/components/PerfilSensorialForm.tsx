@@ -32,10 +32,10 @@ import {
 import type { TablesInsert, Tables } from "@/integrations/supabase/types";
 
 /**
- * Formulário compartilhado de perfil sensorial.
+ * Formulário compartilhado de Perfil TEA.
  *
  * Reusa a UX dos Steps 2 e 3 do cadastro. Usado em /minha-conta/perfis
- * tanto para criar (modal "Adicionar filho") quanto para editar.
+ * tanto para criar (modal "Adicionar Perfil TEA") quanto para editar.
  */
 
 export type PerfilSensorialDraft = Pick<

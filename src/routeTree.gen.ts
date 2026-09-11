@@ -14,7 +14,9 @@ import { Route as SobreOsSelosRouteImport } from './routes/sobre-os-selos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SelecionarPerfilRouteImport } from './routes/selecionar-perfil'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReservarRouteImport } from './routes/reservar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ParceirosRouteImport } from './routes/parceiros'
 import { Route as NossaHistoriaRouteImport } from './routes/nossa-historia'
 import { Route as MinhaEmpresaRouteImport } from './routes/minha-empresa'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
@@ -32,10 +34,14 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MinhaContaIndexRouteImport } from './routes/minha-conta.index'
+import { Route as MeuEstabelecimentoIndexRouteImport } from './routes/meu-estabelecimento.index'
 import { Route as ConteudoIndexRouteImport } from './routes/conteudo.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as QuartosIdRouteImport } from './routes/quartos.$id'
 import { Route as PreCheckinSlugRouteImport } from './routes/pre-checkin.$slug'
-import { Route as MinhaContaPerfilRouteImport } from './routes/minha-conta.perfil'
+import { Route as MeuEstabelecimentoReservasRouteImport } from './routes/meu-estabelecimento.reservas'
+import { Route as MeuEstabelecimentoMensagensRouteImport } from './routes/meu-estabelecimento.mensagens'
+import { Route as MeuEstabelecimentoItensRouteImport } from './routes/meu-estabelecimento.itens'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as EstabelecimentoSlugRouteImport } from './routes/estabelecimento.$slug'
 import { Route as DemoExplorarRouteImport } from './routes/demo.explorar'
@@ -49,14 +55,24 @@ import { Route as AdminAuditoriaAuthRouteImport } from './routes/admin.auditoria
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin.administradores'
 import { Route as MinhaContaReservasIndexRouteImport } from './routes/minha-conta.reservas.index'
+import { Route as MinhaContaPerfilIndexRouteImport } from './routes/minha-conta.perfil.index'
+import { Route as MinhaContaMensagensIndexRouteImport } from './routes/minha-conta.mensagens.index'
+import { Route as MeuEstabelecimentoItensIndexRouteImport } from './routes/meu-estabelecimento.itens.index'
 import { Route as AdminEstabelecimentosIndexRouteImport } from './routes/admin.estabelecimentos.index'
 import { Route as AdminConteudoIndexRouteImport } from './routes/admin.conteudo.index'
 import { Route as MinhaContaReservasNovaRouteImport } from './routes/minha-conta.reservas.nova'
 import { Route as MinhaContaReservasIdRouteImport } from './routes/minha-conta.reservas.$id'
+import { Route as MinhaContaPerfilNovoRouteImport } from './routes/minha-conta.perfil.novo'
+import { Route as MinhaContaMensagensIdRouteImport } from './routes/minha-conta.mensagens.$id'
+import { Route as MeuEstabelecimentoItensNovaRouteImport } from './routes/meu-estabelecimento.itens.nova'
+import { Route as MeuEstabelecimentoItensIdRouteImport } from './routes/meu-estabelecimento.itens.$id'
 import { Route as DemoEstabelecimentoSlugRouteImport } from './routes/demo.estabelecimento.$slug'
 import { Route as AdminEstabelecimentosIdRouteImport } from './routes/admin.estabelecimentos.$id'
 import { Route as AdminConteudoAnalyticsRouteImport } from './routes/admin.conteudo.analytics'
 import { Route as AdminConteudoIdRouteImport } from './routes/admin.conteudo.$id'
+import { Route as MinhaContaPerfilPerfilIdIndexRouteImport } from './routes/minha-conta.perfil.$perfilId.index'
+import { Route as MinhaContaPerfilPerfilIdRevisaoRouteImport } from './routes/minha-conta.perfil.$perfilId.revisao'
+import { Route as MinhaContaPerfilPerfilIdBlocoRouteImport } from './routes/minha-conta.perfil.$perfilId.$bloco'
 import { Route as AdminEstabelecimentosIdPreviewRouteImport } from './routes/admin.estabelecimentos.$id.preview'
 
 const TermosRoute = TermosRouteImport.update({
@@ -84,9 +100,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReservarRoute = ReservarRouteImport.update({
+  id: '/reservar',
+  path: '/reservar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceirosRoute = ParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NossaHistoriaRoute = NossaHistoriaRouteImport.update({
@@ -174,6 +200,11 @@ const MinhaContaIndexRoute = MinhaContaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinhaContaRoute,
 } as any)
+const MeuEstabelecimentoIndexRoute = MeuEstabelecimentoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MeuEstabelecimentoRoute,
+} as any)
 const ConteudoIndexRoute = ConteudoIndexRouteImport.update({
   id: '/conteudo/',
   path: '/conteudo/',
@@ -184,15 +215,32 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const QuartosIdRoute = QuartosIdRouteImport.update({
+  id: '/quartos/$id',
+  path: '/quartos/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreCheckinSlugRoute = PreCheckinSlugRouteImport.update({
   id: '/pre-checkin/$slug',
   path: '/pre-checkin/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MinhaContaPerfilRoute = MinhaContaPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => MinhaContaRoute,
+const MeuEstabelecimentoReservasRoute =
+  MeuEstabelecimentoReservasRouteImport.update({
+    id: '/reservas',
+    path: '/reservas',
+    getParentRoute: () => MeuEstabelecimentoRoute,
+  } as any)
+const MeuEstabelecimentoMensagensRoute =
+  MeuEstabelecimentoMensagensRouteImport.update({
+    id: '/mensagens',
+    path: '/mensagens',
+    getParentRoute: () => MeuEstabelecimentoRoute,
+  } as any)
+const MeuEstabelecimentoItensRoute = MeuEstabelecimentoItensRouteImport.update({
+  id: '/itens',
+  path: '/itens',
+  getParentRoute: () => MeuEstabelecimentoRoute,
 } as any)
 const LSlugRoute = LSlugRouteImport.update({
   id: '/l/$slug',
@@ -259,6 +307,23 @@ const MinhaContaReservasIndexRoute = MinhaContaReservasIndexRouteImport.update({
   path: '/reservas/',
   getParentRoute: () => MinhaContaRoute,
 } as any)
+const MinhaContaPerfilIndexRoute = MinhaContaPerfilIndexRouteImport.update({
+  id: '/perfil/',
+  path: '/perfil/',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const MinhaContaMensagensIndexRoute =
+  MinhaContaMensagensIndexRouteImport.update({
+    id: '/mensagens/',
+    path: '/mensagens/',
+    getParentRoute: () => MinhaContaRoute,
+  } as any)
+const MeuEstabelecimentoItensIndexRoute =
+  MeuEstabelecimentoItensIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MeuEstabelecimentoItensRoute,
+  } as any)
 const AdminEstabelecimentosIndexRoute =
   AdminEstabelecimentosIndexRouteImport.update({
     id: '/estabelecimentos/',
@@ -280,6 +345,28 @@ const MinhaContaReservasIdRoute = MinhaContaReservasIdRouteImport.update({
   path: '/reservas/$id',
   getParentRoute: () => MinhaContaRoute,
 } as any)
+const MinhaContaPerfilNovoRoute = MinhaContaPerfilNovoRouteImport.update({
+  id: '/perfil/novo',
+  path: '/perfil/novo',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const MinhaContaMensagensIdRoute = MinhaContaMensagensIdRouteImport.update({
+  id: '/mensagens/$id',
+  path: '/mensagens/$id',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const MeuEstabelecimentoItensNovaRoute =
+  MeuEstabelecimentoItensNovaRouteImport.update({
+    id: '/nova',
+    path: '/nova',
+    getParentRoute: () => MeuEstabelecimentoItensRoute,
+  } as any)
+const MeuEstabelecimentoItensIdRoute =
+  MeuEstabelecimentoItensIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => MeuEstabelecimentoItensRoute,
+  } as any)
 const DemoEstabelecimentoSlugRoute = DemoEstabelecimentoSlugRouteImport.update({
   id: '/estabelecimento/$slug',
   path: '/estabelecimento/$slug',
@@ -300,6 +387,24 @@ const AdminConteudoIdRoute = AdminConteudoIdRouteImport.update({
   path: '/conteudo/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const MinhaContaPerfilPerfilIdIndexRoute =
+  MinhaContaPerfilPerfilIdIndexRouteImport.update({
+    id: '/perfil/$perfilId/',
+    path: '/perfil/$perfilId/',
+    getParentRoute: () => MinhaContaRoute,
+  } as any)
+const MinhaContaPerfilPerfilIdRevisaoRoute =
+  MinhaContaPerfilPerfilIdRevisaoRouteImport.update({
+    id: '/perfil/$perfilId/revisao',
+    path: '/perfil/$perfilId/revisao',
+    getParentRoute: () => MinhaContaRoute,
+  } as any)
+const MinhaContaPerfilPerfilIdBlocoRoute =
+  MinhaContaPerfilPerfilIdBlocoRouteImport.update({
+    id: '/perfil/$perfilId/$bloco',
+    path: '/perfil/$perfilId/$bloco',
+    getParentRoute: () => MinhaContaRoute,
+  } as any)
 const AdminEstabelecimentosIdPreviewRoute =
   AdminEstabelecimentosIdPreviewRouteImport.update({
     id: '/preview',
@@ -320,11 +425,13 @@ export interface FileRoutesByFullPath {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/meu-estabelecimento': typeof MeuEstabelecimentoRoute
+  '/meu-estabelecimento': typeof MeuEstabelecimentoRouteWithChildren
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -342,21 +449,35 @@ export interface FileRoutesByFullPath {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/perfil': typeof MinhaContaPerfilRoute
+  '/meu-estabelecimento/itens': typeof MeuEstabelecimentoItensRouteWithChildren
+  '/meu-estabelecimento/mensagens': typeof MeuEstabelecimentoMensagensRoute
+  '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
+  '/meu-estabelecimento/': typeof MeuEstabelecimentoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
+  '/meu-estabelecimento/itens/$id': typeof MeuEstabelecimentoItensIdRoute
+  '/meu-estabelecimento/itens/nova': typeof MeuEstabelecimentoItensNovaRoute
+  '/minha-conta/mensagens/$id': typeof MinhaContaMensagensIdRoute
+  '/minha-conta/perfil/novo': typeof MinhaContaPerfilNovoRoute
   '/minha-conta/reservas/$id': typeof MinhaContaReservasIdRoute
   '/minha-conta/reservas/nova': typeof MinhaContaReservasNovaRoute
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
+  '/meu-estabelecimento/itens/': typeof MeuEstabelecimentoItensIndexRoute
+  '/minha-conta/mensagens/': typeof MinhaContaMensagensIndexRoute
+  '/minha-conta/perfil/': typeof MinhaContaPerfilIndexRoute
   '/minha-conta/reservas/': typeof MinhaContaReservasIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
+  '/minha-conta/perfil/$perfilId/$bloco': typeof MinhaContaPerfilPerfilIdBlocoRoute
+  '/minha-conta/perfil/$perfilId/revisao': typeof MinhaContaPerfilPerfilIdRevisaoRoute
+  '/minha-conta/perfil/$perfilId/': typeof MinhaContaPerfilPerfilIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -370,10 +491,11 @@ export interface FileRoutesByTo {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/meu-estabelecimento': typeof MeuEstabelecimentoRoute
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -391,21 +513,34 @@ export interface FileRoutesByTo {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/perfil': typeof MinhaContaPerfilRoute
+  '/meu-estabelecimento/mensagens': typeof MeuEstabelecimentoMensagensRoute
+  '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin': typeof AdminIndexRoute
   '/conteudo': typeof ConteudoIndexRoute
+  '/meu-estabelecimento': typeof MeuEstabelecimentoIndexRoute
   '/minha-conta': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
+  '/meu-estabelecimento/itens/$id': typeof MeuEstabelecimentoItensIdRoute
+  '/meu-estabelecimento/itens/nova': typeof MeuEstabelecimentoItensNovaRoute
+  '/minha-conta/mensagens/$id': typeof MinhaContaMensagensIdRoute
+  '/minha-conta/perfil/novo': typeof MinhaContaPerfilNovoRoute
   '/minha-conta/reservas/$id': typeof MinhaContaReservasIdRoute
   '/minha-conta/reservas/nova': typeof MinhaContaReservasNovaRoute
   '/admin/conteudo': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos': typeof AdminEstabelecimentosIndexRoute
+  '/meu-estabelecimento/itens': typeof MeuEstabelecimentoItensIndexRoute
+  '/minha-conta/mensagens': typeof MinhaContaMensagensIndexRoute
+  '/minha-conta/perfil': typeof MinhaContaPerfilIndexRoute
   '/minha-conta/reservas': typeof MinhaContaReservasIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
+  '/minha-conta/perfil/$perfilId/$bloco': typeof MinhaContaPerfilPerfilIdBlocoRoute
+  '/minha-conta/perfil/$perfilId/revisao': typeof MinhaContaPerfilPerfilIdRevisaoRoute
+  '/minha-conta/perfil/$perfilId': typeof MinhaContaPerfilPerfilIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -421,11 +556,13 @@ export interface FileRoutesById {
   '/explorar': typeof ExplorarRoute
   '/familias': typeof FamiliasRoute
   '/login': typeof LoginRoute
-  '/meu-estabelecimento': typeof MeuEstabelecimentoRoute
+  '/meu-estabelecimento': typeof MeuEstabelecimentoRouteWithChildren
   '/minha-conta': typeof MinhaContaRouteWithChildren
   '/minha-empresa': typeof MinhaEmpresaRoute
   '/nossa-historia': typeof NossaHistoriaRoute
+  '/parceiros': typeof ParceirosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reservar': typeof ReservarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/selecionar-perfil': typeof SelecionarPerfilRoute
   '/sobre': typeof SobreRoute
@@ -443,21 +580,35 @@ export interface FileRoutesById {
   '/demo/explorar': typeof DemoExplorarRoute
   '/estabelecimento/$slug': typeof EstabelecimentoSlugRoute
   '/l/$slug': typeof LSlugRoute
-  '/minha-conta/perfil': typeof MinhaContaPerfilRoute
+  '/meu-estabelecimento/itens': typeof MeuEstabelecimentoItensRouteWithChildren
+  '/meu-estabelecimento/mensagens': typeof MeuEstabelecimentoMensagensRoute
+  '/meu-estabelecimento/reservas': typeof MeuEstabelecimentoReservasRoute
   '/pre-checkin/$slug': typeof PreCheckinSlugRoute
+  '/quartos/$id': typeof QuartosIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conteudo/': typeof ConteudoIndexRoute
+  '/meu-estabelecimento/': typeof MeuEstabelecimentoIndexRoute
   '/minha-conta/': typeof MinhaContaIndexRoute
   '/admin/conteudo/$id': typeof AdminConteudoIdRoute
   '/admin/conteudo/analytics': typeof AdminConteudoAnalyticsRoute
   '/admin/estabelecimentos/$id': typeof AdminEstabelecimentosIdRouteWithChildren
   '/demo/estabelecimento/$slug': typeof DemoEstabelecimentoSlugRoute
+  '/meu-estabelecimento/itens/$id': typeof MeuEstabelecimentoItensIdRoute
+  '/meu-estabelecimento/itens/nova': typeof MeuEstabelecimentoItensNovaRoute
+  '/minha-conta/mensagens/$id': typeof MinhaContaMensagensIdRoute
+  '/minha-conta/perfil/novo': typeof MinhaContaPerfilNovoRoute
   '/minha-conta/reservas/$id': typeof MinhaContaReservasIdRoute
   '/minha-conta/reservas/nova': typeof MinhaContaReservasNovaRoute
   '/admin/conteudo/': typeof AdminConteudoIndexRoute
   '/admin/estabelecimentos/': typeof AdminEstabelecimentosIndexRoute
+  '/meu-estabelecimento/itens/': typeof MeuEstabelecimentoItensIndexRoute
+  '/minha-conta/mensagens/': typeof MinhaContaMensagensIndexRoute
+  '/minha-conta/perfil/': typeof MinhaContaPerfilIndexRoute
   '/minha-conta/reservas/': typeof MinhaContaReservasIndexRoute
   '/admin/estabelecimentos/$id/preview': typeof AdminEstabelecimentosIdPreviewRoute
+  '/minha-conta/perfil/$perfilId/$bloco': typeof MinhaContaPerfilPerfilIdBlocoRoute
+  '/minha-conta/perfil/$perfilId/revisao': typeof MinhaContaPerfilPerfilIdRevisaoRoute
+  '/minha-conta/perfil/$perfilId/': typeof MinhaContaPerfilPerfilIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -478,7 +629,9 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -496,21 +649,35 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/perfil'
+    | '/meu-estabelecimento/itens'
+    | '/meu-estabelecimento/mensagens'
+    | '/meu-estabelecimento/reservas'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin/'
     | '/conteudo/'
+    | '/meu-estabelecimento/'
     | '/minha-conta/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/demo/estabelecimento/$slug'
+    | '/meu-estabelecimento/itens/$id'
+    | '/meu-estabelecimento/itens/nova'
+    | '/minha-conta/mensagens/$id'
+    | '/minha-conta/perfil/novo'
     | '/minha-conta/reservas/$id'
     | '/minha-conta/reservas/nova'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
+    | '/meu-estabelecimento/itens/'
+    | '/minha-conta/mensagens/'
+    | '/minha-conta/perfil/'
     | '/minha-conta/reservas/'
     | '/admin/estabelecimentos/$id/preview'
+    | '/minha-conta/perfil/$perfilId/$bloco'
+    | '/minha-conta/perfil/$perfilId/revisao'
+    | '/minha-conta/perfil/$perfilId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -524,10 +691,11 @@ export interface FileRouteTypes {
     | '/explorar'
     | '/familias'
     | '/login'
-    | '/meu-estabelecimento'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -545,21 +713,34 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/perfil'
+    | '/meu-estabelecimento/mensagens'
+    | '/meu-estabelecimento/reservas'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin'
     | '/conteudo'
+    | '/meu-estabelecimento'
     | '/minha-conta'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/demo/estabelecimento/$slug'
+    | '/meu-estabelecimento/itens/$id'
+    | '/meu-estabelecimento/itens/nova'
+    | '/minha-conta/mensagens/$id'
+    | '/minha-conta/perfil/novo'
     | '/minha-conta/reservas/$id'
     | '/minha-conta/reservas/nova'
     | '/admin/conteudo'
     | '/admin/estabelecimentos'
+    | '/meu-estabelecimento/itens'
+    | '/minha-conta/mensagens'
+    | '/minha-conta/perfil'
     | '/minha-conta/reservas'
     | '/admin/estabelecimentos/$id/preview'
+    | '/minha-conta/perfil/$perfilId/$bloco'
+    | '/minha-conta/perfil/$perfilId/revisao'
+    | '/minha-conta/perfil/$perfilId'
   id:
     | '__root__'
     | '/'
@@ -578,7 +759,9 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/minha-empresa'
     | '/nossa-historia'
+    | '/parceiros'
     | '/privacidade'
+    | '/reservar'
     | '/reset-password'
     | '/selecionar-perfil'
     | '/sobre'
@@ -596,21 +779,35 @@ export interface FileRouteTypes {
     | '/demo/explorar'
     | '/estabelecimento/$slug'
     | '/l/$slug'
-    | '/minha-conta/perfil'
+    | '/meu-estabelecimento/itens'
+    | '/meu-estabelecimento/mensagens'
+    | '/meu-estabelecimento/reservas'
     | '/pre-checkin/$slug'
+    | '/quartos/$id'
     | '/admin/'
     | '/conteudo/'
+    | '/meu-estabelecimento/'
     | '/minha-conta/'
     | '/admin/conteudo/$id'
     | '/admin/conteudo/analytics'
     | '/admin/estabelecimentos/$id'
     | '/demo/estabelecimento/$slug'
+    | '/meu-estabelecimento/itens/$id'
+    | '/meu-estabelecimento/itens/nova'
+    | '/minha-conta/mensagens/$id'
+    | '/minha-conta/perfil/novo'
     | '/minha-conta/reservas/$id'
     | '/minha-conta/reservas/nova'
     | '/admin/conteudo/'
     | '/admin/estabelecimentos/'
+    | '/meu-estabelecimento/itens/'
+    | '/minha-conta/mensagens/'
+    | '/minha-conta/perfil/'
     | '/minha-conta/reservas/'
     | '/admin/estabelecimentos/$id/preview'
+    | '/minha-conta/perfil/$perfilId/$bloco'
+    | '/minha-conta/perfil/$perfilId/revisao'
+    | '/minha-conta/perfil/$perfilId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -626,11 +823,13 @@ export interface RootRouteChildren {
   ExplorarRoute: typeof ExplorarRoute
   FamiliasRoute: typeof FamiliasRoute
   LoginRoute: typeof LoginRoute
-  MeuEstabelecimentoRoute: typeof MeuEstabelecimentoRoute
+  MeuEstabelecimentoRoute: typeof MeuEstabelecimentoRouteWithChildren
   MinhaContaRoute: typeof MinhaContaRouteWithChildren
   MinhaEmpresaRoute: typeof MinhaEmpresaRoute
   NossaHistoriaRoute: typeof NossaHistoriaRoute
+  ParceirosRoute: typeof ParceirosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ReservarRoute: typeof ReservarRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SelecionarPerfilRoute: typeof SelecionarPerfilRoute
   SobreRoute: typeof SobreRoute
@@ -640,6 +839,7 @@ export interface RootRouteChildren {
   EstabelecimentoSlugRoute: typeof EstabelecimentoSlugRoute
   LSlugRoute: typeof LSlugRoute
   PreCheckinSlugRoute: typeof PreCheckinSlugRoute
+  QuartosIdRoute: typeof QuartosIdRoute
   ConteudoIndexRoute: typeof ConteudoIndexRoute
 }
 
@@ -680,11 +880,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reservar': {
+      id: '/reservar'
+      path: '/reservar'
+      fullPath: '/reservar'
+      preLoaderRoute: typeof ReservarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiros': {
+      id: '/parceiros'
+      path: '/parceiros'
+      fullPath: '/parceiros'
+      preLoaderRoute: typeof ParceirosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nossa-historia': {
@@ -806,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinhaContaIndexRouteImport
       parentRoute: typeof MinhaContaRoute
     }
+    '/meu-estabelecimento/': {
+      id: '/meu-estabelecimento/'
+      path: '/'
+      fullPath: '/meu-estabelecimento/'
+      preLoaderRoute: typeof MeuEstabelecimentoIndexRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
+    }
     '/conteudo/': {
       id: '/conteudo/'
       path: '/conteudo'
@@ -820,6 +1041,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/quartos/$id': {
+      id: '/quartos/$id'
+      path: '/quartos/$id'
+      fullPath: '/quartos/$id'
+      preLoaderRoute: typeof QuartosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pre-checkin/$slug': {
       id: '/pre-checkin/$slug'
       path: '/pre-checkin/$slug'
@@ -827,12 +1055,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreCheckinSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/minha-conta/perfil': {
-      id: '/minha-conta/perfil'
-      path: '/perfil'
-      fullPath: '/minha-conta/perfil'
-      preLoaderRoute: typeof MinhaContaPerfilRouteImport
-      parentRoute: typeof MinhaContaRoute
+    '/meu-estabelecimento/reservas': {
+      id: '/meu-estabelecimento/reservas'
+      path: '/reservas'
+      fullPath: '/meu-estabelecimento/reservas'
+      preLoaderRoute: typeof MeuEstabelecimentoReservasRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
+    }
+    '/meu-estabelecimento/mensagens': {
+      id: '/meu-estabelecimento/mensagens'
+      path: '/mensagens'
+      fullPath: '/meu-estabelecimento/mensagens'
+      preLoaderRoute: typeof MeuEstabelecimentoMensagensRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
+    }
+    '/meu-estabelecimento/itens': {
+      id: '/meu-estabelecimento/itens'
+      path: '/itens'
+      fullPath: '/meu-estabelecimento/itens'
+      preLoaderRoute: typeof MeuEstabelecimentoItensRouteImport
+      parentRoute: typeof MeuEstabelecimentoRoute
     }
     '/l/$slug': {
       id: '/l/$slug'
@@ -925,6 +1167,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinhaContaReservasIndexRouteImport
       parentRoute: typeof MinhaContaRoute
     }
+    '/minha-conta/perfil/': {
+      id: '/minha-conta/perfil/'
+      path: '/perfil'
+      fullPath: '/minha-conta/perfil/'
+      preLoaderRoute: typeof MinhaContaPerfilIndexRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/mensagens/': {
+      id: '/minha-conta/mensagens/'
+      path: '/mensagens'
+      fullPath: '/minha-conta/mensagens/'
+      preLoaderRoute: typeof MinhaContaMensagensIndexRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/meu-estabelecimento/itens/': {
+      id: '/meu-estabelecimento/itens/'
+      path: '/'
+      fullPath: '/meu-estabelecimento/itens/'
+      preLoaderRoute: typeof MeuEstabelecimentoItensIndexRouteImport
+      parentRoute: typeof MeuEstabelecimentoItensRoute
+    }
     '/admin/estabelecimentos/': {
       id: '/admin/estabelecimentos/'
       path: '/estabelecimentos'
@@ -953,6 +1216,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinhaContaReservasIdRouteImport
       parentRoute: typeof MinhaContaRoute
     }
+    '/minha-conta/perfil/novo': {
+      id: '/minha-conta/perfil/novo'
+      path: '/perfil/novo'
+      fullPath: '/minha-conta/perfil/novo'
+      preLoaderRoute: typeof MinhaContaPerfilNovoRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/mensagens/$id': {
+      id: '/minha-conta/mensagens/$id'
+      path: '/mensagens/$id'
+      fullPath: '/minha-conta/mensagens/$id'
+      preLoaderRoute: typeof MinhaContaMensagensIdRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/meu-estabelecimento/itens/nova': {
+      id: '/meu-estabelecimento/itens/nova'
+      path: '/nova'
+      fullPath: '/meu-estabelecimento/itens/nova'
+      preLoaderRoute: typeof MeuEstabelecimentoItensNovaRouteImport
+      parentRoute: typeof MeuEstabelecimentoItensRoute
+    }
+    '/meu-estabelecimento/itens/$id': {
+      id: '/meu-estabelecimento/itens/$id'
+      path: '/$id'
+      fullPath: '/meu-estabelecimento/itens/$id'
+      preLoaderRoute: typeof MeuEstabelecimentoItensIdRouteImport
+      parentRoute: typeof MeuEstabelecimentoItensRoute
+    }
     '/demo/estabelecimento/$slug': {
       id: '/demo/estabelecimento/$slug'
       path: '/estabelecimento/$slug'
@@ -980,6 +1271,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/conteudo/$id'
       preLoaderRoute: typeof AdminConteudoIdRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/minha-conta/perfil/$perfilId/': {
+      id: '/minha-conta/perfil/$perfilId/'
+      path: '/perfil/$perfilId'
+      fullPath: '/minha-conta/perfil/$perfilId/'
+      preLoaderRoute: typeof MinhaContaPerfilPerfilIdIndexRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/perfil/$perfilId/revisao': {
+      id: '/minha-conta/perfil/$perfilId/revisao'
+      path: '/perfil/$perfilId/revisao'
+      fullPath: '/minha-conta/perfil/$perfilId/revisao'
+      preLoaderRoute: typeof MinhaContaPerfilPerfilIdRevisaoRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/perfil/$perfilId/$bloco': {
+      id: '/minha-conta/perfil/$perfilId/$bloco'
+      path: '/perfil/$perfilId/$bloco'
+      fullPath: '/minha-conta/perfil/$perfilId/$bloco'
+      preLoaderRoute: typeof MinhaContaPerfilPerfilIdBlocoRouteImport
+      parentRoute: typeof MinhaContaRoute
     }
     '/admin/estabelecimentos/$id/preview': {
       id: '/admin/estabelecimentos/$id/preview'
@@ -1053,20 +1365,67 @@ const DemoRouteChildren: DemoRouteChildren = {
 
 const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
 
+interface MeuEstabelecimentoItensRouteChildren {
+  MeuEstabelecimentoItensIdRoute: typeof MeuEstabelecimentoItensIdRoute
+  MeuEstabelecimentoItensNovaRoute: typeof MeuEstabelecimentoItensNovaRoute
+  MeuEstabelecimentoItensIndexRoute: typeof MeuEstabelecimentoItensIndexRoute
+}
+
+const MeuEstabelecimentoItensRouteChildren: MeuEstabelecimentoItensRouteChildren =
+  {
+    MeuEstabelecimentoItensIdRoute: MeuEstabelecimentoItensIdRoute,
+    MeuEstabelecimentoItensNovaRoute: MeuEstabelecimentoItensNovaRoute,
+    MeuEstabelecimentoItensIndexRoute: MeuEstabelecimentoItensIndexRoute,
+  }
+
+const MeuEstabelecimentoItensRouteWithChildren =
+  MeuEstabelecimentoItensRoute._addFileChildren(
+    MeuEstabelecimentoItensRouteChildren,
+  )
+
+interface MeuEstabelecimentoRouteChildren {
+  MeuEstabelecimentoItensRoute: typeof MeuEstabelecimentoItensRouteWithChildren
+  MeuEstabelecimentoMensagensRoute: typeof MeuEstabelecimentoMensagensRoute
+  MeuEstabelecimentoReservasRoute: typeof MeuEstabelecimentoReservasRoute
+  MeuEstabelecimentoIndexRoute: typeof MeuEstabelecimentoIndexRoute
+}
+
+const MeuEstabelecimentoRouteChildren: MeuEstabelecimentoRouteChildren = {
+  MeuEstabelecimentoItensRoute: MeuEstabelecimentoItensRouteWithChildren,
+  MeuEstabelecimentoMensagensRoute: MeuEstabelecimentoMensagensRoute,
+  MeuEstabelecimentoReservasRoute: MeuEstabelecimentoReservasRoute,
+  MeuEstabelecimentoIndexRoute: MeuEstabelecimentoIndexRoute,
+}
+
+const MeuEstabelecimentoRouteWithChildren =
+  MeuEstabelecimentoRoute._addFileChildren(MeuEstabelecimentoRouteChildren)
+
 interface MinhaContaRouteChildren {
-  MinhaContaPerfilRoute: typeof MinhaContaPerfilRoute
   MinhaContaIndexRoute: typeof MinhaContaIndexRoute
+  MinhaContaMensagensIdRoute: typeof MinhaContaMensagensIdRoute
+  MinhaContaPerfilNovoRoute: typeof MinhaContaPerfilNovoRoute
   MinhaContaReservasIdRoute: typeof MinhaContaReservasIdRoute
   MinhaContaReservasNovaRoute: typeof MinhaContaReservasNovaRoute
+  MinhaContaMensagensIndexRoute: typeof MinhaContaMensagensIndexRoute
+  MinhaContaPerfilIndexRoute: typeof MinhaContaPerfilIndexRoute
   MinhaContaReservasIndexRoute: typeof MinhaContaReservasIndexRoute
+  MinhaContaPerfilPerfilIdBlocoRoute: typeof MinhaContaPerfilPerfilIdBlocoRoute
+  MinhaContaPerfilPerfilIdRevisaoRoute: typeof MinhaContaPerfilPerfilIdRevisaoRoute
+  MinhaContaPerfilPerfilIdIndexRoute: typeof MinhaContaPerfilPerfilIdIndexRoute
 }
 
 const MinhaContaRouteChildren: MinhaContaRouteChildren = {
-  MinhaContaPerfilRoute: MinhaContaPerfilRoute,
   MinhaContaIndexRoute: MinhaContaIndexRoute,
+  MinhaContaMensagensIdRoute: MinhaContaMensagensIdRoute,
+  MinhaContaPerfilNovoRoute: MinhaContaPerfilNovoRoute,
   MinhaContaReservasIdRoute: MinhaContaReservasIdRoute,
   MinhaContaReservasNovaRoute: MinhaContaReservasNovaRoute,
+  MinhaContaMensagensIndexRoute: MinhaContaMensagensIndexRoute,
+  MinhaContaPerfilIndexRoute: MinhaContaPerfilIndexRoute,
   MinhaContaReservasIndexRoute: MinhaContaReservasIndexRoute,
+  MinhaContaPerfilPerfilIdBlocoRoute: MinhaContaPerfilPerfilIdBlocoRoute,
+  MinhaContaPerfilPerfilIdRevisaoRoute: MinhaContaPerfilPerfilIdRevisaoRoute,
+  MinhaContaPerfilPerfilIdIndexRoute: MinhaContaPerfilPerfilIdIndexRoute,
 }
 
 const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
@@ -1086,11 +1445,13 @@ const rootRouteChildren: RootRouteChildren = {
   ExplorarRoute: ExplorarRoute,
   FamiliasRoute: FamiliasRoute,
   LoginRoute: LoginRoute,
-  MeuEstabelecimentoRoute: MeuEstabelecimentoRoute,
+  MeuEstabelecimentoRoute: MeuEstabelecimentoRouteWithChildren,
   MinhaContaRoute: MinhaContaRouteWithChildren,
   MinhaEmpresaRoute: MinhaEmpresaRoute,
   NossaHistoriaRoute: NossaHistoriaRoute,
+  ParceirosRoute: ParceirosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ReservarRoute: ReservarRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SelecionarPerfilRoute: SelecionarPerfilRoute,
   SobreRoute: SobreRoute,
@@ -1100,6 +1461,7 @@ const rootRouteChildren: RootRouteChildren = {
   EstabelecimentoSlugRoute: EstabelecimentoSlugRoute,
   LSlugRoute: LSlugRoute,
   PreCheckinSlugRoute: PreCheckinSlugRoute,
+  QuartosIdRoute: QuartosIdRoute,
   ConteudoIndexRoute: ConteudoIndexRoute,
 }
 export const routeTree = rootRouteImport
