@@ -1,0 +1,39 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip if CLOUDFLARE_API_TOKEN is not configured
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: |
+          echo "::warning::Secret CLOUDFLARE_API_TOKEN não configurado. Deploy ignorado."
+          echo "SKIP_DEPLOY=true" >> "$GITHUB_ENV"
+
+      - uses: oven-sh/setup-bun@v2
+        if: env.SKIP_DEPLOY != 'true'
+
+      - name: Install dependencies
+        if: env.SKIP_DEPLOY != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        if: env.SKIP_DEPLOY != 'true'
+        run: bun run build
+
+      - name: Deploy Worker
+        if: env.SKIP_DEPLOY != 'true'
+        run: bunx wrangler deploy
